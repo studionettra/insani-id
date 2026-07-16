@@ -1,0 +1,21 @@
+# Task Checklist: Phase 2 (i18n, Layout, Master Data)
+
+- `[/]` 1. **Internationalization (i18n)**
+  - `[ ]` Install `mcamara/laravel-localization` & `spatie/laravel-translatable`.
+  - `[ ]` Configure fallback locale (`id`) and middleware.
+- `[ ]` 2. **Layout & Color Palette**
+  - `[ ]` Update `tailwind.config.js` with Insani colors (`#00D1B4`, `#0080FF`).
+  - `[ ]` Create `resources/js/Layouts/AdminLayout.jsx` (wrapping TailAdmin).
+  - `[ ]` Create `resources/js/Layouts/PublicLayout.jsx` (mobile-first).
+  - `[ ]` Create `resources/js/Components/SeoHead.jsx`.
+- `[ ]` 3. **User Management**
+  - `[ ]` Create `UserController.php` with CRUD logic.
+  - `[ ]` Create `resources/js/Pages/Admin/Users/Index.jsx`.
+- `[ ]` 4. **Category Management**
+  - `[ ]` Create migration for `categories`.
+  - `[ ]` Create `Category.php` model with `HasTranslations`.
+  - `[ ]` Create `CategoryController.php` with CRUD logic.
+  - `[ ]` Create `resources/js/Pages/Admin/Categories/Index.jsx`.
+- `[ ]` 5. **Verification**
+  - `[ ]` Migrate database.
+  - `[ ]` Test Admin pages and Public layout rendering.
