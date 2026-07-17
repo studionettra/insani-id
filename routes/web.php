@@ -116,8 +116,11 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('campaigner.verified')->group(function () {
             Route::resource('programs', CampaignerProgramController::class);
             Route::resource('programs.disbursements', \App\Http\Controllers\Public\CampaignerDisbursementController::class)->only(['index', 'create', 'store']);
-            Route::resource('programs.updates', \App\Http\Controllers\Public\CampaignerProgramUpdateController::class)->except(['show']);
+            Route::resource('programs.updates', \App\Http\Controllers\Public\CampaignerProgramUpdateController::class)->only(['index', 'store']);
         });
+        
+        // Rich Text Image Upload (for Campaigners & Admins)
+        Route::post('/upload-image', [\App\Http\Controllers\Api\ImageUploadController::class, 'upload'])->name('upload.image');
     });
 });
 

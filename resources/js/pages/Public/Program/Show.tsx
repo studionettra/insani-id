@@ -11,6 +11,37 @@ import { id as dateId } from 'date-fns/locale/id';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
+
+const UpdateCard = ({ update }: { update: any }) => {
+    const [expanded, setExpanded] = useState(false);
+    return (
+        <div className="border border-slate-100 rounded-xl p-5 hover:border-insani-blue/20 transition-colors bg-white shadow-sm">
+            <div className="flex items-center gap-2 mb-3 text-sm text-slate-500">
+                <Calendar className="w-4 h-4" />
+                {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: dateId })}
+            </div>
+            <h3 className="font-bold text-lg text-slate-800 mb-3">{update.title}</h3>
+            <div className="relative">
+                <div 
+                    className={`text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden transition-all duration-300 ${expanded ? '' : 'max-h-40'}`}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
+                />
+                {!expanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                )}
+            </div>
+            <div className="mt-2 text-center">
+                <button 
+                    onClick={() => setExpanded(!expanded)} 
+                    className="text-insani-blue font-medium text-sm hover:underline focus:outline-none"
+                >
+                    {expanded ? 'Tutup' : 'Baca Selengkapnya'}
+                </button>
+            </div>
+        </div>
+    );
+};
 
 interface Program {
     id: number;
@@ -44,6 +75,7 @@ interface Props {
 
 export default function ProgramShow({ program, auth }: Props) {
     const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur'>('cerita');
+    const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
 
     const commentForm = useForm({
         name: auth?.user ? auth.user.name : '',
@@ -161,9 +193,10 @@ export default function ProgramShow({ program, auth }: Props) {
 
                                     {/* Tab Content: Cerita */}
                                     {activeTab === 'cerita' && (
-                                        <div className="prose prose-slate max-w-none text-slate-600 whitespace-pre-wrap prose-p:leading-relaxed prose-a:text-insani-blue prose-headings:text-slate-800 animate-in fade-in slide-in-from-bottom-2">
-                                            {program.story}
-                                        </div>
+                                        <div 
+                                            className="prose prose-slate max-w-none text-slate-600 prose-p:leading-relaxed prose-a:text-insani-blue prose-headings:text-slate-800 animate-in fade-in slide-in-from-bottom-2 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden"
+                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story.id || program.story as unknown as string) }}
+                                        />
                                     )}
 
                                     {/* Tab Content: Kabar Terbaru */}
@@ -174,18 +207,22 @@ export default function ProgramShow({ program, auth }: Props) {
                                                     Belum ada kabar terbaru untuk program ini.
                                                 </div>
                                             ) : (
-                                                program.updates.map((update: any) => (
-                                                    <div key={update.id} className="border border-slate-100 rounded-xl p-5 hover:border-insani-blue/20 transition-colors bg-white shadow-sm">
-                                                        <div className="flex items-center gap-2 mb-3 text-sm text-slate-500">
-                                                            <Calendar className="w-4 h-4" />
-                                                            {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: dateId })}
+                                                <>
+                                                    {program.updates.slice(0, visibleUpdatesCount).map((update: any) => (
+                                                        <UpdateCard key={update.id} update={update} />
+                                                    ))}
+                                                    {program.updates.length > visibleUpdatesCount && (
+                                                        <div className="text-center mt-6">
+                                                            <Button 
+                                                                variant="outline" 
+                                                                onClick={() => setVisibleUpdatesCount(prev => prev + 5)}
+                                                                className="border-insani-blue text-insani-blue hover:bg-insani-blue/5"
+                                                            >
+                                                                Muat Lebih Banyak Kabar
+                                                            </Button>
                                                         </div>
-                                                        <h3 className="font-bold text-lg text-slate-800 mb-3">{update.title}</h3>
-                                                        <div className="text-slate-600 whitespace-pre-wrap text-sm leading-relaxed">
-                                                            {update.content}
-                                                        </div>
-                                                    </div>
-                                                ))
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     )}

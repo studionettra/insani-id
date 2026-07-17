@@ -1,6 +1,6 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -55,12 +55,11 @@ export default function AkunProgramIndex({ programs }: Props) {
     };
 
     return (
-        <PublicLayout>
+        <AppLayout breadcrumbs={[{ title: 'Program Saya', href: '/akun/programs' }]}>
             <Head title="Program Saya" />
 
-            <div className="bg-slate-50 py-12 min-h-screen">
-                <div className="container mx-auto px-4 max-w-5xl">
-                    
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 mx-auto w-full max-w-5xl">
+                <div>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
                             <h1 className="text-3xl font-bold text-slate-800">Program Saya</h1>
@@ -124,9 +123,17 @@ export default function AkunProgramIndex({ programs }: Props) {
                                                         </Link>
                                                     </Button>
                                                     
+                                                    {['published', 'completed'].includes(program.status) && (
+                                                        <Button variant="outline" size="sm" asChild className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+                                                            <Link href={`/akun/programs/${program.id}/updates`}>
+                                                                <span className="flex items-center">Update Kabar</span>
+                                                            </Link>
+                                                        </Button>
+                                                    )}
+
                                                     {['active', 'completed'].includes(program.status) && (
                                                         <Button variant="outline" size="sm" asChild className="text-green-600 hover:text-green-700 hover:bg-green-50">
-                                                            <Link href={route('akun.programs.disbursements.index', program.id)}>
+                                                            <Link href={`/akun/programs/${program.id}/disbursements`}>
                                                                 <span className="flex items-center">Pencairan</span>
                                                             </Link>
                                                         </Button>
@@ -191,6 +198,6 @@ export default function AkunProgramIndex({ programs }: Props) {
                     )}
                 </div>
             </div>
-        </PublicLayout>
+        </AppLayout>
     );
 }

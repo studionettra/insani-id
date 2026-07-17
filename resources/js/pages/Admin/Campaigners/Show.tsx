@@ -44,12 +44,12 @@ export default function CampaignerShow({ campaigner }: any) {
             
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" asChild>
+                    <Button variant="outline" size="icon" asChild className="border-gray-200 hover:bg-gray-50 text-gray-600">
                         <Link href="/admin/campaigners"><ArrowLeft className="w-4 h-4" /></Link>
                     </Button>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Detail Pendaftaran Campaigner</h2>
-                        <p className="text-muted-foreground text-sm">
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Detail Pendaftaran Campaigner</h1>
+                        <p className="text-sm text-gray-500 mt-1">
                             Tinjau informasi dan dokumen yang diajukan.
                         </p>
                     </div>
@@ -57,95 +57,95 @@ export default function CampaignerShow({ campaigner }: any) {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Informasi Profil</CardTitle>
-                                <CardDescription>Data yang diinputkan oleh pendaftar</CardDescription>
+                        <Card className="border-gray-200 shadow-sm rounded-lg overflow-hidden">
+                            <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
+                                <CardTitle className="text-lg font-semibold text-gray-900">Informasi Profil</CardTitle>
+                                <CardDescription className="text-gray-500">Data yang diinputkan oleh pendaftar</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                                     <div>
-                                        <Label className="text-muted-foreground">Tipe Campaigner</Label>
-                                        <p className="font-medium capitalize">{campaigner.type}</p>
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Campaigner</Label>
+                                        <p className="font-medium text-gray-900 mt-1 capitalize">{campaigner.type}</p>
                                     </div>
                                     <div>
-                                        <Label className="text-muted-foreground">Nama Pendaftar (Akun)</Label>
-                                        <p className="font-medium">{campaigner.user?.name}</p>
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pendaftar (Akun)</Label>
+                                        <p className="font-medium text-gray-900 mt-1">{campaigner.user?.name}</p>
                                     </div>
                                     
                                     {campaigner.type === 'lembaga' && (
                                         <>
                                             <div>
-                                                <Label className="text-muted-foreground">Nama Lembaga</Label>
-                                                <p className="font-medium">{campaigner.nama_lembaga}</p>
+                                                <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Lembaga</Label>
+                                                <p className="font-medium text-gray-900 mt-1">{campaigner.nama_lembaga}</p>
                                             </div>
                                             <div>
-                                                <Label className="text-muted-foreground">Nomor SK</Label>
-                                                <p className="font-medium">{campaigner.nomor_sk}</p>
+                                                <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor SK</Label>
+                                                <p className="font-medium text-gray-900 mt-1">{campaigner.nomor_sk}</p>
                                             </div>
                                             <div>
-                                                <Label className="text-muted-foreground">NPWP Lembaga</Label>
-                                                <p className="font-medium">{campaigner.npwp}</p>
+                                                <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">NPWP Lembaga</Label>
+                                                <p className="font-medium text-gray-900 mt-1">{campaigner.npwp}</p>
                                             </div>
                                         </>
                                     )}
 
                                     <div>
-                                        <Label className="text-muted-foreground">Telepon / WA</Label>
-                                        <p className="font-medium">{campaigner.phone}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Alamat</Label>
-                                        <p className="font-medium">{campaigner.address}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Informasi Rekening</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-muted-foreground">Bank</Label>
-                                        <p className="font-medium">{campaigner.bank_name}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-muted-foreground">Nomor Rekening</Label>
-                                        <p className="font-medium">{campaigner.bank_account_number}</p>
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Telepon / WA</Label>
+                                        <p className="font-medium text-gray-900 mt-1">{campaigner.phone}</p>
                                     </div>
                                     <div className="col-span-2">
-                                        <Label className="text-muted-foreground">Atas Nama</Label>
-                                        <p className="font-medium">{campaigner.bank_account_name}</p>
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Alamat</Label>
+                                        <p className="font-medium text-gray-900 mt-1">{campaigner.address}</p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Dokumen Verifikasi</CardTitle>
+                        <Card className="border-gray-200 shadow-sm rounded-lg overflow-hidden">
+                            <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
+                                <CardTitle className="text-lg font-semibold text-gray-900">Informasi Rekening</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                                    <div>
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Bank</Label>
+                                        <p className="font-medium text-gray-900 mt-1">{campaigner.bank_name}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Rekening</Label>
+                                        <p className="font-medium text-gray-900 mt-1">{campaigner.bank_account_number}</p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Atas Nama</Label>
+                                        <p className="font-medium text-gray-900 mt-1">{campaigner.bank_account_name}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="border-gray-200 shadow-sm rounded-lg overflow-hidden">
+                            <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
+                                <CardTitle className="text-lg font-semibold text-gray-900">Dokumen Verifikasi</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6 space-y-6">
                                 {campaigner.documents.map((doc: any) => (
-                                    <div key={doc.id} className="border p-4 rounded-md space-y-4">
+                                    <div key={doc.id} className="border border-gray-200 bg-gray-50/30 p-5 rounded-lg space-y-4">
                                         <div className="flex justify-between items-start">
-                                            <div className="font-semibold">{getDocTitle(doc.document_type)}</div>
-                                            <a href={`/storage/${doc.file_path}`} target="_blank" rel="noreferrer" className="text-insani-blue text-sm flex items-center hover:underline">
-                                                Lihat Dokumen <ExternalLink className="ml-1 w-3 h-3" />
+                                            <div className="font-semibold text-gray-900">{getDocTitle(doc.document_type)}</div>
+                                            <a href={`/storage/${doc.file_path}`} target="_blank" rel="noreferrer" className="text-[#1A56DB] text-sm font-medium flex items-center hover:underline bg-blue-50 px-3 py-1.5 rounded-md">
+                                                Lihat Dokumen <ExternalLink className="ml-1.5 w-4 h-4" />
                                             </a>
                                         </div>
                                         
-                                        <div className="grid grid-cols-2 gap-4 items-start">
-                                            <div className="space-y-2">
-                                                <Label>Status Dokumen</Label>
+                                        <div className="grid grid-cols-2 gap-4 items-start pt-2 border-t border-gray-100">
+                                            <div className="space-y-1.5">
+                                                <Label className="text-sm font-medium text-gray-700">Status Dokumen</Label>
                                                 <Select 
                                                     value={data.document_statuses[doc.id]} 
                                                     onValueChange={(val) => setData('document_statuses', {...data.document_statuses, [doc.id]: val})}
                                                 >
-                                                    <SelectTrigger>
+                                                    <SelectTrigger className="bg-white border-gray-200 focus:ring-[#1A56DB]">
                                                         <SelectValue placeholder="Pilih status" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -155,12 +155,13 @@ export default function CampaignerShow({ campaigner }: any) {
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            <div className="space-y-2">
-                                                <Label>Catatan (Jika ditolak)</Label>
+                                            <div className="space-y-1.5">
+                                                <Label className="text-sm font-medium text-gray-700">Catatan (Jika ditolak)</Label>
                                                 <Input 
                                                     placeholder="Contoh: Foto buram" 
                                                     value={data.document_notes[doc.id]}
                                                     onChange={(e) => setData('document_notes', {...data.document_notes, [doc.id]: e.target.value})}
+                                                    className="bg-white border-gray-200 focus-visible:ring-[#1A56DB]"
                                                 />
                                             </div>
                                         </div>
@@ -171,16 +172,16 @@ export default function CampaignerShow({ campaigner }: any) {
                     </div>
 
                     <div className="space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Keputusan Verifikasi</CardTitle>
+                        <Card className="border-gray-200 shadow-sm rounded-lg overflow-hidden sticky top-6">
+                            <CardHeader className="bg-gray-50/50 border-b border-gray-100 pb-4">
+                                <CardTitle className="text-lg font-semibold text-gray-900">Keputusan Verifikasi</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <form onSubmit={submit} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="status">Status Akhir Akun</Label>
+                            <CardContent className="p-6">
+                                <form onSubmit={submit} className="space-y-5">
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="status" className="text-sm font-medium text-gray-700">Status Akhir Akun</Label>
                                         <Select value={data.status} onValueChange={(val) => setData('status', val)}>
-                                            <SelectTrigger>
+                                            <SelectTrigger className="border-gray-200 focus:ring-[#1A56DB]">
                                                 <SelectValue placeholder="Pilih keputusan" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -193,19 +194,20 @@ export default function CampaignerShow({ campaigner }: any) {
                                     </div>
 
                                     {data.status === 'rejected' && (
-                                        <div className="space-y-2">
-                                            <Label htmlFor="notes">Alasan Penolakan Global</Label>
+                                        <div className="space-y-1.5">
+                                            <Label htmlFor="notes" className="text-sm font-medium text-gray-700">Alasan Penolakan Global</Label>
                                             <Textarea 
                                                 id="notes" 
                                                 placeholder="Berikan alasan mengapa pengajuan ditolak secara keseluruhan..."
                                                 value={data.notes}
                                                 onChange={(e) => setData('notes', e.target.value)}
+                                                className="border-gray-200 focus-visible:ring-[#1A56DB] min-h-[100px]"
                                             />
-                                            {errors.notes && <p className="text-sm text-red-500">{errors.notes}</p>}
+                                            {errors.notes && <p className="text-xs text-red-500">{errors.notes}</p>}
                                         </div>
                                     )}
 
-                                    <Button type="submit" className="w-full bg-insani-blue hover:bg-insani-blue/90" disabled={processing}>
+                                    <Button type="submit" className="w-full bg-[#1A56DB] text-white hover:bg-[#1e40af]" disabled={processing}>
                                         {processing ? 'Menyimpan...' : 'Simpan Keputusan'}
                                     </Button>
                                 </form>

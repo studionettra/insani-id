@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 use Illuminate\Database\Eloquent\Model;
 
 class CampaignerProfile extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'user_id',
         'type',
@@ -39,4 +44,10 @@ class CampaignerProfile extends Model
     {
         return $this->hasMany(VerificationDocument::class);
     }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll()->logOnlyDirty();
+    }
+
 }

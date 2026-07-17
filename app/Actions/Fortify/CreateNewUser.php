@@ -22,6 +22,9 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
+            'cf-turnstile-response' => ['required', 'string', new \App\Rules\TurnstileRule],
+        ], [
+            'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).'
         ])->validate();
 
         return User::create([

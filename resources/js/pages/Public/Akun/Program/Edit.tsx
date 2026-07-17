@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import RichTextEditor from '@/components/rich-text-editor';
 
 interface Category {
     id: number;
@@ -68,12 +69,11 @@ export default function AkunProgramEdit({ categories, program }: Props) {
     };
 
     return (
-        <PublicLayout>
-            <Head title="Edit Program Galang Dana" />
+        <AppLayout breadcrumbs={[{ title: 'Edit Program', href: `/akun/programs/${program.id}/edit` }]}>
+            <Head title={`Edit Program: ${program.title.id}`} />
 
-            <div className="bg-slate-50 py-12 min-h-screen">
-                <div className="container mx-auto px-4 max-w-4xl">
-                    <div className="mb-6">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
+                <div>
                         <Button variant="ghost" asChild className="mb-4">
                             <Link href="/akun/programs">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -185,12 +185,9 @@ export default function AkunProgramEdit({ categories, program }: Props) {
 
                                     <div className="md:col-span-2">
                                         <Label htmlFor="story" className="mb-2 block">Cerita & Latar Belakang <span className="text-red-500">*</span></Label>
-                                        <Textarea
-                                            id="story"
+                                        <RichTextEditor
                                             value={data.story as string}
-                                            onChange={e => setData('story', e.target.value)}
-                                            rows={10}
-                                            required
+                                            onChange={value => setData('story', value)}
                                         />
                                         {errors.story && <p className="text-red-500 text-sm mt-1">{errors.story}</p>}
                                     </div>
@@ -206,7 +203,6 @@ export default function AkunProgramEdit({ categories, program }: Props) {
                         </CardContent>
                     </Card>
                 </div>
-            </div>
-        </PublicLayout>
+        </AppLayout>
     );
 }

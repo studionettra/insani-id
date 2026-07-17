@@ -1,4 +1,5 @@
 import { Head, Link, useForm, router } from '@inertiajs/react';
+import admin from '@/routes/admin';
 import { useState } from 'react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ export default function UsersIndex({ users, roles, filters }: any) {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(admin.users.index(), { search }, { preserveState: true, replace: true });
+        router.get(admin.users.index().url, { search }, { preserveState: true, replace: true });
     };
 
     const openCreateModal = () => {
@@ -89,62 +90,68 @@ export default function UsersIndex({ users, roles, filters }: any) {
     };
 
     return (
-        <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <div className="flex h-full flex-1 flex-col gap-6 p-6">
             <Head title="Manajemen Pengguna" />
 
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold tracking-tight">Pengguna Sistem</h1>
-                <Button onClick={openCreateModal} className="bg-brand-500 hover:bg-brand-600 text-white">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900">Pengguna Sistem</h1>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Kelola data pengguna, peran, dan akses sistem.
+                    </p>
+                </div>
+                <Button onClick={openCreateModal} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                     <Plus className="mr-2 h-4 w-4" /> Tambah Pengguna
                 </Button>
             </div>
 
-            <div className="flex items-center mb-4">
-                <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
+            <div className="flex items-center">
+                <form onSubmit={handleSearch} className="relative w-full sm:w-[320px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input 
                         type="search" 
                         placeholder="Cari nama atau email..." 
+                        className="pl-9 w-full bg-white border-gray-200 focus-visible:ring-[#1A56DB]"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
-                    <Button type="submit" variant="secondary">
-                        <Search className="h-4 w-4" />
-                    </Button>
                 </form>
             </div>
 
-            <div className="rounded-md border bg-card text-card-foreground">
+            <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-gray-50/50">
                         <TableRow>
-                            <TableCell isHeader>Nama</TableCell>
-                            <TableCell isHeader>Email</TableCell>
-                            <TableCell isHeader>Peran</TableCell>
-                            <TableCell isHeader className="text-right">Aksi</TableCell>
+                            <TableCell isHeader className="font-medium text-gray-500">Nama</TableCell>
+                            <TableCell isHeader className="font-medium text-gray-500">Email</TableCell>
+                            <TableCell isHeader className="font-medium text-gray-500">Peran</TableCell>
+                            <TableCell isHeader className="text-right font-medium text-gray-500">Aksi</TableCell>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {users.data.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center h-24">Tidak ada data pengguna.</TableCell>
+                                <TableCell colSpan={4} className="text-center h-32 text-gray-500">Tidak ada data pengguna.</TableCell>
                             </TableRow>
                         )}
                         {users.data.map((user: any) => (
-                            <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.name}</TableCell>
-                                <TableCell>{user.email}</TableCell>
+                            <TableRow key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                <TableCell className="font-medium text-gray-900">{user.name}</TableCell>
+                                <TableCell className="text-gray-600">{user.email}</TableCell>
                                 <TableCell>
-                                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-900/30 dark:text-blue-400">
+                                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                                         {user.roles[0]?.name || '-'}
                                     </span>
                                 </TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button variant="ghost" size="icon" onClick={() => openEditModal(user)}>
-                                        <Edit className="h-4 w-4 text-blue-600" />
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)}>
-                                        <Trash2 className="h-4 w-4 text-red-600" />
-                                    </Button>
+                                <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                        <Button variant="ghost" size="icon" onClick={() => openEditModal(user)} className="h-8 w-8 text-gray-400 hover:text-[#1A56DB]">
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleDelete(user.id)} className="h-8 w-8 text-gray-400 hover:text-red-600">
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -154,49 +161,56 @@ export default function UsersIndex({ users, roles, filters }: any) {
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Tambah Pengguna</DialogTitle>
-                        <DialogDescription>
-                            Tambahkan pengguna baru ke dalam sistem dengan mengisi form di bawah ini.
+                <DialogContent className="sm:max-w-[425px] border-0 shadow-lg p-0 overflow-hidden">
+                    <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                        <DialogTitle className="text-lg font-semibold text-gray-900">Tambah Pengguna</DialogTitle>
+                        <DialogDescription className="text-sm text-gray-500 mt-1">
+                            Tambahkan pengguna baru ke dalam sistem.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleCreate} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Nama Lengkap</Label>
-                            <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} required />
-                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                    <form onSubmit={handleCreate}>
+                        <div className="px-6 py-4 space-y-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Nama Lengkap</Label>
+                                <Input id="name" value={data.name} onChange={e => setData('name', e.target.value)} required className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                                {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                                <Input id="email" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                                {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="role" className="text-sm font-medium text-gray-700">Peran (Role)</Label>
+                                <Select value={data.role} onValueChange={(val) => setData('role', val)}>
+                                    <SelectTrigger className="border-gray-200 focus:ring-[#1A56DB]">
+                                        <SelectValue placeholder="Pilih Peran" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {roles.map((role: string) => (
+                                            <SelectItem key={role} value={role}>{role}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.role && <p className="text-xs text-red-500">{errors.role}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
+                                <Input id="password" type="password" value={data.password} onChange={e => setData('password', e.target.value)} required className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                                {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-gray-700">Konfirmasi Password</Label>
+                                <Input id="password_confirmation" type="password" value={data.password_confirmation} onChange={e => setData('password_confirmation', e.target.value)} required className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required />
-                            {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="role">Peran (Role)</Label>
-                            <Select value={data.role} onValueChange={(val) => setData('role', val)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih Peran" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roles.map((role: string) => (
-                                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" value={data.password} onChange={e => setData('password', e.target.value)} required />
-                            {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password_confirmation">Konfirmasi Password</Label>
-                            <Input id="password_confirmation" type="password" value={data.password_confirmation} onChange={e => setData('password_confirmation', e.target.value)} required />
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" disabled={processing} className="bg-brand-500 text-white hover:bg-brand-600">Simpan</Button>
+                        <DialogFooter className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)} className="border-gray-200 text-gray-600 hover:bg-gray-100">
+                                Batal
+                            </Button>
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] text-white hover:bg-[#1e40af]">
+                                Simpan
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -204,49 +218,56 @@ export default function UsersIndex({ users, roles, filters }: any) {
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>Edit Pengguna</DialogTitle>
-                        <DialogDescription>
-                            Ubah data pengguna terpilih. Kosongkan field password jika tidak ingin mengubahnya.
+                <DialogContent className="sm:max-w-[425px] border-0 shadow-lg p-0 overflow-hidden">
+                    <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                        <DialogTitle className="text-lg font-semibold text-gray-900">Edit Pengguna</DialogTitle>
+                        <DialogDescription className="text-sm text-gray-500 mt-1">
+                            Ubah data pengguna terpilih.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleEdit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-name">Nama Lengkap</Label>
-                            <Input id="edit-name" value={data.name} onChange={e => setData('name', e.target.value)} required />
-                            {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                    <form onSubmit={handleEdit}>
+                        <div className="px-6 py-4 space-y-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit-name" className="text-sm font-medium text-gray-700">Nama Lengkap</Label>
+                                <Input id="edit-name" value={data.name} onChange={e => setData('name', e.target.value)} required className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                                {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit-email" className="text-sm font-medium text-gray-700">Email</Label>
+                                <Input id="edit-email" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                                {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit-role" className="text-sm font-medium text-gray-700">Peran (Role)</Label>
+                                <Select value={data.role} onValueChange={(val) => setData('role', val)}>
+                                    <SelectTrigger className="border-gray-200 focus:ring-[#1A56DB]">
+                                        <SelectValue placeholder="Pilih Peran" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {roles.map((role: string) => (
+                                            <SelectItem key={role} value={role}>{role}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.role && <p className="text-xs text-red-500">{errors.role}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit-password" className="text-sm font-medium text-gray-700">Password (Opsional)</Label>
+                                <Input id="edit-password" type="password" value={data.password} onChange={e => setData('password', e.target.value)} className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                                {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="edit-password_confirmation" className="text-sm font-medium text-gray-700">Konfirmasi Password (Opsional)</Label>
+                                <Input id="edit-password_confirmation" type="password" value={data.password_confirmation} onChange={e => setData('password_confirmation', e.target.value)} className="border-gray-200 focus-visible:ring-[#1A56DB]" />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-email">Email</Label>
-                            <Input id="edit-email" type="email" value={data.email} onChange={e => setData('email', e.target.value)} required />
-                            {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-role">Peran (Role)</Label>
-                            <Select value={data.role} onValueChange={(val) => setData('role', val)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Pilih Peran" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {roles.map((role: string) => (
-                                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-password">Password (Opsional)</Label>
-                            <Input id="edit-password" type="password" value={data.password} onChange={e => setData('password', e.target.value)} />
-                            {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="edit-password_confirmation">Konfirmasi Password (Opsional)</Label>
-                            <Input id="edit-password_confirmation" type="password" value={data.password_confirmation} onChange={e => setData('password_confirmation', e.target.value)} />
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" disabled={processing} className="bg-brand-500 text-white hover:bg-brand-600">Update</Button>
+                        <DialogFooter className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} className="border-gray-200 text-gray-600 hover:bg-gray-100">
+                                Batal
+                            </Button>
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] text-white hover:bg-[#1e40af]">
+                                Simpan Perubahan
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

@@ -3,8 +3,8 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Save } from 'lucide-react';
+import RichTextEditor from '@/components/rich-text-editor';
 
 interface Category {
     id: number;
@@ -72,158 +72,163 @@ export default function ProgramEdit({ categories, program }: Props) {
         <>
             <Head title="Edit Program" />
 
-            <div className="mb-6 flex items-center justify-between">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href="/admin/programs">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Kembali
-                        </Link>
+                    <Button variant="outline" size="icon" asChild className="border-gray-200 hover:bg-gray-50 text-gray-600">
+                        <Link href="/admin/programs"><ArrowLeft className="w-4 h-4" /></Link>
                     </Button>
-                    <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Edit Program</h1>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Edit Program</h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Perbarui informasi program donasi.
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                <form onSubmit={handleSubmit} className="p-6.5 space-y-6">
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {/* Judul Program */}
-                        <div className="md:col-span-2">
-                            <Label htmlFor="title" className="mb-2.5 block text-black dark:text-white">
-                                Judul Program <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                                id="title"
-                                type="text"
-                                value={data.title as string}
-                                onChange={(e) => setData('title', e.target.value)}
-                                className="w-full"
-                                required
-                            />
-                            {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
+                <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                    <div className="border-b border-gray-100 bg-gray-50/50 py-4 px-6">
+                        <h3 className="font-semibold text-gray-900">
+                            Informasi Program Utama
+                        </h3>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            {/* Judul Program */}
+                            <div className="md:col-span-2 space-y-1.5">
+                                <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                                    Judul Program <span className="text-red-500">*</span>
+                                </Label>
+                                <Input
+                                    id="title"
+                                    type="text"
+                                    value={data.title as string}
+                                    onChange={(e) => setData('title', e.target.value)}
+                                    className="w-full border-gray-200 focus-visible:ring-[#1A56DB]"
+                                    required
+                                />
+                                {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
+                            </div>
+
+                            {/* Kategori */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="category_id" className="text-sm font-medium text-gray-700">
+                                    Kategori <span className="text-red-500">*</span>
+                                </Label>
+                                <select
+                                    id="category_id"
+                                    value={data.category_id}
+                                    onChange={(e) => setData('category_id', parseInt(e.target.value))}
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-[#1A56DB] focus:ring-1 focus:ring-[#1A56DB] disabled:cursor-not-allowed disabled:opacity-50"
+                                    required
+                                >
+                                    <option value="">Pilih Kategori</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.name.id || cat.name}</option>
+                                    ))}
+                                </select>
+                                {errors.category_id && <p className="mt-1 text-xs text-red-500">{errors.category_id}</p>}
+                            </div>
+
+                            {/* Target Donasi */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="target_amount" className="text-sm font-medium text-gray-700">
+                                    Target Donasi (Opsional)
+                                </Label>
+                                <Input
+                                    id="target_amount"
+                                    type="number"
+                                    value={data.target_amount}
+                                    onChange={(e) => setData('target_amount', e.target.value)}
+                                    className="w-full border-gray-200 focus-visible:ring-[#1A56DB]"
+                                    min="0"
+                                />
+                                {errors.target_amount && <p className="mt-1 text-xs text-red-500">{errors.target_amount}</p>}
+                            </div>
+
+                            {/* Deadline */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="deadline" className="text-sm font-medium text-gray-700">
+                                    Batas Waktu (Opsional)
+                                </Label>
+                                <Input
+                                    id="deadline"
+                                    type="date"
+                                    value={data.deadline}
+                                    onChange={(e) => setData('deadline', e.target.value)}
+                                    className="w-full border-gray-200 focus-visible:ring-[#1A56DB]"
+                                />
+                                {errors.deadline && <p className="mt-1 text-xs text-red-500">{errors.deadline}</p>}
+                            </div>
+
+                            {/* Video URL */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="video_url" className="text-sm font-medium text-gray-700">
+                                    Tautan Video Youtube (Opsional)
+                                </Label>
+                                <Input
+                                    id="video_url"
+                                    type="url"
+                                    value={data.video_url}
+                                    onChange={(e) => setData('video_url', e.target.value)}
+                                    className="w-full border-gray-200 focus-visible:ring-[#1A56DB]"
+                                />
+                                {errors.video_url && <p className="mt-1 text-xs text-red-500">{errors.video_url}</p>}
+                            </div>
+
+                            {/* Cover Image */}
+                            <div className="md:col-span-2 space-y-1.5">
+                                <Label htmlFor="cover_image" className="text-sm font-medium text-gray-700">
+                                    Gambar Utama (Cover)
+                                </Label>
+                                <input
+                                    id="cover_image"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleCoverChange}
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm outline-none transition file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:py-1 file:px-3 file:text-xs file:font-medium file:text-[#1A56DB] hover:file:bg-blue-100 focus:border-[#1A56DB] focus:ring-1 focus:ring-[#1A56DB]"
+                                />
+                                <p className="text-[11px] text-gray-500">Biarkan kosong jika tidak ingin mengubah gambar sampul.</p>
+                                {errors.cover_image && <p className="mt-1 text-xs text-red-500">{errors.cover_image}</p>}
+                                
+                                {coverPreview && (
+                                    <div className="mt-3">
+                                        <p className="text-xs text-gray-500 mb-2">Preview:</p>
+                                        <img src={coverPreview} alt="Preview" className="h-48 rounded-lg object-cover border border-gray-100" />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Story */}
+                            <div className="md:col-span-2 space-y-1.5">
+                                <Label htmlFor="story" className="text-sm font-medium text-gray-700">
+                                    Cerita / Penjelasan Program <span className="text-red-500">*</span>
+                                </Label>
+                                <RichTextEditor
+                                    value={data.story as string}
+                                    onChange={(value) => setData('story', value)}
+                                />
+                                {errors.story && <p className="mt-1 text-xs text-red-500">{errors.story}</p>}
+                            </div>
                         </div>
 
-                        {/* Kategori */}
-                        <div>
-                            <Label htmlFor="category_id" className="mb-2.5 block text-black dark:text-white">
-                                Kategori <span className="text-red-500">*</span>
-                            </Label>
-                            <select
-                                id="category_id"
-                                value={data.category_id}
-                                onChange={(e) => setData('category_id', parseInt(e.target.value))}
-                                className="w-full rounded border border-stroke bg-transparent py-3 px-5 font-medium outline-none transition focus:border-blue-500 active:border-blue-500 dark:border-form-strokedark dark:bg-form-input dark:focus:border-blue-500"
-                                required
+                        <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => window.history.back()}
+                                disabled={processing}
+                                className="border-gray-200 text-gray-600 hover:bg-gray-50"
                             >
-                                <option value="">Pilih Kategori</option>
-                                {categories.map(cat => (
-                                    <option key={cat.id} value={cat.id}>{cat.name.id || cat.name}</option>
-                                ))}
-                            </select>
-                            {errors.category_id && <p className="mt-1 text-sm text-red-500">{errors.category_id}</p>}
+                                Batal
+                            </Button>
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
+                                <Save className="mr-2 h-4 w-4" />
+                                Simpan Perubahan
+                            </Button>
                         </div>
-
-                        {/* Target Donasi */}
-                        <div>
-                            <Label htmlFor="target_amount" className="mb-2.5 block text-black dark:text-white">
-                                Target Donasi (Opsional)
-                            </Label>
-                            <Input
-                                id="target_amount"
-                                type="number"
-                                value={data.target_amount}
-                                onChange={(e) => setData('target_amount', e.target.value)}
-                                className="w-full"
-                                min="0"
-                            />
-                            {errors.target_amount && <p className="mt-1 text-sm text-red-500">{errors.target_amount}</p>}
-                        </div>
-
-                        {/* Deadline */}
-                        <div>
-                            <Label htmlFor="deadline" className="mb-2.5 block text-black dark:text-white">
-                                Batas Waktu (Opsional)
-                            </Label>
-                            <Input
-                                id="deadline"
-                                type="date"
-                                value={data.deadline}
-                                onChange={(e) => setData('deadline', e.target.value)}
-                                className="w-full"
-                            />
-                            {errors.deadline && <p className="mt-1 text-sm text-red-500">{errors.deadline}</p>}
-                        </div>
-
-                        {/* Video URL */}
-                        <div>
-                            <Label htmlFor="video_url" className="mb-2.5 block text-black dark:text-white">
-                                Tautan Video Youtube (Opsional)
-                            </Label>
-                            <Input
-                                id="video_url"
-                                type="url"
-                                value={data.video_url}
-                                onChange={(e) => setData('video_url', e.target.value)}
-                                className="w-full"
-                            />
-                            {errors.video_url && <p className="mt-1 text-sm text-red-500">{errors.video_url}</p>}
-                        </div>
-
-                        {/* Cover Image */}
-                        <div className="md:col-span-2">
-                            <Label htmlFor="cover_image" className="mb-2.5 block text-black dark:text-white">
-                                Gambar Utama (Cover)
-                            </Label>
-                            <input
-                                id="cover_image"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleCoverChange}
-                                className="w-full rounded-md border border-input bg-transparent p-3 outline-none transition file:mr-4 file:rounded file:border-0 file:bg-secondary file:py-1 file:px-2.5 file:text-sm file:font-medium focus:border-ring focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            />
-                            <p className="mt-1 text-xs text-slate-500">Biarkan kosong jika tidak ingin mengubah gambar sampul.</p>
-                            {errors.cover_image && <p className="mt-1 text-sm text-red-500">{errors.cover_image}</p>}
-                            
-                            {coverPreview && (
-                                <div className="mt-4">
-                                    <p className="text-sm mb-2">Preview:</p>
-                                    <img src={coverPreview} alt="Preview" className="h-48 rounded-md object-cover" />
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Story */}
-                        <div className="md:col-span-2">
-                            <Label htmlFor="story" className="mb-2.5 block text-black dark:text-white">
-                                Cerita / Penjelasan Program <span className="text-red-500">*</span>
-                            </Label>
-                            <Textarea
-                                id="story"
-                                rows={8}
-                                value={data.story as string}
-                                onChange={(e) => setData('story', e.target.value)}
-                                className="w-full"
-                                required
-                            />
-                            {errors.story && <p className="mt-1 text-sm text-red-500">{errors.story}</p>}
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end gap-4 mt-6">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => window.history.back()}
-                            disabled={processing}
-                        >
-                            Batal
-                        </Button>
-                        <Button type="submit" disabled={processing} className="bg-blue-600 hover:bg-blue-700">
-                            <Save className="mr-2 h-4 w-4" />
-                            Simpan Perubahan
-                        </Button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         
         </>

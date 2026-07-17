@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save } from 'lucide-react';
+import RichTextEditor from '@/components/rich-text-editor';
 
 
 export default function PagesCreate() {
@@ -61,16 +62,13 @@ export default function PagesCreate() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="content_id">Konten HTML (ID) *</Label>
-                                <Textarea
-                                    id="content_id"
-                                    rows={10}
+                                <RichTextEditor
                                     value={data.content_html.id}
-                                    onChange={(e) => setData('content_html', { ...data.content_html, id: e.target.value })}
-                                    className="font-mono text-sm"
-                                    required
+                                    onChange={(value) => setData('content_html', { ...data.content_html, id: value })}
+                                    placeholder="Tulis konten halaman di sini..."
                                 />
                                 {errors['content_html.id'] && <p className="text-sm text-red-500">{errors['content_html.id']}</p>}
-                                <p className="text-xs text-muted-foreground">Gunakan tag HTML yang valid. Anda dapat mem-paste HTML dari WordPress.</p>
+                                <p className="text-xs text-muted-foreground">Anda bisa menyisipkan format teks dan gambar.</p>
                             </div>
                             
                             <div className="grid gap-2">
@@ -108,12 +106,10 @@ export default function PagesCreate() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="content_en">Konten HTML (EN)</Label>
-                                <Textarea
-                                    id="content_en"
-                                    rows={10}
+                                <RichTextEditor
                                     value={data.content_html.en}
-                                    onChange={(e) => setData('content_html', { ...data.content_html, en: e.target.value })}
-                                    className="font-mono text-sm"
+                                    onChange={(value) => setData('content_html', { ...data.content_html, en: value })}
+                                    placeholder="Write page content here..."
                                 />
                             </div>
                         </div>

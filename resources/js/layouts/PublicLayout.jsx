@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
-
+import { ThemeToggle } from '@/components/theme-toggle';
 export default function PublicLayout({ children, title }) {
     const { locale } = usePage().props;
     const isRtl = locale === 'ar';
@@ -45,14 +45,15 @@ export default function PublicLayout({ children, title }) {
                             <Link href="/buat-program" className="text-gray-600 hover:text-insani-blue font-medium hidden lg:block">Galang Dana</Link>
                         </nav>
                         
-                        <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                            <div className="hidden sm:block">
-                                <LanguageSwitcher />
+                            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                <div className="hidden sm:block">
+                                    <LanguageSwitcher />
+                                </div>
+                                <ThemeToggle />
+                                <Link href="/login" className="hidden md:block text-insani-blue bg-insani-blue/10 px-4 py-2 rounded-full font-medium hover:bg-insani-blue/20 transition">
+                                    Masuk
+                                </Link>
                             </div>
-                            <Link href="/login" className="hidden md:block text-insani-blue bg-insani-blue/10 px-4 py-2 rounded-full font-medium hover:bg-insani-blue/20 transition">
-                                Masuk
-                            </Link>
-                        </div>
                     </div>
                 </div>
             </header>

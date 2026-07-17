@@ -21,7 +21,7 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\Laravel\Fortify\Http\Requests\LoginRequest::class, \App\Http\Requests\CustomLoginRequest::class);
     }
 
     /**
@@ -71,7 +71,7 @@ class FortifyServiceProvider extends ServiceProvider
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
         ]));
 
-        Fortify::confirmPasswordView(fn () => Inertia::render('Auth/confirm-password'));
+        Fortify::confirmPasswordView(fn () => Inertia::render('Public/Auth/ConfirmPassword'));
     }
 
     /**

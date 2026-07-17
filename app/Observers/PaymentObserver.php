@@ -63,6 +63,26 @@ class PaymentObserver
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error('Failed to send donation success email: ' . $e->getMessage());
                 }
+
+                // Send WhatsApp Notification
+                try {
+                    $waService = app(\App\Services\NotificationGatewayService::class);
+                    $waService->sendDonationConfirmation($donation);
+
+                    if ($donation->donor_phone) {
+                        \App\Models\NotificationLog::create([
+                            'notifiable_type' => \App\Models\Donation::class,
+                            'notifiable_id' => $donation->id,
+                            'channel' => 'whatsapp',
+                            'recipient' => $donation->donor_phone,
+                            'message' => 'Donation Success WhatsApp Sent',
+                            'status' => 'sent',
+                            'provider' => 'mock_wablas'
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send donation success whatsapp: ' . $e->getMessage());
+                }
             }
         }
     }

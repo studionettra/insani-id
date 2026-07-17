@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Donation extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'donation_code',
         'program_id',
@@ -42,4 +47,10 @@ class Donation extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll()->logOnlyDirty();
+    }
+
 }

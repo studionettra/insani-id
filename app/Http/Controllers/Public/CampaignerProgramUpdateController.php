@@ -17,7 +17,7 @@ class CampaignerProgramUpdateController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $updates = $program->updates()->latest()->get();
+        $updates = $program->updates()->latest()->paginate(10);
 
         return inertia('Public/Akun/Program/Updates', [
             'program' => $program,

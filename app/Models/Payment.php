@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
+    use LogsActivity;
+
     protected $fillable = [
         'donation_id',
         'payment_method',
@@ -33,4 +38,10 @@ class Payment extends Model
     {
         return $this->belongsTo(User::class, 'confirmed_by');
     }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll()->logOnlyDirty();
+    }
+
 }

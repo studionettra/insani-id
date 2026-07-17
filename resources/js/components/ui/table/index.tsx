@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 // Props for Table
 interface TableProps {
@@ -33,22 +34,26 @@ interface TableCellProps {
 
 // Table Component
 const Table: React.FC<TableProps> = ({ children, className }) => {
-  return <table className={`min-w-full  ${className}`}>{children}</table>;
+  return (
+    <div className="relative w-full overflow-auto">
+      <table className={cn("w-full caption-bottom text-sm", className)}>{children}</table>
+    </div>
+  );
 };
 
 // TableHeader Component
 const TableHeader: React.FC<TableHeaderProps> = ({ children, className }) => {
-  return <thead className={className}>{children}</thead>;
+  return <thead className={cn("[&_tr]:border-b", className)}>{children}</thead>;
 };
 
 // TableBody Component
 const TableBody: React.FC<TableBodyProps> = ({ children, className }) => {
-  return <tbody className={className}>{children}</tbody>;
+  return <tbody className={cn("[&_tr:last-child]:border-0", className)}>{children}</tbody>;
 };
 
 // TableRow Component
 const TableRow: React.FC<TableRowProps> = ({ children, className }) => {
-  return <tr className={className}>{children}</tr>;
+  return <tr className={cn("border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted", className)}>{children}</tr>;
 };
 
 // TableCell Component
@@ -58,7 +63,18 @@ const TableCell: React.FC<TableCellProps> = ({
   className,
 }) => {
   const CellTag = isHeader ? "th" : "td";
-  return <CellTag className={` ${className}`}>{children}</CellTag>;
+  return (
+    <CellTag 
+      className={cn(
+        isHeader 
+          ? "h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]" 
+          : "p-4 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]", 
+        className
+      )}
+    >
+      {children}
+    </CellTag>
+  );
 };
 
 const TableHead = (props: TableCellProps) => <TableCell isHeader={true} {...props} />;

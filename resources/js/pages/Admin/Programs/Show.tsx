@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import DOMPurify from 'dompurify';
 
 interface Program {
     id: number;
@@ -74,19 +75,19 @@ export default function ProgramShow({ program }: Props) {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'published':
-                return <Badge variant="default" className="bg-green-500 text-white">Aktif</Badge>;
+                return <Badge variant="outline" className="bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 border-0 font-medium">Aktif</Badge>;
             case 'pending_verification':
-                return <Badge variant="secondary" className="bg-yellow-500 text-white">Menunggu Verifikasi</Badge>;
+                return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 ring-1 ring-inset ring-yellow-600/20 border-0 font-medium">Menunggu Verifikasi</Badge>;
             case 'completed':
-                return <Badge variant="default" className="bg-blue-500 text-white">Selesai</Badge>;
+                return <Badge variant="outline" className="bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/20 border-0 font-medium">Selesai</Badge>;
             case 'rejected':
-                return <Badge variant="destructive">Ditolak</Badge>;
+                return <Badge variant="outline" className="bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10 border-0 font-medium">Ditolak</Badge>;
             case 'draft':
-                return <Badge variant="outline">Draft</Badge>;
+                return <Badge variant="outline" className="bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-600/20 border-0 font-medium">Draft</Badge>;
             case 'closed_manual':
-                return <Badge variant="secondary">Ditutup Manual</Badge>;
+                return <Badge variant="outline" className="bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20 border-0 font-medium">Ditutup Manual</Badge>;
             default:
-                return <Badge>{status}</Badge>;
+                return <Badge variant="outline" className="font-medium">{status}</Badge>;
         }
     };
 
@@ -94,204 +95,212 @@ export default function ProgramShow({ program }: Props) {
         <>
             <Head title={`Detail Program: ${program.title}`} />
 
-            <div className="mb-6">
-                <Link href="/admin/programs" className="flex items-center text-slate-500 hover:text-blue-600 transition-colors">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Kembali ke Manajemen Program
-                </Link>
-            </div>
-
-            {errors.status && (
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md flex items-start">
-                    <AlertTriangle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
-                    <p>{errors.status}</p>
-                </div>
-            )}
-
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
-                <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Detail Program</h1>
+            <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div>
-                    {getStatusBadge(program.status)}
+                    <Button variant="outline" size="sm" asChild className="mb-6 border-gray-200 hover:bg-gray-50 text-gray-600">
+                        <Link href="/admin/programs"><ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Manajemen Program</Link>
+                    </Button>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                
-                {/* Left Column - Details */}
-                <div className="xl:col-span-2 space-y-6">
+                {errors.status && (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md flex items-start">
+                        <AlertTriangle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm font-medium">{errors.status}</p>
+                    </div>
+                )}
+
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Detail Program</h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Tinjau informasi program donasi.
+                        </p>
+                    </div>
+                    <div>
+                        {getStatusBadge(program.status)}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     
-                    {program.status === 'rejected' && program.rejection_notes && (
-                        <div className="rounded-sm border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
-                            <div className="flex items-start">
-                                <Info className="h-5 w-5 text-red-500 mr-3 mt-0.5" />
-                                <div>
-                                    <h4 className="text-red-800 dark:text-red-200 font-medium mb-1">Program Ditolak</h4>
-                                    <p className="text-sm text-red-700 dark:text-red-300">
-                                        <strong>Catatan Penolakan:</strong> {program.rejection_notes}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                        <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                            <h3 className="font-medium text-slate-800 dark:text-white">
-                                Informasi Utama
-                            </h3>
-                        </div>
-                        <div className="p-6.5">
-                            <div className="mb-6">
-                                <img 
-                                    src={`/storage/${program.cover_image}`} 
-                                    alt={program.title} 
-                                    className="w-full h-64 object-cover rounded-md"
-                                />
-                            </div>
-                            
-                            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-                                {program.title}
-                            </h2>
-                            <p className="text-slate-500 mb-6 font-mono text-sm">Kode: {program.program_code}</p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-md">
-                                    <p className="text-sm text-slate-500 mb-1">Target Donasi</p>
-                                    <p className="font-semibold text-lg text-slate-800 dark:text-white">
-                                        {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
-                                    </p>
-                                </div>
-                                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-md">
-                                    <p className="text-sm text-slate-500 mb-1">Terkumpul</p>
-                                    <p className="font-semibold text-lg text-blue-600 dark:text-blue-400">
-                                        {formatCurrency(program.collected_amount)}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 className="font-medium text-slate-800 dark:text-white mb-2">Cerita Program</h4>
-                                <div className="prose dark:prose-invert max-w-none text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap">
-                                    {program.story}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Column - Sidebar */}
-                <div className="space-y-6">
-                    {/* Action Card for Verification */}
-                    {program.status === 'pending_verification' && (
-                        <div className="rounded-sm border border-yellow-200 bg-yellow-50 shadow-default dark:border-yellow-800 dark:bg-yellow-900/20">
-                            <div className="border-b border-yellow-200 py-4 px-6.5 dark:border-yellow-800">
-                                <h3 className="font-medium text-yellow-800 dark:text-yellow-200">
-                                    Aksi Verifikasi
-                                </h3>
-                            </div>
-                            <div className="p-6.5 space-y-4">
-                                <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                                    Program ini menunggu persetujuan Anda sebelum dapat dipublikasikan dan menerima donasi.
-                                </p>
-                                <Button 
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white" 
-                                    onClick={handleApprove}
-                                >
-                                    <CheckCircle className="mr-2 h-4 w-4" />
-                                    Setujui & Publikasikan
-                                </Button>
-                                <Button 
-                                    variant="outline"
-                                    className="w-full border-red-500 text-red-500 hover:bg-red-50"
-                                    onClick={() => setIsRejectModalOpen(true)}
-                                >
-                                    <XCircle className="mr-2 h-4 w-4" />
-                                    Tolak Program
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {program.status === 'published' && (
-                        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                            <div className="p-6.5 space-y-4">
-                                <Button 
-                                    variant="outline"
-                                    className="w-full"
-                                    onClick={handleCloseProgram}
-                                >
-                                    <Ban className="mr-2 h-4 w-4" />
-                                    Tutup Program (Manual)
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                        <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                            <h3 className="font-medium text-slate-800 dark:text-white">
-                                Informasi Metadata
-                            </h3>
-                        </div>
-                        <div className="p-6.5 space-y-4">
-                            <div>
-                                <p className="text-sm text-slate-500">Kategori</p>
-                                <p className="font-medium">{program.category?.name?.id || 'N/A'}</p>
-                            </div>
-                            
-                            <div>
-                                <p className="text-sm text-slate-500">Batas Waktu</p>
-                                <div className="flex items-center mt-1">
-                                    <Calendar className="h-4 w-4 mr-2 text-slate-400" />
-                                    <p className="font-medium">
-                                        {program.deadline ? formatDate(program.deadline) : 'Tanpa batas waktu (∞)'}
-                                    </p>
-                                </div>
-                            </div>
-                            
-                            {program.published_at && (
-                                <div>
-                                    <p className="text-sm text-slate-500">Dipublikasikan Pada</p>
-                                    <p className="font-medium">{formatDate(program.published_at)}</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                        <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                            <h3 className="font-medium text-slate-800 dark:text-white flex items-center">
-                                <User className="mr-2 h-4 w-4" />
-                                Informasi Pembuat
-                            </h3>
-                        </div>
-                        <div className="p-6.5 space-y-4">
-                            <div>
-                                <p className="text-sm text-slate-500">Tipe Campaigner</p>
-                                <p className="font-medium capitalize">{program.campaigner_type}</p>
-                            </div>
-                            
-                            {program.campaigner_type === 'internal' ? (
-                                <div>
-                                    <p className="text-sm text-slate-500">Nama Staff (Internal)</p>
-                                    <p className="font-medium">{program.creator?.name}</p>
-                                </div>
-                            ) : (
-                                <>
+                    {/* Left Column - Details */}
+                    <div className="xl:col-span-2 space-y-6">
+                        
+                        {program.status === 'rejected' && program.rejection_notes && (
+                            <div className="rounded-lg border border-red-200 bg-red-50 p-5">
+                                <div className="flex items-start">
+                                    <Info className="h-5 w-5 text-red-600 mr-3 mt-0.5 shrink-0" />
                                     <div>
-                                        <p className="text-sm text-slate-500">Nama Penggalang</p>
-                                        <p className="font-medium">
-                                            {program.campaignerProfile?.type === 'lembaga' 
-                                                ? program.campaignerProfile.institution_name 
-                                                : program.creator?.name}
+                                        <h4 className="text-red-900 font-semibold mb-1">Program Ditolak</h4>
+                                        <p className="text-sm text-red-700 leading-relaxed">
+                                            <strong>Catatan Penolakan:</strong> {program.rejection_notes}
                                         </p>
                                     </div>
-                                    <div>
-                                        <p className="text-sm text-slate-500">Email Kontak</p>
-                                        <p className="font-medium">{program.creator?.email}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm">
+                            <div className="border-b border-gray-100 bg-gray-50/50 py-4 px-6">
+                                <h3 className="font-semibold text-gray-900">
+                                    Informasi Utama
+                                </h3>
+                            </div>
+                            <div className="p-6">
+                                <div className="mb-6">
+                                    <img 
+                                        src={`/storage/${program.cover_image}`} 
+                                        alt={program.title} 
+                                        className="w-full h-64 sm:h-[400px] object-cover rounded-lg border border-gray-100"
+                                    />
+                                </div>
+                                
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                                    {program.title}
+                                </h2>
+                                <p className="text-gray-500 mb-6 font-mono text-sm tracking-wide">Kode: {program.program_code}</p>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                    <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
+                                        <p className="text-sm font-medium text-gray-500 mb-1 uppercase tracking-wider">Target Donasi</p>
+                                        <p className="font-bold text-2xl text-gray-900 tracking-tight">
+                                            {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
+                                        </p>
                                     </div>
-                                </>
-                            )}
+                                    <div className="bg-blue-50 p-5 rounded-lg border border-blue-100">
+                                        <p className="text-sm font-medium text-blue-600 mb-1 uppercase tracking-wider">Terkumpul</p>
+                                        <p className="font-bold text-2xl text-[#1A56DB] tracking-tight">
+                                            {formatCurrency(program.collected_amount)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-4">Cerita Program</h4>
+                                    <div 
+                                        className="prose prose-sm sm:prose-base max-w-none text-gray-600 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story.id || program.story as unknown as string) }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Column - Sidebar */}
+                    <div className="space-y-6">
+                        {/* Action Card for Verification */}
+                        {program.status === 'pending_verification' && (
+                            <div className="rounded-lg border border-yellow-200 bg-yellow-50 overflow-hidden sticky top-6">
+                                <div className="border-b border-yellow-200/60 bg-yellow-100/50 py-4 px-6">
+                                    <h3 className="font-semibold text-yellow-900 flex items-center">
+                                        <AlertTriangle className="h-4 w-4 mr-2" />
+                                        Aksi Verifikasi
+                                    </h3>
+                                </div>
+                                <div className="p-6 space-y-4">
+                                    <p className="text-sm text-yellow-800 leading-relaxed">
+                                        Program ini menunggu persetujuan Anda sebelum dapat dipublikasikan dan menerima donasi.
+                                    </p>
+                                    <div className="pt-2 space-y-3">
+                                        <Button 
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white shadow-sm" 
+                                            onClick={handleApprove}
+                                        >
+                                            <CheckCircle className="mr-2 h-4 w-4" /> Setujui & Publikasikan
+                                        </Button>
+                                        <Button 
+                                            variant="outline"
+                                            className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                                            onClick={() => setIsRejectModalOpen(true)}
+                                        >
+                                            <XCircle className="mr-2 h-4 w-4" /> Tolak Program
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {program.status === 'published' && (
+                            <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden sticky top-6">
+                                <div className="p-6">
+                                    <Button 
+                                        variant="outline"
+                                        className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                                        onClick={handleCloseProgram}
+                                    >
+                                        <Ban className="mr-2 h-4 w-4" />
+                                        Tutup Program (Manual)
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                            <div className="border-b border-gray-100 bg-gray-50/50 py-4 px-6">
+                                <h3 className="font-semibold text-gray-900">
+                                    Informasi Metadata
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-5">
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Kategori</p>
+                                    <p className="font-medium text-gray-900">{program.category?.name?.id || 'N/A'}</p>
+                                </div>
+                                
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Batas Waktu</p>
+                                    <div className="flex items-center">
+                                        <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                                        <p className="font-medium text-gray-900">
+                                            {program.deadline ? formatDate(program.deadline) : 'Tanpa batas waktu (∞)'}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {program.published_at && (
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Dipublikasikan Pada</p>
+                                        <p className="font-medium text-gray-900">{formatDate(program.published_at)}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                            <div className="border-b border-gray-100 bg-gray-50/50 py-4 px-6">
+                                <h3 className="font-semibold text-gray-900 flex items-center">
+                                    <User className="mr-2 h-4 w-4 text-gray-500" />
+                                    Informasi Pembuat
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-5">
+                                <div>
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Tipe Campaigner</p>
+                                    <p className="font-medium text-gray-900 capitalize">{program.campaigner_type}</p>
+                                </div>
+                                
+                                {program.campaigner_type === 'internal' ? (
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Nama Staff (Internal)</p>
+                                        <p className="font-medium text-gray-900">{program.creator?.name}</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Nama Penggalang</p>
+                                            <p className="font-medium text-gray-900">
+                                                {program.campaignerProfile?.type === 'lembaga' 
+                                                    ? program.campaignerProfile.institution_name 
+                                                    : program.creator?.name}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Email Kontak</p>
+                                            <p className="font-medium text-gray-900">{program.creator?.email}</p>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -299,16 +308,16 @@ export default function ProgramShow({ program }: Props) {
 
             {/* Modal Tolak */}
             <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Tolak Program</DialogTitle>
-                        <DialogDescription>
+                <DialogContent className="sm:max-w-[425px] border-0 shadow-lg p-0 overflow-hidden">
+                    <DialogHeader className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                        <DialogTitle className="text-lg font-semibold text-gray-900">Tolak Program</DialogTitle>
+                        <DialogDescription className="text-sm text-gray-500 mt-1">
                             Berikan alasan penolakan agar campaigner dapat memperbaiki dan mengajukan ulang program ini.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleRejectSubmit}>
-                        <div className="py-4">
-                            <Label htmlFor="rejection_notes" className="mb-2 block">Catatan Penolakan <span className="text-red-500">*</span></Label>
+                        <div className="px-6 py-4">
+                            <Label htmlFor="rejection_notes" className="text-sm font-medium text-gray-700 mb-2 block">Catatan Penolakan <span className="text-red-500">*</span></Label>
                             <Textarea
                                 id="rejection_notes"
                                 value={rejectData.rejection_notes}
@@ -316,12 +325,13 @@ export default function ProgramShow({ program }: Props) {
                                 placeholder="Contoh: Mohon hapus nomor rekening pribadi yang ada di dalam deskripsi cerita."
                                 rows={4}
                                 required
+                                className="border-gray-200 focus-visible:ring-red-500 min-h-[120px]"
                             />
-                            {rejectErrors.rejection_notes && <p className="mt-1 text-sm text-red-500">{rejectErrors.rejection_notes}</p>}
+                            {rejectErrors.rejection_notes && <p className="mt-1.5 text-xs text-red-500">{rejectErrors.rejection_notes}</p>}
                         </div>
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsRejectModalOpen(false)}>Batal</Button>
-                            <Button type="submit" variant="destructive" disabled={rejectProcessing}>Kirim Penolakan</Button>
+                        <DialogFooter className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                            <Button type="button" variant="outline" onClick={() => setIsRejectModalOpen(false)} className="border-gray-200 text-gray-600 hover:bg-gray-100">Batal</Button>
+                            <Button type="submit" variant="destructive" disabled={rejectProcessing} className="bg-red-600 hover:bg-red-700 text-white">Kirim Penolakan</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

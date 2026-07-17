@@ -2,7 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import PublicLayout from '@/layouts/PublicLayout';
+import AppLayout from '@/layouts/app-layout';
 
 export default function Status({ profile }: any) {
     const getStatusInfo = (status: string) => {
@@ -53,10 +53,10 @@ export default function Status({ profile }: any) {
     const statusInfo = getStatusInfo(profile.verification_status);
 
     return (
-        <PublicLayout>
+        <AppLayout breadcrumbs={[{ title: 'Status Verifikasi Campaigner', href: '/campaigner/status' }]}>
             <Head title="Status Verifikasi Campaigner" />
             
-            <div className="container mx-auto px-4 py-12 max-w-2xl min-h-[70vh] flex items-center justify-center">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full min-h-[70vh] items-center justify-center">
                 <Card className={`w-full text-center border ${statusInfo.bgColor}`}>
                     <CardHeader className="flex flex-col items-center">
                         {statusInfo.icon}
@@ -82,18 +82,18 @@ export default function Status({ profile }: any) {
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
                             <Button asChild variant="outline">
-                                <Link href="/">Kembali ke Beranda</Link>
+                                <Link href="/dashboard">Kembali ke Dashboard</Link>
                             </Button>
                             
                             {profile.verification_status === 'verified' && (
-                                <Button asChild className="bg-insani-blue hover:bg-insani-blue/90">
-                                    <Link href="/admin/programs">Mulai Buat Program</Link>
+                                <Button asChild className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
+                                    <Link href="/akun/programs">Mulai Buat Program</Link>
                                 </Button>
                             )}
                         </div>
                     </CardContent>
                 </Card>
             </div>
-        </PublicLayout>
+        </AppLayout>
     );
 }

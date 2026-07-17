@@ -1,12 +1,13 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, AlertCircle, Info, Calendar, DollarSign, Target } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import DOMPurify from 'dompurify';
 
 interface Program {
     id: number;
@@ -50,13 +51,12 @@ export default function AkunProgramShow({ program }: Props) {
     };
 
     return (
-        <PublicLayout>
-            <Head title={`Detail Program - ${program.title}`} />
+        <AppLayout breadcrumbs={[{ title: 'Detail Program', href: `/akun/programs/${program.id}` }]}>
+            <Head title={`Detail Program: ${program.title.id || program.title}`} />
 
-            <div className="bg-slate-50 py-12 min-h-screen">
-                <div className="container mx-auto px-4 max-w-5xl">
-                    <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
+                <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
                             <Button variant="ghost" asChild className="mb-4 -ml-4">
                                 <Link href="/akun/programs">
                                     <ArrowLeft className="mr-2 h-4 w-4" />
@@ -69,13 +69,22 @@ export default function AkunProgramShow({ program }: Props) {
                             <p className="text-slate-500 mt-1 font-mono">{program.program_code}</p>
                         </div>
                         
-                        {['draft', 'rejected'].includes(program.status) && (
-                            <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                                <Link href={`/akun/programs/${program.id}/edit`}>
-                                    Edit Program
-                                </Link>
-                            </Button>
-                        )}
+                        <div className="flex gap-2">
+                            {['published', 'completed'].includes(program.status) && (
+                                <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
+                                    <Link href={`/akun/programs/${program.id}/updates`}>
+                                        Update Kabar
+                                    </Link>
+                                </Button>
+                            )}
+                            {['draft', 'rejected'].includes(program.status) && (
+                                <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                                    <Link href={`/akun/programs/${program.id}/edit`}>
+                                        Edit Program
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
                     </div>
 
                     {program.status === 'rejected' && program.rejection_notes && (
@@ -113,9 +122,10 @@ export default function AkunProgramShow({ program }: Props) {
                                     </h2>
                                     <Badge variant="outline" className="mb-6">{program.category?.name?.id || 'Kategori'}</Badge>
                                     
-                                    <div className="prose max-w-none text-slate-600 whitespace-pre-wrap">
-                                        {program.story}
-                                    </div>
+                                    <div 
+                                        className="prose max-w-none text-slate-600"
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story.id || program.story as unknown as string) }}
+                                    />
                                 </CardContent>
                             </Card>
                         </div>
@@ -188,7 +198,6 @@ export default function AkunProgramShow({ program }: Props) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </PublicLayout>
+        </AppLayout>
     );
 }

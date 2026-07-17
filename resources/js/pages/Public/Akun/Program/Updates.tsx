@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,8 +9,47 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale/id';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Link } from '@inertiajs/react';
+import RichTextEditor from '@/components/rich-text-editor';
+import DOMPurify from 'dompurify';
+
+const UpdateCard = ({ update }: { update: any }) => {
+    const [expanded, setExpanded] = useState(false);
+    return (
+        <Card>
+            <CardContent className="p-6">
+                <div className="flex justify-between items-start gap-4">
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg mb-1 truncate">{update.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                            {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: id })}
+                            {!update.is_published && ' • (Draft)'}
+                        </p>
+                        <div className="relative">
+                            <div 
+                                className={`prose prose-sm max-w-none text-muted-foreground break-words overflow-hidden transition-all duration-300 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md ${expanded ? '' : 'max-h-40'}`}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
+                            />
+                            {!expanded && (
+                                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                            )}
+                        </div>
+                        <div className="mt-2">
+                            <button 
+                                onClick={() => setExpanded(!expanded)} 
+                                className="text-insani-blue font-medium text-sm hover:underline focus:outline-none"
+                            >
+                                {expanded ? 'Tutup' : 'Baca Selengkapnya'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
 
 interface Update {
     id: number;
@@ -28,14 +67,13 @@ interface Program {
 
 interface Props {
     program: Program;
-    updates: Update[];
+    updates: any; // Paginated response
 }
 
 export default function Updates({ program, updates }: Props) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingId, setEditingId] = useState<number | null>(null);
 
-    const { data, setData, post, put, delete: destroy, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         content: '',
         is_published: true,
@@ -43,44 +81,21 @@ export default function Updates({ program, updates }: Props) {
 
     const openCreateDialog = () => {
         reset();
-        setEditingId(null);
-        setIsDialogOpen(true);
-    };
-
-    const openEditDialog = (update: Update) => {
-        setData({
-            title: update.title,
-            content: update.content,
-            is_published: update.is_published,
-        });
-        setEditingId(update.id);
         setIsDialogOpen(true);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (editingId) {
-            put(route('akun.programs.updates.update', { program: program.id, update: editingId }), {
-                onSuccess: () => setIsDialogOpen(false),
-            });
-        } else {
-            post(route('akun.programs.updates.store', program.id), {
-                onSuccess: () => setIsDialogOpen(false),
-            });
-        }
-    };
-
-    const handleDelete = (updateId: number) => {
-        if (confirm('Yakin ingin menghapus update ini?')) {
-            destroy(route('akun.programs.updates.destroy', { program: program.id, update: updateId }));
-        }
+        post(`/akun/programs/${program.id}/updates`, {
+            onSuccess: () => setIsDialogOpen(false),
+        });
     };
 
     return (
-        <PublicLayout>
-            <Head title={`Kabar Terbaru - ${program.title.id}`} />
+        <AppLayout breadcrumbs={[{ title: 'Kabar Terbaru', href: `/akun/programs/${program.id}/updates` }]}>
+            <Head title={`Kabar Terbaru: ${program.title.id}`} />
             
-            <div className="container mx-auto py-8">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 mx-auto w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-2xl font-bold">Kabar Terbaru</h1>
@@ -92,44 +107,44 @@ export default function Updates({ program, updates }: Props) {
                 </div>
 
                 <div className="space-y-4">
-                    {updates.length === 0 ? (
+                    {(!updates.data || updates.data.length === 0) ? (
                         <div className="text-center py-8 text-muted-foreground border rounded-lg">
                             Belum ada kabar terbaru untuk program ini.
                         </div>
                     ) : (
-                        updates.map((update) => (
-                            <Card key={update.id}>
-                                <CardContent className="p-6">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h3 className="font-bold text-lg mb-1">{update.title}</h3>
-                                            <p className="text-sm text-muted-foreground mb-4">
-                                                {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: id })}
-                                                {!update.is_published && ' • (Draft)'}
-                                            </p>
-                                            <div className="prose prose-sm max-w-none text-muted-foreground whitespace-pre-wrap">
-                                                {update.content}
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 ml-4">
-                                            <Button variant="outline" size="sm" onClick={() => openEditDialog(update)}>
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <Button variant="destructive" size="sm" onClick={() => handleDelete(update.id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                        <>
+                            {updates.data.map((update: any) => (
+                                <UpdateCard key={update.id} update={update} />
+                            ))}
+
+                            {updates.last_page > 1 && (
+                                <div className="flex justify-center mt-8">
+                                    <div className="flex space-x-2">
+                                        {updates.links.map((link: any, idx: number) => (
+                                            <Link
+                                                key={idx}
+                                                href={link.url || '#'}
+                                                className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
+                                                    link.active
+                                                        ? 'bg-insani-blue text-white shadow-md'
+                                                        : link.url 
+                                                            ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-insani-blue' 
+                                                            : 'bg-transparent text-slate-400 cursor-not-allowed'
+                                                }`}
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        ))}
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle>{editingId ? 'Edit Kabar Terbaru' : 'Tambah Kabar Terbaru'}</DialogTitle>
+                            <DialogTitle>Tambah Kabar Terbaru</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -145,11 +160,9 @@ export default function Updates({ program, updates }: Props) {
                             
                             <div>
                                 <Label htmlFor="content">Isi Konten</Label>
-                                <Textarea
-                                    id="content"
-                                    rows={5}
+                                <RichTextEditor
                                     value={data.content}
-                                    onChange={(e) => setData('content', e.target.value)}
+                                    onChange={(value) => setData('content', value)}
                                     placeholder="Ceritakan detail kabar terbaru..."
                                 />
                                 {errors.content && <p className="text-sm text-destructive mt-1">{errors.content}</p>}
@@ -173,6 +186,6 @@ export default function Updates({ program, updates }: Props) {
                     </DialogContent>
                 </Dialog>
             </div>
-        </PublicLayout>
+        </AppLayout>
     );
 }

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
+import RichTextEditor from '@/components/rich-text-editor';
 
 interface Category {
     id: number;
@@ -44,12 +45,11 @@ export default function AkunProgramCreate({ categories }: Props) {
     };
 
     return (
-        <PublicLayout>
+        <AppLayout breadcrumbs={[{ title: 'Buat Program', href: '/akun/programs/create' }]}>
             <Head title="Buat Program Galang Dana" />
 
-            <div className="bg-slate-50 py-12 min-h-screen">
-                <div className="container mx-auto px-4 max-w-4xl">
-                    <div className="mb-6">
+            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
+                <div>
                         <Button variant="ghost" asChild className="mb-4">
                             <Link href="/akun/programs">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -153,13 +153,10 @@ export default function AkunProgramCreate({ categories }: Props) {
 
                                     <div className="md:col-span-2">
                                         <Label htmlFor="story" className="mb-2 block">Cerita & Latar Belakang <span className="text-red-500">*</span></Label>
-                                        <Textarea
-                                            id="story"
+                                        <RichTextEditor
                                             value={data.story}
-                                            onChange={e => setData('story', e.target.value)}
+                                            onChange={value => setData('story', value)}
                                             placeholder="Ceritakan mengapa Anda menggalang dana untuk program ini secara detail..."
-                                            rows={10}
-                                            required
                                         />
                                         {errors.story && <p className="text-red-500 text-sm mt-1">{errors.story}</p>}
                                     </div>
@@ -175,7 +172,6 @@ export default function AkunProgramCreate({ categories }: Props) {
                         </CardContent>
                     </Card>
                 </div>
-            </div>
-        </PublicLayout>
+        </AppLayout>
     );
 }

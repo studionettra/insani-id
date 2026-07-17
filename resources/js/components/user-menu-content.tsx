@@ -46,20 +46,7 @@ export function UserMenuContent({ user }: Props) {
                     </Link>
                 </DropdownMenuItem>
                 
-                {auth?.permissions?.includes('campaigner.verified') && (
-                    <DropdownMenuItem asChild>
-                        <Link
-                            className="block w-full cursor-pointer"
-                            href="/akun/programs"
-                            prefetch
-                            onClick={cleanup}
-                        >
-                            <LayoutGrid className="mr-2" />
-                            Program Saya
-                        </Link>
-                    </DropdownMenuItem>
-                )}
-                
+
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"
