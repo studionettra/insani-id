@@ -4,7 +4,7 @@ import { Head, usePage } from '@inertiajs/react';
 export default function SeoHead({ 
     title, 
     description = 'Insani Indonesia - Lembaga filantropi terpercaya untuk berbagi dan memberdayakan sesama.', 
-    image = '/images/logo-landscape-color.png',
+    image = '/images/logo/logo-landscape-color.png',
 }) {
     const { supportedLocales, locale } = usePage().props;
     const fullTitle = title ? `${title} - Insani Indonesia` : 'Insani Indonesia';

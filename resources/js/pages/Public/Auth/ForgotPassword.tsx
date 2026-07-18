@@ -23,7 +23,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo-landscape-color.png" 
+                        src="/images/logo/logo-landscape-color.png" 
                         alt="Logo Insani" 
                         className="h-30 w-auto mb-3" 
                     />

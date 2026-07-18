@@ -59,35 +59,20 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                 </div>
 
                 <div className="container mx-auto px-4 max-w-6xl py-12">
-                    {/* Filters & Search */}
-                    <div className="flex flex-col md:flex-row gap-4 mb-10 justify-between items-center">
-                        <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto hide-scrollbar">
-                            <Button 
-                                variant={!filters.category ? 'default' : 'outline'}
-                                onClick={() => handleFilterChange('category', '')}
-                                className={!filters.category ? 'bg-insani-blue' : ''}
-                            >
-                                Semua
-                            </Button>
-                            {categories.map(cat => (
-                                <Button 
-                                    key={cat.id}
-                                    variant={filters.category == cat.id.toString() ? 'default' : 'outline'}
-                                    onClick={() => handleFilterChange('category', cat.id.toString())}
-                                    className={filters.category == cat.id.toString() ? 'bg-insani-blue' : 'whitespace-nowrap'}
-                                >
-                                    {cat.name.id || cat.name}
-                                </Button>
-                            ))}
-                        </div>
+                    {/* Filters & Search Modern UI */}
+                    <div className="flex flex-col gap-6 mb-12 bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 items-center justify-center relative overflow-hidden">
+                        
+                        {/* Subtle Background Accent */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-insani-blue/20 via-insani-blue to-insani-blue/20"></div>
 
-                        <div className="relative w-full md:w-auto flex space-x-2">
-                            <div className="relative flex-1 md:w-64">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        {/* Search & Sort Centered */}
+                        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-3xl justify-center z-10">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                                 <Input 
                                     type="text"
-                                    placeholder="Cari program..."
-                                    className="pl-10 w-full"
+                                    placeholder="Cari program donasi..."
+                                    className="pl-12 h-12 w-full bg-slate-50/80 border-slate-200 focus:bg-white focus:border-insani-blue focus:ring-insani-blue/20 rounded-xl transition-all text-base shadow-sm"
                                     defaultValue={filters.search || ''}
                                     onKeyDown={e => {
                                         if (e.key === 'Enter') {
@@ -97,7 +82,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                 />
                             </div>
                             <select
-                                className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-insani-blue dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                className="h-12 rounded-xl border border-slate-200 bg-slate-50/80 px-5 py-2.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-insani-blue/20 focus:bg-white focus:border-insani-blue transition-all cursor-pointer min-w-[180px] shadow-sm"
                                 value={filters.sort || 'terbaru'}
                                 onChange={(e) => handleFilterChange('sort', e.target.value)}
                             >
@@ -105,6 +90,36 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                 <option value="terlama">Terlama</option>
                                 <option value="terbanyak">Terkumpul Terbanyak</option>
                             </select>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="w-full max-w-4xl h-px bg-slate-100 my-1 z-10"></div>
+
+                        {/* Categories Tabs (Wrap & Centered) */}
+                        <div className="w-full flex flex-wrap justify-center gap-3 z-10">
+                            <button 
+                                onClick={() => handleFilterChange('category', '')}
+                                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    !filters.category 
+                                        ? 'bg-insani-blue text-white shadow-md shadow-insani-blue/30 scale-100' 
+                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
+                                }`}
+                            >
+                                Semua
+                            </button>
+                            {categories.map(cat => (
+                                <button 
+                                    key={cat.id}
+                                    onClick={() => handleFilterChange('category', cat.id.toString())}
+                                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                        filters.category == cat.id.toString() 
+                                            ? 'bg-insani-blue text-white shadow-md shadow-insani-blue/30 scale-100' 
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
+                                    }`}
+                                >
+                                    {cat.name.id || cat.name}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
