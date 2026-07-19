@@ -20,11 +20,10 @@ export function formatCurrency(value: number): string {
     }).format(value);
 }
 
+import { format } from 'date-fns';
+import { id as dateId } from 'date-fns/locale/id';
+
 export function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
+    return format(new Date(dateString), 'd MMMM yyyy', { locale: dateId });
 }
 export const formatRupiah = formatCurrency;

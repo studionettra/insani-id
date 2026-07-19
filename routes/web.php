@@ -26,6 +26,24 @@ Route::get('/berita/{slug}', [\App\Http\Controllers\Public\BlogController::class
 Route::get('/kontak', [\App\Http\Controllers\Public\ContactController::class, 'create'])->name('contact.create');
 Route::post('/kontak', [\App\Http\Controllers\Public\ContactController::class, 'store'])->name('contact.store');
 
+// Smart Redirect for "Galang Dana" / Create Program
+Route::get('/buat-program', function () {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+    
+    $user = auth()->user();
+    if (!$user->campaignerProfile) {
+        return redirect()->route('campaigner.register');
+    }
+    
+    if ($user->campaignerProfile->verification_status !== 'verified') {
+        return redirect()->route('campaigner.status');
+    }
+    
+    return redirect()->route('akun.programs.create');
+})->name('buat-program');
+
 // Webhooks
 Route::post('/webhooks/xendit', [\App\Http\Controllers\Webhook\XenditWebhookController::class, 'handle'])
     ->middleware('verify.xendit-callback-token')
@@ -36,6 +54,14 @@ Route::post('/webhooks/wordpress', [\App\Http\Controllers\Webhook\WordPressWebho
 
 Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+
+    // Custom GET logout to force a hard page navigation and wipe SPA cache
+    Route::get('/logout', function () {
+        auth()->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/');
+    });
 
     // Campaigner Registration
     Route::get('/campaigner/register', [CampaignerRegistrationController::class, 'create'])->name('campaigner.register');

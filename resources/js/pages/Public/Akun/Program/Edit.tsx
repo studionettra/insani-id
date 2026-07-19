@@ -148,7 +148,9 @@ export default function AkunProgramEdit({ categories, program }: Props) {
                                             id="deadline"
                                             type="date"
                                             value={data.deadline}
+                                            min={new Date().toISOString().split('T')[0]}
                                             onChange={e => setData('deadline', e.target.value)}
+                                            onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
                                         />
                                         {errors.deadline && <p className="text-red-500 text-sm mt-1">{errors.deadline}</p>}
                                     </div>

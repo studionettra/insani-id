@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import AppLayout from '@/layouts/app-layout';
+
 import campaigner from '@/routes/campaigner';
 
 export default function Create() {
@@ -32,7 +32,7 @@ export default function Create() {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Pendaftaran Campaigner', href: '/campaigner/register' }]}>
+        <>
             <Head title="Pendaftaran Campaigner" />
             
             <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
@@ -163,6 +163,6 @@ export default function Create() {
                     </form>
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }

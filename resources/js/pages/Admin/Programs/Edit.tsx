@@ -155,7 +155,9 @@ export default function ProgramEdit({ categories, program }: Props) {
                                     id="deadline"
                                     type="date"
                                     value={data.deadline}
+                                    min={new Date().toISOString().split('T')[0]}
                                     onChange={(e) => setData('deadline', e.target.value)}
+                                    onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
                                     className="w-full border-gray-200 focus-visible:ring-[#1A56DB]"
                                 />
                                 {errors.deadline && <p className="mt-1 text-xs text-red-500">{errors.deadline}</p>}

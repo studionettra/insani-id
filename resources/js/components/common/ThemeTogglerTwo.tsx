@@ -1,7 +1,11 @@
-import { useTheme } from "../../context/ThemeContext";
+import { useAppearance } from "@/hooks/use-appearance";
 
 export default function ThemeTogglerTwo() {
-  const { toggleTheme } = useTheme();
+  const { appearance, updateAppearance } = useAppearance();
+
+  const toggleTheme = () => {
+    updateAppearance(appearance === "dark" ? "light" : "dark");
+  };
   return (
     <button
       onClick={toggleTheme}

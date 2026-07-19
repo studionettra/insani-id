@@ -3,7 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Home, Heart, PlusCircle, User } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { ThemeToggle } from '@/components/theme-toggle';
-export default function PublicLayout({ children, title }) {
+export default function PublicLayout({ children, title, hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
     const { locale } = usePage().props;
     const { url } = usePage();
     const isRtl = locale === 'ar';
@@ -17,6 +17,7 @@ export default function PublicLayout({ children, title }) {
             </Head>
 
             {/* Header (Desktop & Mobile) */}
+            {!hideTopNav && (
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
@@ -60,6 +61,7 @@ export default function PublicLayout({ children, title }) {
                     </div>
                 </div>
             </header>
+            )}
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col w-full mx-auto pb-20 md:pb-0">
@@ -67,6 +69,7 @@ export default function PublicLayout({ children, title }) {
             </main>
 
             {/* Footer */}
+            {!hideFooter && (
             <footer className="relative bg-insani-darkblue text-white mt-auto overflow-hidden">
                 {/* Background ambient glow */}
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-insani-blue/50 to-transparent"></div>
@@ -194,8 +197,10 @@ export default function PublicLayout({ children, title }) {
                     </div>
                 </div>
             </footer>
+            )}
 
             {/* Bottom Navigation (Mobile Only) */}
+            {!hideMobileNav && (
             <nav className="md:hidden fixed bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-gray-200/60 z-50 flex justify-around py-2 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
                 <Link href="/" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/') ? 'bg-brand-50' : 'bg-transparent'}`}>
@@ -222,6 +227,7 @@ export default function PublicLayout({ children, title }) {
                     <span className="text-[10px] font-medium mt-0.5">Akun</span>
                 </Link>
             </nav>
+            )}
         </div>
     );
 }

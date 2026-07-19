@@ -2,7 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import AppLayout from '@/layouts/app-layout';
+
 
 export default function Status({ profile }: any) {
     const getStatusInfo = (status: string) => {
@@ -53,7 +53,7 @@ export default function Status({ profile }: any) {
     const statusInfo = getStatusInfo(profile.verification_status);
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Status Verifikasi Campaigner', href: '/campaigner/status' }]}>
+        <>
             <Head title="Status Verifikasi Campaigner" />
             
             <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full min-h-[70vh] items-center justify-center">
@@ -94,6 +94,6 @@ export default function Status({ profile }: any) {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </>
     );
 }

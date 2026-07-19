@@ -1,7 +1,11 @@
-import { useTheme } from "../../context/ThemeContext";
+import { useAppearance } from "@/hooks/use-appearance";
 
 export const ThemeToggleButton: React.FC = () => {
-  const { toggleTheme } = useTheme();
+  const { appearance, updateAppearance } = useAppearance();
+
+  const toggleTheme = () => {
+    updateAppearance(appearance === "dark" ? "light" : "dark");
+  };
 
   return (
     <button

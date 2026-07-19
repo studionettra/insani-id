@@ -138,7 +138,9 @@ export default function ProgramCreate({ categories }: Props) {
                                     id="deadline"
                                     type="date"
                                     value={data.deadline}
+                                    min={new Date().toISOString().split('T')[0]}
                                     onChange={(e) => setData('deadline', e.target.value)}
+                                    onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
                                     className="w-full border-gray-200 focus-visible:ring-[#1A56DB]"
                                 />
                                 <p className="text-[11px] text-gray-500">Kosongkan jika program tidak memiliki batas waktu (infinity).</p>

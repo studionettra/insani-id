@@ -5,7 +5,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import AppLayout from '@/layouts/app-layout';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-
+import TailAdminLayout from '@/layouts/TailAdmin/AppLayout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -13,14 +13,18 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
+            case name.startsWith('Public/Akun/') || name.startsWith('Public/CampaignerRegistration/'):
+                return TailAdminLayout;
             case name === 'welcome' || name.startsWith('Public/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            case name === 'dashboard' || name.startsWith('Admin/') || name.startsWith('Akun/'):
+                return TailAdminLayout;
             case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
+                return [TailAdminLayout, SettingsLayout];
             default:
-                return AppLayout;
+                return TailAdminLayout;
         }
     },
     strictMode: true,

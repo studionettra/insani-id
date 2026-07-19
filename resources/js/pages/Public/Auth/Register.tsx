@@ -42,12 +42,12 @@ export default function Register({ passwordRules }: Props) {
             <Head title="Daftar - Insani Indonesia" />
 
             {/* Kiri: Form Register */}
-            <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
+            <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
                         src="/images/logo/logo-landscape-color.png" 
                         alt="Logo Insani" 
-                        className="h-30 w-auto mb-3" 
+                        className="h-24 w-auto mb-3" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">

@@ -1,10 +1,9 @@
-import { SidebarProvider, useSidebar } from "../context/SidebarContext";
-import { Outlet } from "react-router";
+import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
 
-const LayoutContent: React.FC = () => {
+const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
@@ -20,17 +19,17 @@ const LayoutContent: React.FC = () => {
       >
         <AppHeader />
         <div className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-          <Outlet />
+          {children}
         </div>
       </div>
     </div>
   );
 };
 
-const AppLayout: React.FC = () => {
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
-      <LayoutContent />
+      <LayoutContent>{children}</LayoutContent>
     </SidebarProvider>
   );
 };

@@ -25,15 +25,15 @@ export default function Login({ status }: { status?: string }) {
             <Head title="Login - Insani Indonesia" />
 
             {/* Kiri: Form Login */}
-            <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
+            <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32 lg:py-0">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
                         src="/images/logo/logo-landscape-color.png" 
                         alt="Logo Insani" 
-                        className="h-30 w-auto mb-3" 
+                        className="h-24 w-auto mb-3" 
                     />
                     
-                    <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
+                    <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
                         Selamat Datang
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
