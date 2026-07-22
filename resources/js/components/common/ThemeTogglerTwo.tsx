@@ -6,6 +6,7 @@ export default function ThemeTogglerTwo() {
   const toggleTheme = () => {
     updateAppearance(appearance === "dark" ? "light" : "dark");
   };
+
   return (
     <button
       onClick={toggleTheme}

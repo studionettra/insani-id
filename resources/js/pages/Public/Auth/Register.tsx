@@ -1,10 +1,10 @@
 import { useForm, Head, Link } from '@inertiajs/react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { ArrowRight, Lock, Mail, User, LoaderCircle, Check, X } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Turnstile } from '@marsidev/react-turnstile';
 
 type Props = {
     passwordRules?: string;

@@ -57,6 +57,7 @@
         "@radix-ui/react-tooltip": "^1.1.8",
         "@react-jvectormap/core": "^1.0.4",
         "@react-jvectormap/world": "^1.1.2",
+        "@tailwindcss/typography": "^0.5.20",
         "@tailwindcss/vite": "^4.1.11",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",

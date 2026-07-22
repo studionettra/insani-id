@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Download, TrendingUp, RefreshCcw } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Download, TrendingUp, RefreshCcw } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
 interface Props {
@@ -21,8 +21,14 @@ export default function ReportIndex({ stats }: Props) {
     const handleExportDonations = () => {
         let url = route('admin.reports.donations.export');
         const params = new URLSearchParams();
-        if (donationsDates.start) params.append('start_date', donationsDates.start);
-        if (donationsDates.end) params.append('end_date', donationsDates.end);
+
+        if (donationsDates.start) {
+params.append('start_date', donationsDates.start);
+}
+
+        if (donationsDates.end) {
+params.append('end_date', donationsDates.end);
+}
         
         if (params.toString()) {
             url += '?' + params.toString();
@@ -34,8 +40,14 @@ export default function ReportIndex({ stats }: Props) {
     const handleExportDisbursements = () => {
         let url = route('admin.reports.disbursements.export');
         const params = new URLSearchParams();
-        if (disbursementsDates.start) params.append('start_date', disbursementsDates.start);
-        if (disbursementsDates.end) params.append('end_date', disbursementsDates.end);
+
+        if (disbursementsDates.start) {
+params.append('start_date', disbursementsDates.start);
+}
+
+        if (disbursementsDates.end) {
+params.append('end_date', disbursementsDates.end);
+}
         
         if (params.toString()) {
             url += '?' + params.toString();

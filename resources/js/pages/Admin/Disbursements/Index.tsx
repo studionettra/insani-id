@@ -1,11 +1,11 @@
-import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import admin from '@/routes/admin';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { formatRupiah, formatDate } from '@/lib/utils';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, Download, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { formatRupiah, formatDate } from '@/lib/utils';
+import admin from '@/routes/admin';
 
 export default function Index({ disbursements, filters }: any) {
     const handleTabChange = (value: string) => {

@@ -1,7 +1,7 @@
-import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
 import { ArrowRight } from 'lucide-react';
+import React from 'react';
+import PublicLayout from '@/layouts/PublicLayout';
 
 export default function FocusProgramIndex({ pillars }: any) {
     const { locale } = usePage().props as any;

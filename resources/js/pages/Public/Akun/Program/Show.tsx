@@ -1,13 +1,13 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, AlertCircle, Info, Calendar, DollarSign, Target } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import DOMPurify from 'dompurify';
+import { ArrowLeft, AlertCircle, Info, Calendar, DollarSign, Target } from 'lucide-react';
+import React from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppLayout from '@/layouts/app-layout';
+import { formatCurrency, formatDate } from '@/lib/utils';
 
 interface Program {
     id: number;
@@ -123,7 +123,7 @@ export default function AkunProgramShow({ program }: Props) {
                                     <Badge variant="outline" className="mb-6">{program.category?.name?.id || 'Kategori'}</Badge>
                                     
                                     <div 
-                                        className="prose max-w-none text-slate-600"
+                                        className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-justify prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto text-left"
                                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story.id || program.story as unknown as string) }}
                                     />
                                 </CardContent>

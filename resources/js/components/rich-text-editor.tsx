@@ -25,7 +25,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
         input.onchange = async () => {
             const file = input.files ? input.files[0] : null;
-            if (!file) return;
+
+            if (!file) {
+return;
+}
 
             const formData = new FormData();
             formData.append('image', file);
@@ -48,8 +51,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 
                 // Get quill instance and insert the image
                 const quill = quillRef.current?.getEditor();
+
                 if (quill) {
                     const range = quill.getSelection(true);
+
                     if (range) {
                         quill.insertEmbed(range.index, 'image', url);
                         quill.setSelection(range.index + 1, 0);

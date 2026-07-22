@@ -45,13 +45,17 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
 
   const updateSelection = (newSelected: string[]) => {
-    if (!isControlled) setInternalSelected(newSelected);
+    if (!isControlled) {
+setInternalSelected(newSelected);
+}
+
     onChange?.(newSelected);
   };
 
@@ -74,9 +78,12 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (disabled) return;
+    if (disabled) {
+return;
+}
 
     e.preventDefault();
+
     switch (e.key) {
       case "Enter":
         if (!isOpen) {
@@ -84,6 +91,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         } else if (focusedIndex >= 0) {
           handleSelect(options[focusedIndex].value);
         }
+
         break;
       case "Escape":
         setIsOpen(false);
@@ -94,11 +102,13 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         } else {
           setFocusedIndex((prev) => (prev < options.length - 1 ? prev + 1 : 0));
         }
+
         break;
       case "ArrowUp":
         if (isOpen) {
           setFocusedIndex((prev) => (prev > 0 ? prev - 1 : options.length - 1));
         }
+
         break;
     }
   };
@@ -137,6 +147,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                   selectedOptions.map((value) => {
                     const text =
                       options.find((opt) => opt.value === value)?.text || value;
+
                     return (
                       <div
                         key={value}
@@ -147,7 +158,10 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!disabled) removeOption(value);
+
+                            if (!disabled) {
+removeOption(value);
+}
                           }}
                           disabled={disabled}
                           className="pl-2 text-gray-500 cursor-pointer group-hover:text-gray-400 dark:text-gray-400 disabled:cursor-not-allowed"

@@ -1,9 +1,9 @@
-import Chart from "react-apexcharts";
-import { ApexOptions } from "apexcharts";
+import type { ApexOptions } from "apexcharts";
 import { useState } from "react";
+import Chart from "react-apexcharts";
+import { MoreDotIcon } from "../../icons";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../icons";
 
 export default function MonthlyTarget() {
   const series = [75.55];
@@ -63,6 +63,7 @@ export default function MonthlyTarget() {
   function closeDropdown() {
     setIsOpen(false);
   }
+
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]">
       <div className="px-5 pt-5 bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6">

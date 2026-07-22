@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, getYouTubeEmbedUrl } from '@/lib/utils';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const [expanded, setExpanded] = useState(false);
@@ -24,7 +24,7 @@ const UpdateCard = ({ update }: { update: any }) => {
             </div>
             <h3 className="font-bold text-lg text-slate-800 mb-3">{update.title}</h3>
             <div className="relative">
-                <div 
+                <div
                     className={`text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden transition-all duration-300 ${expanded ? '' : 'max-h-40'}`}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
                 />
@@ -33,8 +33,8 @@ const UpdateCard = ({ update }: { update: any }) => {
                 )}
             </div>
             <div className="mt-2 text-center">
-                <button 
-                    onClick={() => setExpanded(!expanded)} 
+                <button
+                    onClick={() => setExpanded(!expanded)}
                     className="text-insani-blue font-medium text-sm hover:underline focus:outline-none"
                 >
                     {expanded ? 'Tutup' : 'Baca Selengkapnya'}
@@ -43,6 +43,7 @@ const UpdateCard = ({ update }: { update: any }) => {
         </div>
     );
 };
+
 
 interface Program {
     id: number;
@@ -92,14 +93,14 @@ export default function ProgramShow({ program, auth }: Props) {
         });
     };
 
-    const progress = program.target_amount 
+    const progress = program.target_amount
         ? Math.min(100, Math.round((program.collected_amount / parseFloat(program.target_amount)) * 100))
         : null;
 
-    const campaignerName = program.campaigner_type === 'internal' 
+    const campaignerName = program.campaigner_type === 'internal'
         ? 'Insani Indonesia (Official)'
-        : (program.campaignerProfile?.type === 'lembaga' 
-            ? program.campaignerProfile.institution_name 
+        : (program.campaignerProfile?.type === 'lembaga'
+            ? program.campaignerProfile.institution_name
             : program.creator?.name);
 
     const handleShare = () => {
@@ -150,8 +151,8 @@ export default function ProgramShow({ program, auth }: Props) {
                             </div>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-2.5 mb-2 overflow-hidden">
-                            <div 
-                                className="bg-insani-blue h-2.5 rounded-full transition-all duration-1000 ease-out" 
+                            <div
+                                className="bg-insani-blue h-2.5 rounded-full transition-all duration-1000 ease-out"
                                 style={{ width: `${progress}%` }}
                             ></div>
                         </div>
@@ -199,7 +200,7 @@ export default function ProgramShow({ program, auth }: Props) {
 
             <div className="bg-slate-50 py-0 lg:py-12">
                 <div className="container mx-auto px-0 lg:px-4 max-w-6xl">
-                    
+
                     {/* Breadcrumbs */}
                     <div className="hidden lg:flex items-center text-sm text-slate-500 mb-6">
                         <Link href="/" className="hover:text-insani-blue transition-colors">Beranda</Link>
@@ -212,36 +213,39 @@ export default function ProgramShow({ program, auth }: Props) {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        
+
                         {/* Main Content (Left) */}
                         <div className="lg:col-span-2 space-y-0 lg:space-y-4">
                             {/* Image/Video Gallery */}
                             <div className="rounded-none lg:rounded-2xl overflow-hidden shadow-sm bg-white relative">
                                 {/* Mobile Back Button */}
-                                <Link 
-                                    href="/program" 
+                                <Link
+                                    href="/program"
                                     className="lg:hidden absolute top-4 left-4 z-10 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
                                 >
                                     <ArrowLeft className="w-5 h-5" />
                                 </Link>
-                                {program.video_url ? (
-                                    <div className="aspect-video w-full bg-slate-900 relative">
-                                        <iframe 
-                                            className="absolute inset-0 w-full h-full"
-                                            src={program.video_url.replace('watch?v=', 'embed/')} 
-                                            title="YouTube video player" 
-                                            frameBorder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                            allowFullScreen
-                                        ></iframe>
-                                    </div>
-                                ) : (
-                                    <img 
-                                        src={`/storage/${program.cover_image}`} 
-                                        alt={program.title as string} 
-                                        className="w-full h-auto aspect-video object-cover"
-                                    />
-                                )}
+                                {(() => {
+                                    const embedUrl = getYouTubeEmbedUrl(program.video_url);
+
+                                    return embedUrl ? (
+                                        <div className="aspect-video w-full bg-slate-900 relative">
+                                            <iframe 
+                                                className="absolute inset-0 w-full h-full"
+                                                src={embedUrl}
+                                                title="YouTube video player"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        </div>
+                                    ) : (
+                                        <img 
+                                            src={`/storage/${program.cover_image}`} 
+                                            alt={program.title as string} 
+                                            className="w-full h-auto aspect-video object-cover"
+                                        />
+                                    );
+                                })()}
                             </div>
 
                             {/* Title & Info */}
@@ -262,19 +266,19 @@ export default function ProgramShow({ program, auth }: Props) {
                                 <CardContent className="p-4 md:p-6 md:pt-4">
                                     {/* Tabs Navigation */}
                                     <div className="flex border-b border-slate-200 mb-6 overflow-x-auto hide-scrollbar">
-                                        <button 
+                                        <button
                                             onClick={() => setActiveTab('cerita')}
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'cerita' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
                                             Cerita
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => setActiveTab('kabar')}
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'kabar' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
                                             Kabar <Badge variant="secondary" className="ml-2 text-xs">{program.updates?.length || 0}</Badge>
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => setActiveTab('donatur')}
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'donatur' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
@@ -289,9 +293,9 @@ export default function ProgramShow({ program, auth }: Props) {
                                                 <Calendar className="w-4 h-4 text-slate-400" />
                                                 <span>Program diterbitkan pada <span className="font-medium text-slate-700">{formatDate(program.published_at)}</span></span>
                                             </div>
-                                            
-                                            <div 
-                                                className="prose prose-slate max-w-none text-slate-600 prose-p:leading-relaxed prose-a:text-insani-blue prose-headings:text-slate-800 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden"
+
+                                            <div
+                                                className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-justify prose-a:text-insani-blue prose-headings:text-slate-800 prose-strong:text-slate-800 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-slate-400 break-words overflow-hidden text-left"
                                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story) }}
                                             />
                                         </div>
@@ -311,8 +315,8 @@ export default function ProgramShow({ program, auth }: Props) {
                                                     ))}
                                                     {program.updates.length > visibleUpdatesCount && (
                                                         <div className="text-center mt-6">
-                                                            <Button 
-                                                                variant="outline" 
+                                                            <Button
+                                                                variant="outline"
                                                                 onClick={() => setVisibleUpdatesCount(prev => prev + 5)}
                                                                 className="border-insani-blue text-insani-blue hover:bg-insani-blue/5"
                                                             >
@@ -337,8 +341,8 @@ export default function ProgramShow({ program, auth }: Props) {
                                                 <form onSubmit={submitComment} className="space-y-4">
                                                     {!auth?.user && (
                                                         <div>
-                                                            <Input 
-                                                                placeholder="Nama Anda" 
+                                                            <Input
+                                                                placeholder="Nama Anda"
                                                                 value={commentForm.data.name}
                                                                 onChange={e => commentForm.setData('name', e.target.value)}
                                                                 required
@@ -349,8 +353,8 @@ export default function ProgramShow({ program, auth }: Props) {
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <Textarea 
-                                                            placeholder="Tulis dukungan, doa, atau komentar positif..." 
+                                                        <Textarea
+                                                            placeholder="Tulis dukungan, doa, atau komentar positif..."
                                                             value={commentForm.data.body}
                                                             onChange={e => commentForm.setData('body', e.target.value)}
                                                             required
@@ -406,7 +410,7 @@ export default function ProgramShow({ program, auth }: Props) {
 
                         {/* Sidebar (Right) - Hidden on Mobile */}
                         <div className="hidden lg:block space-y-6 sticky top-24 self-start">
-                            
+
                             {/* Donation Action Card */}
                             <Card className="border-none shadow-theme-md">
                                 <CardContent className="p-6 md:p-6 md:pt-0 md:pb-0">
@@ -439,9 +443,9 @@ export default function ProgramShow({ program, auth }: Props) {
             {/* Sticky Bottom Action Bar (Mobile Only) */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-100 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-50 pb-safe">
                 <div className="flex gap-3 w-full">
-                    <Button 
+                    <Button
                         onClick={handleShare}
-                        variant="outline" 
+                        variant="outline"
                         className="w-[28%] h-12 flex-shrink-0 flex items-center justify-center border-insani-blue text-insani-blue rounded-md bg-white hover:bg-insani-blue/5 font-semibold text-sm px-2"
                     >
                         <Share2 className="w-4 h-4 mr-1.5" />

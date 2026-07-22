@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
 import { Head, usePage, Link } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
 import { ChevronDown, ChevronUp, FileText, ExternalLink, ShieldCheck, Scale, Building2, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import PublicLayout from '@/layouts/PublicLayout';
 
 const staticFaqs = [
     {

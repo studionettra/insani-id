@@ -6,6 +6,7 @@ import Label from "../Label";
 export default function TextAreaInput() {
   const [message, setMessage] = useState("");
   const [messageTwo, setMessageTwo] = useState("");
+
   return (
     <ComponentCard title="Textarea input field">
       <div className="space-y-6">

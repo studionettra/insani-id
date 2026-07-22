@@ -1,10 +1,15 @@
 /*! Copyright (C) GTranslate Inc. */
-(function(){if(!(document.currentScript instanceof HTMLScriptElement))return;
+(function(){
+if(!(document.currentScript instanceof HTMLScriptElement)){
+return;
+}
+
     var gt = window.gtranslateSettings || {};
     gt = gt[document.currentScript.getAttribute('data-gt-widget-id')] || gt;
 
     if(gt.default_language == null) {
         console.log('gtranslateSettings is not properly initialized');
+
         return;
     }
 
@@ -30,7 +35,9 @@
     var custom_css = gt.custom_css||'';
     var lang_array = native_language_names && lang_array_native || lang_array_english;
 
-    var u_class = '.gt_container-'+Array.from('flags'+wrapper_selector).reduce(function(h,c){return 0|(31*h+c.charCodeAt(0))},0).toString(36);
+    var u_class = '.gt_container-'+Array.from('flags'+wrapper_selector).reduce(function(h,c){
+return 0|(31*h+c.charCodeAt(0))
+},0).toString(36);
 
     var widget_code = '<!-- GTranslate: https://gtranslate.com -->';
     var widget_css = custom_css;
@@ -39,24 +46,25 @@
     var flag_ext = flag_style=='3d'?'.png':'.svg';
 
     function get_flag_src(lang) {
-        if(!alt_flags[lang])
-            return flags_location+lang+flag_ext;
-        else if(alt_flags[lang] == 'usa')
-            return flags_location+'en-us'+flag_ext;
-        else if(alt_flags[lang] == 'canada')
-            return flags_location+'en-ca'+flag_ext;
-        else if(alt_flags[lang] == 'brazil')
-            return flags_location+'pt-br'+flag_ext;
-        else if(alt_flags[lang] == 'mexico')
-            return flags_location+'es-mx'+flag_ext;
-        else if(alt_flags[lang] == 'argentina')
-            return flags_location+'es-ar'+flag_ext;
-        else if(alt_flags[lang] == 'colombia')
-            return flags_location+'es-co'+flag_ext;
-        else if(alt_flags[lang] == 'quebec')
-            return flags_location+'fr-qc'+flag_ext;
-        else
-            return alt_flags[lang];
+        if(!alt_flags[lang]) {
+return flags_location+lang+flag_ext;
+} else if(alt_flags[lang] == 'usa') {
+return flags_location+'en-us'+flag_ext;
+} else if(alt_flags[lang] == 'canada') {
+return flags_location+'en-ca'+flag_ext;
+} else if(alt_flags[lang] == 'brazil') {
+return flags_location+'pt-br'+flag_ext;
+} else if(alt_flags[lang] == 'mexico') {
+return flags_location+'es-mx'+flag_ext;
+} else if(alt_flags[lang] == 'argentina') {
+return flags_location+'es-ar'+flag_ext;
+} else if(alt_flags[lang] == 'colombia') {
+return flags_location+'es-co'+flag_ext;
+} else if(alt_flags[lang] == 'quebec') {
+return flags_location+'fr-qc'+flag_ext;
+} else {
+return alt_flags[lang];
+}
     }
 
     function get_lang_href(lang) {
@@ -68,10 +76,12 @@
         } else if(url_structure == 'sub_domain') {
             var gt_request_uri = (document.currentScript.getAttribute('data-gt-orig-url') || location.pathname) + location.search + location.hash;
             var domain = document.currentScript.getAttribute('data-gt-orig-domain') || location.hostname;
-            if(typeof custom_domains == 'object' && custom_domains[lang])
-                href = (lang == default_language) && location.protocol+'//'+domain+gt_request_uri || location.protocol+'//'+custom_domains[lang]+gt_request_uri;
-            else
-                href = (lang == default_language) && location.protocol+'//'+domain+gt_request_uri || location.protocol+'//'+lang+'.'+domain.replace(/^www\./, '')+gt_request_uri;
+
+            if(typeof custom_domains == 'object' && custom_domains[lang]) {
+href = (lang == default_language) && location.protocol+'//'+domain+gt_request_uri || location.protocol+'//'+custom_domains[lang]+gt_request_uri;
+} else {
+href = (lang == default_language) && location.protocol+'//'+domain+gt_request_uri || location.protocol+'//'+lang+'.'+domain.replace(/^www\./, '')+gt_request_uri;
+}
         }
 
         return href;
@@ -82,13 +92,15 @@
     widget_css += "a.glink:hover img{opacity:1}";
 
     var current_lang = document.querySelector('html').getAttribute('lang')||default_language;
+
     if(url_structure == 'none') {
         var googtrans_matches = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');
         current_lang = googtrans_matches && googtrans_matches[2].split('/')[2] || current_lang;
     }
 
-    if(!lang_array[current_lang])
-        current_lang = default_language;
+    if(!lang_array[current_lang]) {
+current_lang = default_language;
+}
 
     languages.forEach(function(lang) {
         var el_a = document.createElement('a');
@@ -117,38 +129,97 @@
         widget_css += "font font{background-color:transparent!important;box-shadow:none!important;position:initial!important}";
     }
 
-    if(horizontal_position != 'inline')
-        widget_code = '<div class="gt_switcher_wrapper" style="position:fixed;'+vertical_position+':15px;'+horizontal_position+':15px;z-index:999999;">' + widget_code + '</div>';
+    if(horizontal_position != 'inline') {
+widget_code = '<div class="gt_switcher_wrapper" style="position:fixed;'+vertical_position+':15px;'+horizontal_position+':15px;z-index:999999;">' + widget_code + '</div>';
+}
 
     var add_css = document.createElement('style');
     add_css.classList.add('gtranslate_css');
     add_css.textContent = widget_css;
     document.head.appendChild(add_css);
 
-    document.querySelectorAll(wrapper_selector).forEach(function(e){e.classList.add(u_class.substring(1));e.innerHTML+=widget_code});
+    document.querySelectorAll(wrapper_selector).forEach(function(e){
+e.classList.add(u_class.substring(1));e.innerHTML+=widget_code
+});
 
     if(url_structure == 'none') {
-        function get_current_lang() {var keyValue = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');return keyValue ? keyValue[2].split('/')[2] : null;}
-        function fire_event(element,event){try{if(document.createEventObject){var evt=document.createEventObject();element.fireEvent('on'+event,evt)}else{var evt=document.createEvent('HTMLEvents');evt.initEvent(event,true,true);element.dispatchEvent(evt)}}catch(e){}}
-        function load_tlib(){if(!window.gt_translate_script){window.gt_translate_script=document.createElement('script');gt_translate_script.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit2';document.body.appendChild(gt_translate_script);}}
-        window.doGTranslate = function(lang_pair){if(lang_pair.value)lang_pair=lang_pair.value;if(lang_pair=='')return;var lang=lang_pair.split('|')[1];if(get_current_lang() == null && lang == lang_pair.split('|')[0])return;var teCombo;var sel=document.getElementsByTagName('select');for(var i=0;i<sel.length;i++)if(sel[i].className.indexOf('goog-te-combo')!=-1){teCombo=sel[i];break;}if(document.getElementById('google_translate_element2')==null||document.getElementById('google_translate_element2').innerHTML.length==0||teCombo.length==0||teCombo.innerHTML.length==0){setTimeout(function(){doGTranslate(lang_pair)},500)}else{teCombo.value=lang;fire_event(teCombo,'change');fire_event(teCombo,'change')}}
-        window.googleTranslateElementInit2=function(){new google.translate.TranslateElement({pageLanguage:default_language,autoDisplay:false},'google_translate_element2')};
+        function get_current_lang() {
+var keyValue = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');
 
-        if(current_lang != default_language)
-            load_tlib();
-        else
-            document.querySelectorAll(u_class).forEach(function(e){e.addEventListener('pointerenter',load_tlib);e.addEventListener('focusin',load_tlib)});
+return keyValue ? keyValue[2].split('/')[2] : null;
+}
+        function fire_event(element,event){
+try{
+if(document.createEventObject){
+var evt=document.createEventObject();element.fireEvent('on'+event,evt)
+}else{
+var evt=document.createEvent('HTMLEvents');evt.initEvent(event,true,true);element.dispatchEvent(evt)
+}
+}catch(e){}
+}
+        function load_tlib(){
+if(!window.gt_translate_script){
+window.gt_translate_script=document.createElement('script');gt_translate_script.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit2';document.body.appendChild(gt_translate_script);
+}
+}
+        window.doGTranslate = function(lang_pair){
+if(lang_pair.value){
+lang_pair=lang_pair.value;
+}
 
-        document.querySelectorAll(u_class + ' a[data-gt-lang]').forEach(function(e){e.addEventListener('click', function(evt) {
+if(lang_pair==''){
+return;
+}
+
+var lang=lang_pair.split('|')[1];
+
+if(get_current_lang() == null && lang == lang_pair.split('|')[0]){
+return;
+}
+
+var teCombo;var sel=document.getElementsByTagName('select');
+
+for(var i=0;i<sel.length;i++){
+if(sel[i].className.indexOf('goog-te-combo')!=-1){
+teCombo=sel[i];break;
+}
+}
+
+if(document.getElementById('google_translate_element2')==null||document.getElementById('google_translate_element2').innerHTML.length==0||teCombo.length==0||teCombo.innerHTML.length==0){
+setTimeout(function(){
+doGTranslate(lang_pair)
+},500)
+}else{
+teCombo.value=lang;fire_event(teCombo,'change');fire_event(teCombo,'change')
+}
+}
+        window.googleTranslateElementInit2=function(){
+new google.translate.TranslateElement({pageLanguage:default_language,autoDisplay:false},'google_translate_element2')
+};
+
+        if(current_lang != default_language) {
+load_tlib();
+} else {
+document.querySelectorAll(u_class).forEach(function(e){
+e.addEventListener('pointerenter',load_tlib);e.addEventListener('focusin',load_tlib)
+});
+}
+
+        document.querySelectorAll(u_class + ' a[data-gt-lang]').forEach(function(e){
+e.addEventListener('click', function(evt) {
             evt.preventDefault();
-            document.querySelectorAll(u_class + ' a.gt-current-lang').forEach(function(e){e.classList.remove('gt-current-lang')});
+            document.querySelectorAll(u_class + ' a.gt-current-lang').forEach(function(e){
+e.classList.remove('gt-current-lang')
+});
             e.classList.add('gt-current-lang');
             doGTranslate(default_language+'|'+e.getAttribute('data-gt-lang'));
-        })});
+        })
+});
     }
 
     if(detect_browser_language && window.localStorage && window.navigator && localStorage.getItem('gt_autoswitch') == null && !/bot|spider|slurp|facebook/i.test(navigator.userAgent)) {
         var accept_language = (navigator.language||navigator.userLanguage).toLowerCase();
+
         switch(accept_language) {
             case 'zh':
             case 'zh-cn':var preferred_language = 'zh-CN';break;
@@ -163,11 +234,16 @@
                 load_tlib();
                 window.gt_translate_script.onload=function(){
                     doGTranslate(default_language+'|'+preferred_language);
-                    document.querySelectorAll(u_class + ' a.gt-current-lang').forEach(function(e){e.classList.remove('gt-current-lang')});
+                    document.querySelectorAll(u_class + ' a.gt-current-lang').forEach(function(e){
+e.classList.remove('gt-current-lang')
+});
                     document.querySelector(u_class+' a[data-gt-lang="'+preferred_language+'"]').classList.add('gt-current-lang');
                 };
-            } else
-                document.querySelectorAll(u_class+' a[data-gt-lang="'+preferred_language+'"]').forEach(function(e){location.href=e.href});
+            } else {
+document.querySelectorAll(u_class+' a[data-gt-lang="'+preferred_language+'"]').forEach(function(e){
+location.href=e.href
+});
+}
         }
 
         localStorage.setItem('gt_autoswitch', 1);

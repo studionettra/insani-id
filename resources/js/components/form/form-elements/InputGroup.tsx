@@ -1,8 +1,8 @@
-import ComponentCard from "../../common/ComponentCard";
-import Label from "../Label";
-import Input from "../input/InputField";
 import { EnvelopeIcon } from "../../../icons";
+import ComponentCard from "../../common/ComponentCard";
 import PhoneInput from "../group-input/PhoneInput";
+import Input from "../input/InputField";
+import Label from "../Label";
 
 export default function InputGroup() {
   const countries = [
@@ -14,6 +14,7 @@ export default function InputGroup() {
   const handlePhoneNumberChange = (phoneNumber: string) => {
     console.log("Updated phone number:", phoneNumber);
   };
+
   return (
     <ComponentCard title="Input Group">
       <div className="space-y-6">
