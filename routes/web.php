@@ -91,7 +91,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::post('/campaigner/register', [CampaignerRegistrationController::class, 'store'])->name('campaigner.register.store');
     Route::get('/campaigner/status', [CampaignerRegistrationController::class, 'status'])->name('campaigner.status');
 
-    Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service|Content Editor')->group(function () {
         Route::middleware('permission:user.view')->group(function () {
             Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
         });

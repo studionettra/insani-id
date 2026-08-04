@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\DonationSuccessNotification;
 use App\Models\Category;
 use App\Models\Donation;
 use App\Models\Payment;
@@ -7,18 +8,26 @@ use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\DonationSuccessNotification;
-
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Role::create(['name' => 'admin']);
-    Role::create(['name' => 'campaigner']);
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+    Permission::firstOrCreate(['name' => 'donation.view']);
+
+    $adminRole = Role::firstOrCreate(['name' => 'Administrator']);
+    $adminRole->givePermissionTo('donation.view');
+
+    Role::firstOrCreate(['name' => 'campaigner']);
+
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
     $this->admin = User::factory()->create();
-    $this->admin->assignRole('admin');
+    $this->admin->assignRole('Administrator');
 
     $this->campaigner = User::factory()->create();
     $this->campaigner->assignRole('campaigner');
@@ -45,7 +54,7 @@ beforeEach(function () {
 });
 
 test('admin can view donations list', function () {
-    for($i=0; $i<3; $i++) {
+    for ($i = 0; $i < 3; $i++) {
         Donation::create([
             'donation_code' => "DON-00$i",
             'program_id' => $this->program->id,
@@ -67,10 +76,10 @@ test('admin can confirm offline donation', function () {
     Mail::fake();
 
     $donation = Donation::create([
-        'donation_code' => "DON-OFFLINE",
+        'donation_code' => 'DON-OFFLINE',
         'program_id' => $this->program->id,
-        'donor_name' => "Donor",
-        'donor_email' => "donor@test.com",
+        'donor_name' => 'Donor',
+        'donor_email' => 'donor@test.com',
         'donor_phone' => '08123456789',
         'channel' => 'offline',
         'status' => 'pending',
@@ -92,7 +101,7 @@ test('admin can confirm offline donation', function () {
 
     expect($payment->fresh()->gateway_status)->toBe('PAID');
     expect($donation->fresh()->status)->toBe('paid');
-    
+
     // Check program collected amount updated
     expect($this->program->fresh()->collected_amount)->toEqual(100000);
 

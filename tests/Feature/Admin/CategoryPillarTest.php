@@ -2,21 +2,24 @@
 
 use App\Models\Category;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
+
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\patch;
-use function Pest\Laravel\put;
 
 beforeEach(function () {
     // Ensure roles and permissions exist
     $this->adminRole = Role::firstOrCreate(['name' => 'Administrator']);
     $this->editorRole = Role::firstOrCreate(['name' => 'Content Editor']);
-    
+
     $viewCategoryPerm = Permission::firstOrCreate(['name' => 'category.view']);
     $this->editorRole->givePermissionTo($viewCategoryPerm);
+    $this->adminRole->givePermissionTo($viewCategoryPerm);
+
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
     $this->admin = User::factory()->create();
     $this->admin->assignRole('Administrator');
@@ -34,7 +37,7 @@ beforeEach(function () {
 
 it('allows content editor to update pillar settings only', function () {
     Storage::fake('public');
-    
+
     $file = UploadedFile::fake()->image('pillar.jpg');
 
     actingAs($this->editor)
@@ -46,7 +49,7 @@ it('allows content editor to update pillar settings only', function () {
         ->assertSessionHas('success');
 
     $this->category->refresh();
-    
+
     expect($this->category->is_focus_program)->toBeTrue();
     expect($this->category->pillar_image)->not->toBeNull();
 });
@@ -60,7 +63,7 @@ it('forbids content editor from updating standard category fields', function () 
         ->assertForbidden();
 
     $this->category->refresh();
-    
+
     expect($this->category->name)->toBe('Original Name');
     expect($this->category->platform_fee_percent)->toEqual(5);
 });
@@ -77,7 +80,7 @@ it('allows administrator to update standard category fields', function () {
         ->assertRedirect();
 
     $this->category->refresh();
-    
+
     expect($this->category->name)->toBe('Admin Edited Name');
     expect($this->category->platform_fee_percent)->toEqual(10);
 });

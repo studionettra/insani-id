@@ -1,8 +1,15 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
+
+beforeEach(function () {
+    Http::fake([
+        'challenges.cloudflare.com/*' => Http::response(['success' => true]),
+    ]);
+});
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
@@ -16,6 +23,7 @@ test('users can authenticate using the login screen', function () {
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'password',
+        'cf-turnstile-response' => 'test-token',
     ]);
 
     $this->assertAuthenticated();
@@ -48,6 +56,7 @@ test('users can not authenticate with invalid password', function () {
     $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'wrong-password',
+        'cf-turnstile-response' => 'test-token',
     ]);
 
     $this->assertGuest();
@@ -71,6 +80,7 @@ test('users are rate limited', function () {
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
         'password' => 'wrong-password',
+        'cf-turnstile-response' => 'test-token',
     ]);
 
     $response->assertTooManyRequests();

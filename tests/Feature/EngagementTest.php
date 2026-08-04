@@ -1,20 +1,21 @@
 <?php
 
-use App\Models\User;
-use App\Models\Program;
 use App\Models\CampaignerProfile;
+use App\Models\Category;
 use App\Models\Comment;
-use App\Models\ProgramUpdate;
-use Spatie\Permission\Models\Role;
+use App\Models\Program;
+use App\Models\User;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function () {
     // Seed roles and permissions
-    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
     $permissions = [
         'program.create', 'program.update-own', 'update-post.create',
-        'comment.view', 'comment.moderate'
+        'comment.view', 'comment.moderate',
     ];
 
     foreach ($permissions as $permission) {
@@ -45,7 +46,7 @@ beforeEach(function () {
     $this->cs = User::factory()->create();
     $this->cs->assignRole('Customer Service');
 
-    $this->category = \App\Models\Category::create([
+    $this->category = Category::create([
         'name' => 'Kesehatan',
         'slug' => 'kesehatan',
     ]);
@@ -60,7 +61,7 @@ beforeEach(function () {
         'campaigner_type' => 'App\\Models\\CampaignerProfile',
         'category_id' => $this->category->id,
         'status' => 'published',
-        'cover_image' => 'cover.jpg'
+        'cover_image' => 'cover.jpg',
     ]);
 });
 
@@ -80,16 +81,17 @@ it('allows campaigner to create program update', function () {
     ]);
 });
 
-it('allows guest to submit a comment', function () {
-    $response = $this->post(route('programs.comments.store', $this->program->id), [
-        'name' => 'Guest User',
-        'body' => 'Great program!',
-    ]);
+it('allows an authenticated user to submit a comment', function () {
+    $response = $this->actingAs($this->campaigner)
+        ->post(route('programs.comments.store', $this->program->id), [
+            'body' => 'Great program!',
+        ]);
 
     $response->assertSessionHasNoErrors();
     $this->assertDatabaseHas('comments', [
         'program_id' => $this->program->id,
-        'name' => 'Guest User',
+        'user_id' => $this->campaigner->id,
+        'name' => $this->campaigner->name,
         'body' => 'Great program!',
         'is_hidden' => false,
     ]);
@@ -107,7 +109,7 @@ it('allows cs to hide a comment', function () {
         ->put(route('admin.comments.toggle-hidden', $comment->id));
 
     $response->assertSessionHasNoErrors();
-    
+
     $comment->refresh();
     expect($comment->is_hidden)->toBeTrue();
 });
