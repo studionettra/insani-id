@@ -1,10 +1,10 @@
 import { Head, useForm, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, FileText, Trash2 } from 'lucide-react';
 import RichTextEditor from '@/components/rich-text-editor';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 
 export default function PagesEdit({ page }: any) {

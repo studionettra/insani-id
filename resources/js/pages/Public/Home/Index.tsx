@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
-import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
-import { FadeIn } from '@/components/ui/fade-in';
 import { motion, useReducedMotion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { FadeIn } from '@/components/ui/fade-in';
+import PublicLayout from '@/layouts/PublicLayout';
+import { formatCurrency } from '@/lib/utils';
 
 export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs }: any) {
     const { locale } = usePage().props as any;
@@ -15,10 +15,14 @@ export default function HomeIndex({ banners, stats, partners, focusPrograms, pro
     const [currentSlide, setCurrentSlide] = useState(0);
     
     useEffect(() => {
-        if (!banners || banners.length <= 1) return;
+        if (!banners || banners.length <= 1) {
+return;
+}
+
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
         }, 5000);
+
         return () => clearInterval(timer);
     }, [banners]);
 
@@ -173,6 +177,7 @@ export default function HomeIndex({ banners, stats, partners, focusPrograms, pro
                             {focusPrograms.map((cat: any, index: number) => {
                                 // Dynamic bento sizing logic
                                 let spanClass = "col-span-1 md:col-span-2";
+
                                 if (focusPrograms.length % 2 !== 0 && index === 0) {
                                     spanClass = "col-span-1 md:col-span-4 row-span-2";
                                 } else if (index % 3 === 0) {

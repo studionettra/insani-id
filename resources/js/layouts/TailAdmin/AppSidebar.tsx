@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
-
-import { useSidebar } from "./context/SidebarContext";
-import { GridIcon, ChevronDownIcon, HorizontaLDots } from "@/icons";
 import { Users, BookOpen, FolderGit2, LayoutGrid, Briefcase, Gift, GiftIcon, CheckCheckIcon, Check, BadgeCheck, Paperclip, MessageCircleCode, BadgeCent, BadgeHelp, CaseLower, WalletCards, ListChecksIcon } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { GridIcon, ChevronDownIcon, HorizontaLDots } from "@/icons";
+import { useSidebar } from "./context/SidebarContext";
 
 type NavItem = {
   name: string;
@@ -120,6 +120,7 @@ const AppSidebar: React.FC = () => {
   useEffect(() => {
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
+
       if (subMenuRefs.current[key]) {
         setSubMenuHeight((prevHeights) => ({
           ...prevHeights,
@@ -138,6 +139,7 @@ const AppSidebar: React.FC = () => {
       ) {
         return null;
       }
+
       return { type: menuType, index };
     });
   };

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import DOMPurify from 'dompurify';
 import { ArrowLeft, CheckCircle, XCircle, Info, Ban, User, Calendar, AlertTriangle } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import DOMPurify from 'dompurify';
+import { formatCurrency, formatDate } from '@/lib/utils';
 
 interface Program {
     id: number;
@@ -42,7 +42,7 @@ interface Props {
 export default function ProgramShow({ program }: Props) {
     const { errors } = usePage().props as any;
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-    
+
     const { data: rejectData, setData: setRejectData, post: postReject, processing: rejectProcessing, errors: rejectErrors } = useForm({
         _method: 'put',
         status: 'rejected',
@@ -122,10 +122,10 @@ export default function ProgramShow({ program }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                    
+
                     {/* Left Column - Details */}
                     <div className="xl:col-span-2 space-y-6">
-                        
+
                         {program.status === 'rejected' && program.rejection_notes && (
                             <div className="rounded-lg border border-red-200 bg-red-50 p-5">
                                 <div className="flex items-start">
@@ -148,13 +148,13 @@ export default function ProgramShow({ program }: Props) {
                             </div>
                             <div className="p-6">
                                 <div className="mb-6">
-                                    <img 
-                                        src={`/storage/${program.cover_image}`} 
-                                        alt={program.title} 
+                                    <img
+                                        src={`/storage/${program.cover_image}`}
+                                        alt={program.title}
                                         className="w-full h-64 sm:h-[400px] object-cover rounded-lg border border-gray-100"
                                     />
                                 </div>
-                                
+
                                 <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
                                     {program.title}
                                 </h2>
@@ -177,8 +177,8 @@ export default function ProgramShow({ program }: Props) {
 
                                 <div>
                                     <h4 className="font-semibold text-gray-900 mb-4">Cerita Program</h4>
-                                    <div 
-                                        className="prose prose-sm sm:prose-base max-w-none text-gray-600 leading-relaxed"
+                                    <div
+                                        className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-justify prose-a:text-[#1A56DB] prose-headings:text-gray-900 prose-strong:text-gray-900 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-gray-400 break-words overflow-hidden text-left"
                                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story.id || program.story as unknown as string) }}
                                     />
                                 </div>
@@ -202,13 +202,13 @@ export default function ProgramShow({ program }: Props) {
                                         Program ini menunggu persetujuan Anda sebelum dapat dipublikasikan dan menerima donasi.
                                     </p>
                                     <div className="pt-2 space-y-3">
-                                        <Button 
-                                            className="w-full bg-green-600 hover:bg-green-700 text-white shadow-sm" 
+                                        <Button
+                                            className="w-full bg-green-600 hover:bg-green-700 text-white shadow-sm"
                                             onClick={handleApprove}
                                         >
                                             <CheckCircle className="mr-2 h-4 w-4" /> Setujui & Publikasikan
                                         </Button>
-                                        <Button 
+                                        <Button
                                             variant="outline"
                                             className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
                                             onClick={() => setIsRejectModalOpen(true)}
@@ -223,7 +223,7 @@ export default function ProgramShow({ program }: Props) {
                         {program.status === 'published' && (
                             <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden sticky top-6">
                                 <div className="p-6">
-                                    <Button 
+                                    <Button
                                         variant="outline"
                                         className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                                         onClick={handleCloseProgram}
@@ -246,7 +246,7 @@ export default function ProgramShow({ program }: Props) {
                                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Kategori</p>
                                     <p className="font-medium text-gray-900">{program.category?.name?.id || 'N/A'}</p>
                                 </div>
-                                
+
                                 <div>
                                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Batas Waktu</p>
                                     <div className="flex items-center">
@@ -256,7 +256,7 @@ export default function ProgramShow({ program }: Props) {
                                         </p>
                                     </div>
                                 </div>
-                                
+
                                 {program.published_at && (
                                     <div>
                                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Dipublikasikan Pada</p>
@@ -278,7 +278,7 @@ export default function ProgramShow({ program }: Props) {
                                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Tipe Campaigner</p>
                                     <p className="font-medium text-gray-900 capitalize">{program.campaigner_type}</p>
                                 </div>
-                                
+
                                 {program.campaigner_type === 'internal' ? (
                                     <div>
                                         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Nama Staff (Internal)</p>
@@ -289,8 +289,8 @@ export default function ProgramShow({ program }: Props) {
                                         <div>
                                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Nama Penggalang</p>
                                             <p className="font-medium text-gray-900">
-                                                {program.campaignerProfile?.type === 'lembaga' 
-                                                    ? program.campaignerProfile.institution_name 
+                                                {program.campaignerProfile?.type === 'lembaga'
+                                                    ? program.campaignerProfile.institution_name
                                                     : program.creator?.name}
                                             </p>
                                         </div>
@@ -337,10 +337,10 @@ export default function ProgramShow({ program }: Props) {
                 </DialogContent>
             </Dialog>
 
-        
+
         </>
 
-        
+
     );
 }
 

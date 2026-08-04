@@ -1,7 +1,7 @@
-import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
 import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -10,13 +10,13 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 
 interface Program {
     id: number;
     title: { id: string };
     program_code: string;
+    cover_image: string;
     category: { title: { id: string }, name: { id: string } };
     campaigner_type: string;
     creator: { name: string };
@@ -79,7 +79,7 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                             Kelola semua kampanye dan program donasi yang ada.
                         </p>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
                         <Button asChild className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                             <Link href="/admin/programs/create">
@@ -119,11 +119,12 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                         <TableHeader className="bg-gray-50/50">
                             <TableRow>
                                 <TableHead className="font-medium text-gray-500">Kode / Judul</TableHead>
+                                <TableHead className="font-medium text-gray-500 w-1/8">Cover</TableHead>
                                 <TableHead className="font-medium text-gray-500">Kategori</TableHead>
                                 <TableHead className="font-medium text-gray-500">Pembuat</TableHead>
                                 <TableHead className="font-medium text-gray-500">Terkumpul</TableHead>
                                 <TableHead className="font-medium text-gray-500">Status</TableHead>
-                                <TableHead className="text-right font-medium text-gray-500">Aksi</TableHead>
+                                <TableHead className="text-center font-medium text-gray-500 ">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -137,6 +138,13 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                             <div className="text-sm text-gray-500 mt-0.5">
                                                 {program.program_code}
                                             </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <img
+                                                src={`/storage/${program.cover_image}`}
+                                                alt={program.title}
+                                                className="h-20 w-35 rounded-md object-cover border border-gray-200"
+                                            />
                                         </TableCell>
                                         <TableCell className="text-gray-600">{program.category?.name?.id || 'N/A'}</TableCell>
                                         <TableCell>
@@ -168,7 +176,7 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-32 text-gray-500">
+                                    <TableCell colSpan={7} className="text-center h-32 text-gray-500">
                                         Tidak ada data program.
                                     </TableCell>
                                 </TableRow>
@@ -176,7 +184,7 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                         </TableBody>
                     </Table>
                 </div>
-                
+
                 {programs.last_page > 1 && (
                     <div className="flex justify-center mt-2">
                         <div className="flex space-x-1">
@@ -196,9 +204,9 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                     </div>
                 )}
             </div>
-        
+
         </>
-        
+
     );
 }
 

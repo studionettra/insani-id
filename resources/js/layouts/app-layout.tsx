@@ -1,7 +1,7 @@
+import { FlashMessages } from '@/components/flash-messages';
 import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
 import type { BreadcrumbItem } from '@/types';
 
-import { FlashMessages } from '@/components/flash-messages';
 
 export default function AppLayout({
     breadcrumbs = [],

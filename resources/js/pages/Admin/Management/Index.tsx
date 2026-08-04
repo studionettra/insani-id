@@ -1,9 +1,8 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -12,6 +11,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Table,
     TableBody,
@@ -19,7 +20,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
 
 export default function ManagementIndex({ members, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -82,7 +82,10 @@ export default function ManagementIndex({ members, filters }: any) {
 
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!editingMember) return;
+
+        if (!editingMember) {
+return;
+}
         
         post(`/admin/management-members/${editingMember.id}`, {
             onSuccess: () => {

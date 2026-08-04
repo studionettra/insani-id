@@ -1,7 +1,7 @@
-import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import AppHeader from "./AppHeader";
-import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
+import Backdrop from "./Backdrop";
+import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 
 const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();

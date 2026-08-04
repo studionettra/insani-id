@@ -18,9 +18,13 @@ const Switch: React.FC<SwitchProps> = ({
   const [isChecked, setIsChecked] = useState(defaultChecked);
 
   const handleToggle = () => {
-    if (disabled) return;
+    if (disabled) {
+return;
+}
+
     const newCheckedState = !isChecked;
     setIsChecked(newCheckedState);
+
     if (onChange) {
       onChange(newCheckedState);
     }

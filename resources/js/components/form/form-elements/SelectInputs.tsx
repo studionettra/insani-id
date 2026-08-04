@@ -1,8 +1,8 @@
 import { useState } from "react";
 import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
-import Select from "../Select";
 import MultiSelect from "../MultiSelect";
+import Select from "../Select";
 
 export default function SelectInputs() {
   const options = [
@@ -22,6 +22,7 @@ export default function SelectInputs() {
     { value: "4", text: "Option 4", selected: false },
     { value: "5", text: "Option 5", selected: false },
   ];
+
   return (
     <ComponentCard title="Select Inputs">
       <div className="space-y-6">

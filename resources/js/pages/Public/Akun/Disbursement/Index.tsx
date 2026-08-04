@@ -1,10 +1,10 @@
-import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import { ArrowLeft, Plus, Download, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Download, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import PublicLayout from '@/layouts/PublicLayout';
 import { formatRupiah, formatDate } from '@/lib/utils';
 
 export default function Index({ program, disbursements }: any) {

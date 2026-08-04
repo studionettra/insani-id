@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
+import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, CheckCircle2, Clock, XCircle } from 'lucide-react';
 
 
 export default function Status({ profile }: any) {

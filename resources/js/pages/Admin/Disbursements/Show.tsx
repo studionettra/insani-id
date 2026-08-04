@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import admin from '@/routes/admin';
+import { ArrowLeft, CheckCircle, XCircle, Upload, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { formatRupiah, formatDate } from '@/lib/utils';
-import { ArrowLeft, CheckCircle, XCircle, Upload, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import { formatRupiah, formatDate } from '@/lib/utils';
+import admin from '@/routes/admin';
 
 export default function Show({ disbursement }: any) {
     const [actionType, setActionType] = useState<string | null>(null);
@@ -179,7 +179,9 @@ export default function Show({ disbursement }: any) {
                                             </div>
                                         ) : (
                                             <div className="flex flex-col gap-2">
-                                                <Button onClick={() => { setData('status', 'approved'); submitAction('approved'); }} className="w-full bg-[#1A56DB] hover:bg-[#1e40af] text-white" disabled={processing}>
+                                                <Button onClick={() => {
+ setData('status', 'approved'); submitAction('approved'); 
+}} className="w-full bg-[#1A56DB] hover:bg-[#1e40af] text-white" disabled={processing}>
                                                     <CheckCircle className="w-4 h-4 mr-2" /> Setujui Pengajuan
                                                 </Button>
                                                 <Button variant="outline" className="w-full text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50" onClick={() => setActionType('reject')}>

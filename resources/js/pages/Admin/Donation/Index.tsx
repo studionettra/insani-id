@@ -1,11 +1,9 @@
-import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { Search, Filter, Eye, CheckCircle } from 'lucide-react';
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Eye, CheckCircle } from 'lucide-react';
-import { index as donationsIndex, confirm as donationsConfirm } from '@/routes/admin/donations';
-import { route as wayfinder } from '@/routes/admin/wayfinder';
 import {
   Table,
   TableBody,
@@ -14,6 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { index as donationsIndex, confirm as donationsConfirm } from '@/routes/admin/donations';
+import { route as wayfinder } from '@/routes/admin/wayfinder';
 
 export default function Index({ donations, filters }: any) {
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {

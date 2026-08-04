@@ -1,10 +1,7 @@
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import admin from '@/routes/admin';
-import { useState } from 'react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
@@ -14,6 +11,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -21,7 +21,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import admin from '@/routes/admin';
 
 export default function UsersIndex({ users, roles, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -74,7 +74,11 @@ export default function UsersIndex({ users, roles, filters }: any) {
 
     const handleEdit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!editingUser) return;
+
+        if (!editingUser) {
+return;
+}
+
         put(admin.users.update(editingUser.id).url, {
             onSuccess: () => {
                 setIsEditModalOpen(false);

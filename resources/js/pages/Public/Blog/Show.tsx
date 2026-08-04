@@ -1,8 +1,8 @@
-import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
 import { Calendar, User, ArrowLeft } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
+import PublicLayout from '@/layouts/PublicLayout';
 
 export default function BlogShow({ blog, relatedBlogs }: any) {
     const { locale } = usePage().props as any;

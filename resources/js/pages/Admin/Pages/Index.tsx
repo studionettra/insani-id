@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

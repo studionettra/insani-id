@@ -1,3 +1,4 @@
+import Badge from "../../ui/badge/Badge";
 import {
   Table,
   TableBody,
@@ -6,7 +7,6 @@ import {
   TableRow,
 } from "../../ui/table";
 
-import Badge from "../../ui/badge/Badge";
 
 interface Order {
   id: number;

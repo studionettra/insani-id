@@ -1,9 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { Users, Wallet, Target, TrendingUp, Heart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 import admin from '@/routes/admin';
 import akun from '@/routes/akun';
-import { Users, Wallet, Target, TrendingUp, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 export default function Dashboard() {
     const { auth } = usePage().props as any;
@@ -11,6 +11,7 @@ export default function Dashboard() {
     const isCampaigner = auth?.user?.roles?.some((role: any) => role.name === 'Campaigner' || role === 'Campaigner');
     
     let createProgramUrl = '/campaigner/register';
+
     if (isAdministrator) {
         createProgramUrl = admin.programs.create().url;
     } else if (isCampaigner) {

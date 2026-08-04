@@ -1,9 +1,8 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -13,6 +12,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
     Table,
     TableBody,
@@ -21,8 +23,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 
 export default function CategoriesIndex({ categories, filters }: any) {
     const { auth } = usePage().props as any;
@@ -99,7 +99,10 @@ export default function CategoriesIndex({ categories, filters }: any) {
 
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!editingCategory) return;
+
+        if (!editingCategory) {
+return;
+}
         
         const targetUrl = isAdministrator 
             ? `/admin/categories/${editingCategory.id}` 

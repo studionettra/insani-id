@@ -12,6 +12,7 @@ export default function InputStates() {
     const isValidEmail =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
     setError(!isValidEmail);
+
     return isValidEmail;
   };
 
@@ -25,6 +26,7 @@ export default function InputStates() {
     setEmailTwo(value);
     validateEmail(value);
   };
+
   return (
     <ComponentCard
       title="Input States"

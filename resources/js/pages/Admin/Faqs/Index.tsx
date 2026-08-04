@@ -1,10 +1,8 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { useState } from 'react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -13,6 +11,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Table,
     TableBody,
@@ -20,7 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 
 
 export default function FaqsIndex({ faqs, filters }: any) {
@@ -83,7 +83,10 @@ export default function FaqsIndex({ faqs, filters }: any) {
 
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!editingFaq) return;
+
+        if (!editingFaq) {
+return;
+}
         
         put(`/admin/faqs/${editingFaq.id}`, {
             onSuccess: () => {

@@ -1,5 +1,5 @@
+import type { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
-import { ApexOptions } from "apexcharts";
 
 export default function BarChartOne() {
   const options: ApexOptions = {
@@ -87,6 +87,7 @@ export default function BarChartOne() {
       data: [168, 385, 201, 298, 187, 195, 291, 110, 215, 390, 280, 112],
     },
   ];
+
   return (
     <div className="max-w-full overflow-x-auto custom-scrollbar">
       <div id="chartOne" className="min-w-[1000px]">

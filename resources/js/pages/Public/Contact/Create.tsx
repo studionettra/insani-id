@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { MapPin, Phone, Mail, Clock, CheckCircle2, UserPlus, Wallet, Handshake, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'motion/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import PublicLayout from '@/layouts/PublicLayout';
 
 const staticFaqs = [
     {
@@ -120,10 +120,12 @@ export default function ContactCreate() {
         if (flash?.success) {
             setIsSuccess(true);
             reset();
+
             // Reset Turnstile
             if (widgetIdRef.current !== null && window.turnstile) {
                 window.turnstile.reset(widgetIdRef.current);
             }
+
             // Auto hide success message after 5 seconds
             setTimeout(() => setIsSuccess(false), 5000);
         }

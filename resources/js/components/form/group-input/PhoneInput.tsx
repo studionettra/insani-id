@@ -30,6 +30,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
     const newCountry = e.target.value;
     setSelectedCountry(newCountry);
     setPhoneNumber(countryCodes[newCountry]);
+
     if (onChange) {
       onChange(countryCodes[newCountry]);
     }
@@ -38,6 +39,7 @@ const PhoneInput: React.FC<PhoneInputProps> = ({
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPhoneNumber = e.target.value;
     setPhoneNumber(newPhoneNumber);
+
     if (onChange) {
       onChange(newPhoneNumber);
     }

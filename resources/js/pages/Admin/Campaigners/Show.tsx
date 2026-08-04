@@ -1,12 +1,12 @@
 import { Head, useForm, Link } from '@inertiajs/react';
+import { ExternalLink, ArrowLeft } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { ExternalLink, ArrowLeft } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function CampaignerShow({ campaigner }: any) {
     const { data, setData, put, processing, errors } = useForm({
@@ -14,10 +14,12 @@ export default function CampaignerShow({ campaigner }: any) {
         notes: '',
         document_statuses: campaigner.documents.reduce((acc: any, doc: any) => {
             acc[doc.id] = doc.status;
+
             return acc;
         }, {}),
         document_notes: campaigner.documents.reduce((acc: any, doc: any) => {
             acc[doc.id] = doc.notes || '';
+
             return acc;
         }, {}),
     });
@@ -35,6 +37,7 @@ export default function CampaignerShow({ campaigner }: any) {
             'sk_lembaga': 'SK Kemenkumham',
             'npwp': 'NPWP Lembaga'
         };
+
         return titles[type] || type;
     };
 

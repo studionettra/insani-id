@@ -1,11 +1,11 @@
-import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import PublicLayout from '@/layouts/PublicLayout';
+import { Search } from 'lucide-react';
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency } from '@/lib/utils';
 
 interface Category {
