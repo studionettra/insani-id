@@ -24,6 +24,8 @@ class RoleSeeder extends Seeder
                 'program.view', 'program.create', 'program.update', 'program.publish', 'program.reject', 'program.close',
                 'update-post.view', 'update-post.create', 'update-post.update', 'update-post.delete',
                 'category.view',
+                'manage_pages', 'manage_faqs', 'manage_management',
+                'manage_partners', 'manage_impact_stats', 'manage_banners',
             ],
 
             'Verifikator' => [
@@ -43,6 +45,7 @@ class RoleSeeder extends Seeder
                 'dashboard.view',
                 'donation.view', 'donation.confirm-manual',
                 'comment.view', 'comment.moderate',
+                'manage_contact_messages',
             ],
 
             'Campaigner Individu' => [

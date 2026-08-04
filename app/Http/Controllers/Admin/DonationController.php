@@ -21,11 +21,13 @@ class DonationController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('donation_code', 'like', "%{$search}%")
-                  ->orWhere('donor_name', 'like', "%{$search}%")
-                  ->orWhereHas('program', function($q) use ($search) {
-                      $q->where('title', 'like', "%{$search}%");
-                  });
+            $query->where(function ($q) use ($search) {
+                $q->where('donation_code', 'like', "%{$search}%")
+                    ->orWhere('donor_name', 'like', "%{$search}%")
+                    ->orWhereHas('program', function ($sub) use ($search) {
+                        $sub->where('title', 'like', "%{$search}%");
+                    });
+            });
         }
 
         if ($request->filled('status')) {
@@ -36,7 +38,7 @@ class DonationController extends Controller
 
         return inertia('Admin/Donation/Index', [
             'donations' => $donations,
-            'filters' => $request->only(['search', 'status'])
+            'filters' => $request->only(['search', 'status']),
         ]);
     }
 

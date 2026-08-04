@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactMessageNotification;
+use App\Models\ContactMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -12,7 +17,7 @@ class ContactController extends Controller
         return inertia('Public/Contact/Create');
     }
 
-    public function store(\Illuminate\Http\Request $request)
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -24,17 +29,17 @@ class ContactController extends Controller
         ]);
 
         // Verify Turnstile
-        $response = \Illuminate\Support\Facades\Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-            'secret' => env('TURNSTILE_SECRET_KEY', '1x0000000000000000000000000000000AA'), // default dummy secret for testing
+        $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+            'secret' => config('services.turnstile.secret_key'),
             'response' => $request->input('cf-turnstile-response'),
             'remoteip' => $request->ip(),
         ]);
 
-        if (!$response->json('success')) {
+        if (! $response->json('success')) {
             return back()->withErrors(['cf-turnstile-response' => 'Verifikasi keamanan gagal.']);
         }
 
-        $message = \App\Models\ContactMessage::create([
+        $message = ContactMessage::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
@@ -44,9 +49,9 @@ class ContactController extends Controller
 
         // Send Email Notification
         try {
-            \Illuminate\Support\Facades\Mail::to('sapa@insani.id')->send(new \App\Mail\ContactMessageNotification($message));
+            Mail::to('sapa@insani.id')->send(new ContactMessageNotification($message));
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Gagal mengirim email notifikasi kontak: ' . $e->getMessage());
+            Log::error('Gagal mengirim email notifikasi kontak: '.$e->getMessage());
         }
 
         return back()->with('success', 'Terima kasih, pesan Anda telah berhasil dikirim. Kami akan segera menghubungi Anda.');

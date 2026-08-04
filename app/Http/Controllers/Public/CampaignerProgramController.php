@@ -133,8 +133,8 @@ class CampaignerProgramController extends Controller
             'video_url' => 'nullable|url',
         ]);
 
-        $program->setTranslation('title', 'id', $request->title);
-        $program->setTranslation('story', 'id', $request->story);
+        $program->title = $request->title;
+        $program->story = $request->story;
         $program->category_id = $request->category_id;
         $program->target_amount = $request->target_amount;
         $program->deadline = $request->deadline;
