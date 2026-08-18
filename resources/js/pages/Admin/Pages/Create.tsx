@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 export default function PagesCreate() {
     const { data, setData, post, processing, errors } = useForm({
+        slug: '',
         title: { id: '', en: '', ar: '' },
         content_html: { id: '', en: '', ar: '' },
         meta_title: { id: '', en: '', ar: '' },
@@ -44,24 +45,44 @@ export default function PagesCreate() {
                 </div>
 
                 <form onSubmit={submit} className="flex flex-col gap-6">
-                    <div className="grid gap-6 md:grid-cols-2">
-                        {/* Kolom Kiri: Informasi Dasar & Bahasa Indonesia */}
+                    <div className="grid gap-6">
+                        {/* Kolom Informasi Dasar */}
                         <div className="flex flex-col gap-4 rounded-md border bg-white p-6 shadow-sm">
-                            <h3 className="font-semibold text-lg border-b pb-2">Konten Bahasa Indonesia (Utama)</h3>
+                            <h3 className="font-semibold text-lg border-b pb-2">Konten Halaman</h3>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="title_id">Judul Halaman (ID) *</Label>
+                                <Label htmlFor="title_id">Judul Halaman *</Label>
                                 <Input
                                     id="title_id"
                                     value={data.title.id}
-                                    onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
+                                    onChange={(e) => {
+                                        setData(data => ({
+                                            ...data,
+                                            title: { ...data.title, id: e.target.value },
+                                            // Auto-fill slug if empty
+                                            slug: data.slug || e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+                                        }));
+                                    }}
                                     required
                                 />
                                 {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="content_id">Konten HTML (ID) *</Label>
+                                <Label htmlFor="slug">Slug (URL) *</Label>
+                                <Input
+                                    id="slug"
+                                    value={data.slug}
+                                    onChange={(e) => setData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9\-]/g, ''))}
+                                    placeholder="contoh-slug-halaman"
+                                    required
+                                />
+                                {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
+                                <p className="text-xs text-muted-foreground">URL yang akan digunakan: /<span className="font-semibold text-insani-blue">{data.slug || 'contoh-slug'}</span></p>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="content_id">Konten HTML *</Label>
                                 <RichTextEditor
                                     value={data.content_html.id}
                                     onChange={(value) => setData('content_html', { ...data.content_html, id: value })}
@@ -72,7 +93,7 @@ export default function PagesCreate() {
                             </div>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="meta_title_id">Meta Title (ID)</Label>
+                                <Label htmlFor="meta_title_id">Meta Title</Label>
                                 <Input
                                     id="meta_title_id"
                                     value={data.meta_title.id}
@@ -81,35 +102,12 @@ export default function PagesCreate() {
                             </div>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="meta_desc_id">Meta Description (ID)</Label>
+                                <Label htmlFor="meta_desc_id">Meta Description</Label>
                                 <Textarea
                                     id="meta_desc_id"
                                     rows={3}
                                     value={data.meta_description.id}
                                     onChange={(e) => setData('meta_description', { ...data.meta_description, id: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Kolom Kanan: Bahasa Inggris & Pengaturan */}
-                        <div className="flex flex-col gap-4 rounded-md border bg-white p-6 shadow-sm">
-                            <h3 className="font-semibold text-lg border-b pb-2">Konten Bahasa Inggris (Opsional)</h3>
-                            
-                            <div className="grid gap-2">
-                                <Label htmlFor="title_en">Judul Halaman (EN)</Label>
-                                <Input
-                                    id="title_en"
-                                    value={data.title.en}
-                                    onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="content_en">Konten HTML (EN)</Label>
-                                <RichTextEditor
-                                    value={data.content_html.en}
-                                    onChange={(value) => setData('content_html', { ...data.content_html, en: value })}
-                                    placeholder="Write page content here..."
                                 />
                             </div>
                         </div>

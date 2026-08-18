@@ -56,7 +56,7 @@ export default function ContactMessagesIndex({ messages, filters }: any) {
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white">
+                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>

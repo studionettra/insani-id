@@ -179,4 +179,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     });
 });
 
+// Dynamic Public Pages (Catch-all)
+Route::get('/{slug}', [App\Http\Controllers\Public\PageController::class, 'show'])->name('page.show');
+
 require __DIR__.'/settings.php';

@@ -1,0 +1,25 @@
+# Dependencies
+vendor/
+node_modules/
+
+# Build artifacts
+public/build/
+dist/
+build/
+
+# Cache & storage
+storage/
+bootstrap/cache/
+bootstrap/ssr/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Logs, OS, editor
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

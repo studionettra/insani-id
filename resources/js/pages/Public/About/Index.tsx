@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, FileText, ExternalLink, ShieldCheck, Scale, Bui
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
-
+import { Button } from '@/components/ui/button';
 const staticFaqs = [
     {
         id: 1,
@@ -19,81 +19,6 @@ const staticFaqs = [
         id: 3,
         question: "Dimana Saja Bantuan Insani Indonesia di Salurkan?",
         answer: "Insani menyalurkan bantuan ke seluruh Indonesia dan juga luar negeri khususnya negara yang mengalami krisis.\n\nSaat ini Insani telah menyalurkan bantuan ke negara Palestina, Suriah, Yaman, dan untuk Indonesia ke daerah Jabodetabek, Banten, Jawa Tengah, Jawa Timur, Sumatera, Kalimantan, Sulawesi, dan Bali."
-    },
-    {
-        id: 4,
-        question: "Bagaimana cara Insani menyalurkan bantuan?",
-        answer: "Untuk bantuan lokal di Indonesia, Insani langsung menurunkan tim ke lapangan. Adapun bantuan ke luar negeri, Insani bekerjasama dengan mitra lembaga terpercaya di negara terkait untuk penyaluran bantuan sehingga lebih aman, amanah, dan jelas secara laporan dan dokumentasi. Semua lembaga yang menjadi mitra Insani telah resmi dan berbadan hukum sesuai peraturan negara masing-masing."
-    },
-    {
-        id: 5,
-        question: "Apa manfaat berdonasi di Insani?",
-        answer: "Donasi yang diterima Insani akan disalurkan secara amanah, profesional, dan efektif tepat sasaran. Selain itu, berdonasi di Insani juga sangat mudah. Kami bekerja menyalurkan bantuan yang Anda titipkan kepada mereka yang betul-betul membutuhkan sehingga Anda tidak perlu bingung mencari penerima bantuan yang tepat.\n\nInsani senantiasa mengadakan program bantuan berdasarkan prioritas kebutuhan yang paling penting dan mendesak."
-    },
-    {
-        id: 6,
-        question: "Bagaimana cara berdonasi di Insani?",
-        answer: (
-            <div className="space-y-4">
-                <p>Berdonasi di Insani sangatlah mudah. Kami menyediakan beberapa cara berdonasi berikut:</p>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="font-semibold text-slate-800">Bank Syariah Indonesia (451)</p>
-                    <p className="font-mono text-insani-blue text-lg my-1">7132195026</p>
-                    <p className="text-sm text-slate-500">A.n Insani Indonesia</p>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="font-semibold text-slate-800">Bank Rakyat Indonesia (002)</p>
-                    <p className="font-mono text-insani-blue text-lg my-1">034501001366304</p>
-                    <p className="text-sm text-slate-500">A.n Insani Indonesia</p>
-                </div>
-                <p>
-                    Kemudian kirimkan foto/screenshot bukti transfer ke WhatsApp Insani di <a href="https://wa.me/6282123998593" target="_blank" rel="noopener noreferrer" className="text-insani-blue hover:underline">082123998593</a> atau dengan cara menghubungi kami langsung di 082123998593 atau (021) 27871199.
-                </p>
-                <p>
-                    Anda juga dapat berdonasi via website dengan berbagai metode yang tersedia, cukup klik tautan berikut: <Link href="/galang-dana" className="text-insani-blue hover:underline font-medium">https://insani.id/galang-dana</Link>
-                </p>
-                <p>
-                    Donasi via Gopay/Ovo/DANA/LinkAja/ShopeePay/Qris, caranya cukup scan QR Code pada halaman website kami melalui aplikasi e-wallet Anda.
-                </p>
-            </div>
-        )
-    },
-    {
-        id: 7,
-        question: "Di mana kami dapat melihat update kegiatan dan penyaluran bantuan Insani?",
-        answer: (
-            <div className="space-y-4">
-                <p>Update kegiatan serta penyaluran INSANI dapat dilihat di media sosial kami. Ikuti kami dan dapatkan update-update tentang bantuan kemanusiaan lainnya.</p>
-                <ul className="list-disc pl-5 space-y-2">
-                    <li>Facebook: <a href="https://www.facebook.com/insaniindonesia" target="_blank" rel="noopener noreferrer" className="text-insani-blue hover:underline">insaniindonesia</a></li>
-                    <li>Instagram: <a href="https://www.instagram.com/insaniindonesia" target="_blank" rel="noopener noreferrer" className="text-insani-blue hover:underline">@insaniindonesia</a></li>
-                    <li>Twitter: <a href="https://twitter.com/officialinsani" target="_blank" rel="noopener noreferrer" className="text-insani-blue hover:underline">@officialinsani</a></li>
-                    <li>Youtube: <a href="https://www.youtube.com/@insaniindonesia" target="_blank" rel="noopener noreferrer" className="text-insani-blue hover:underline">Official Insani</a></li>
-                </ul>
-                <p>Bagi donatur khusus akan mendapatkan update khusus melalui email.</p>
-            </div>
-        )
-    },
-    {
-        id: 8,
-        question: "Bagaimana cara menjadi relawan Insani?",
-        answer: "Kami membuka kesempatan bagi siapa saja untuk menjadi inisiator kebaikan dalam hal menyebarkan info program kami maupun relawan dalam kegiatan kami. Silakan hubungi 082123998593 untuk info lebih lanjut."
-    },
-    {
-        id: 9,
-        question: "Bagaimana cara mengirimkan penawaran kerjasama dengan Insani?",
-        answer: (
-            <div className="space-y-4">
-                <p>Anda dapat mengirimkan penawaran kerjasama dalam hal berikut:</p>
-                <ul className="list-disc pl-5 space-y-1">
-                    <li>Kerjasama CSR perusahaan</li>
-                    <li>Kerjasama NGO</li>
-                    <li>Kerjasama menjadi donatur tetap</li>
-                    <li>Kerjasama komunitas</li>
-                </ul>
-                <p>Silakan kirim email ke <a href="mailto:sapa@insani.id" className="text-insani-blue hover:underline font-medium">sapa@insani.id</a> atau menghubungi CS INSANI di 081319456675 atau (021) 27871199.</p>
-            </div>
-        )
     }
 ];
 
@@ -403,6 +328,15 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
                                 </div>
                             </motion.div>
                         ))}
+                    </div>
+                    
+                    <div className="mt-12 text-center">
+                        <Link href="/pusat-bantuan">
+                            <Button size="lg" className="bg-insani-blue hover:bg-insani-blue/90 text-white rounded-full px-8 h-12 font-semibold shadow-sm transition-transform hover:scale-105">
+                                Selengkapnya di Pusat Bantuan
+                                <ExternalLink className="ml-2 w-4 h-4" />
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </section>

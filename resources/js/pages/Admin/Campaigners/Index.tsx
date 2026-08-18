@@ -64,7 +64,7 @@ export default function CampaignersIndex({ campaigners, filters }: any) {
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+                <div className="rounded-lg border border-gray-200 bg-white overflow-x-auto overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-gray-50/50">
                             <TableRow>

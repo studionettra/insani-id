@@ -12,7 +12,7 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-outfit" dir={isRtl ? 'rtl' : 'ltr'}>
             <Head>
-                <title>{title ? `${title} - Insani Indonesia` : 'Insani Indonesia'}</title>
+                <title>{title || 'Insani Indonesia'}</title>
                 <meta name="description" content="Platform Galang Dana Insani Indonesia" />
             </Head>
 
@@ -46,7 +46,6 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                             <Link href="/fokus-program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/fokus-program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Fokus Program</Link>
                             <Link href="/program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Donasi</Link>
                             <Link href="/berita" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/berita') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Berita</Link>
-                            <Link href="/buat-program" className={`hidden lg:block px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/buat-program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Galang Dana</Link>
                         </nav>
                         
                         <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -119,9 +118,9 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                             </div>
                         </div>
 
-                        {/* Kolom 2: Tautan Perusahaan */}
+                        {/* Kolom 2: Tautan Tentang */}
                         <div className="col-span-1 md:col-span-4 lg:col-span-2 lg:col-start-6">
-                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">Perusahaan</h3>
+                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">Tentang</h3>
                             <ul className="space-y-3 text-sm text-blue-100">
                                 <li>
                                     <Link href="/tentang-kami" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
@@ -141,6 +140,11 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                                 <li>
                                     <Link href="/kontak" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
                                         Hubungi Kami
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/buat-program" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
+                                        Jadi Campaigner
                                     </Link>
                                 </li>
                             </ul>
@@ -218,7 +222,7 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/buat-program') ? 'bg-brand-50' : 'bg-transparent'}`}>
                         <PlusCircle className="w-[22px] h-[22px]" strokeWidth={isActive('/buat-program') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">Galang</span>
+                    <span className="text-[10px] font-medium mt-0.5">Campaigner</span>
                 </Link>
                 <Link href="/login" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/login') || isActive('/akun') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/login') || isActive('/akun') ? 'bg-brand-50' : 'bg-transparent'}`}>

@@ -5,30 +5,31 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
+import { Textarea } from '@/components/ui/textarea';
 
 export default function PagesEdit({ page }: any) {
     const { data, setData, post, processing, errors } = useForm({
         _method: 'put',
+        slug: page.slug || '',
         title: { 
-            id: page.title_translations?.id || '', 
-            en: page.title_translations?.en || '', 
-            ar: page.title_translations?.ar || '' 
+            id: page.title?.id || page.title || '', 
+            en: page.title?.en || '', 
+            ar: page.title?.ar || '' 
         },
         content_html: { 
-            id: page.content_html_translations?.id || '', 
-            en: page.content_html_translations?.en || '', 
-            ar: page.content_html_translations?.ar || '' 
+            id: page.content_html?.id || page.content_html || '', 
+            en: page.content_html?.en || '', 
+            ar: page.content_html?.ar || '' 
         },
         meta_title: { 
-            id: page.meta_title_translations?.id || '', 
-            en: page.meta_title_translations?.en || '', 
-            ar: page.meta_title_translations?.ar || '' 
+            id: page.meta_title?.id || page.meta_title || '', 
+            en: page.meta_title?.en || '', 
+            ar: page.meta_title?.ar || '' 
         },
         meta_description: { 
-            id: page.meta_description_translations?.id || '', 
-            en: page.meta_description_translations?.en || '', 
-            ar: page.meta_description_translations?.ar || '' 
+            id: page.meta_description?.id || page.meta_description || '', 
+            en: page.meta_description?.en || '', 
+            ar: page.meta_description?.ar || '' 
         },
         is_active: page.is_active,
         attachment: null as File | null,
@@ -51,7 +52,7 @@ export default function PagesEdit({ page }: any) {
                         </Button>
                     </Link>
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Edit Halaman: {page.title_translations?.id || page.title}</h2>
+                        <h2 className="text-2xl font-bold tracking-tight">Edit Halaman: {typeof page.title === 'string' ? page.title : (page.title?.id || '')}</h2>
                         <p className="text-muted-foreground text-sm">
                             /{page.slug}
                         </p>
@@ -59,13 +60,13 @@ export default function PagesEdit({ page }: any) {
                 </div>
 
                 <form onSubmit={submit} className="flex flex-col gap-6">
-                    <div className="grid gap-6 md:grid-cols-2">
-                        {/* Kolom Kiri: Informasi Dasar & Bahasa Indonesia */}
+                    <div className="grid gap-6">
+                        {/* Kolom Informasi Dasar */}
                         <div className="flex flex-col gap-4 rounded-md border bg-white p-6 shadow-sm">
-                            <h3 className="font-semibold text-lg border-b pb-2">Konten Bahasa Indonesia (Utama)</h3>
+                            <h3 className="font-semibold text-lg border-b pb-2">Konten Halaman</h3>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="title_id">Judul Halaman (ID) *</Label>
+                                <Label htmlFor="title_id">Judul Halaman *</Label>
                                 <Input
                                     id="title_id"
                                     value={data.title.id}
@@ -76,7 +77,20 @@ export default function PagesEdit({ page }: any) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="content_id">Konten HTML (ID) *</Label>
+                                <Label htmlFor="slug">Slug (URL) *</Label>
+                                <Input
+                                    id="slug"
+                                    value={data.slug}
+                                    onChange={(e) => setData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9\-]/g, ''))}
+                                    placeholder="contoh-slug-halaman"
+                                    required
+                                />
+                                {errors.slug && <p className="text-sm text-red-500">{errors.slug}</p>}
+                                <p className="text-xs text-muted-foreground">URL yang akan digunakan: /<span className="font-semibold text-insani-blue">{data.slug || 'contoh-slug'}</span></p>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="content_id">Konten HTML *</Label>
                                 <RichTextEditor
                                     value={data.content_html.id}
                                     onChange={(value) => setData('content_html', { ...data.content_html, id: value })}
@@ -86,7 +100,7 @@ export default function PagesEdit({ page }: any) {
                             </div>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="meta_title_id">Meta Title (ID)</Label>
+                                <Label htmlFor="meta_title_id">Meta Title</Label>
                                 <Input
                                     id="meta_title_id"
                                     value={data.meta_title.id}
@@ -95,35 +109,12 @@ export default function PagesEdit({ page }: any) {
                             </div>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="meta_desc_id">Meta Description (ID)</Label>
+                                <Label htmlFor="meta_desc_id">Meta Description</Label>
                                 <Textarea
                                     id="meta_desc_id"
                                     rows={3}
                                     value={data.meta_description.id}
                                     onChange={(e) => setData('meta_description', { ...data.meta_description, id: e.target.value })}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Kolom Kanan: Bahasa Inggris & Pengaturan */}
-                        <div className="flex flex-col gap-4 rounded-md border bg-white p-6 shadow-sm">
-                            <h3 className="font-semibold text-lg border-b pb-2">Konten Bahasa Inggris (Opsional)</h3>
-                            
-                            <div className="grid gap-2">
-                                <Label htmlFor="title_en">Judul Halaman (EN)</Label>
-                                <Input
-                                    id="title_en"
-                                    value={data.title.en}
-                                    onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="content_en">Konten HTML (EN)</Label>
-                                <RichTextEditor
-                                    value={data.content_html.en}
-                                    onChange={(value) => setData('content_html', { ...data.content_html, en: value })}
-                                    placeholder="Write page content here..."
                                 />
                             </div>
                         </div>

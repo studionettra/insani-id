@@ -160,7 +160,7 @@ return;
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+                <div className="rounded-lg border border-gray-200 bg-white overflow-x-auto overflow-x-auto">
                     <Table>
                         <TableHeader className="bg-gray-50/50">
                             <TableRow>
@@ -253,7 +253,7 @@ return;
                                 {errors['name.id'] && <p className="text-xs text-red-500">{errors['name.id']}</p>}
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="name_en" className="text-sm font-medium text-gray-700">Nama (EN)</Label>
                                     <Input
@@ -285,7 +285,7 @@ return;
                                 />
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="description_en" className="text-sm font-medium text-gray-700">Deskripsi (EN)</Label>
                                     <Input
@@ -331,7 +331,7 @@ return;
                                 {errors.pillar_image && <p className="text-xs text-red-500">{errors.pillar_image}</p>}
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="platform_fee" className="text-sm font-medium text-gray-700">Biaya Platform (%)</Label>
                                     <Input
@@ -432,7 +432,7 @@ return;
                                         {errors['name.id'] && <p className="text-xs text-red-500">{errors['name.id']}</p>}
                                     </div>
                                     
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
                                             <Label htmlFor="edit_name_en" className="text-sm font-medium text-gray-700">Nama (EN)</Label>
                                             <Input
@@ -463,7 +463,7 @@ return;
                                             className="border-gray-200 focus-visible:ring-[#1A56DB]"
                                         />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
                                             <Label htmlFor="edit_description_en" className="text-sm font-medium text-gray-700">Deskripsi (EN)</Label>
                                             <Input
@@ -515,7 +515,7 @@ return;
 
                             {isAdministrator && (
                                 <>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
                                             <Label htmlFor="edit_platform_fee" className="text-sm font-medium text-gray-700">Biaya Platform (%)</Label>
                                             <Input

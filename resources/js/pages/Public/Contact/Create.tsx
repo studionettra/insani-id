@@ -147,7 +147,7 @@ export default function ContactCreate() {
 
     return (
         <PublicLayout title="Hubungi Kami">
-            <Head title="Kontak | Insani Indonesia" />
+            <Head title="Kontak" />
             
             {/* Hero Section */}
             <div className="bg-insani-darkblue text-white py-16 md:py-24 relative overflow-hidden">

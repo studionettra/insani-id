@@ -1,4 +1,5 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { toast } from 'sonner';
 import { ChevronRight, ShieldCheck, CreditCard, Landmark, CheckCircle2 } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,12 @@ export default function Donate({ program }: any) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (data.amount < 10000) {
+            toast.error('Minimal donasi adalah Rp 10.000');
+            return;
+        }
+
         post(`/program/${program.slug}/donasi`);
     };
 
@@ -85,7 +92,6 @@ export default function Donate({ program }: any) {
                                                 <Input
                                                     id="custom_amount"
                                                     type="number"
-                                                    min="10000"
                                                     step="1000"
                                                     className="pl-12 h-14 text-lg font-bold"
                                                     value={data.amount}
@@ -141,7 +147,7 @@ export default function Donate({ program }: any) {
                                         
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <Label htmlFor="donor_name">Nama Lengkap</Label>
+                                                <Label htmlFor="donor_name">Nama Lengkap <span className="text-red-500">*</span></Label>
                                                 <Input 
                                                     id="donor_name" 
                                                     className="mt-1" 
@@ -152,7 +158,7 @@ export default function Donate({ program }: any) {
                                                 {errors.donor_name && <p className="text-red-500 text-sm mt-1">{errors.donor_name}</p>}
                                             </div>
                                             <div>
-                                                <Label htmlFor="donor_phone">Nomor WhatsApp</Label>
+                                                <Label htmlFor="donor_phone">Nomor WhatsApp <span className="text-red-500">*</span></Label>
                                                 <Input 
                                                     id="donor_phone" 
                                                     className="mt-1"
@@ -163,7 +169,7 @@ export default function Donate({ program }: any) {
                                                 {errors.donor_phone && <p className="text-red-500 text-sm mt-1">{errors.donor_phone}</p>}
                                             </div>
                                             <div className="md:col-span-2">
-                                                <Label htmlFor="donor_email">Email</Label>
+                                                <Label htmlFor="donor_email">Email <span className="text-red-500">*</span></Label>
                                                 <Input 
                                                     id="donor_email" 
                                                     type="email"
@@ -223,7 +229,7 @@ export default function Donate({ program }: any) {
                                 <div className="flex gap-4 items-start mb-6">
                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 shrink-0">
                                         <img 
-                                            src={program.image_url || 'https://placehold.co/150x150?text=No+Image'} 
+                                            src={program.cover_image ? `/storage/${program.cover_image}` : 'https://placehold.co/150x150?text=No+Image'} 
                                             alt={title}
                                             className="w-full h-full object-cover"
                                         />

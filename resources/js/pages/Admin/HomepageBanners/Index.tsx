@@ -129,7 +129,7 @@ return;
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white">
+                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -270,7 +270,7 @@ return;
                                 {errors.cta_link && <p className="text-sm text-red-500">{errors.cta_link}</p>}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="sort_order">Urutan (Sort Order)</Label>
                                     <Input
@@ -369,7 +369,7 @@ return;
                                 {errors.cta_link && <p className="text-sm text-red-500">{errors.cta_link}</p>}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="edit_sort_order">Urutan (Sort Order)</Label>
                                     <Input

@@ -112,19 +112,21 @@ export default function Status({ donation }: any) {
                                     <ul className="space-y-3">
                                         <li className="flex justify-between items-center bg-white p-3 rounded-lg border border-amber-200">
                                             <div>
-                                                <span className="block font-bold">BSI (Bank Syariah Indonesia)</span>
-                                                <span className="text-slate-600 font-mono text-lg tracking-wider">712 345 6789</span>
+                                                <span className="block font-bold">Bank Syariah Indonesia (451)</span>
+                                                <span className="text-slate-600 font-mono text-lg tracking-wider">713 219 5026</span>
+                                                <span className="block text-sm text-slate-500">A.n Insani Indonesia</span>
                                             </div>
-                                            <button onClick={() => copyToClipboard('7123456789')} className="p-2 text-insani-blue bg-blue-50 rounded-md hover:bg-blue-100">
+                                            <button onClick={() => copyToClipboard('7132195026')} className="p-2 text-insani-blue bg-blue-50 rounded-md hover:bg-blue-100">
                                                 <Copy className="w-4 h-4" />
                                             </button>
                                         </li>
                                         <li className="flex justify-between items-center bg-white p-3 rounded-lg border border-amber-200">
                                             <div>
-                                                <span className="block font-bold">Mandiri</span>
-                                                <span className="text-slate-600 font-mono text-lg tracking-wider">131 00 1234567 8</span>
+                                                <span className="block font-bold">Bank Rakyat Indonesia (002)</span>
+                                                <span className="text-slate-600 font-mono text-lg tracking-wider">0345 0100 1366 304</span>
+                                                <span className="block text-sm text-slate-500">A.n Insani Indonesia</span>
                                             </div>
-                                            <button onClick={() => copyToClipboard('1310012345678')} className="p-2 text-insani-blue bg-blue-50 rounded-md hover:bg-blue-100">
+                                            <button onClick={() => copyToClipboard('034501001366304')} className="p-2 text-insani-blue bg-blue-50 rounded-md hover:bg-blue-100">
                                                 <Copy className="w-4 h-4" />
                                             </button>
                                         </li>

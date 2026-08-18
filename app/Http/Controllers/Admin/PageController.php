@@ -32,6 +32,7 @@ class PageController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'slug' => 'required|string|max:120|unique:pages,slug',
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
@@ -46,17 +47,7 @@ class PageController extends Controller
             'attachment' => 'nullable|file|max:10240',
         ]);
 
-        $slug = \Illuminate\Support\Str::slug($validated['title']['id']);
-        
-        // Ensure unique slug
-        $originalSlug = $slug;
-        $counter = 1;
-        while (\App\Models\Page::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
-            $counter++;
-        }
-
-        $validated['slug'] = $slug;
+        $validated['slug'] = \Illuminate\Support\Str::slug($validated['slug']);
         $validated['is_active'] = $validated['is_active'] ?? true;
 
         if ($request->hasFile('attachment')) {
@@ -78,6 +69,7 @@ class PageController extends Controller
     public function update(Request $request, \App\Models\Page $page)
     {
         $validated = $request->validate([
+            'slug' => 'required|string|max:120|unique:pages,slug,' . $page->id,
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
@@ -92,16 +84,7 @@ class PageController extends Controller
             'attachment' => 'nullable|file|max:10240',
         ]);
 
-        if ($page->getTranslation('title', 'id') !== $validated['title']['id']) {
-            $slug = \Illuminate\Support\Str::slug($validated['title']['id']);
-            $originalSlug = $slug;
-            $counter = 1;
-            while (\App\Models\Page::where('slug', $slug)->where('id', '!=', $page->id)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
-                $counter++;
-            }
-            $validated['slug'] = $slug;
-        }
+        $validated['slug'] = \Illuminate\Support\Str::slug($validated['slug']);
 
         if ($request->hasFile('attachment')) {
             if ($page->attachment_url) {

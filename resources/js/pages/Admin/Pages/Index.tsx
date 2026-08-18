@@ -63,7 +63,7 @@ export default function PagesIndex({ pages, filters }: any) {
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white">
+                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -84,13 +84,15 @@ export default function PagesIndex({ pages, filters }: any) {
                                 pages.data.map((page: any) => (
                                     <TableRow key={page.id}>
                                         <TableCell>
-                                            <div className="font-medium">{page.title_translations?.id || page.title}</div>
+                                            <div className="font-medium">
+                                                {typeof page.title === 'string' ? page.title : (page.title?.id || '')}
+                                            </div>
                                             <div className="text-xs text-muted-foreground truncate max-w-[200px]">
-                                                {page.meta_title_translations?.id || ''}
+                                                {typeof page.meta_title === 'string' ? page.meta_title : (page.meta_title?.id || '')}
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <a href={`/pages/${page.slug}`} target="_blank" rel="noreferrer" className="text-insani-blue hover:underline">
+                                            <a href={`/${page.slug}`} target="_blank" rel="noreferrer" className="text-insani-blue hover:underline">
                                                 /{page.slug}
                                             </a>
                                         </TableCell>

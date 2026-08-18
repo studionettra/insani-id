@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Comment;
+use App\Models\Program;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,15 +12,17 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CommentFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Comment::class;
+
     public function definition(): array
     {
         return [
-            //
+            'program_id' => Program::factory(),
+            'donation_id' => null,
+            'user_id' => User::factory(),
+            'name' => fake()->name(),
+            'body' => fake()->paragraph(),
+            'is_hidden' => false,
         ];
     }
 }

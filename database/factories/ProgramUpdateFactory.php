@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Program;
 use App\Models\ProgramUpdate;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,15 +12,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class ProgramUpdateFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = ProgramUpdate::class;
+
     public function definition(): array
     {
         return [
-            //
+            'program_id' => Program::factory(),
+            'title' => fake()->sentence(4),
+            'content' => fake()->paragraphs(3, true),
+            'created_by' => User::factory(),
+            'is_published' => true,
         ];
     }
 }

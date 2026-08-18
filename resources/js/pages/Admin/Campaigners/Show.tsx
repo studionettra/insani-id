@@ -66,7 +66,7 @@ export default function CampaignerShow({ campaigner }: any) {
                                 <CardDescription className="text-gray-500">Data yang diinputkan oleh pendaftar</CardDescription>
                             </CardHeader>
                             <CardContent className="p-6">
-                                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                                     <div>
                                         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Campaigner</Label>
                                         <p className="font-medium text-gray-900 mt-1 capitalize">{campaigner.type}</p>
@@ -110,7 +110,7 @@ export default function CampaignerShow({ campaigner }: any) {
                                 <CardTitle className="text-lg font-semibold text-gray-900">Informasi Rekening</CardTitle>
                             </CardHeader>
                             <CardContent className="p-6">
-                                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
                                     <div>
                                         <Label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Bank</Label>
                                         <p className="font-medium text-gray-900 mt-1">{campaigner.bank_name}</p>
@@ -141,7 +141,7 @@ export default function CampaignerShow({ campaigner }: any) {
                                             </a>
                                         </div>
                                         
-                                        <div className="grid grid-cols-2 gap-4 items-start pt-2 border-t border-gray-100">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start pt-2 border-t border-gray-100">
                                             <div className="space-y-1.5">
                                                 <Label className="text-sm font-medium text-gray-700">Status Dokumen</Label>
                                                 <Select 
