@@ -1,9 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, Filter, Eye, CheckCircle } from 'lucide-react';
-import React from 'react';
+import { Search, Filter, Eye, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -12,10 +13,23 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogPortal,
+} from '@/components/ui/dialog';
 import { index as donationsIndex, confirm as donationsConfirm } from '@/routes/admin/donations';
 import { route as wayfinder } from '@/routes/admin/wayfinder';
 
 export default function Index({ donations, filters }: any) {
+    const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+    const [confirmingDonation, setConfirmingDonation] = useState<number | null>(null);
+    const [loadingConfirm, setLoadingConfirm] = useState(false);
+
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             router.get(donationsIndex.url({ search: e.currentTarget.value, status: filters.status }), undefined, { preserveState: true });
@@ -23,9 +37,37 @@ export default function Index({ donations, filters }: any) {
     };
 
     const confirmManualDonation = (donationId: number) => {
-        if (window.confirm('Apakah Anda yakin donasi ini telah dibayar?')) {
-            router.post(donationsConfirm.url({ donation: donationId }));
+        setConfirmingDonation(donationId);
+        setIsConfirmDialogOpen(true);
+    };
+
+    const handleConfirmSubmit = async () => {
+        if (!confirmingDonation) return;
+
+        setLoadingConfirm(true);
+        try {
+            await router.post(
+                donationsConfirm.url({ donation: confirmingDonation }),
+                {},
+                {
+                    onSuccess: () => {
+                        setIsConfirmDialogOpen(false);
+                        setConfirmingDonation(null);
+                        toast.success('Donasi berhasil dikonfirmasi!');
+                    },
+                    onError: () => {
+                        toast.error('Gagal mengkonfirmasi donasi. Silakan coba lagi.');
+                    },
+                }
+            );
+        } finally {
+            setLoadingConfirm(false);
         }
+    };
+
+    const handleCancelConfirm = () => {
+        setIsConfirmDialogOpen(false);
+        setConfirmingDonation(null);
     };
 
     return (
@@ -121,9 +163,57 @@ export default function Index({ donations, filters }: any) {
                     </div>
                 </div>
             </div>
-        
+
+            {/* Full Screen SweetAlert-style Confirm Dialog with Premium Design */}
+            <Dialog
+                open={isConfirmDialogOpen}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        handleCancelConfirm();
+                    }
+                }}
+            >
+                <DialogContent className="max-w-md p-0 border-0 bg-transparent shadow-none [&>button]:hidden">
+                    <div className="relative w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 mx-auto">
+                        <div className="flex flex-col items-center text-center">
+                            {/* Icon */}
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mb-6">
+                                <AlertCircle className="h-8 w-8" />
+                            </div>
+
+                            {/* Title */}
+                            <h3 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
+                                Konfirmasi Pembayaran Donasi
+                            </h3>
+
+                            {/* Description */}
+                            <p className="text-base text-zinc-600 dark:text-zinc-400 leading-relaxed mb-8">
+                                Apakah Anda yakin ingin mengkonfirmasi donasi ini?<br />
+                                Pastikan pembayaran sudah berhasil dilakukan sebelum mengkonfirmasi.
+                            </p>
+
+                            {/* Buttons */}
+                            <div className="flex w-full gap-3">
+                                <button
+                                    onClick={handleCancelConfirm}
+                                    disabled={loadingConfirm}
+                                    className="flex-1 px-6 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={handleConfirmSubmit}
+                                    disabled={loadingConfirm}
+                                    className="flex-1 px-6 py-3 rounded-xl bg-[#1A56DB] hover:bg-[#1A4DB5] text-white font-semibold transition-all shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loadingConfirm ? 'Mengkonfirmasi...' : 'Ya, Konfirmasi'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
-        
     );
 }
 
