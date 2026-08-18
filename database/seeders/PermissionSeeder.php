@@ -26,6 +26,10 @@ class PermissionSeeder extends Seeder
             'comment.view', 'comment.moderate',
             'report.view',
             'settings.view', 'settings.update',
+            
+            // New Modules (Survey & Fundraiser)
+            'survey_report.create', 'survey_report.view',
+            'fundraiser.view', 'fundraiser.create_link',
 
             // CMS Content Management
             'manage_pages', 'manage_faqs', 'manage_management',

@@ -61,6 +61,29 @@ class RoleSeeder extends Seeder
             'Donatur' => [
                 // Empty for now, handled implicitly via ownership of donations
             ],
+
+            'Eksekutif' => [
+                'dashboard.view',
+                'report.view',
+                'program.view',
+                'donation.view',
+                'campaigner.view',
+                'disbursement.view',
+            ],
+
+            'Relawan Lapangan' => [
+                'dashboard.view',
+                'campaigner.view',
+                'program.view',
+                'survey_report.create',
+                'survey_report.view',
+            ],
+
+            'Fundraiser' => [
+                'dashboard.view',
+                'fundraiser.view',
+                'fundraiser.create_link',
+            ],
         ];
 
         foreach ($roles as $roleName => $permissions) {
