@@ -4,10 +4,11 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import PublicLayout from '@/layouts/PublicLayout';
-import { formatRupiah, formatDate } from '@/lib/utils';
+import { formatRupiah, formatDate, getLocalizedValue } from '@/lib/utils';
 
 export default function Index({ program, disbursements }: any) {
+    const programTitle = getLocalizedValue(program?.title, 'Program');
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'pending':
@@ -24,72 +25,71 @@ export default function Index({ program, disbursements }: any) {
     };
 
     return (
-        <PublicLayout>
-            <Head title={`Pencairan Dana - ${program.title}`} />
+        <>
+            <Head title={`Pencairan Dana - ${programTitle}`} />
 
-            <div className="bg-slate-50 py-12 min-h-screen">
-                <div className="container mx-auto px-4 max-w-4xl">
-                    <div className="mb-6 flex items-center justify-between">
-                        <div>
-                            <Link href={route('akun.programs.index')} className="text-sm text-slate-500 hover:text-primary flex items-center mb-2">
-                                <ArrowLeft className="w-4 h-4 mr-1" /> Kembali ke Program
-                            </Link>
-                            <h1 className="text-2xl font-bold text-slate-900">Pencairan Dana</h1>
-                            <p className="text-slate-500 mt-1">{program.title}</p>
-                        </div>
-                        <Button asChild>
-                            <Link href={route('akun.programs.disbursements.create', program.id)}>
-                                <Plus className="w-4 h-4 mr-2" /> Ajukan Pencairan
-                            </Link>
-                        </Button>
+            <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 max-w-4xl mx-auto w-full">
+                <div className="mb-2 flex items-center justify-between">
+                    <div>
+                        <Link href="/akun/programs" className="text-sm text-slate-500 hover:text-primary flex items-center mb-2">
+                            <ArrowLeft className="w-4 h-4 mr-1" /> Kembali ke Program
+                        </Link>
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Pencairan Dana</h1>
+                        <p className="text-slate-500 dark:text-gray-400 mt-1">{programTitle}</p>
                     </div>
+                    <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
+                        <Link href={`/akun/programs/${program.id}/disbursements/create`}>
+                            <Plus className="w-4 h-4 mr-2" /> Ajukan Pencairan
+                        </Link>
+                    </Button>
+                </div>
 
-                    <Card>
+                    <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
                         <CardHeader>
-                            <CardTitle>Riwayat Pencairan</CardTitle>
+                            <CardTitle className="text-slate-900 dark:text-white">Riwayat Pencairan</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {disbursements.data.length === 0 ? (
                                 <div className="text-center py-12">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-                                        <Download className="w-8 h-8 text-slate-400" />
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-gray-800 mb-4">
+                                        <Download className="w-8 h-8 text-slate-400 dark:text-gray-500" />
                                     </div>
-                                    <h3 className="text-lg font-medium text-slate-900 mb-2">Belum ada riwayat pencairan</h3>
-                                    <p className="text-slate-500 mb-6">Anda belum pernah mengajukan pencairan dana untuk program ini.</p>
+                                    <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Belum ada riwayat pencairan</h3>
+                                    <p className="text-slate-500 dark:text-gray-400 mb-6">Anda belum pernah mengajukan pencairan dana untuk program ini.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {disbursements.data.map((item: any) => (
-                                        <div key={item.id} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div key={item.id} className="border border-slate-200 dark:border-gray-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-900">
                                             <div>
                                                 <div className="flex items-center gap-2 mb-2">
-                                                    <span className="font-semibold text-lg">{formatRupiah(item.requested_amount)}</span>
+                                                    <span className="font-semibold text-lg text-slate-900 dark:text-white">{formatRupiah(item.requested_amount)}</span>
                                                     {getStatusBadge(item.status)}
                                                 </div>
-                                                <p className="text-sm text-slate-500">
+                                                <p className="text-sm text-slate-500 dark:text-gray-400">
                                                     Diajukan pada {formatDate(item.created_at)}
                                                 </p>
                                                 {item.status === 'rejected' && item.rejection_reason && (
-                                                    <div className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded border border-red-100">
+                                                    <div className="mt-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 p-2 rounded border border-red-100 dark:border-red-900/60">
                                                         <span className="font-medium">Alasan penolakan:</span> {item.rejection_reason}
                                                     </div>
                                                 )}
                                                 {item.status === 'transferred' && item.transferred_at && (
-                                                    <div className="mt-2 text-sm text-green-600">
+                                                    <div className="mt-2 text-sm text-green-600 dark:text-green-400">
                                                         Ditransfer pada {formatDate(item.transferred_at)}
                                                     </div>
                                                 )}
                                             </div>
                                             
                                             <div className="text-left md:text-right text-sm">
-                                                <p className="font-medium text-slate-900">{item.bank_name}</p>
-                                                <p className="text-slate-500">{item.bank_account_number}</p>
-                                                <p className="text-slate-500">a.n. {item.bank_account_name}</p>
+                                                <p className="font-medium text-slate-900 dark:text-white">{item.bank_name}</p>
+                                                <p className="text-slate-500 dark:text-gray-400 font-mono">{item.bank_account_number}</p>
+                                                <p className="text-slate-500 dark:text-gray-400">a.n. {item.bank_account_name}</p>
                                             </div>
                                         </div>
                                     ))}
 
-                                    {/* Pagination (Simplified for demo) */}
+                                    {/* Pagination */}
                                     {disbursements.last_page > 1 && (
                                         <div className="flex justify-center mt-6">
                                             <div className="flex gap-2">
@@ -97,7 +97,11 @@ export default function Index({ program, disbursements }: any) {
                                                     <Link
                                                         key={i}
                                                         href={link.url || '#'}
-                                                        className={`px-3 py-1 rounded border ${link.active ? 'bg-primary text-white border-primary' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
+                                                        className={`px-3 py-1 rounded border text-sm ${
+                                                            link.active 
+                                                                ? 'bg-blue-600 text-white border-blue-600' 
+                                                                : 'bg-white dark:bg-gray-900 text-slate-700 dark:text-gray-300 border-slate-200 dark:border-gray-800 hover:bg-slate-50 dark:hover:bg-gray-800'
+                                                        }`}
                                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                                     />
                                                 ))}
@@ -109,7 +113,6 @@ export default function Index({ program, disbursements }: any) {
                         </CardContent>
                     </Card>
                 </div>
-            </div>
-        </PublicLayout>
+        </>
     );
 }

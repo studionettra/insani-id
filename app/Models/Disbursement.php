@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Disbursement extends Model
 {
@@ -51,5 +50,4 @@ class Disbursement extends Model
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();
     }
-
 }

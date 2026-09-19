@@ -3,49 +3,45 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateDisbursementStatusRequest;
 use App\Models\Disbursement;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Storage;
 
 class DisbursementController extends Controller
 {
     public function index(Request $request)
     {
         $status = $request->query('status', 'pending');
-        
+
         $disbursements = Disbursement::with('program')
-            ->when($status !== 'all', function($query) use ($status) {
+            ->when($status !== 'all', function ($query) use ($status) {
                 return $query->where('status', $status);
             })
             ->latest()
             ->paginate(15)
             ->withQueryString();
-            
+
         return Inertia::render('Admin/Disbursements/Index', [
             'disbursements' => $disbursements,
             'filters' => [
-                'status' => $status
-            ]
+                'status' => $status,
+            ],
         ]);
     }
 
     public function show(Disbursement $disbursement)
     {
-        $disbursement->load('program.campaigner');
-        
+        $disbursement->load(['program.campaignerProfile', 'program.creator']);
+
         return Inertia::render('Admin/Disbursements/Show', [
-            'disbursement' => $disbursement
+            'disbursement' => $disbursement,
         ]);
     }
 
-    public function updateStatus(Request $request, Disbursement $disbursement)
+    public function updateStatus(UpdateDisbursementStatusRequest $request, Disbursement $disbursement)
     {
-        $request->validate([
-            'status' => 'required|in:approved,rejected,transferred',
-            'rejection_reason' => 'required_if:status,rejected|nullable|string|max:1000',
-            'transfer_proof' => 'required_if:status,transferred|nullable|image|max:2048',
-        ]);
+        $validated = $request->validated();
 
         $status = $request->input('status');
 

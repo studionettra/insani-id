@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDisbursementRequest;
 use App\Models\Program;
-use App\Models\Disbursement;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Gate;
 
 class CampaignerDisbursementController extends Controller
 {
@@ -16,15 +14,15 @@ class CampaignerDisbursementController extends Controller
         if ($program->campaigner_type === 'internal') {
             abort(403, 'Unauthorized.');
         }
-        
+
         $profileId = auth()->user()->campaignerProfile?->id;
 
-        if (!$profileId || $program->campaigner_profile_id !== $profileId) {
+        if (! $profileId || $program->campaigner_profile_id !== $profileId) {
             abort(403, 'Unauthorized.');
         }
 
         $disbursements = $program->disbursements()->latest()->paginate(10);
-        
+
         return Inertia::render('Public/Akun/Disbursement/Index', [
             'program' => $program,
             'disbursements' => $disbursements,
@@ -36,10 +34,10 @@ class CampaignerDisbursementController extends Controller
         if ($program->campaigner_type === 'internal') {
             abort(403, 'Unauthorized.');
         }
-        
+
         $profileId = auth()->user()->campaignerProfile?->id;
 
-        if (!$profileId || $program->campaigner_profile_id !== $profileId) {
+        if (! $profileId || $program->campaigner_profile_id !== $profileId) {
             abort(403, 'Unauthorized.');
         }
 
@@ -54,30 +52,13 @@ class CampaignerDisbursementController extends Controller
         ]);
     }
 
-    public function store(Request $request, Program $program)
+    public function store(StoreDisbursementRequest $request, Program $program)
     {
-        if ($program->campaigner_type === 'internal') {
-            abort(403, 'Unauthorized.');
-        }
-        
-        $profileId = auth()->user()->campaignerProfile?->id;
-
-        if (!$profileId || $program->campaigner_profile_id !== $profileId) {
-            abort(403, 'Unauthorized.');
-        }
-
-        $totalCollected = $program->donations()->where('status', 'paid')->sum('amount');
-        $totalDisbursed = $program->disbursements()->whereIn('status', ['pending', 'approved', 'transferred'])->sum('requested_amount');
-        $availableBalance = $totalCollected - $totalDisbursed;
-
-        $request->validate([
-            'requested_amount' => ['required', 'numeric', 'min:10000', 'max:' . $availableBalance],
-            'notes' => ['nullable', 'string', 'max:500'],
-        ]);
+        $validated = $request->validated();
 
         $profile = auth()->user()->campaignerProfile;
-        
-        if (!$profile || !$profile->bank_name || !$profile->bank_account_number || !$profile->bank_account_name) {
+
+        if (! $profile || ! $profile->bank_name || ! $profile->bank_account_number || ! $profile->bank_account_name) {
             return back()->with('error', 'Silakan lengkapi profil rekening bank Anda terlebih dahulu.');
         }
 
