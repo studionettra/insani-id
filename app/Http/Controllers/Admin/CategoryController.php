@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Routing\Controller as BaseController;
+use App\Http\Requests\UpdateCategoryPillarRequest;
 use App\Models\Category;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CategoryController extends BaseController
 {
@@ -153,7 +154,7 @@ class CategoryController extends BaseController
     /**
      * Update the pillar settings of the specified resource.
      */
-    public function updatePillar(\App\Http\Requests\UpdateCategoryPillarRequest $request, Category $category)
+    public function updatePillar(UpdateCategoryPillarRequest $request, Category $category)
     {
         $validated = $request->validated();
 

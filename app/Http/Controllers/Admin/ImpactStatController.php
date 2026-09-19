@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ImpactStat;
 use Illuminate\Http\Request;
 
 class ImpactStatController extends Controller
 {
     public function index()
     {
-        $impactStats = \App\Models\ImpactStat::query()
+        $impactStats = ImpactStat::query()
             ->when(request('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -41,12 +42,12 @@ class ImpactStatController extends Controller
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
-        \App\Models\ImpactStat::create($validated);
+        ImpactStat::create($validated);
 
         return redirect()->back()->with('success', 'Statistik Dampak berhasil ditambahkan.');
     }
 
-    public function update(Request $request, \App\Models\ImpactStat $impact_stat)
+    public function update(Request $request, ImpactStat $impact_stat)
     {
         $validated = $request->validate([
             'title' => 'required|array',
@@ -65,7 +66,7 @@ class ImpactStatController extends Controller
         return redirect()->back()->with('success', 'Statistik Dampak berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\ImpactStat $impact_stat)
+    public function destroy(ImpactStat $impact_stat)
     {
         $impact_stat->delete();
 

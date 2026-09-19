@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\HomepageBanner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class HomepageBannerController extends Controller
 {
     public function index()
     {
-        $banners = \App\Models\HomepageBanner::query()
+        $banners = HomepageBanner::query()
             ->when(request('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -38,7 +40,7 @@ class HomepageBannerController extends Controller
         if ($request->hasFile('desktop_image_url')) {
             $validated['desktop_image_url'] = $request->file('desktop_image_url')->store('banners', 'public');
         }
-        
+
         if ($request->hasFile('mobile_image_url')) {
             $validated['mobile_image_url'] = $request->file('mobile_image_url')->store('banners/mobile', 'public');
         }
@@ -46,12 +48,12 @@ class HomepageBannerController extends Controller
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
-        \App\Models\HomepageBanner::create($validated);
+        HomepageBanner::create($validated);
 
         return redirect()->back()->with('success', 'Banner berhasil ditambahkan.');
     }
 
-    public function update(Request $request, \App\Models\HomepageBanner $homepage_banner)
+    public function update(Request $request, HomepageBanner $homepage_banner)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -64,14 +66,14 @@ class HomepageBannerController extends Controller
 
         if ($request->hasFile('desktop_image_url')) {
             if ($homepage_banner->desktop_image_url) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($homepage_banner->desktop_image_url);
+                Storage::disk('public')->delete($homepage_banner->desktop_image_url);
             }
             $validated['desktop_image_url'] = $request->file('desktop_image_url')->store('banners', 'public');
         }
-        
+
         if ($request->hasFile('mobile_image_url')) {
             if ($homepage_banner->mobile_image_url) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($homepage_banner->mobile_image_url);
+                Storage::disk('public')->delete($homepage_banner->mobile_image_url);
             }
             $validated['mobile_image_url'] = $request->file('mobile_image_url')->store('banners/mobile', 'public');
         }
@@ -81,13 +83,13 @@ class HomepageBannerController extends Controller
         return redirect()->back()->with('success', 'Banner berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\HomepageBanner $homepage_banner)
+    public function destroy(HomepageBanner $homepage_banner)
     {
         if ($homepage_banner->desktop_image_url) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($homepage_banner->desktop_image_url);
+            Storage::disk('public')->delete($homepage_banner->desktop_image_url);
         }
         if ($homepage_banner->mobile_image_url) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($homepage_banner->mobile_image_url);
+            Storage::disk('public')->delete($homepage_banner->mobile_image_url);
         }
         $homepage_banner->delete();
 

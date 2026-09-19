@@ -40,4 +40,16 @@ return null;
     return match ? `https://www.youtube.com/embed/${match[1]}` : null;
 }
 
+export function getLocalizedValue(val: any, fallback = ''): string {
+    if (!val) return fallback;
+    if (typeof val === 'string') return val;
+    if (typeof val === 'object') {
+        if (typeof val.id === 'string' && val.id.trim() !== '') return val.id;
+        if (typeof val.en === 'string' && val.en.trim() !== '') return val.en;
+        const first = Object.values(val).find(v => typeof v === 'string' && (v as string).trim() !== '');
+        if (first) return first as string;
+    }
+    return String(val || fallback);
+}
+
 

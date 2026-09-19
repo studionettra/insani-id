@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Console\Commands\RouteTranslationsListCommand;
+use App\Models\Payment;
 use App\Models\Program;
+use App\Observers\PaymentObserver;
 use App\Observers\ProgramObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -17,7 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(
+            'laravellocalizationroutecache.list',
+            RouteTranslationsListCommand::class
+        );
     }
 
     /**
@@ -26,9 +32,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
-        
-        \App\Models\Program::observe(\App\Observers\ProgramObserver::class);
-        \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
+
+        Program::observe(ProgramObserver::class);
+        Payment::observe(PaymentObserver::class);
     }
 
     /**

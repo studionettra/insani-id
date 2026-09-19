@@ -4,8 +4,8 @@ namespace App\Mail;
 
 use App\Models\ContactMessage;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -30,7 +30,7 @@ class ContactMessageNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Pesan Kontak Baru: ' . $this->messageData->subject,
+            subject: 'Pesan Kontak Baru: '.$this->messageData->subject,
         );
     }
 
@@ -47,7 +47,7 @@ class ContactMessageNotification extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

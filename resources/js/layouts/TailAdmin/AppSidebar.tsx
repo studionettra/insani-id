@@ -36,7 +36,7 @@ const AppSidebar: React.FC = () => {
         name: "Program Donasi",
         path: "/admin/programs",
     }] : []),
-    ...(permissions.includes('program.view') ? [{
+    ...(permissions.includes('donation.view') ? [{
         icon: <BookOpen className="w-5 h-5" />,
         name: "Manajemen Donasi",
         path: "/admin/donations",
@@ -306,15 +306,18 @@ const AppSidebar: React.FC = () => {
               />
             </>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-              onError={(e) => {
-                 e.currentTarget.src = '/images/logo/logo-landscape-color.png';
-              }}
-            />
+            <>
+              <img
+                src="/images/logo/logo-portrait-color.png"
+                alt="Logo"
+                className="h-8 w-8 object-contain dark:hidden"
+              />
+              <img
+                src="/images/logo/logo-portrait-white.png"
+                alt="Logo"
+                className="h-8 w-8 object-contain hidden dark:block"
+              />
+            </>
           )}
         </Link>
       </div>

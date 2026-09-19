@@ -44,11 +44,7 @@ test('CategoryFactory creates valid model', function () {
         ->and($category->is_active)->toBeTrue()
         ->and($category->platform_fee_percent)->toBeGreaterThanOrEqual(0);
 
-    // name bisa berupa array (MySQL/PostgreSQL) atau JSON string (SQLite)
-    $name = $category->name;
-    if (is_string($name)) {
-        $name = json_decode($name, true);
-    }
+    $name = $category->getTranslations('name');
     expect($name)->toBeArray()->toHaveKey('id');
 });
 

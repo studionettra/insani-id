@@ -2,12 +2,13 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
@@ -60,6 +61,7 @@ interface Program {
     video_url: string | null;
     story: string;
     published_at: string;
+    deadline?: string | null;
     updates?: any[];
     comments?: any[];
 }
@@ -78,6 +80,19 @@ interface Props {
 export default function ProgramShow({ program, auth }: Props) {
     const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur'>('cerita');
     const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
+    const [isShareOpen, setIsShareOpen] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://insani.id/program/${program.slug}`;
+    const shareText = `Mari bersama bantu program kebaikan: "${program.title}" melalui Insani Indonesia`;
+    const metaDescription = program.story
+        ? program.story.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
+        : `Bantu wujudkan program ${program.title} bersama Insani Indonesia.`;
+    const coverImageUrl = program.cover_image
+        ? (program.cover_image.startsWith('http')
+            ? program.cover_image
+            : `${typeof window !== 'undefined' ? window.location.origin : ''}/storage/${program.cover_image}`)
+        : '/images/default-cover.jpg';
 
     const commentForm = useForm({
         name: auth?.user ? auth.user.name : '',
@@ -86,8 +101,7 @@ export default function ProgramShow({ program, auth }: Props) {
 
     const submitComment = (e: React.FormEvent) => {
         e.preventDefault();
-        // @ts-ignore
-        commentForm.post(route('programs.comments.store', program.id), {
+        commentForm.post(`/programs/${program.id}/comments`, {
             preserveScroll: true,
             onSuccess: () => commentForm.reset('body'),
         });
@@ -103,16 +117,29 @@ export default function ProgramShow({ program, auth }: Props) {
             ? program.campaignerProfile.institution_name
             : program.creator?.name);
 
+    const copyToClipboard = () => {
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                setCopied(true);
+                toast.success("Tautan program berhasil disalin!");
+                setTimeout(() => setCopied(false), 2500);
+            });
+        }
+    };
+
     const handleShare = () => {
-        if (navigator.share) {
+        setIsShareOpen(true);
+    };
+
+    const handleNativeShare = () => {
+        if (typeof navigator !== 'undefined' && navigator.share) {
             navigator.share({
-                title: `${program.title} - Insani.id`,
-                text: `Mari bersama wujudkan program kebaikan: ${program.title}`,
-                url: window.location.href,
-            }).catch((error) => console.log('Error sharing', error));
+                title: `${program.title} - Insani Indonesia`,
+                text: shareText,
+                url: shareUrl,
+            }).catch(() => {});
         } else {
-            navigator.clipboard.writeText(window.location.href);
-            toast.success("Tautan program disalin ke clipboard!");
+            copyToClipboard();
         }
     };
 
@@ -189,13 +216,24 @@ export default function ProgramShow({ program, auth }: Props) {
     return (
         <PublicLayout hideFooter={true} hideMobileNav={true} hideTopNav={true}>
             <Head>
-                <title>{`${program.title} - Program Donasi`}</title>
-                <meta name="description" content={program.story ? program.story.substring(0, 150) + '...' : `Bantu wujudkan program ${program.title} bersama Insani Indonesia.`} />
-                <meta property="og:title" content={program.title} />
-                <meta property="og:description" content={program.story ? program.story.substring(0, 150) + '...' : `Bantu wujudkan program ${program.title} bersama Insani Indonesia.`} />
-                <meta property="og:image" content={program.cover_image ? `/storage/${program.cover_image}` : '/images/default-cover.jpg'} />
+                <title>{`${program.title} - Program Kebaikan Insani`}</title>
+                <meta name="description" content={metaDescription} />
+                <link rel="canonical" href={shareUrl} />
+
+                {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
+                <meta property="og:url" content={shareUrl} />
+                <meta property="og:title" content={program.title} />
+                <meta property="og:description" content={metaDescription} />
+                <meta property="og:image" content={coverImageUrl} />
+                <meta property="og:site_name" content="Insani Indonesia" />
+
+                {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:url" content={shareUrl} />
+                <meta name="twitter:title" content={program.title} />
+                <meta name="twitter:description" content={metaDescription} />
+                <meta name="twitter:image" content={coverImageUrl} />
             </Head>
 
             <div className="bg-slate-50 py-0 lg:py-12">
@@ -458,6 +496,135 @@ export default function ProgramShow({ program, auth }: Props) {
                     </Link>
                 </div>
             </div>
+            {/* Share Modal */}
+            <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
+                <DialogContent className="sm:max-w-md p-6 bg-white rounded-2xl">
+                    <DialogHeader className="text-left">
+                        <DialogTitle className="text-lg font-bold text-slate-800">
+                            Bagikan Program Kebaikan
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-slate-500">
+                            Sebarkan program ini ke keluarga dan kerabat untuk memperluas jangkauan kebaikan.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Program Preview */}
+                    <div className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 items-center mt-2">
+                        <img
+                            src={coverImageUrl}
+                            alt={program.title}
+                            className="w-16 h-12 object-cover rounded-lg flex-shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-slate-800 line-clamp-1">{program.title}</p>
+                            <p className="text-[11px] text-slate-500 mt-0.5">{campaignerName}</p>
+                        </div>
+                    </div>
+
+                    {/* Social Share Grid */}
+                    <div className="grid grid-cols-4 gap-2 py-3">
+                        {/* WhatsApp */}
+                        <a
+                            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-emerald-50 transition-colors group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+                                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824z" />
+                                </svg>
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-700">WhatsApp</span>
+                        </a>
+
+                        {/* Facebook */}
+                        <a
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-blue-50 transition-colors group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 group-hover:scale-105 transition-transform">
+                                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                </svg>
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-700">Facebook</span>
+                        </a>
+
+                        {/* Telegram */}
+                        <a
+                            href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-sky-50 transition-colors group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
+                                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.121l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.458c.538-.196 1.006.128.832.943z"/>
+                                </svg>
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-700">Telegram</span>
+                        </a>
+
+                        {/* Twitter / X */}
+                        <a
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-100 transition-colors group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md shadow-slate-900/20 group-hover:scale-105 transition-transform">
+                                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                            </div>
+                            <span className="text-[11px] font-medium text-slate-700">X / Twitter</span>
+                        </a>
+                    </div>
+
+                    {/* Copy Link Input Bar */}
+                    <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200">
+                        <input
+                            type="text"
+                            readOnly
+                            value={shareUrl}
+                            className="w-full bg-transparent px-3 text-xs text-slate-600 outline-none truncate"
+                        />
+                        <Button
+                            size="sm"
+                            onClick={copyToClipboard}
+                            className={`flex-shrink-0 h-9 px-4 text-xs font-semibold rounded-lg transition-all ${
+                                copied ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-insani-blue hover:bg-blue-700 text-white'
+                            }`}
+                        >
+                            {copied ? (
+                                <>
+                                    <Check className="w-3.5 h-3.5 mr-1.5" />
+                                    Tersalin
+                                </>
+                            ) : (
+                                <>
+                                    <Copy className="w-3.5 h-3.5 mr-1.5" />
+                                    Salin
+                                </>
+                            )}
+                        </Button>
+                    </div>
+
+                    {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
+                        <Button
+                            variant="outline"
+                            onClick={handleNativeShare}
+                            className="w-full mt-1 text-xs text-slate-600 border-slate-200 hover:bg-slate-50"
+                        >
+                            <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
+                            Opsi Berbagi Lainnya (Sistem)
+                        </Button>
+                    )}
+                </DialogContent>
+            </Dialog>
         </PublicLayout>
     );
 }

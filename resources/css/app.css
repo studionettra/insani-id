@@ -309,6 +309,7 @@
   --z-index-9999: 9999;
   --z-index-99999: 99999;
   --z-index-999999: 999999;
+  --z-index-9999999: 9999999;
 }
 
 /*
@@ -935,5 +936,52 @@ span.flatpickr-weekday,
 
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
+}
+
+/* Quill Editor Dark Mode */
+.dark .ql-toolbar.ql-snow {
+  border-color: #374151 !important;
+  background-color: #1f2937 !important;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+}
+
+.dark .ql-toolbar.ql-snow .ql-stroke {
+  stroke: #9ca3af !important;
+}
+
+.dark .ql-toolbar.ql-snow .ql-fill {
+  fill: #9ca3af !important;
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker {
+  color: #9ca3af !important;
+}
+
+.dark .ql-toolbar.ql-snow .ql-picker-options {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .ql-toolbar.ql-snow button:hover .ql-stroke,
+.dark .ql-toolbar.ql-snow button.ql-active .ql-stroke {
+  stroke: #60a5fa !important;
+}
+
+.dark .ql-toolbar.ql-snow button:hover .ql-fill,
+.dark .ql-toolbar.ql-snow button.ql-active .ql-fill {
+  fill: #60a5fa !important;
+}
+
+.dark .ql-container.ql-snow {
+  border-color: #374151 !important;
+  background-color: #111827 !important;
+  color: #f3f4f6 !important;
+  border-bottom-left-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: #6b7280 !important;
 }
 

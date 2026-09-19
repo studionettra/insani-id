@@ -3,35 +3,40 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\BlogPostCache;
+use App\Models\Category;
+use App\Models\HomepageBanner;
+use App\Models\ImpactStat;
+use App\Models\Partner;
+use App\Models\Program;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        $banners = \App\Models\HomepageBanner::where('is_active', true)
+        $banners = HomepageBanner::where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
-        $stats = \App\Models\ImpactStat::where('is_active', true)
+        $stats = ImpactStat::where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
-        $partners = \App\Models\Partner::where('is_active', true)
+        $partners = Partner::where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
-        $focusPrograms = \App\Models\Category::where('is_focus_program', true)
+        $focusPrograms = Category::where('is_focus_program', true)
             ->orderBy('name')
             ->get();
 
-        $latestPrograms = \App\Models\Program::with('category')
+        $latestPrograms = Program::with('category')
             ->where('status', 'published')
             ->latest()
             ->take(3)
             ->get();
 
-        $latestBlogs = \App\Models\BlogPostCache::latest('published_at')
+        $latestBlogs = BlogPostCache::latest('published_at')
             ->take(3)
             ->get();
 

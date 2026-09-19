@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\ContactMessage;
 
 class ContactMessageController extends Controller
 {
     public function index()
     {
-        $messages = \App\Models\ContactMessage::query()
+        $messages = ContactMessage::query()
             ->when(request('search'), function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
@@ -25,9 +25,9 @@ class ContactMessageController extends Controller
         ]);
     }
 
-    public function show(\App\Models\ContactMessage $contact_message)
+    public function show(ContactMessage $contact_message)
     {
-        if (!$contact_message->is_read) {
+        if (! $contact_message->is_read) {
             $contact_message->update([
                 'is_read' => true,
                 'read_at' => now(),
@@ -40,7 +40,7 @@ class ContactMessageController extends Controller
         ]);
     }
 
-    public function destroy(\App\Models\ContactMessage $contact_message)
+    public function destroy(ContactMessage $contact_message)
     {
         $contact_message->delete();
 

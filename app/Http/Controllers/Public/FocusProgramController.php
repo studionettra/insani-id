@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Category;
 
 class FocusProgramController extends Controller
 {
     public function index()
     {
-        $pillars = \App\Models\Category::where('is_focus_program', true)
+        $pillars = Category::where('is_focus_program', true)
             ->orderBy('name')
             ->get();
 

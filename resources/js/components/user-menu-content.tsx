@@ -20,9 +20,18 @@ export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
     const { auth } = usePage<any>().props;
 
-    const handleLogout = () => {
+    const handleLogout = (e: React.MouseEvent) => {
+        e.preventDefault();
         cleanup();
-        router.flushAll();
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('logged_out', 'true');
+        }
+        router.post(logout(), {}, {
+            onFinish: () => {
+                router.clearHistory();
+                window.location.replace('/login');
+            },
+        });
     };
 
     return (
@@ -61,16 +70,15 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-                <Link
-                    className="block w-full cursor-pointer"
-                    href={logout()}
-                    as="button"
+                <button
+                    type="button"
+                    className="flex w-full items-center cursor-pointer px-2 py-1.5 text-sm text-red-600 hover:text-red-700 outline-none"
                     onClick={handleLogout}
                     data-test="logout-button"
                 >
-                    <LogOut className="mr-2" />
+                    <LogOut className="mr-2 h-4 w-4" />
                     Log out
-                </Link>
+                </button>
             </DropdownMenuItem>
         </>
     );

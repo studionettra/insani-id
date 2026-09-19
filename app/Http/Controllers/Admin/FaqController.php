@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faq;
 use Illuminate\Http\Request;
 
 class FaqController extends Controller
 {
     public function index()
     {
-        $faqs = \App\Models\Faq::query()
+        $faqs = Faq::query()
             ->when(request('search'), function ($query, $search) {
                 $query->where('question', 'like', "%{$search}%");
             })
@@ -42,12 +43,12 @@ class FaqController extends Controller
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
-        \App\Models\Faq::create($validated);
+        Faq::create($validated);
 
         return redirect()->back()->with('success', 'FAQ berhasil dibuat.');
     }
 
-    public function update(Request $request, \App\Models\Faq $faq)
+    public function update(Request $request, Faq $faq)
     {
         $validated = $request->validate([
             'question' => 'required|array',
@@ -67,7 +68,7 @@ class FaqController extends Controller
         return redirect()->back()->with('success', 'FAQ berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\Faq $faq)
+    public function destroy(Faq $faq)
     {
         $faq->delete();
 

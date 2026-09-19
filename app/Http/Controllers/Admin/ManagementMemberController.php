@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ManagementMember;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ManagementMemberController extends Controller
 {
     public function index()
     {
-        $members = \App\Models\ManagementMember::query()
+        $members = ManagementMember::query()
             ->when(request('search'), function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('position', 'like', "%{$search}%");
@@ -45,14 +47,14 @@ class ManagementMemberController extends Controller
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
-        \App\Models\ManagementMember::create($validated);
+        ManagementMember::create($validated);
 
         return redirect()->back()->with('success', 'Anggota Manajemen berhasil ditambahkan.');
     }
 
-    public function update(Request $request, \App\Models\ManagementMember $management_member)
+    public function update(Request $request, ManagementMember $management_member)
     {
-        // Parameter binding for resource route uses the snake_case of the model name by default 
+        // Parameter binding for resource route uses the snake_case of the model name by default
         // if not explicitly defined in routes/web.php
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -67,7 +69,7 @@ class ManagementMemberController extends Controller
 
         if ($request->hasFile('image_url')) {
             if ($management_member->image_url) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($management_member->image_url);
+                Storage::disk('public')->delete($management_member->image_url);
             }
             $validated['image_url'] = $request->file('image_url')->store('management', 'public');
         }
@@ -77,10 +79,10 @@ class ManagementMemberController extends Controller
         return redirect()->back()->with('success', 'Anggota Manajemen berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\ManagementMember $management_member)
+    public function destroy(ManagementMember $management_member)
     {
         if ($management_member->image_url) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($management_member->image_url);
+            Storage::disk('public')->delete($management_member->image_url);
         }
         $management_member->delete();
 

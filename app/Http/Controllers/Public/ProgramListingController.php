@@ -52,16 +52,16 @@ class ProgramListingController extends Controller
     public function show(string $slug)
     {
         $program = Program::with([
-                'category', 
-                'creator', 
-                'campaignerProfile',
-                'updates' => function ($query) {
-                    $query->where('is_published', true)->latest();
-                },
-                'comments' => function ($query) {
-                    $query->where('is_hidden', false)->latest();
-                }
-            ])
+            'category',
+            'creator',
+            'campaignerProfile',
+            'updates' => function ($query) {
+                $query->where('is_published', true)->latest();
+            },
+            'comments' => function ($query) {
+                $query->where('is_hidden', false)->latest();
+            },
+        ])
             ->where('slug', $slug)
             ->where('status', 'published')
             ->firstOrFail();

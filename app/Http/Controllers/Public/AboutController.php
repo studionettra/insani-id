@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Faq;
+use App\Models\ManagementMember;
+use App\Models\Page;
 
 class AboutController extends Controller
 {
     public function index()
     {
-        $management = \App\Models\ManagementMember::orderBy('sort_order')->get();
-        $faqs = \App\Models\Faq::where('is_active', true)->orderBy('sort_order')->get();
-        $aboutPage = \App\Models\Page::where('slug', 'tentang-kami')->where('is_active', true)->first();
+        $management = ManagementMember::orderBy('sort_order')->get();
+        $faqs = Faq::where('is_active', true)->orderBy('sort_order')->get();
+        $aboutPage = Page::where('slug', 'tentang-kami')->where('is_active', true)->first();
 
         return inertia('Public/About/Index', [
             'management' => $management,

@@ -1,57 +1,20 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { usePage, router } from '@inertiajs/react';
 
-const languages = [
-    { code: 'id', flag: 'id', name: 'Indonesian' },
-    { code: 'en', flag: 'en', name: 'English' },
-    { code: 'ar', flag: 'ar', name: 'Arabic' },
-];
+const flags = {
+    id: 'https://cdn.gtranslate.net/flags/svg/id.svg',
+    en: 'https://cdn.gtranslate.net/flags/svg/en.svg',
+    ar: 'https://cdn.gtranslate.net/flags/svg/ar.svg',
+};
 
 export default function LanguageSwitcher() {
+    const { locale, supportedLocales } = usePage().props;
     const [isOpen, setIsOpen] = useState(false);
-    const [currentLang, setCurrentLang] = useState('id');
     const dropdownRef = useRef(null);
 
+    const currentLang = locale || 'id';
+
     useEffect(() => {
-        // Define initialization callback for Google Translate
-        window.googleTranslateElementInit2 = () => {
-            if (window.google && window.google.translate) {
-                new window.google.translate.TranslateElement(
-                    { pageLanguage: 'id', autoDisplay: false },
-                    'google_translate_element2'
-                );
-            }
-        };
-
-        // Inject Google Translate script directly (this is what GTranslate uses under the hood)
-        if (!document.getElementById('google-translate-script')) {
-            const script = document.createElement('script');
-            script.id = 'google-translate-script';
-            script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit2';
-            script.async = true;
-            document.body.appendChild(script);
-        }
-
-        // Add styles to hide the native Google Translate banner at the top of the page
-        if (!document.getElementById('google-translate-styles')) {
-            const style = document.createElement('style');
-            style.id = 'google-translate-styles';
-            style.innerHTML = `
-                body { top: 0 !important; }
-                .skiptranslate, #google_translate_element2 { display: none !important; }
-                font font { background-color: transparent !important; box-shadow: none !important; position: initial !important; }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Restore language state from googtrans cookie if exists
-        const match = document.cookie.match(/(^|;) ?googtrans=([^;]*)(;|$)/);
-        if (match && match[2]) {
-            const parts = match[2].split('/');
-            if (parts.length === 3 && parts[2] !== 'id') {
-                setCurrentLang(parts[2]);
-            }
-        }
-
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsOpen(false);
@@ -61,38 +24,36 @@ export default function LanguageSwitcher() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const changeLanguage = (langCode) => {
-        setCurrentLang(langCode);
+    const changeLanguage = (targetUrl) => {
         setIsOpen(false);
-
-        // Native method to trigger Google Translate
-        const teCombo = document.querySelector('.goog-te-combo');
-        if (teCombo) {
-            teCombo.value = langCode === 'id' ? '' : langCode; // Revert to original language if 'id'
-            teCombo.dispatchEvent(new Event('change', { bubbles: true }));
-        } else {
-            // Fallback: Set cookie manually and reload
-            document.cookie = `googtrans=/id/${langCode}; path=/`;
-            document.cookie = `googtrans=/id/${langCode}; path=/; domain=${window.location.hostname}`;
-            window.location.reload();
+        if (targetUrl) {
+            router.visit(targetUrl, {
+                preserveScroll: true,
+            });
         }
     };
 
-    const currentFlag = languages.find(l => l.code === currentLang)?.flag || 'id';
+    const currentFlag = flags[currentLang] || flags.id;
+
+    const availableLocales = supportedLocales && Object.keys(supportedLocales).length > 0
+        ? supportedLocales
+        : {
+            id: { name: 'Bahasa Indonesia', url: '/id' },
+            en: { name: 'English', url: '/en' },
+            ar: { name: 'العربية', url: '/ar' },
+        };
 
     return (
         <div className="relative inline-block text-left" ref={dropdownRef}>
-            {/* The hidden element required by Google Translate */}
-            <div id="google_translate_element2" className="hidden"></div>
-            
             {/* Custom Toggle Button */}
             <button 
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-100 transition-colors focus:outline-none active:scale-95"
                 title="Ganti Bahasa"
+                type="button"
             >
                 <img 
-                    src={`https://cdn.gtranslate.net/flags/svg/${currentFlag}.svg`} 
+                    src={currentFlag} 
                     alt={currentLang} 
                     className="w-[22px] h-[22px] rounded-sm object-cover shadow-sm border border-zinc-200"
                 />
@@ -100,19 +61,20 @@ export default function LanguageSwitcher() {
 
             {/* Custom Dropdown */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 py-2 w-14 bg-white/90 backdrop-blur-xl rounded-2xl shadow-lg border border-zinc-200/60 z-50 flex flex-col items-center gap-1 origin-top-right transition-all">
-                    {languages.map((lang) => (
+                <div className="absolute right-0 mt-2 py-2 w-44 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-zinc-200/80 z-50 flex flex-col gap-1 origin-top-right transition-all">
+                    {Object.entries(availableLocales).map(([code, item]) => (
                         <button
-                            key={lang.code}
-                            onClick={() => changeLanguage(lang.code)}
-                            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all active:scale-90 ${currentLang === lang.code ? 'bg-brand-50' : 'hover:bg-zinc-100'}`}
-                            title={lang.name}
+                            key={code}
+                            type="button"
+                            onClick={() => changeLanguage(item.url)}
+                            className={`flex items-center gap-3 px-3 py-2 text-sm text-left w-full hover:bg-brand-50 transition-colors ${currentLang === code ? 'font-semibold text-brand-600 bg-brand-50/50' : 'text-zinc-700'}`}
                         >
                             <img 
-                                src={`https://cdn.gtranslate.net/flags/svg/${lang.flag}.svg`} 
-                                alt={lang.code} 
-                                className="w-[22px] h-[22px] rounded-sm object-cover shadow-sm border border-zinc-200"
+                                src={flags[code] || flags.id} 
+                                alt={code} 
+                                className="w-5 h-5 rounded-sm object-cover shadow-sm border border-zinc-200"
                             />
+                            <span>{item.name}</span>
                         </button>
                     ))}
                 </div>
