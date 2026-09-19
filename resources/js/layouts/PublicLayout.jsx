@@ -1,16 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Home, Heart, PlusCircle, User } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
-import { ThemeToggle } from '@/components/theme-toggle';
-export default function PublicLayout({ children, title, hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
-    const { locale } = usePage().props;
+import { FlashMessages } from '@/components/flash-messages';
+
+export default function PublicLayout({ children, title = '', hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
+    const { locale, auth } = usePage().props;
     const { url } = usePage();
     const isRtl = locale === 'ar';
     const isActive = (path) => path === '/' ? url === '/' : url.startsWith(path);
 
+    useEffect(() => {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
+    }, []);
+
+    const userAccountUrl = auth?.user
+        ? (auth.user.roles?.some(r => ['Administrator', 'Program Officer', 'Verifikator', 'Keuangan', 'Customer Service', 'Content Editor'].includes(typeof r === 'object' ? r.name : r))
+            ? '/dashboard'
+            : '/akun/donasi-saya')
+        : '/login';
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-outfit" dir={isRtl ? 'rtl' : 'ltr'}>
+            <FlashMessages />
             <Head>
                 <title>{title || 'Insani Indonesia'}</title>
                 <meta name="description" content="Platform Galang Dana Insani Indonesia" />
@@ -52,10 +65,16 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                             <div className="hidden sm:block">
                                 <LanguageSwitcher />
                             </div>
-                            <ThemeToggle />
-                            <Link href="/login" className="hidden md:inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 hover:shadow-md transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
-                                Masuk
-                            </Link>
+                            {auth?.user ? (
+                                <Link href={userAccountUrl} className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 hover:shadow-xs transition-all duration-200 active:scale-95 border border-brand-200">
+                                    <User className="w-4 h-4 mr-1.5 text-brand-600" />
+                                    {auth.user.name?.split(' ')[0]}
+                                </Link>
+                            ) : (
+                                <Link href="/login" className="hidden md:inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 hover:shadow-md transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+                                    Masuk
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -155,7 +174,7 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                             <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">Bantuan</h3>
                             <ul className="space-y-3 text-sm text-blue-100">
                                 <li>
-                                    <Link href="/faq" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
+                                    <Link href="/pusat-bantuan" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
                                         Pusat Bantuan (FAQ)
                                     </Link>
                                 </li>
@@ -224,9 +243,9 @@ export default function PublicLayout({ children, title, hideFooter = false, hide
                     </div>
                     <span className="text-[10px] font-medium mt-0.5">Campaigner</span>
                 </Link>
-                <Link href="/login" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/login') || isActive('/akun') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/login') || isActive('/akun') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <User className="w-[22px] h-[22px]" strokeWidth={isActive('/login') || isActive('/akun') ? 2.5 : 2} />
+                <Link href={userAccountUrl} className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive(userAccountUrl) || isActive('/akun') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                    <div className={`p-1.5 rounded-full transition-colors ${isActive(userAccountUrl) || isActive('/akun') ? 'bg-brand-50' : 'bg-transparent'}`}>
+                        <User className="w-[22px] h-[22px]" strokeWidth={isActive(userAccountUrl) || isActive('/akun') ? 2.5 : 2} />
                     </div>
                     <span className="text-[10px] font-medium mt-0.5">Akun</span>
                 </Link>

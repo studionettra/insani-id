@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\ImageUploadController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Public\AboutController;
 use App\Http\Controllers\Public\BlogController;
 use App\Http\Controllers\Public\CampaignerDisbursementController;
@@ -24,47 +25,66 @@ use App\Http\Controllers\Public\CampaignerRegistrationController;
 use App\Http\Controllers\Public\CommentController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\DonationController;
+use App\Http\Controllers\Public\DonorDonationController;
 use App\Http\Controllers\Public\FocusProgramController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\PageController as PublicPageController;
 use App\Http\Controllers\Public\ProgramListingController;
 use App\Http\Controllers\Webhook\WordPressWebhookController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use Illuminate\Support\Facades\Route;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+// Public Localized Routes
+Route::group([
+    'prefix' => LaravelLocalization::setLocale(),
+    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath'],
+], function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Public Program Listing
-Route::get('/program', [ProgramListingController::class, 'index'])->name('program.index');
-Route::get('/program/{program:slug}/donasi', [DonationController::class, 'create'])->name('donation.create');
-Route::post('/program/{program:slug}/donasi', [DonationController::class, 'store'])->name('donation.store');
-Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])->name('donation.status');
-Route::get('/program/{slug}', [ProgramListingController::class, 'show'])->name('program.show');
+    // Public Program Listing & Detail
+    Route::get('/program', [ProgramListingController::class, 'index'])->name('program.index');
+    Route::get('/program/{program:slug}/donasi', [DonationController::class, 'create'])->name('donation.create');
+    Route::post('/program/{program:slug}/donasi', [DonationController::class, 'store'])->name('donation.store');
+    Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])->name('donation.status');
+    Route::get('/program/{slug}', [ProgramListingController::class, 'show'])->name('program.show');
 
-// Public Pages
-Route::get('/tentang-kami', [AboutController::class, 'index'])->name('about.index');
-Route::get('/fokus-program', [FocusProgramController::class, 'index'])->name('focus.index');
-Route::get('/berita', [BlogController::class, 'index'])->name('blog.index');
-Route::get('/berita/{slug}', [BlogController::class, 'show'])->name('blog.show');
-Route::get('/kontak', [ContactController::class, 'create'])->name('contact.create');
-Route::post('/kontak', [ContactController::class, 'store'])->name('contact.store');
+    // Public Pages
+    Route::get('/tentang-kami', [AboutController::class, 'index'])->name('about.index');
+    Route::get('/fokus-program', [FocusProgramController::class, 'index'])->name('focus.index');
+    Route::get('/berita', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/berita/{slug}', [BlogController::class, 'show'])->name('blog.show');
+    Route::get('/kontak', [ContactController::class, 'create'])->name('contact.create');
+    Route::post('/kontak', [ContactController::class, 'store'])->name('contact.store');
 
-// Smart Redirect for "Galang Dana" / Create Program
-Route::get('/buat-program', function () {
-    if (! auth()->check()) {
-        return redirect()->route('login');
-    }
+    // Smart Redirect for "Galang Dana" / Create Program
+    Route::get('/buat-program', function () {
+        if (! auth()->check()) {
+            return redirect()->route('login');
+        }
 
-    $user = auth()->user();
-    if (! $user->campaignerProfile) {
-        return redirect()->route('campaigner.register');
-    }
+        $user = auth()->user();
+        if (! $user->campaignerProfile) {
+            return redirect()->route('campaigner.register');
+        }
 
-    if ($user->campaignerProfile->verification_status !== 'verified') {
-        return redirect()->route('campaigner.status');
-    }
+        if ($user->campaignerProfile->verification_status !== 'verified') {
+            return redirect()->route('campaigner.status');
+        }
 
-    return redirect()->route('akun.programs.create');
-})->name('buat-program');
+        return redirect()->route('akun.programs.create');
+    })->name('buat-program');
+
+    // Static Legal & Help Pages (Clean URL Aliases)
+    Route::get('/pusat-bantuan', [PublicPageController::class, 'pusatBantuan'])->name('page.pusat-bantuan');
+    Route::get('/faq', fn () => redirect()->route('page.pusat-bantuan'))->name('page.faq');
+    Route::get('/syarat-ketentuan', [PublicPageController::class, 'syaratKetentuan'])->name('page.syarat-ketentuan');
+    Route::get('/kebijakan-privasi', [PublicPageController::class, 'kebijakanPrivasi'])->name('page.kebijakan-privasi');
+    Route::get('/cara-donasi', [PublicPageController::class, 'caraDonasi'])->name('page.cara-donasi');
+
+    // Dynamic Public Pages (Catch-all inside locale)
+    Route::get('/halaman/{slug}', [PublicPageController::class, 'show'])->name('page.show');
+});
 
 // Webhooks
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle'])
@@ -75,16 +95,7 @@ Route::post('/webhooks/wordpress', [WordPressWebhookController::class, 'handle']
     ->name('webhooks.wordpress');
 
 Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
-
-    // Custom GET logout to force a hard page navigation and wipe SPA cache
-    Route::get('/logout', function () {
-        auth()->logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
-
-        return redirect('/');
-    });
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Campaigner Registration
     Route::get('/campaigner/register', [CampaignerRegistrationController::class, 'create'])->name('campaigner.register');
@@ -167,6 +178,9 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         ->name('programs.comments.store');
 
     Route::middleware('auth')->prefix('akun')->name('akun.')->group(function () {
+        // Donor route
+        Route::get('/donasi-saya', [DonorDonationController::class, 'index'])->name('donations.index');
+
         // Campaigner routes (Must be verified)
         Route::middleware('campaigner.verified')->group(function () {
             Route::resource('programs', CampaignerProgramController::class);
@@ -178,8 +192,5 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::post('/upload-image', [ImageUploadController::class, 'upload'])->name('upload.image');
     });
 });
-
-// Dynamic Public Pages (Catch-all)
-Route::get('/{slug}', [App\Http\Controllers\Public\PageController::class, 'show'])->name('page.show');
 
 require __DIR__.'/settings.php';

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             CategorySeeder::class,
+            PageSeeder::class,
         ]);
 
         $admin = User::factory()->create([

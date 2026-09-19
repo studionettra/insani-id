@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use Inertia\Response;
 
 class PageController extends Controller
 {
-    public function show($slug)
+    public function show(string $slug): Response
     {
         $page = Page::where('slug', $slug)
             ->where('is_active', true)
@@ -22,5 +23,25 @@ class PageController extends Controller
                 'attachment_url' => $page->attachment_url ? asset('storage/'.$page->attachment_url) : null,
             ],
         ]);
+    }
+
+    public function syaratKetentuan(): Response
+    {
+        return $this->show('syarat-ketentuan');
+    }
+
+    public function kebijakanPrivasi(): Response
+    {
+        return $this->show('kebijakan-privasi');
+    }
+
+    public function caraDonasi(): Response
+    {
+        return $this->show('cara-donasi');
+    }
+
+    public function pusatBantuan(): Response
+    {
+        return $this->show('pusat-bantuan');
     }
 }

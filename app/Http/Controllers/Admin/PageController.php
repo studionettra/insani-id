@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PageController extends Controller
 {
     public function index()
     {
-        $pages = \App\Models\Page::query()
+        $pages = Page::query()
             ->when(request('search'), function ($query, $search) {
                 $query->where('title', 'like', "%{$search}%")
                     ->orWhere('slug', 'like', "%{$search}%");
@@ -47,29 +50,29 @@ class PageController extends Controller
             'attachment' => 'nullable|file|max:10240',
         ]);
 
-        $validated['slug'] = \Illuminate\Support\Str::slug($validated['slug']);
+        $validated['slug'] = Str::slug($validated['slug']);
         $validated['is_active'] = $validated['is_active'] ?? true;
 
         if ($request->hasFile('attachment')) {
             $validated['attachment_url'] = $request->file('attachment')->store('pages/attachments', 'public');
         }
 
-        \App\Models\Page::create($validated);
+        Page::create($validated);
 
         return redirect()->route('admin.pages.index')->with('success', 'Halaman berhasil dibuat.');
     }
 
-    public function edit(\App\Models\Page $page)
+    public function edit(Page $page)
     {
         return inertia('Admin/Pages/Edit', [
             'page' => $page,
         ]);
     }
 
-    public function update(Request $request, \App\Models\Page $page)
+    public function update(Request $request, Page $page)
     {
         $validated = $request->validate([
-            'slug' => 'required|string|max:120|unique:pages,slug,' . $page->id,
+            'slug' => 'required|string|max:120|unique:pages,slug,'.$page->id,
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
@@ -84,11 +87,11 @@ class PageController extends Controller
             'attachment' => 'nullable|file|max:10240',
         ]);
 
-        $validated['slug'] = \Illuminate\Support\Str::slug($validated['slug']);
+        $validated['slug'] = Str::slug($validated['slug']);
 
         if ($request->hasFile('attachment')) {
             if ($page->attachment_url) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($page->attachment_url);
+                Storage::disk('public')->delete($page->attachment_url);
             }
             $validated['attachment_url'] = $request->file('attachment')->store('pages/attachments', 'public');
         }
@@ -98,12 +101,12 @@ class PageController extends Controller
         return redirect()->route('admin.pages.index')->with('success', 'Halaman berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\Page $page)
+    public function destroy(Page $page)
     {
         if ($page->attachment_url) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($page->attachment_url);
+            Storage::disk('public')->delete($page->attachment_url);
         }
-        
+
         $page->delete();
 
         return redirect()->back()->with('success', 'Halaman berhasil dihapus.');
