@@ -21,12 +21,27 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
             : '/akun/donasi-saya')
         : '/login';
 
+    const pageTitle = title ? `${title} - Insani Indonesia` : 'Insani Indonesia - Platform Galang Dana dan Donasi Online';
+    const pageDescription = 'Platform Galang Dana dan Donasi Online Insani Indonesia. Bersama menebar kebaikan dan kepedulian.';
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://insani.id';
+    const logoUrl = typeof window !== 'undefined' ? `${window.location.origin}/images/logo/logo-landscape-color.png` : 'https://insani.id/images/logo/logo-landscape-color.png';
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-outfit" dir={isRtl ? 'rtl' : 'ltr'}>
             <FlashMessages />
             <Head>
-                <title>{title || 'Insani Indonesia'}</title>
-                <meta name="description" content="Platform Galang Dana Insani Indonesia" />
+                <title>{pageTitle}</title>
+                <meta name="description" content={pageDescription} />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={currentUrl} />
+                <meta property="og:title" content={pageTitle} />
+                <meta property="og:description" content={pageDescription} />
+                <meta property="og:image" content={logoUrl} />
+                <meta property="og:site_name" content="Insani Indonesia" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={pageTitle} />
+                <meta name="twitter:description" content={pageDescription} />
+                <meta name="twitter:image" content={logoUrl} />
             </Head>
 
             {/* Header (Desktop & Mobile) */}

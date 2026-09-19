@@ -7,8 +7,38 @@ import PublicLayout from '@/layouts/PublicLayout';
 export default function BlogShow({ blog, relatedBlogs }: any) {
     const { locale } = usePage().props as any;
 
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://insani.id/berita/${blog.slug}`;
+    const rawDescription = blog.excerpt || blog.content_html || '';
+    const cleanExcerpt = rawDescription
+        ? rawDescription.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
+        : `Baca selengkapnya mengenai ${blog.title} di Insani Indonesia.`;
+    const imageUrl = blog.thumbnail_url || blog.featured_image_url || '/images/logo/logo-landscape-color.png';
+    const absoluteImageUrl = imageUrl.startsWith('http')
+        ? imageUrl
+        : `${typeof window !== 'undefined' ? window.location.origin : ''}${imageUrl.startsWith('/') ? imageUrl : '/storage/' + imageUrl}`;
+
     return (
         <PublicLayout title={blog.title}>
+            <Head>
+                <title>{`${blog.title} - Insani Indonesia`}</title>
+                <meta name="description" content={cleanExcerpt} />
+                <link rel="canonical" href={shareUrl} />
+
+                {/* Open Graph / Facebook / WhatsApp */}
+                <meta property="og:type" content="article" />
+                <meta property="og:url" content={shareUrl} />
+                <meta property="og:title" content={`${blog.title} - Insani Indonesia`} />
+                <meta property="og:description" content={cleanExcerpt} />
+                <meta property="og:image" content={absoluteImageUrl} />
+                <meta property="og:site_name" content="Insani Indonesia" />
+
+                {/* Twitter */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:url" content={shareUrl} />
+                <meta name="twitter:title" content={`${blog.title} - Insani Indonesia`} />
+                <meta name="twitter:description" content={cleanExcerpt} />
+                <meta name="twitter:image" content={absoluteImageUrl} />
+            </Head>
             
             <div className="bg-slate-50 py-12 md:py-16">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

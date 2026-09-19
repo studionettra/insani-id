@@ -25,4 +25,16 @@ class BlogPostCache extends Model
         'published_at' => 'datetime',
         'synced_at' => 'datetime',
     ];
+
+    protected $appends = [
+        'thumbnail_url',
+    ];
+
+    /**
+     * Accessor for thumbnail_url to match frontend expectations.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        return $this->featured_image_url;
+    }
 }

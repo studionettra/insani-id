@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
-import { formatCurrency, formatDate, getYouTubeEmbedUrl } from '@/lib/utils';
+import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue } from '@/lib/utils';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const [expanded, setExpanded] = useState(false);
@@ -83,11 +83,13 @@ export default function ProgramShow({ program, auth }: Props) {
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
 
+    const programTitle = getLocalizedValue(program.title);
+    const programStory = getLocalizedValue(program.story);
     const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://insani.id/program/${program.slug}`;
-    const shareText = `Mari bersama bantu program kebaikan: "${program.title}" melalui Insani Indonesia`;
-    const metaDescription = program.story
-        ? program.story.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
-        : `Bantu wujudkan program ${program.title} bersama Insani Indonesia.`;
+    const shareText = `Mari bersama bantu program kebaikan: "${programTitle}" melalui Insani Indonesia`;
+    const metaDescription = programStory
+        ? programStory.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
+        : `Bantu wujudkan program ${programTitle} bersama Insani Indonesia.`;
     const coverImageUrl = program.cover_image
         ? (program.cover_image.startsWith('http')
             ? program.cover_image
@@ -134,7 +136,7 @@ export default function ProgramShow({ program, auth }: Props) {
     const handleNativeShare = () => {
         if (typeof navigator !== 'undefined' && navigator.share) {
             navigator.share({
-                title: `${program.title} - Insani Indonesia`,
+                title: `${programTitle} - Insani Indonesia`,
                 text: shareText,
                 url: shareUrl,
             }).catch(() => {});
@@ -146,10 +148,10 @@ export default function ProgramShow({ program, auth }: Props) {
     const renderProgramTitle = () => (
         <div className="mb-4">
             <Badge variant="outline" className="text-insani-blue border-insani-blue/30 bg-insani-blue/5 mb-3">
-                {program.category?.name?.id || 'Kategori'}
+                {getLocalizedValue(program.category?.name, 'Kategori')}
             </Badge>
             <h1 className="text-xl lg:text-xl font-bold text-slate-800 leading-tight mb-2">
-                {program.title}
+                {programTitle}
             </h1>
         </div>
     );
@@ -216,14 +218,14 @@ export default function ProgramShow({ program, auth }: Props) {
     return (
         <PublicLayout hideFooter={true} hideMobileNav={true} hideTopNav={true}>
             <Head>
-                <title>{`${program.title} - Program Kebaikan Insani`}</title>
+                <title>{`${programTitle} - Program Kebaikan Insani`}</title>
                 <meta name="description" content={metaDescription} />
                 <link rel="canonical" href={shareUrl} />
 
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={shareUrl} />
-                <meta property="og:title" content={program.title} />
+                <meta property="og:title" content={programTitle} />
                 <meta property="og:description" content={metaDescription} />
                 <meta property="og:image" content={coverImageUrl} />
                 <meta property="og:site_name" content="Insani Indonesia" />
@@ -231,7 +233,7 @@ export default function ProgramShow({ program, auth }: Props) {
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:url" content={shareUrl} />
-                <meta name="twitter:title" content={program.title} />
+                <meta name="twitter:title" content={programTitle} />
                 <meta name="twitter:description" content={metaDescription} />
                 <meta name="twitter:image" content={coverImageUrl} />
             </Head>
@@ -246,7 +248,7 @@ export default function ProgramShow({ program, auth }: Props) {
                         <Link href="/program" className="hover:text-insani-blue transition-colors">Program Donasi</Link>
                         <ChevronRight className="w-4 h-4 mx-2" />
                         <span className="text-slate-800 font-medium truncate max-w-[200px] sm:max-w-xs">
-                            {program.title}
+                            {programTitle}
                         </span>
                     </div>
 
@@ -279,7 +281,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                     ) : (
                                         <img 
                                             src={`/storage/${program.cover_image}`} 
-                                            alt={program.title as string} 
+                                            alt={programTitle} 
                                             className="w-full h-auto aspect-video object-cover"
                                         />
                                     );
@@ -334,7 +336,7 @@ export default function ProgramShow({ program, auth }: Props) {
 
                                             <div
                                                 className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-justify prose-a:text-insani-blue prose-headings:text-slate-800 prose-strong:text-slate-800 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-slate-400 break-words overflow-hidden text-left"
-                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story) }}
+                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(programStory) }}
                                             />
                                         </div>
                                     )}
@@ -512,11 +514,11 @@ export default function ProgramShow({ program, auth }: Props) {
                     <div className="flex gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 items-center mt-2">
                         <img
                             src={coverImageUrl}
-                            alt={program.title}
+                            alt={programTitle}
                             className="w-16 h-12 object-cover rounded-lg flex-shrink-0"
                         />
                         <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-slate-800 line-clamp-1">{program.title}</p>
+                            <p className="text-xs font-semibold text-slate-800 line-clamp-1">{programTitle}</p>
                             <p className="text-[11px] text-slate-500 mt-0.5">{campaignerName}</p>
                         </div>
                     </div>
