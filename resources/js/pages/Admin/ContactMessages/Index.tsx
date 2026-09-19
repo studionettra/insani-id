@@ -10,6 +10,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function ContactMessagesIndex({ messages, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -23,10 +24,18 @@ export default function ContactMessagesIndex({ messages, filters }: any) {
         );
     };
 
-    const deleteMessage = (message: any) => {
-        if (confirm('Apakah Anda yakin ingin menghapus pesan ini?')) {
-            router.delete(`/admin/contact-messages/${message.id}`);
-        }
+    const [messageToDelete, setMessageToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteMessage = () => {
+        if (!messageToDelete) return;
+        setIsDeleting(true);
+        router.delete(`/admin/contact-messages/${messageToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setMessageToDelete(null);
+            },
+        });
     };
 
     return (
@@ -129,7 +138,7 @@ export default function ContactMessagesIndex({ messages, filters }: any) {
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => deleteMessage(message)}
+                                                    onClick={() => setMessageToDelete(message)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -142,6 +151,16 @@ export default function ContactMessagesIndex({ messages, filters }: any) {
                     </Table>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={!!messageToDelete}
+                onOpenChange={(open) => !open && setMessageToDelete(null)}
+                title="Hapus Pesan Masuk"
+                description={`Apakah Anda yakin ingin menghapus pesan dari "${messageToDelete?.name}" (${messageToDelete?.email})? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeleteMessage}
+            />
         </>
     );
 }

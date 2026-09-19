@@ -19,6 +19,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function ImpactStatsIndex({ impactStats, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -93,10 +94,18 @@ return;
         });
     };
 
-    const deleteStat = (stat: any) => {
-        if (confirm('Apakah Anda yakin ingin menghapus data statistik ini?')) {
-            router.delete(`/admin/impact-stats/${stat.id}`);
-        }
+    const [statToDelete, setStatToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteStat = () => {
+        if (!statToDelete) return;
+        setIsDeleting(true);
+        router.delete(`/admin/impact-stats/${statToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setStatToDelete(null);
+            },
+        });
     };
 
     return (
@@ -179,7 +188,7 @@ return;
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => deleteStat(stat)}
+                                                    onClick={() => setStatToDelete(stat)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -396,6 +405,16 @@ return;
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ConfirmDialog
+                open={!!statToDelete}
+                onOpenChange={(open) => !open && setStatToDelete(null)}
+                title="Hapus Statistik Dampak"
+                description={`Apakah Anda yakin ingin menghapus statistik "${typeof statToDelete?.title === 'string' ? statToDelete.title : (statToDelete?.title?.id || '')}"? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeleteStat}
+            />
         </>
     );
 }

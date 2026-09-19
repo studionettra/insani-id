@@ -19,6 +19,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function HomepageBannersIndex({ banners, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -92,10 +93,18 @@ return;
         });
     };
 
-    const deleteBanner = (banner: any) => {
-        if (confirm('Apakah Anda yakin ingin menghapus banner ini?')) {
-            router.delete(`/admin/homepage-banners/${banner.id}`);
-        }
+    const [bannerToDelete, setBannerToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteBanner = () => {
+        if (!bannerToDelete) return;
+        setIsDeleting(true);
+        router.delete(`/admin/homepage-banners/${bannerToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setBannerToDelete(null);
+            },
+        });
     };
 
     return (
@@ -201,7 +210,7 @@ return;
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => deleteBanner(banner)}
+                                                    onClick={() => setBannerToDelete(banner)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -405,6 +414,16 @@ return;
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ConfirmDialog
+                open={!!bannerToDelete}
+                onOpenChange={(open) => !open && setBannerToDelete(null)}
+                title="Hapus Banner Beranda"
+                description={`Apakah Anda yakin ingin menghapus banner "${bannerToDelete?.title}"? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeleteBanner}
+            />
         </>
     );
 }

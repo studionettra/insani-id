@@ -1,4 +1,5 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
+import { toast } from 'sonner';
 import 'react-quill-new/dist/quill.snow.css';
 
 const ReactQuill = React.lazy(() => import('react-quill-new'));
@@ -64,7 +65,7 @@ return;
                 }
             } catch (error) {
                 console.error('Error uploading image:', error);
-                alert('Gagal mengunggah gambar. Pastikan ukuran kurang dari 10MB.');
+                toast.error('Gagal mengunggah gambar. Pastikan ukuran kurang dari 10MB.');
             }
         };
     };
@@ -92,12 +93,12 @@ return;
     ];
 
     if (!isMounted) {
-        return <div className="h-[250px] w-full bg-slate-50 animate-pulse rounded-md border border-slate-200"></div>;
+        return <div className="h-[250px] w-full bg-slate-50 dark:bg-gray-800 animate-pulse rounded-md border border-slate-200 dark:border-gray-700"></div>;
     }
 
     return (
-        <div className="bg-white rounded-md">
-            <Suspense fallback={<div className="h-[250px] w-full bg-slate-50 animate-pulse rounded-md border border-slate-200"></div>}>
+        <div className="bg-white dark:bg-gray-900 rounded-md">
+            <Suspense fallback={<div className="h-[250px] w-full bg-slate-50 dark:bg-gray-800 animate-pulse rounded-md border border-slate-200 dark:border-gray-700"></div>}>
                 <ReactQuill
                     ref={quillRef}
                     theme="snow"

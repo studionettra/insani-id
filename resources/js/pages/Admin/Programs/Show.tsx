@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle, XCircle, Info, Ban, User, Calendar, AlertTriang
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
     Dialog,
     DialogContent,
@@ -49,12 +50,20 @@ export default function ProgramShow({ program }: Props) {
         rejection_notes: ''
     });
 
-    const handleApprove = () => {
-        if (confirm('Apakah Anda yakin ingin mempublikasikan program ini?')) {
-            router.put(`/admin/programs/${program.id}/status`, {
-                status: 'published'
-            });
-        }
+    const [isApproveConfirmOpen, setIsApproveConfirmOpen] = useState(false);
+    const [isCloseConfirmOpen, setIsCloseConfirmOpen] = useState(false);
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
+    const handleApproveConfirm = () => {
+        setIsUpdatingStatus(true);
+        router.put(`/admin/programs/${program.id}/status`, {
+            status: 'published'
+        }, {
+            onFinish: () => {
+                setIsUpdatingStatus(false);
+                setIsApproveConfirmOpen(false);
+            }
+        });
     };
 
     const handleRejectSubmit = (e: React.FormEvent) => {
@@ -64,12 +73,16 @@ export default function ProgramShow({ program }: Props) {
         });
     };
 
-    const handleCloseProgram = () => {
-        if (confirm('Apakah Anda yakin ingin menutup program ini (Closed Manual)? Donatur tidak akan bisa berdonasi lagi.')) {
-            router.put(`/admin/programs/${program.id}/status`, {
-                status: 'closed_manual'
-            });
-        }
+    const handleCloseConfirm = () => {
+        setIsUpdatingStatus(true);
+        router.put(`/admin/programs/${program.id}/status`, {
+            status: 'closed_manual'
+        }, {
+            onFinish: () => {
+                setIsUpdatingStatus(false);
+                setIsCloseConfirmOpen(false);
+            }
+        });
     };
 
     const getStatusBadge = (status: string) => {
@@ -204,7 +217,7 @@ export default function ProgramShow({ program }: Props) {
                                     <div className="pt-2 space-y-3">
                                         <Button
                                             className="w-full bg-green-600 hover:bg-green-700 text-white shadow-sm"
-                                            onClick={handleApprove}
+                                            onClick={() => setIsApproveConfirmOpen(true)}
                                         >
                                             <CheckCircle className="mr-2 h-4 w-4" /> Setujui & Publikasikan
                                         </Button>
@@ -226,7 +239,7 @@ export default function ProgramShow({ program }: Props) {
                                     <Button
                                         variant="outline"
                                         className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                                        onClick={handleCloseProgram}
+                                        onClick={() => setIsCloseConfirmOpen(true)}
                                     >
                                         <Ban className="mr-2 h-4 w-4" />
                                         Tutup Program (Manual)
@@ -337,7 +350,27 @@ export default function ProgramShow({ program }: Props) {
                 </DialogContent>
             </Dialog>
 
+            <ConfirmDialog
+                open={isApproveConfirmOpen}
+                onOpenChange={setIsApproveConfirmOpen}
+                title="Publikasikan Program"
+                description={`Apakah Anda yakin ingin mempublikasikan program "${program.title}"? Program akan aktif tayang di halaman publik dan donatur dapat mulai berdonasi.`}
+                confirmText="Publikasikan"
+                variant="info"
+                loading={isUpdatingStatus}
+                onConfirm={handleApproveConfirm}
+            />
 
+            <ConfirmDialog
+                open={isCloseConfirmOpen}
+                onOpenChange={setIsCloseConfirmOpen}
+                title="Tutup Program (Manual)"
+                description="Apakah Anda yakin ingin menutup program donasi ini? Penggalangan dana akan dihentikan dan donatur tidak dapat berdonasi lagi."
+                confirmText="Ya, Tutup Program"
+                variant="warning"
+                loading={isUpdatingStatus}
+                onConfirm={handleCloseConfirm}
+            />
         </>
 
 

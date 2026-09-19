@@ -1,11 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
-import React from 'react';
+import { Plus, Eye, Edit, Trash2, Target } from 'lucide-react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import AppLayout from '@/layouts/app-layout';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
 
 interface Program {
     id: number;
@@ -29,10 +29,18 @@ interface Props {
 }
 
 export default function AkunProgramIndex({ programs }: Props) {
-    const handleDelete = (id: number) => {
-        if (confirm('Apakah Anda yakin ingin membatalkan/menghapus program ini?')) {
-            router.delete(`/akun/programs/${id}`);
-        }
+    const [programToDelete, setProgramToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleConfirmDelete = () => {
+        if (!programToDelete) return;
+        setIsDeleting(true);
+        router.delete(`/akun/programs/${programToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setProgramToDelete(null);
+            },
+        });
     };
 
     const getStatusBadge = (status: string) => {
@@ -55,17 +63,17 @@ export default function AkunProgramIndex({ programs }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Program Saya', href: '/akun/programs' }]}>
+        <>
             <Head title="Program Saya" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 mx-auto w-full max-w-5xl">
+            <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 w-full">
                 <div>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-800">Program Saya</h1>
-                            <p className="text-slate-500 mt-1">Kelola program penggalangan dana yang Anda buat.</p>
+                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Program Saya</h1>
+                            <p className="text-slate-500 dark:text-gray-400 mt-1">Kelola program penggalangan dana yang Anda buat.</p>
                         </div>
-                        <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
                             <Link href="/akun/programs/create">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Galang Dana Baru
@@ -76,63 +84,98 @@ export default function AkunProgramIndex({ programs }: Props) {
                     <div className="space-y-6">
                         {programs.data.length > 0 ? (
                             programs.data.map((program) => (
-                                <Card key={program.id} className="overflow-hidden border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                                    <div className="flex flex-col md:flex-row">
-                                        <div className="w-full md:w-48 h-48 md:h-auto">
-                                            <img 
-                                                src={`/storage/${program.cover_image}`} 
-                                                alt={program.title} 
-                                                className="w-full h-full object-cover"
-                                            />
+                                <Card key={program.id} className="overflow-hidden border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs hover:shadow-sm transition-all p-5 sm:p-6 gap-0">
+                                    <div className="flex flex-col md:flex-row gap-6 items-start">
+                                        <div className="w-full md:w-80 lg:w-96 shrink-0 aspect-video rounded-xl overflow-hidden bg-slate-100 dark:bg-gray-800 relative shadow-2xs border border-slate-200/70 dark:border-gray-800">
+                                            {program.cover_image ? (
+                                                <img 
+                                                    src={program.cover_image.startsWith('http') ? program.cover_image : `/storage/${program.cover_image}`} 
+                                                    alt={getLocalizedValue(program.title, 'Cover Program')} 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-gray-500">
+                                                    <Target className="w-12 h-12" />
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="p-6 flex-1 flex flex-col justify-between">
+                                        <div className="flex-1 flex flex-col justify-between w-full min-w-0">
                                             <div>
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
-                                                        <Badge variant="outline" className="mb-2 mr-2">{program.category?.name?.id || 'Kategori'}</Badge>
+                                                <div className="flex justify-between items-start mb-2 gap-2 flex-wrap">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <Badge variant="outline" className="border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300">
+                                                            {getLocalizedValue(program.category?.name, 'Kategori')}
+                                                        </Badge>
                                                         {getStatusBadge(program.status)}
                                                     </div>
-                                                    <span className="text-sm text-slate-400 font-mono">{program.program_code}</span>
+                                                    <span className="text-xs text-slate-400 dark:text-gray-500 font-mono bg-slate-50 dark:bg-gray-800 px-2 py-1 rounded">
+                                                        {program.program_code}
+                                                    </span>
                                                 </div>
-                                                <h3 className="text-xl font-bold text-slate-800 mb-2 line-clamp-1">
-                                                    {program.title}
+                                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">
+                                                    {getLocalizedValue(program.title, 'Program Tanpa Judul')}
                                                 </h3>
                                                 
-                                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                                    <div>
-                                                        <p className="text-xs text-slate-500 uppercase font-semibold">Terkumpul</p>
-                                                        <p className="font-bold text-blue-600">{formatCurrency(program.collected_amount)}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-xs text-slate-500 uppercase font-semibold">Target</p>
-                                                        <p className="font-semibold text-slate-700">
-                                                            {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : '∞'}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                                {(() => {
+                                                    const hasTarget = Boolean(program.target_amount && parseFloat(program.target_amount) > 0);
+                                                    const progress = hasTarget
+                                                        ? Math.min(100, Math.round(((program.collected_amount || 0) / parseFloat(program.target_amount!)) * 100))
+                                                        : 0;
+
+                                                    return (
+                                                        <div className="mt-4 p-3.5 rounded-xl bg-slate-50/80 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800">
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div>
+                                                                    <p className="text-[11px] text-slate-500 dark:text-gray-400 uppercase font-semibold tracking-wider">Terkumpul</p>
+                                                                    <p className="font-bold text-base text-emerald-600 dark:text-emerald-400 mt-0.5">{formatCurrency(program.collected_amount)}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[11px] text-slate-500 dark:text-gray-400 uppercase font-semibold tracking-wider">Target Donasi</p>
+                                                                    <p className="font-semibold text-base text-slate-900 dark:text-white mt-0.5">
+                                                                        {hasTarget ? formatCurrency(parseFloat(program.target_amount!)) : 'Tanpa Target'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            {hasTarget && (
+                                                                <div className="mt-3">
+                                                                    <div className="flex justify-between items-center text-xs text-slate-500 dark:text-gray-400 mb-1.5">
+                                                                        <span>Progres Pengumpulan</span>
+                                                                        <span className="font-semibold text-slate-700 dark:text-gray-200">{progress}%</span>
+                                                                    </div>
+                                                                    <div className="w-full bg-slate-200/70 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                                                        <div 
+                                                                            className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400 transition-all duration-500" 
+                                                                            style={{ width: `${progress}%` }} 
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                             
-                                            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4">
-                                                <div className="text-sm text-slate-500">
+                                            <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 dark:border-gray-800 pt-4">
+                                                <div className="text-sm text-slate-500 dark:text-gray-400">
                                                     Dibuat pada {formatDate(program.created_at)}
                                                 </div>
-                                                <div className="flex space-x-2">
-                                                    <Button variant="outline" size="sm" asChild>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <Button variant="outline" size="sm" asChild className="border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300">
                                                         <Link href={`/akun/programs/${program.id}`}>
                                                             <Eye className="mr-2 h-4 w-4" /> Detail
                                                         </Link>
                                                     </Button>
                                                     
                                                     {['published', 'completed'].includes(program.status) && (
-                                                        <Button variant="outline" size="sm" asChild className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+                                                        <Button variant="outline" size="sm" asChild className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 border-slate-200 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40">
                                                             <Link href={`/akun/programs/${program.id}/updates`}>
                                                                 <span className="flex items-center">Update Kabar</span>
                                                             </Link>
                                                         </Button>
                                                     )}
 
-                                                    {['active', 'completed'].includes(program.status) && (
-                                                        <Button variant="outline" size="sm" asChild className="text-green-600 hover:text-green-700 hover:bg-green-50">
+                                                    {['published', 'completed'].includes(program.status) && (
+                                                        <Button variant="outline" size="sm" asChild className="text-green-600 dark:text-green-400 hover:text-green-700 border-slate-200 dark:border-gray-700 hover:bg-green-50 dark:hover:bg-green-950/40">
                                                             <Link href={`/akun/programs/${program.id}/disbursements`}>
                                                                 <span className="flex items-center">Pencairan</span>
                                                             </Link>
@@ -140,7 +183,7 @@ export default function AkunProgramIndex({ programs }: Props) {
                                                     )}
 
                                                     {['draft', 'rejected'].includes(program.status) && (
-                                                        <Button variant="outline" size="sm" asChild>
+                                                        <Button variant="outline" size="sm" asChild className="border-slate-200 dark:border-gray-700 text-slate-700 dark:text-gray-300">
                                                             <Link href={`/akun/programs/${program.id}/edit`}>
                                                                 <Edit className="mr-2 h-4 w-4" /> Edit
                                                             </Link>
@@ -148,7 +191,7 @@ export default function AkunProgramIndex({ programs }: Props) {
                                                     )}
                                                     
                                                     {program.status !== 'published' && program.status !== 'completed' && program.status !== 'closed_manual' && (
-                                                        <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleDelete(program.id)}>
+                                                        <Button variant="outline" size="sm" className="text-red-500 dark:text-red-400 hover:text-red-600 border-slate-200 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-950/40" onClick={() => setProgramToDelete(program)}>
                                                             <Trash2 className="mr-2 h-4 w-4" /> Hapus
                                                         </Button>
                                                     )}
@@ -159,16 +202,16 @@ export default function AkunProgramIndex({ programs }: Props) {
                                 </Card>
                             ))
                         ) : (
-                            <Card>
+                            <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
                                 <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 text-blue-500">
+                                    <div className="w-16 h-16 bg-blue-50 dark:bg-blue-950/50 rounded-full flex items-center justify-center mb-4 text-blue-500 dark:text-blue-400">
                                         <Plus className="w-8 h-8" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-800 mb-2">Belum ada program</h3>
-                                    <p className="text-slate-500 mb-6 max-w-md">
+                                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Belum ada program</h3>
+                                    <p className="text-slate-500 dark:text-gray-400 mb-6 max-w-md">
                                         Anda belum membuat program penggalangan dana apapun. Mulai tebarkan kebaikan dengan membuat program pertama Anda.
                                     </p>
-                                    <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                                    <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
                                         <Link href="/akun/programs/create">
                                             Buat Program Sekarang
                                         </Link>
@@ -188,7 +231,7 @@ export default function AkunProgramIndex({ programs }: Props) {
                                         className={`px-3 py-1 rounded text-sm ${
                                             link.active
                                                 ? 'bg-blue-600 text-white'
-                                                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                                                : 'bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800'
                                         }`}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                     />
@@ -198,6 +241,16 @@ export default function AkunProgramIndex({ programs }: Props) {
                     )}
                 </div>
             </div>
-        </AppLayout>
+
+            <ConfirmDialog
+                open={!!programToDelete}
+                onOpenChange={(open) => !open && setProgramToDelete(null)}
+                title="Hapus / Batalkan Program"
+                description={`Apakah Anda yakin ingin membatalkan atau menghapus program "${programToDelete ? getLocalizedValue(programToDelete.title, 'id') : ''}"? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleConfirmDelete}
+            />
+        </>
     );
 }

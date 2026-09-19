@@ -19,6 +19,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function PartnersIndex({ partners, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -90,10 +91,18 @@ return;
         });
     };
 
-    const deletePartner = (partner: any) => {
-        if (confirm('Apakah Anda yakin ingin menghapus mitra ini?')) {
-            router.delete(`/admin/partners/${partner.id}`);
-        }
+    const [partnerToDelete, setPartnerToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeletePartner = () => {
+        if (!partnerToDelete) return;
+        setIsDeleting(true);
+        router.delete(`/admin/partners/${partnerToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setPartnerToDelete(null);
+            },
+        });
     };
 
     return (
@@ -191,7 +200,7 @@ return;
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => deletePartner(partner)}
+                                                    onClick={() => setPartnerToDelete(partner)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -369,6 +378,16 @@ return;
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ConfirmDialog
+                open={!!partnerToDelete}
+                onOpenChange={(open) => !open && setPartnerToDelete(null)}
+                title="Hapus Mitra Kerja Sama"
+                description={`Apakah Anda yakin ingin menghapus mitra "${partnerToDelete?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeletePartner}
+            />
         </>
     );
 }

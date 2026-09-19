@@ -1,13 +1,21 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Trash2, Mail, Calendar, User, Phone, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function ContactMessagesShow({ message }: any) {
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const deleteMessage = () => {
-        if (confirm('Apakah Anda yakin ingin menghapus pesan ini?')) {
-            router.delete(`/admin/contact-messages/${message.id}`);
-        }
+    const handleDeleteMessage = () => {
+        setIsDeleting(true);
+        router.delete(`/admin/contact-messages/${message.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setIsConfirmOpen(false);
+            },
+        });
     };
 
     return (
@@ -29,7 +37,7 @@ export default function ContactMessagesShow({ message }: any) {
                     
                     <Button 
                         variant="destructive" 
-                        onClick={deleteMessage}
+                        onClick={() => setIsConfirmOpen(true)}
                     >
                         <Trash2 className="mr-2 h-4 w-4" /> Hapus Pesan
                     </Button>
@@ -118,6 +126,16 @@ export default function ContactMessagesShow({ message }: any) {
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={isConfirmOpen}
+                onOpenChange={setIsConfirmOpen}
+                title="Hapus Pesan Masuk"
+                description={`Apakah Anda yakin ingin menghapus pesan dari "${message.name}" (${message.email})? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeleteMessage}
+            />
         </>
     );
 }

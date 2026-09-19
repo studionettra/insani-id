@@ -21,6 +21,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 
 export default function FaqsIndex({ faqs, filters }: any) {
@@ -96,10 +97,18 @@ return;
         });
     };
 
-    const deleteFaq = (faq: any) => {
-        if (confirm('Apakah Anda yakin ingin menghapus FAQ ini?')) {
-            destroy(`/admin/faqs/${faq.id}`);
-        }
+    const [faqToDelete, setFaqToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteFaq = () => {
+        if (!faqToDelete) return;
+        setIsDeleting(true);
+        destroy(`/admin/faqs/${faqToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setFaqToDelete(null);
+            },
+        });
     };
 
     return (
@@ -183,7 +192,7 @@ return;
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => deleteFaq(faq)}
+                                                    onClick={() => setFaqToDelete(faq)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -416,6 +425,16 @@ return;
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ConfirmDialog
+                open={!!faqToDelete}
+                onOpenChange={(open) => !open && setFaqToDelete(null)}
+                title="Hapus FAQ"
+                description={`Apakah Anda yakin ingin menghapus pertanyaan FAQ "${typeof faqToDelete?.question === 'string' ? faqToDelete.question : (faqToDelete?.question?.id || '')}"? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeleteFaq}
+            />
         </>
     );
 }

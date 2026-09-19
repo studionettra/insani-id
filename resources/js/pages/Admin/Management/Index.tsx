@@ -20,6 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function ManagementIndex({ members, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -95,10 +96,18 @@ return;
         });
     };
 
-    const deleteMember = (member: any) => {
-        if (confirm('Apakah Anda yakin ingin menghapus anggota ini?')) {
-            router.delete(`/admin/management-members/${member.id}`);
-        }
+    const [memberToDelete, setMemberToDelete] = useState<any>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteMember = () => {
+        if (!memberToDelete) return;
+        setIsDeleting(true);
+        router.delete(`/admin/management-members/${memberToDelete.id}`, {
+            onFinish: () => {
+                setIsDeleting(false);
+                setMemberToDelete(null);
+            },
+        });
     };
 
     return (
@@ -192,7 +201,7 @@ return;
                                                 <Button
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => deleteMember(member)}
+                                                    onClick={() => setMemberToDelete(member)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -384,6 +393,16 @@ return;
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ConfirmDialog
+                open={!!memberToDelete}
+                onOpenChange={(open) => !open && setMemberToDelete(null)}
+                title="Hapus Anggota Manajemen"
+                description={`Apakah Anda yakin ingin menghapus anggota manajemen "${memberToDelete?.name}" (${memberToDelete?.role_title})? Tindakan ini tidak dapat dibatalkan.`}
+                variant="danger"
+                loading={isDeleting}
+                onConfirm={handleDeleteMember}
+            />
         </>
     );
 }
