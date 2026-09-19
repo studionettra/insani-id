@@ -8,8 +8,10 @@ use App\Models\Program;
 use App\Observers\PaymentObserver;
 use App\Observers\ProgramObserver;
 use Carbon\CarbonImmutable;
+use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -35,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
 
         Program::observe(ProgramObserver::class);
         Payment::observe(PaymentObserver::class);
+
+        View::composer('*', function ($view) {
+            if (isset($view->getData()['message']) && $view->getData()['message'] instanceof Message) {
+                View::share('mailMessage', $view->getData()['message']);
+            }
+        });
     }
 
     /**

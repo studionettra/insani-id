@@ -17,6 +17,16 @@ Semoga kebaikan Anda menjadi amal jariyah yang terus mengalir dan membawa keberk
 Lihat Program
 </x-mail::button>
 
+@if (! $donation->donor_user_id)
+---
+**Ingin memantau laporan penyaluran donasi ini?**  
+Daftar akun di Insani Indonesia menggunakan email ini ({{ $donation->donor_email }}) agar seluruh riwayat donasi Anda tersimpan rapi di dashboard donatur.
+
+<x-mail::button :url="route('register', ['email' => $donation->donor_email, 'name' => $donation->donor_name])" color="success">
+Daftar Akun Donatur
+</x-mail::button>
+@endif
+
 Terima kasih,<br>
 {{ config('app.name') }}
 </x-mail::message>
