@@ -29,6 +29,7 @@ class DonationController extends Controller
         return inertia('Public/Program/Donate', [
             'program' => $program->load('creator'),
             'onlinePaymentAvailable' => ! empty(config('services.xendit.api_key')),
+            'paymentChannels' => XenditPaymentService::getAvailableChannels(),
         ]);
     }
 
@@ -77,13 +78,15 @@ class DonationController extends Controller
         ]);
 
         if ($donation->channel === 'online') {
-            // Generate Xendit Invoice
-            $invoice = $this->xendit->createInvoice($donation);
+            $selectedChannel = $validated['payment_channel'] ?? null;
+            $invoice = $this->xendit->createInvoice($donation, $selectedChannel);
 
             if ($invoice['status'] === 'success') {
                 Payment::create([
                     'donation_id' => $donation->id,
-                    'payment_method' => 'virtual_account', // Placeholder, xendit handles actual method in invoice
+                    'payment_method' => $validated['payment_method'] ?? 'virtual_account',
+                    'payment_channel' => $selectedChannel,
+                    'checkout_url' => $invoice['invoice_url'] ?? null,
                     'gateway' => 'xendit',
                     'gateway_reference_id' => $invoice['external_id'],
                     'gateway_status' => 'PENDING',
@@ -98,9 +101,14 @@ class DonationController extends Controller
             }
         } else {
             // Offline/Manual transfer
+            $channelCode = $validated['payment_channel'] ?? 'MANUAL_BSI';
+            $channelDef = XenditPaymentService::findChannel($channelCode);
+
             Payment::create([
                 'donation_id' => $donation->id,
                 'payment_method' => 'bank_transfer_manual',
+                'payment_channel' => $channelCode,
+                'payment_destination' => $channelDef['account_number'] ?? '713 219 5026',
                 'gateway' => 'manual',
                 'gateway_reference_id' => $donationCode,
                 'gateway_status' => 'PENDING',
@@ -112,7 +120,17 @@ class DonationController extends Controller
 
     public function status($donationCode)
     {
-        $donation = Donation::where('donation_code', $donationCode)->with('program')->firstOrFail();
+        $donation = Donation::where('donation_code', $donationCode)->with(['program', 'payments'])->firstOrFail();
+
+        // Real-time fallback sync: If donation is pending and online, check Xendit API
+        if ($donation->status === 'pending' && $donation->channel === 'online') {
+            $payment = $donation->payments()->where('gateway', 'xendit')->latest()->first();
+            if ($payment) {
+                $this->xendit->syncInvoiceStatus($payment);
+                $donation->refresh();
+                $donation->load(['program', 'payments']);
+            }
+        }
 
         return inertia('Public/Donation/Status', [
             'donation' => $donation,

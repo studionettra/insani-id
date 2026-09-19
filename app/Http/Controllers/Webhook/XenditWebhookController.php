@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Services\XenditPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -30,14 +31,30 @@ class XenditWebhookController extends Controller
             return response()->json(['message' => 'Payment not found'], 404);
         }
 
-        $status = $payload['status'];
+        $status = strtoupper($payload['status'] ?? '');
+        $isPaid = in_array($status, ['PAID', 'SETTLED']);
 
-        $payment->update([
+        $updateData = [
             'gateway_status' => $status,
-            'paid_amount' => $status === 'PAID' ? ($payload['paid_amount'] ?? $payload['amount']) : null,
-            'paid_at' => $status === 'PAID' ? now() : null,
+            'paid_amount' => $isPaid ? ($payload['paid_amount'] ?? $payload['amount'] ?? null) : null,
+            'paid_at' => $isPaid ? ($payment->paid_at ?? now()) : null,
             'raw_payload' => $payload,
-        ]);
+        ];
+
+        if (! empty($payload['payment_method'])) {
+            $updateData['payment_method'] = XenditPaymentService::mapPaymentMethod($payload['payment_method']);
+        }
+
+        $channel = $payload['payment_channel'] ?? $payload['bank_code'] ?? null;
+        if (! empty($channel)) {
+            $updateData['payment_channel'] = $channel;
+        }
+
+        if (! empty($payload['payment_destination'])) {
+            $updateData['payment_destination'] = $payload['payment_destination'];
+        }
+
+        $payment->update($updateData);
 
         return response()->json(['message' => 'Webhook processed successfully'], 200);
     }

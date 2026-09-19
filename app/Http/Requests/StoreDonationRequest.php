@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\AppSetting;
+use App\Services\XenditPaymentService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -33,7 +34,32 @@ class StoreDonationRequest extends FormRequest
             'is_anonymous' => ['nullable', 'boolean'],
             'message' => ['nullable', 'string', 'max:1000'],
             'channel' => ['required', 'in:online,offline'],
+            'payment_method' => ['nullable', 'string', 'in:virtual_account,ewallet,qris,credit_card,bank_transfer_manual'],
+            'payment_channel' => ['nullable', 'string', 'max:50'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $channelCode = $this->input('payment_channel');
+            $amount = (float) $this->input('amount');
+
+            if (! empty($channelCode) && $amount > 0) {
+                $channelDef = XenditPaymentService::findChannel($channelCode);
+                if ($channelDef) {
+                    if (isset($channelDef['min_amount']) && $amount < $channelDef['min_amount']) {
+                        $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} minimal Rp ".number_format($channelDef['min_amount'], 0, ',', '.').'.');
+                    }
+                    if (isset($channelDef['max_amount']) && $amount > $channelDef['max_amount']) {
+                        $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} maksimal Rp ".number_format($channelDef['max_amount'], 0, ',', '.').'.');
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -55,6 +81,7 @@ class StoreDonationRequest extends FormRequest
             'donor_phone.required' => 'Nomor WhatsApp / telepon wajib diisi.',
             'channel.required' => 'Metode pembayaran wajib dipilih.',
             'channel.in' => 'Metode pembayaran tidak valid.',
+            'payment_method.in' => 'Kategori pembayaran tidak valid.',
         ];
     }
 }

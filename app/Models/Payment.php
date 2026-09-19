@@ -14,6 +14,9 @@ class Payment extends Model
     protected $fillable = [
         'donation_id',
         'payment_method',
+        'payment_channel',
+        'payment_destination',
+        'checkout_url',
         'gateway',
         'gateway_reference_id',
         'gateway_status',

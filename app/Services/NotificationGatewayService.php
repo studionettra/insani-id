@@ -70,10 +70,18 @@ class NotificationGatewayService
 
         $amount = number_format($donation->amount, 0, ',', '.');
         $programTitle = $donation->program?->title ?? 'Program Kebaikan';
+
+        $registerTip = '';
+        if (! $donation->donor_user_id && $donation->donor_email) {
+            $registerUrl = route('register', ['email' => $donation->donor_email, 'name' => $donation->donor_name]);
+            $registerTip = "\n\n💡 _Tips: Anda dapat mendaftar akun di Insani untuk memantau jejak donasi & laporan penyaluran dana secara berkala:_ {$registerUrl}";
+        }
+
         $message = "Assalamu'alaikum Warahmatullahi Wabarakatuh, Kak {$donation->donor_name}.\n\n".
                    "Alhamdulillah, donasi Anda sebesar *Rp {$amount}* untuk program *{$programTitle}* telah berhasil kami terima.\n\n".
                    "Kode Donasi: {$donation->donation_code}\n\n".
-                   "Terima kasih atas kebaikan dan kepedulian Anda. Semoga Allah SWT membalas dengan keberkahan yang berlipat ganda. Aamiin.\n\n".
+                   'Terima kasih atas kebaikan dan kepedulian Anda. Semoga Allah SWT membalas dengan keberkahan yang berlipat ganda. Aamiin.'.
+                   $registerTip."\n\n".
                    '— Insani Indonesia (insani.id)';
 
         $this->sendWhatsApp($donation->donor_phone, $message);

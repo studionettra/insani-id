@@ -33,7 +33,7 @@ class PaymentObserver
             return;
         }
 
-        if ($gatewayStatus === 'PAID' && $donation->status !== 'paid') {
+        if (in_array($gatewayStatus, ['PAID', 'SETTLED']) && $donation->status !== 'paid') {
             DB::transaction(function () use ($donation, $payment) {
                 $donation->update([
                     'status' => 'paid',

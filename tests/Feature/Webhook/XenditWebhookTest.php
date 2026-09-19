@@ -289,3 +289,48 @@ test('it marks donation as failed when FAILED status is received', function () {
     expect($payment->gateway_status)->toBe('FAILED')
         ->and($donation->status)->toBe('failed');
 });
+
+test('it successfully processes SETTLED webhook and updates payment channel and donation status', function () {
+    Queue::fake();
+
+    $program = Program::factory()->create();
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-SETTLED-1',
+        'amount' => 50000,
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::factory()->create([
+        'donation_id' => $donation->id,
+        'gateway' => 'xendit',
+        'gateway_reference_id' => 'DON-SETTLED-1',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $payload = [
+        'external_id' => 'DON-SETTLED-1',
+        'status' => 'SETTLED',
+        'amount' => 50000,
+        'paid_amount' => 50000,
+        'payment_method' => 'EWALLET',
+        'payment_channel' => 'SHOPEEPAY',
+    ];
+
+    $response = $this->withHeaders([
+        'x-callback-token' => 'test-webhook-token',
+    ])->postJson(route('webhooks.xendit'), $payload);
+
+    $response->assertOk();
+
+    $payment->refresh();
+    $donation->refresh();
+
+    expect($payment->gateway_status)->toBe('SETTLED')
+        ->and((float) $payment->paid_amount)->toBe(50000.0)
+        ->and($payment->paid_at)->not->toBeNull()
+        ->and($payment->payment_method)->toBe('ewallet')
+        ->and($payment->payment_channel)->toBe('SHOPEEPAY')
+        ->and($donation->status)->toBe('paid');
+});
