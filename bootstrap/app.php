@@ -5,6 +5,8 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoCache;
 use App\Http\Middleware\PreventBackHistory;
+use App\Http\Middleware\VerifyWordPressWebhookToken;
+use App\Http\Middleware\VerifyXenditCallbackToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -42,12 +44,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'localeCookieRedirect' => LocaleCookieRedirect::class,
             'localeViewPath' => LaravelLocalizationViewPath::class,
             'campaigner.verified' => EnsureCampaignerVerified::class,
-            'role'                    => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission'              => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission'      => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'no-cache'                => \App\Http\Middleware\NoCache::class,
-            'verify.xendit-callback-token' => \App\Http\Middleware\VerifyXenditCallbackToken::class,
-            'verify.wordpress-webhook-token' => \App\Http\Middleware\VerifyWordPressWebhookToken::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'no-cache' => NoCache::class,
+            'verify.xendit-callback-token' => VerifyXenditCallbackToken::class,
+            'verify.wordpress-webhook-token' => VerifyWordPressWebhookToken::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

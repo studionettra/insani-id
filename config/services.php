@@ -49,4 +49,10 @@ return [
         'site_key' => env('TURNSTILE_SITE_KEY', '1x00000000000000000000AA'),
     ],
 
+    'whatsapp' => [
+        'provider' => env('WHATSAPP_PROVIDER', 'fonnte'),
+        'endpoint' => env('WHATSAPP_ENDPOINT', 'https://api.fonnte.com/send'),
+        'token' => env('WHATSAPP_TOKEN'),
+    ],
+
 ];

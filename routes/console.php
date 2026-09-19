@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\FullSyncBlogPostsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -9,6 +10,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('programs:check-status')->dailyAt('00:01');
-Schedule::job(new \App\Jobs\FullSyncBlogPostsJob)->hourly();
+Schedule::command('disbursements:send-update-reminders')->dailyAt('09:00');
+Schedule::job(new FullSyncBlogPostsJob)->hourly();
 Schedule::command('backup:run --only-db')->dailyAt('01:00');
 Schedule::command('backup:clean')->dailyAt('01:30');
