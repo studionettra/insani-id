@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CampaignerVerificationNotification;
 use App\Models\CampaignerProfile;
 use App\Models\VerificationDocument;
+use App\Services\NotificationGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CampaignerVerificationController extends Controller
 {
@@ -69,6 +72,20 @@ class CampaignerVerificationController extends Controller
                 Log::info("Campaigner {$campaigner->user->name} rejected. Notes: {$validated['notes']}");
             }
         });
+
+        // Dispatch notifications outside transaction
+        try {
+            $notes = $validated['notes'] ?? null;
+            app(NotificationGatewayService::class)->sendCampaignerVerificationResult($campaigner, $validated['status'], $notes);
+
+            if ($campaigner->user?->email) {
+                Mail::to($campaigner->user->email)->send(
+                    new CampaignerVerificationNotification($campaigner, $validated['status'], $notes)
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed sending campaigner verification notification: '.$e->getMessage());
+        }
 
         return redirect()->route('admin.campaigners.index')->with('success', 'Status verifikasi berhasil diperbarui.');
     }

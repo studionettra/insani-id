@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
-
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class CampaignerProfile extends Model
 {
@@ -49,5 +48,4 @@ class CampaignerProfile extends Model
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();
     }
-
 }

@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Translatable\HasTranslations;
+
 class Program extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
+    use HasTranslations {
+        HasTranslations::getTranslations as traitGetTranslations;
+    }
+
+    public $translatable = ['title', 'story'];
 
     protected $fillable = [
         'program_code',
@@ -96,4 +102,20 @@ class Program extends Model
         return LogOptions::defaults()->logAll()->logOnlyDirty();
     }
 
+    public function getTranslations(?string $key = null): array
+    {
+        if ($key) {
+            $value = $this->attributes[$key] ?? '';
+            if (! empty($value) && ! is_array($value)) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    return $decoded;
+                }
+
+                return ['id' => $value];
+            }
+        }
+
+        return $this->traitGetTranslations($key);
+    }
 }

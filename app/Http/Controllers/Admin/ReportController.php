@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Donation;
 use App\Models\Disbursement;
+use App\Models\Donation;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
@@ -20,7 +20,7 @@ class ReportController extends Controller
             'stats' => [
                 'totalDonations' => $totalDonations,
                 'totalDisbursements' => $totalDisbursements,
-            ]
+            ],
         ]);
     }
 
@@ -37,19 +37,19 @@ class ReportController extends Controller
 
         $donations = $query->get();
 
-        $filename = "laporan_donasi_" . now()->format('Ymd_His') . ".csv";
+        $filename = 'laporan_donasi_'.now()->format('Ymd_His').'.csv';
 
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = ['ID Donasi', 'Tanggal Lunas', 'Program', 'Nama Donatur', 'Nominal', 'Metode Pembayaran'];
 
-        $callback = function() use($donations, $columns) {
+        $callback = function () use ($donations, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
@@ -61,7 +61,7 @@ class ReportController extends Controller
                 $row['Nominal'] = $donation->amount;
                 $row['Metode Pembayaran'] = $donation->payment_method;
 
-                fputcsv($file, array($row['ID Donasi'], $row['Tanggal Lunas'], $row['Program'], $row['Nama Donatur'], $row['Nominal'], $row['Metode Pembayaran']));
+                fputcsv($file, [$row['ID Donasi'], $row['Tanggal Lunas'], $row['Program'], $row['Nama Donatur'], $row['Nominal'], $row['Metode Pembayaran']]);
             }
 
             fclose($file);
@@ -83,19 +83,19 @@ class ReportController extends Controller
 
         $disbursements = $query->get();
 
-        $filename = "laporan_pencairan_" . now()->format('Ymd_His') . ".csv";
+        $filename = 'laporan_pencairan_'.now()->format('Ymd_His').'.csv';
 
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $columns = ['Tgl Pengajuan', 'Program', 'Nominal Pencairan', 'Status', 'Tujuan Transfer', 'Keterangan'];
 
-        $callback = function() use($disbursements, $columns) {
+        $callback = function () use ($disbursements, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
@@ -104,10 +104,10 @@ class ReportController extends Controller
                 $row['Program'] = $disb->program ? $disb->program->title : '';
                 $row['Nominal Pencairan'] = $disb->requested_amount;
                 $row['Status'] = $disb->status;
-                $row['Tujuan Transfer'] = $disb->bank_name . ' - ' . $disb->bank_account_number;
+                $row['Tujuan Transfer'] = $disb->bank_name.' - '.$disb->bank_account_number;
                 $row['Keterangan'] = $disb->notes;
 
-                fputcsv($file, array($row['Tgl Pengajuan'], $row['Program'], $row['Nominal Pencairan'], $row['Status'], $row['Tujuan Transfer'], $row['Keterangan']));
+                fputcsv($file, [$row['Tgl Pengajuan'], $row['Program'], $row['Nominal Pencairan'], $row['Status'], $row['Tujuan Transfer'], $row['Keterangan']]);
             }
 
             fclose($file);

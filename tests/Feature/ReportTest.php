@@ -1,16 +1,17 @@
 <?php
 
-use App\Models\User;
-use App\Models\Donation;
-use App\Models\Program;
+use App\Models\CampaignerProfile;
 use App\Models\Category;
 use App\Models\Disbursement;
-use App\Models\CampaignerProfile;
-use Spatie\Permission\Models\Role;
+use App\Models\Donation;
+use App\Models\Program;
+use App\Models\User;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function () {
-    app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+    app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
     Permission::firstOrCreate(['name' => 'report.view']);
 
@@ -47,7 +48,7 @@ beforeEach(function () {
         'campaigner_type' => 'App\\Models\\CampaignerProfile',
         'category_id' => $this->category->id,
         'status' => 'published',
-        'cover_image' => 'cover.jpg'
+        'cover_image' => 'cover.jpg',
     ]);
 });
 

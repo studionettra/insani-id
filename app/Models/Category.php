@@ -33,8 +33,8 @@ class Category extends Model
     public function scopeFocusProgram($query)
     {
         return $query->where('is_focus_program', true)
-                     ->where('is_active', true)
-                     ->orderBy('sort_order');
+            ->where('is_active', true)
+            ->orderBy('sort_order');
     }
 
     protected $casts = [

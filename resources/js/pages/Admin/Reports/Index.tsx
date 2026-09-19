@@ -19,16 +19,16 @@ export default function ReportIndex({ stats }: Props) {
     const [disbursementsDates, setDisbursementsDates] = useState({ start: '', end: '' });
 
     const handleExportDonations = () => {
-        let url = route('admin.reports.donations.export');
+        let url = '/admin/reports/donations/export';
         const params = new URLSearchParams();
 
         if (donationsDates.start) {
-params.append('start_date', donationsDates.start);
-}
+            params.append('start_date', donationsDates.start);
+        }
 
         if (donationsDates.end) {
-params.append('end_date', donationsDates.end);
-}
+            params.append('end_date', donationsDates.end);
+        }
         
         if (params.toString()) {
             url += '?' + params.toString();
@@ -38,7 +38,7 @@ params.append('end_date', donationsDates.end);
     };
 
     const handleExportDisbursements = () => {
-        let url = route('admin.reports.disbursements.export');
+        let url = '/admin/reports/disbursements/export';
         const params = new URLSearchParams();
 
         if (disbursementsDates.start) {
@@ -63,56 +63,56 @@ params.append('end_date', disbursementsDates.end);
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Laporan & Ekspor Data</h1>
-                        <p className="text-sm text-gray-500 mt-1">Unduh laporan transaksi dalam format CSV untuk diolah lebih lanjut.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Laporan & Ekspor Data</h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Unduh laporan transaksi dalam format CSV untuk diolah lebih lanjut.</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden p-6 flex items-center gap-5">
-                        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden p-6 flex items-center gap-5">
+                        <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center">
                             <TrendingUp className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 font-medium mb-1">Total Donasi Diterima</p>
-                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalDonations)}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Donasi Diterima</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(stats.totalDonations)}</p>
                         </div>
                     </div>
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden p-6 flex items-center gap-5">
-                        <div className="w-12 h-12 bg-blue-50 text-[#1A56DB] rounded-full flex items-center justify-center">
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden p-6 flex items-center gap-5">
+                        <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 text-[#1A56DB] dark:text-blue-400 rounded-full flex items-center justify-center">
                             <RefreshCcw className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-sm text-gray-500 font-medium mb-1">Total Dana Dicairkan</p>
-                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalDisbursements)}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Dana Dicairkan</p>
+                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(stats.totalDisbursements)}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-                        <div className="border-b border-gray-100 bg-gray-50/50 py-4 px-6">
-                            <h3 className="font-semibold text-gray-900">Ekspor Laporan Donasi</h3>
-                            <p className="text-xs text-gray-500 mt-1">Unduh data seluruh donasi yang berstatus lunas (Paid).</p>
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+                        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Ekspor Laporan Donasi</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unduh data seluruh donasi yang berstatus lunas (Paid).</p>
                         </div>
                         <div className="p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-sm font-medium text-gray-700">Dari Tanggal</Label>
+                                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Dari Tanggal</Label>
                                     <Input 
                                         type="date" 
                                         value={donationsDates.start} 
                                         onChange={(e) => setDonationsDates({...donationsDates, start: e.target.value})} 
-                                        className="border-gray-200 focus-visible:ring-[#1A56DB] text-sm"
+                                        className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] text-sm"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-sm font-medium text-gray-700">Sampai Tanggal</Label>
+                                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sampai Tanggal</Label>
                                     <Input 
                                         type="date" 
                                         value={donationsDates.end} 
                                         onChange={(e) => setDonationsDates({...donationsDates, end: e.target.value})} 
-                                        className="border-gray-200 focus-visible:ring-[#1A56DB] text-sm"
+                                        className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] text-sm"
                                     />
                                 </div>
                             </div>
@@ -122,29 +122,29 @@ params.append('end_date', disbursementsDates.end);
                         </div>
                     </div>
 
-                    <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-                        <div className="border-b border-gray-100 bg-gray-50/50 py-4 px-6">
-                            <h3 className="font-semibold text-gray-900">Ekspor Laporan Pencairan</h3>
-                            <p className="text-xs text-gray-500 mt-1">Unduh data seluruh pengajuan pencairan dana program.</p>
+                    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+                        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Ekspor Laporan Pencairan</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unduh data seluruh pengajuan pencairan dana program.</p>
                         </div>
                         <div className="p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-sm font-medium text-gray-700">Dari Tanggal</Label>
+                                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Dari Tanggal</Label>
                                     <Input 
                                         type="date" 
                                         value={disbursementsDates.start} 
                                         onChange={(e) => setDisbursementsDates({...disbursementsDates, start: e.target.value})} 
-                                        className="border-gray-200 focus-visible:ring-[#1A56DB] text-sm"
+                                        className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] text-sm"
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-sm font-medium text-gray-700">Sampai Tanggal</Label>
+                                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sampai Tanggal</Label>
                                     <Input 
                                         type="date" 
                                         value={disbursementsDates.end} 
                                         onChange={(e) => setDisbursementsDates({...disbursementsDates, end: e.target.value})} 
-                                        className="border-gray-200 focus-visible:ring-[#1A56DB] text-sm"
+                                        className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] text-sm"
                                     />
                                 </div>
                             </div>

@@ -42,15 +42,15 @@ export default function CampaignersIndex({ campaigners, filters }: any) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Verifikasi Campaigner</h1>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Verifikasi Campaigner</h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             Kelola pendaftaran penggalang dana (Individu & Lembaga).
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Select value={status} onValueChange={handleFilterChange}>
-                            <SelectTrigger className="w-[180px] bg-white border-gray-200 focus:ring-[#1A56DB]">
+                            <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-gray-200 focus:ring-[#1A56DB]">
                                 <Filter className="w-4 h-4 mr-2 text-gray-400" />
                                 <SelectValue placeholder="Filter Status" />
                             </SelectTrigger>
@@ -64,41 +64,41 @@ export default function CampaignersIndex({ campaigners, filters }: any) {
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 bg-white overflow-x-auto overflow-x-auto">
+                <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-x-auto">
                     <Table>
-                        <TableHeader className="bg-gray-50/50">
+                        <TableHeader className="bg-gray-50/50 dark:bg-gray-800/50">
                             <TableRow>
-                                <TableCell className="font-medium text-gray-500 w-16">ID</TableCell>
-                                <TableCell className="font-medium text-gray-500">Nama User</TableCell>
-                                <TableCell className="font-medium text-gray-500">Tipe</TableCell>
-                                <TableCell className="font-medium text-gray-500">Nama Lembaga</TableCell>
-                                <TableCell className="font-medium text-gray-500">Status</TableCell>
-                                <TableCell className="font-medium text-gray-500">Tanggal Daftar</TableCell>
-                                <TableCell className="text-right font-medium text-gray-500">Aksi</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400 w-16">ID</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Nama User</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Tipe</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Nama Lembaga</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Status</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Tanggal Daftar</TableCell>
+                                <TableCell className="text-right font-medium text-gray-500 dark:text-gray-400">Aksi</TableCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {campaigners.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="h-32 text-center text-gray-500">
+                                    <TableCell colSpan={7} className="h-32 text-center text-gray-500 dark:text-gray-400">
                                         Tidak ada data yang ditemukan.
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 campaigners.data.map((campaigner: any) => (
-                                    <TableRow key={campaigner.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <TableCell className="text-gray-500">{campaigner.id}</TableCell>
-                                        <TableCell className="font-medium text-gray-900">{campaigner.user?.name}</TableCell>
-                                        <TableCell className="capitalize text-gray-600">{campaigner.type}</TableCell>
-                                        <TableCell className="text-gray-600">{campaigner.type === 'lembaga' ? campaigner.nama_lembaga : '-'}</TableCell>
+                                    <TableRow key={campaigner.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <TableCell className="text-gray-500 dark:text-gray-400">{campaigner.id}</TableCell>
+                                        <TableCell className="font-medium text-gray-900 dark:text-white">{campaigner.user?.name}</TableCell>
+                                        <TableCell className="capitalize text-gray-600 dark:text-gray-300">{campaigner.type}</TableCell>
+                                        <TableCell className="text-gray-600 dark:text-gray-300">{campaigner.type === 'lembaga' ? campaigner.nama_lembaga : '-'}</TableCell>
                                         <TableCell>{getStatusBadge(campaigner.verification_status)}</TableCell>
-                                        <TableCell className="text-gray-600">{new Date(campaigner.created_at).toLocaleDateString('id-ID')}</TableCell>
+                                        <TableCell className="text-gray-600 dark:text-gray-300">{new Date(campaigner.created_at).toLocaleDateString('id-ID')}</TableCell>
                                         <TableCell className="text-right">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
                                                 asChild
-                                                className="text-[#1A56DB] hover:text-[#1e40af] hover:bg-blue-50 font-medium"
+                                                className="text-[#1A56DB] hover:text-[#1e40af] hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/50 font-medium"
                                             >
                                                 <Link href={`/admin/campaigners/${campaigner.id}`}>
                                                     <Eye className="h-4 w-4 mr-2" /> Detail

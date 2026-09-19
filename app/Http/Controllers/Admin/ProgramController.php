@@ -170,7 +170,7 @@ class ProgramController extends Controller
             $story = preg_replace('/[\s\-]/', '', $program->story);
             if (preg_match('/\d{10,16}/', $story)) {
                 return redirect()->back()->withErrors([
-                    'status' => 'Peringatan: Terdeteksi kemungkinan nomor rekening di dalam deskripsi program. Harap periksa kembali sebelum mempublikasikan.'
+                    'status' => 'Peringatan: Terdeteksi kemungkinan nomor rekening di dalam deskripsi program. Harap periksa kembali sebelum mempublikasikan.',
                 ]);
             }
 

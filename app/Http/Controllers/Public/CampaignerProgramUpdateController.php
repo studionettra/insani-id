@@ -13,7 +13,7 @@ class CampaignerProgramUpdateController extends Controller
     {
         $profileId = auth()->user()->campaignerProfile?->id;
 
-        if (!$profileId || $program->campaigner_profile_id !== $profileId) {
+        if (! $profileId || $program->campaigner_profile_id !== $profileId) {
             abort(403, 'Unauthorized.');
         }
 
@@ -29,7 +29,7 @@ class CampaignerProgramUpdateController extends Controller
     {
         $profileId = auth()->user()->campaignerProfile?->id;
 
-        if (!$profileId || $program->campaigner_profile_id !== $profileId) {
+        if (! $profileId || $program->campaigner_profile_id !== $profileId) {
             abort(403, 'Unauthorized.');
         }
 
@@ -53,7 +53,7 @@ class CampaignerProgramUpdateController extends Controller
     {
         $profileId = auth()->user()->campaignerProfile?->id;
 
-        if (!$profileId || $program->campaigner_profile_id !== $profileId || $update->program_id !== $program->id) {
+        if (! $profileId || $program->campaigner_profile_id !== $profileId || $update->program_id !== $program->id) {
             abort(403, 'Unauthorized.');
         }
 
@@ -76,7 +76,7 @@ class CampaignerProgramUpdateController extends Controller
     {
         $profileId = auth()->user()->campaignerProfile?->id;
 
-        if (!$profileId || $program->campaigner_profile_id !== $profileId || $update->program_id !== $program->id) {
+        if (! $profileId || $program->campaigner_profile_id !== $profileId || $update->program_id !== $program->id) {
             abort(403, 'Unauthorized.');
         }
 

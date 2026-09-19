@@ -13,34 +13,34 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/app-layout';
+import { getLocalizedValue } from '@/lib/utils';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const [expanded, setExpanded] = useState(false);
 
     return (
-        <Card>
+        <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
             <CardContent className="p-6">
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg mb-1 truncate">{update.title}</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
+                        <h3 className="font-bold text-lg mb-1 truncate text-slate-900 dark:text-white">{update.title}</h3>
+                        <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">
                             {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: id })}
                             {!update.is_published && ' • (Draft)'}
                         </p>
                         <div className="relative">
                             <div 
-                                className={`prose prose-sm max-w-none text-muted-foreground break-words overflow-hidden transition-all duration-300 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md ${expanded ? '' : 'max-h-40'}`}
+                                className={`prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-gray-300 break-words overflow-hidden transition-all duration-300 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md ${expanded ? '' : 'max-h-40'}`}
                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
                             />
                             {!expanded && (
-                                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
                             )}
                         </div>
                         <div className="mt-2">
                             <button 
                                 onClick={() => setExpanded(!expanded)} 
-                                className="text-insani-blue font-medium text-sm hover:underline focus:outline-none"
+                                className="text-blue-600 dark:text-blue-400 font-medium text-sm hover:underline focus:outline-none"
                             >
                                 {expanded ? 'Tutup' : 'Baca Selengkapnya'}
                             </button>
@@ -93,23 +93,23 @@ export default function Updates({ program, updates }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Kabar Terbaru', href: `/akun/programs/${program.id}/updates` }]}>
-            <Head title={`Kabar Terbaru: ${program.title.id}`} />
+        <>
+            <Head title={`Kabar Terbaru: ${getLocalizedValue(program.title, 'Program')}`} />
             
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 mx-auto w-full max-w-4xl">
+            <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 mx-auto w-full max-w-4xl">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold">Kabar Terbaru</h1>
-                        <p className="text-muted-foreground">{program.title.id}</p>
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Kabar Terbaru</h1>
+                        <p className="text-slate-500 dark:text-gray-400">{getLocalizedValue(program.title, 'Program')}</p>
                     </div>
-                    <Button onClick={openCreateDialog}>
+                    <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
                         <Plus className="mr-2 h-4 w-4" /> Tambah Update
                     </Button>
                 </div>
 
                 <div className="space-y-4">
                     {(!updates.data || updates.data.length === 0) ? (
-                        <div className="text-center py-8 text-muted-foreground border rounded-lg">
+                        <div className="text-center py-8 text-slate-500 dark:text-gray-400 border border-slate-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
                             Belum ada kabar terbaru untuk program ini.
                         </div>
                     ) : (
@@ -127,10 +127,10 @@ export default function Updates({ program, updates }: Props) {
                                                 href={link.url || '#'}
                                                 className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
                                                     link.active
-                                                        ? 'bg-insani-blue text-white shadow-md'
+                                                        ? 'bg-blue-600 text-white shadow-md'
                                                         : link.url 
-                                                            ? 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-insani-blue' 
-                                                            : 'bg-transparent text-slate-400 cursor-not-allowed'
+                                                            ? 'bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400' 
+                                                            : 'bg-transparent text-slate-400 dark:text-gray-600 cursor-not-allowed'
                                                 }`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />
@@ -187,6 +187,6 @@ export default function Updates({ program, updates }: Props) {
                     </DialogContent>
                 </Dialog>
             </div>
-        </AppLayout>
+        </>
     );
 }

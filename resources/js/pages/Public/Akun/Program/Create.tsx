@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/app-layout';
 
 interface Category {
     id: number;
@@ -46,49 +45,49 @@ export default function AkunProgramCreate({ categories }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Buat Program', href: '/akun/programs/create' }]}>
+        <>
             <Head title="Buat Program Galang Dana" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
+            <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 max-w-4xl mx-auto w-full">
                 <div>
-                        <Button variant="ghost" asChild className="mb-4">
-                            <Link href="/akun/programs">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Kembali ke Daftar Program
-                            </Link>
-                        </Button>
-                        <h1 className="text-3xl font-bold text-slate-800">Buat Program Galang Dana Baru</h1>
-                        <p className="text-slate-500 mt-1">Lengkapi informasi di bawah ini untuk memulai penggalangan dana Anda.</p>
-                    </div>
+                    <Button variant="ghost" asChild className="mb-4 text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800">
+                        <Link href="/akun/programs">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Kembali ke Daftar Program
+                        </Link>
+                    </Button>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Buat Program Galang Dana Baru</h1>
+                    <p className="text-slate-500 dark:text-gray-400 mt-1">Lengkapi informasi di bawah ini untuk memulai penggalangan dana Anda.</p>
+                </div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Informasi Program</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="md:col-span-2">
-                                        <Label htmlFor="title" className="mb-2 block">Judul Program <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            id="title"
-                                            value={data.title}
-                                            onChange={e => setData('title', e.target.value)}
-                                            placeholder="Contoh: Bantuan Sembako untuk Lansia Dhuafa"
-                                            required
-                                        />
-                                        {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-                                    </div>
+                <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
+                    <CardHeader>
+                        <CardTitle className="text-slate-900 dark:text-white">Informasi Program</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="md:col-span-2">
+                                    <Label htmlFor="title" className="mb-2 block">Judul Program <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        id="title"
+                                        value={data.title}
+                                        onChange={e => setData('title', e.target.value)}
+                                        placeholder="Contoh: Bantuan Sembako untuk Lansia Dhuafa"
+                                        required
+                                    />
+                                    {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+                                </div>
 
-                                    <div>
-                                        <Label htmlFor="category_id" className="mb-2 block">Kategori <span className="text-red-500">*</span></Label>
-                                        <select
-                                            id="category_id"
-                                            value={data.category_id}
-                                            onChange={e => setData('category_id', e.target.value)}
-                                            className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                            required
-                                        >
+                                <div>
+                                    <Label htmlFor="category_id" className="mb-2 block">Kategori <span className="text-red-500">*</span></Label>
+                                    <select
+                                        id="category_id"
+                                        value={data.category_id}
+                                        onChange={e => setData('category_id', e.target.value)}
+                                        className="flex h-10 w-full rounded-md border border-slate-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-slate-900 dark:text-gray-100 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        required
+                                    >
                                             <option value="">Pilih Kategori</option>
                                             {categories.map(cat => (
                                                 <option key={cat.id} value={cat.id}>{cat.name.id || cat.name}</option>
@@ -148,7 +147,7 @@ export default function AkunProgramCreate({ categories }: Props) {
                                         
                                         {coverPreview && (
                                             <div className="mt-4">
-                                                <p className="text-sm text-slate-500 mb-2">Pratinjau:</p>
+                                                <p className="text-sm text-slate-500 dark:text-gray-400 mb-2">Pratinjau:</p>
                                                 <img src={coverPreview} alt="Pratinjau Sampul" className="max-w-full h-auto max-h-64 rounded-md object-cover" />
                                             </div>
                                         )}
@@ -175,6 +174,6 @@ export default function AkunProgramCreate({ categories }: Props) {
                         </CardContent>
                     </Card>
                 </div>
-        </AppLayout>
+        </>
     );
 }
