@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BlogPostCache;
 use Illuminate\Console\Command;
 
 class MockBlogSync extends Command
@@ -64,7 +65,7 @@ class MockBlogSync extends Command
         ];
 
         foreach ($posts as $post) {
-            \App\Models\BlogPostCache::updateOrCreate(
+            BlogPostCache::updateOrCreate(
                 ['wp_post_id' => $post['wp_post_id']],
                 $post
             );

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\BlogPostCache;
 
 class BlogController extends Controller
 {
     public function index()
     {
-        $blogs = \App\Models\BlogPostCache::orderBy('published_at', 'desc')
+        $blogs = BlogPostCache::orderBy('published_at', 'desc')
             ->paginate(12);
 
         return inertia('Public/Blog/Index', [
@@ -19,18 +19,18 @@ class BlogController extends Controller
 
     public function show($slug)
     {
-        $blog = \App\Models\BlogPostCache::where('slug', $slug)
+        $blog = BlogPostCache::where('slug', $slug)
             ->firstOrFail();
-            
+
         // Get related blogs (by category or just latest)
-        $relatedBlogs = \App\Models\BlogPostCache::where('id', '!=', $blog->id)
+        $relatedBlogs = BlogPostCache::where('id', '!=', $blog->id)
             ->latest('published_at')
             ->take(3)
             ->get();
 
         return inertia('Public/Blog/Show', [
             'blog' => $blog,
-            'relatedBlogs' => $relatedBlogs
+            'relatedBlogs' => $relatedBlogs,
         ]);
     }
 }

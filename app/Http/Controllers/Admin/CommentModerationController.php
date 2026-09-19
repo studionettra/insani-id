@@ -27,10 +27,11 @@ class CommentModerationController extends Controller
     public function toggleHidden(Comment $comment)
     {
         $comment->update([
-            'is_hidden' => !$comment->is_hidden,
+            'is_hidden' => ! $comment->is_hidden,
         ]);
 
         $status = $comment->is_hidden ? 'disembunyikan' : 'ditampilkan';
+
         return back()->with('success', "Komentar berhasil $status.");
     }
 }

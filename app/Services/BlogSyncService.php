@@ -3,24 +3,22 @@
 namespace App\Services;
 
 use App\Models\BlogPostCache;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Mews\Purifier\Facades\Purifier;
-use Carbon\Carbon;
 
 class BlogSyncService
 {
     /**
      * Fetch a single post from WordPress and upsert it into the local cache.
-     *
-     * @param int $wpPostId
-     * @return bool
      */
     public function syncPost(int $wpPostId): bool
     {
         $wpApiUrl = rtrim(config('services.wordpress.url'), '/');
-        if (!$wpApiUrl) {
+        if (! $wpApiUrl) {
             Log::error('WordPress API URL is not configured.');
+
             return false;
         }
 
@@ -28,13 +26,15 @@ class BlogSyncService
             // Using standard WP REST API endpoint format
             $response = Http::get("{$wpApiUrl}/wp-json/wp/v2/posts/{$wpPostId}?_embed");
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 if ($response->status() === 404) {
                     // Post might be deleted or unpublished in WP, remove it from cache
                     BlogPostCache::where('wp_post_id', $wpPostId)->delete();
+
                     return true;
                 }
-                Log::error("Failed to fetch post {$wpPostId} from WordPress. Status: " . $response->status());
+                Log::error("Failed to fetch post {$wpPostId} from WordPress. Status: ".$response->status());
+
                 return false;
             }
 
@@ -44,16 +44,14 @@ class BlogSyncService
             return true;
 
         } catch (\Exception $e) {
-            Log::error("Error syncing post {$wpPostId}: " . $e->getMessage());
+            Log::error("Error syncing post {$wpPostId}: ".$e->getMessage());
+
             return false;
         }
     }
 
     /**
      * Upsert a post into the local cache based on WP REST API payload.
-     *
-     * @param array $data
-     * @return void
      */
     protected function upsertPost(array $data): void
     {
@@ -61,11 +59,11 @@ class BlogSyncService
         $wpPostId = $data['id'];
         $slug = $data['slug'];
         $title = $data['title']['rendered'] ?? '';
-        
+
         // Sanitize HTML fields using Purifier
         $excerpt = isset($data['excerpt']['rendered']) ? strip_tags($data['excerpt']['rendered']) : null;
         $contentHtml = isset($data['content']['rendered']) ? Purifier::clean($data['content']['rendered']) : '';
-        
+
         $publishedAt = isset($data['date']) ? Carbon::parse($data['date']) : now();
 
         // Extract featured image from _embedded
@@ -101,16 +99,14 @@ class BlogSyncService
             ]
         );
     }
-    
+
     /**
      * Fetch all latest posts and sync them. Used by the fallback scheduled job.
-     * 
-     * @return void
      */
     public function syncAllPosts(): void
     {
         $wpApiUrl = rtrim(config('services.wordpress.url'), '/');
-        if (!$wpApiUrl) {
+        if (! $wpApiUrl) {
             return;
         }
 
@@ -121,8 +117,9 @@ class BlogSyncService
                 'per_page' => 100,
             ]);
 
-            if (!$response->successful()) {
-                Log::error("Failed to fetch WordPress posts for full sync. Status: " . $response->status());
+            if (! $response->successful()) {
+                Log::error('Failed to fetch WordPress posts for full sync. Status: '.$response->status());
+
                 return;
             }
 
@@ -133,7 +130,7 @@ class BlogSyncService
                 $this->upsertPost($postData);
                 $fetchedWpIds[] = $postData['id'];
             }
-            
+
             // Delete local posts that are not in the fetched latest list
             if (count($fetchedWpIds) > 0) {
                 $deleted = BlogPostCache::whereNotIn('wp_post_id', $fetchedWpIds)->delete();
@@ -142,7 +139,7 @@ class BlogSyncService
                 }
             }
         } catch (\Exception $e) {
-            Log::error("Error during full sync of WordPress posts: " . $e->getMessage());
+            Log::error('Error during full sync of WordPress posts: '.$e->getMessage());
         }
     }
 }

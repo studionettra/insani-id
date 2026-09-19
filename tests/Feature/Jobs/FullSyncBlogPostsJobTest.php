@@ -2,9 +2,10 @@
 
 use App\Jobs\FullSyncBlogPostsJob;
 use App\Models\BlogPostCache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Config;
+use App\Services\BlogSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
@@ -32,15 +33,15 @@ it('fetches latest posts and deletes missing local posts', function () {
             'excerpt' => ['rendered' => 'Excerpt'],
             'content' => ['rendered' => '<p>New content</p>'],
             'date' => '2026-07-16T10:00:00',
-        ]
+        ],
     ];
 
     Http::fake([
-        "https://berita.insani.id/wp-json/wp/v2/posts*" => Http::response($mockResponse, 200)
+        'https://berita.insani.id/wp-json/wp/v2/posts*' => Http::response($mockResponse, 200),
     ]);
 
-    $job = new FullSyncBlogPostsJob();
-    $job->handle(new \App\Services\BlogSyncService());
+    $job = new FullSyncBlogPostsJob;
+    $job->handle(new BlogSyncService);
 
     // New post should be inserted
     $this->assertDatabaseHas('blog_post_caches', [
