@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDonationRequest;
 use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Services\XenditPaymentService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class DonationController extends Controller
@@ -27,33 +27,37 @@ class DonationController extends Controller
         }
 
         return inertia('Public/Program/Donate', [
-            'program' => $program->load('creator')
+            'program' => $program->load('creator'),
+            'onlinePaymentAvailable' => ! empty(config('services.xendit.api_key')),
         ]);
     }
 
-    public function store(Request $request, Program $program)
+    public function store(StoreDonationRequest $request, Program $program)
     {
         if ($program->status !== 'published') {
             abort(404);
         }
 
-        $validated = $request->validate([
-            'amount' => 'required|numeric|min:10000',
-            'donor_name' => 'required|string|max:255',
-            'donor_email' => 'required|email|max:255',
-            'donor_phone' => 'required|string|max:30',
-            'is_anonymous' => 'boolean',
-            'message' => 'nullable|string',
-            'channel' => 'required|in:online,offline',
-        ]);
+        $validated = $request->validated();
 
-        $donationCode = 'DON-' . strtoupper(Str::random(10));
-        
+        $donationCode = 'DON-'.strtoupper(Str::random(10));
+
         $uniqueCode = null;
-        $totalAmount = $validated['amount'];
-        
+        $totalAmount = (float) $validated['amount'];
+
         if ($validated['channel'] === 'offline') {
-            $uniqueCode = rand(101, 999);
+            $existingCodes = Donation::where('program_id', $program->id)
+                ->where('channel', 'offline')
+                ->where('status', 'pending')
+                ->whereDate('created_at', today())
+                ->pluck('unique_code')
+                ->filter()
+                ->all();
+
+            do {
+                $uniqueCode = rand(101, 999);
+            } while (in_array($uniqueCode, $existingCodes));
+
             $totalAmount += $uniqueCode;
         }
 
@@ -89,7 +93,8 @@ class DonationController extends Controller
             } else {
                 // If failed, mark as failed
                 $donation->update(['status' => 'failed']);
-                return back()->with('error', 'Gagal membuat tagihan donasi: ' . $invoice['message']);
+
+                return back()->with('error', 'Gagal membuat tagihan donasi: '.$invoice['message']);
             }
         } else {
             // Offline/Manual transfer
@@ -108,9 +113,9 @@ class DonationController extends Controller
     public function status($donationCode)
     {
         $donation = Donation::where('donation_code', $donationCode)->with('program')->firstOrFail();
-        
+
         return inertia('Public/Donation/Status', [
-            'donation' => $donation
+            'donation' => $donation,
         ]);
     }
 }

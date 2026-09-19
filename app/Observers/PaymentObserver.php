@@ -2,14 +2,13 @@
 
 namespace App\Observers;
 
-use App\Mail\DonationSuccessNotification;
+use App\Jobs\SendDonationPaidNotification;
 use App\Models\Comment;
 use App\Models\Donation;
-use App\Models\NotificationLog;
 use App\Models\Payment;
-use App\Services\NotificationGatewayService;
+use App\Models\Program;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class PaymentObserver
 {
@@ -35,69 +34,44 @@ class PaymentObserver
         }
 
         if ($gatewayStatus === 'PAID' && $donation->status !== 'paid') {
-            $donation->update([
-                'status' => 'paid',
-                'paid_at' => $payment->paid_at ?? now(),
-            ]);
-
-            // Copy donation message to comments table if it exists
-            if (! empty($donation->message)) {
-                Comment::create([
-                    'program_id' => $donation->program_id,
-                    'donation_id' => $donation->id,
-                    'user_id' => $donation->donor_user_id,
-                    'name' => $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name,
-                    'body' => $donation->message,
-                    'is_hidden' => false,
+            DB::transaction(function () use ($donation, $payment) {
+                $donation->update([
+                    'status' => 'paid',
+                    'paid_at' => $payment->paid_at ?? now(),
                 ]);
-            }
 
-            // Recalculate program's collected amount
-            $program = $donation->program;
-            if ($program) {
-                $totalCollected = Donation::where('program_id', $program->id)
-                    ->where('status', 'paid')
-                    ->sum('amount');
-
-                $program->update(['collected_amount' => $totalCollected]);
-            }
-
-            // Send Email Notification
-            try {
-                Mail::to($donation->donor_email)->send(new DonationSuccessNotification($donation));
-
-                NotificationLog::create([
-                    'notifiable_type' => Donation::class,
-                    'notifiable_id' => $donation->id,
-                    'channel' => 'email',
-                    'recipient' => $donation->donor_email,
-                    'message' => 'Donation Success Email Sent',
-                    'status' => 'sent',
-                    'provider' => 'smtp',
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to send donation success email: '.$e->getMessage());
-            }
-
-            // Send WhatsApp Notification
-            try {
-                $waService = app(NotificationGatewayService::class);
-                $waService->sendDonationConfirmation($donation);
-
-                if ($donation->donor_phone) {
-                    NotificationLog::create([
-                        'notifiable_type' => Donation::class,
-                        'notifiable_id' => $donation->id,
-                        'channel' => 'whatsapp',
-                        'recipient' => $donation->donor_phone,
-                        'message' => 'Donation Success WhatsApp Sent',
-                        'status' => 'sent',
-                        'provider' => 'mock_wablas',
+                // Copy donation message to comments table if it exists
+                if (! empty($donation->message)) {
+                    Comment::create([
+                        'program_id' => $donation->program_id,
+                        'donation_id' => $donation->id,
+                        'user_id' => $donation->donor_user_id,
+                        'name' => $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name,
+                        'body' => $donation->message,
+                        'is_hidden' => false,
                     ]);
                 }
-            } catch (\Exception $e) {
-                Log::error('Failed to send donation success whatsapp: '.$e->getMessage());
-            }
+
+                // Recalculate program's collected amount with row locking to avoid race condition
+                $program = Program::whereKey($donation->program_id)->lockForUpdate()->first();
+                if ($program) {
+                    $totalCollected = Donation::where('program_id', $program->id)
+                        ->where('status', 'paid')
+                        ->sum('amount');
+
+                    $updates = ['collected_amount' => $totalCollected];
+
+                    // Check if program reached its target amount
+                    if ($program->target_amount && $totalCollected >= $program->target_amount && $program->status === 'published') {
+                        $updates['status'] = 'completed';
+                    }
+
+                    $program->update($updates);
+                }
+            });
+
+            // Dispatch notification job to queue after the transaction commits
+            SendDonationPaidNotification::dispatch($donation)->afterCommit();
         }
 
         if (in_array($gatewayStatus, ['EXPIRED', 'FAILED'])) {

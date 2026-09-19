@@ -13,7 +13,7 @@ class DonationController extends Controller
         $query = Donation::with(['program', 'donor', 'payments']);
 
         // Filter based on role
-        if (auth()->user()->hasRole('campaigner')) {
+        if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga'])) {
             $query->whereHas('program', function ($q) {
                 $q->where('created_by', auth()->id());
             });
@@ -45,7 +45,7 @@ class DonationController extends Controller
     public function confirm(Request $request, Donation $donation)
     {
         // Admin or Campaigner who owns the program
-        if (auth()->user()->hasRole('campaigner') && $donation->program->created_by !== auth()->id()) {
+        if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga']) && $donation->program->created_by !== auth()->id()) {
             abort(403);
         }
 

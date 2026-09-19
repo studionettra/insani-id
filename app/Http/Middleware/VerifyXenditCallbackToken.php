@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class VerifyXenditCallbackToken
@@ -19,10 +20,11 @@ class VerifyXenditCallbackToken
         $reqToken = $request->header('x-callback-token');
 
         if ($reqToken !== $xenditXCallbackToken) {
-            \Illuminate\Support\Facades\Log::warning('Unauthorized Xendit Webhook Token', [
+            Log::warning('Unauthorized Xendit Webhook Token', [
                 'ip' => $request->ip(),
-                'token_received' => $reqToken
+                'token_received' => $reqToken,
             ]);
+
             return response()->json(['message' => 'Unauthorized token'], 403);
         }
 

@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { CheckCircle2, Clock, XCircle, AlertCircle, Copy } from 'lucide-react';
 import React from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency } from '@/lib/utils';
@@ -54,7 +55,7 @@ export default function Status({ donation }: any) {
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
-        alert('Tersalin: ' + text);
+        toast.success('Berhasil disalin ke clipboard');
     };
 
     return (

@@ -3,13 +3,13 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class DonationSuccessNotification extends Mailable
+class NewDonationNotification extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -29,7 +29,7 @@ class DonationSuccessNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Terima Kasih atas Donasi Anda - '.config('app.name'),
+            subject: 'Donasi Baru Masuk untuk Program Anda - '.config('app.name'),
         );
     }
 
@@ -39,7 +39,7 @@ class DonationSuccessNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.donations.success',
+            markdown: 'emails.campaigners.new-donation',
             with: [
                 'donation' => $this->donation,
             ]
@@ -48,8 +48,6 @@ class DonationSuccessNotification extends Mailable
 
     /**
      * Get the attachments for the message.
-     *
-     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

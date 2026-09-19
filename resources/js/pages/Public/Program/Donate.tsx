@@ -1,6 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { toast } from 'sonner';
-import { ChevronRight, ShieldCheck, CreditCard, Landmark, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, ShieldCheck, CreditCard, Landmark, CheckCircle2, AlertCircle } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
 
 
-export default function Donate({ program }: any) {
-    const { auth } = usePage().props as any;
+export default function Donate({ program, onlinePaymentAvailable = true }: any) {
+    const { auth, flash } = usePage().props as any;
     
 
     const presets = [10000, 20000, 50000, 100000, 500000, 1000000];
@@ -23,7 +23,7 @@ export default function Donate({ program }: any) {
         donor_phone: '',
         is_anonymous: false,
         message: '',
-        channel: 'online'
+        channel: onlinePaymentAvailable ? 'online' : 'offline'
     });
 
     const submit = (e: React.FormEvent) => {
@@ -63,6 +63,16 @@ export default function Donate({ program }: any) {
                                 <h1 className="text-2xl font-bold text-slate-800 mb-6">Masukkan Nominal Donasi</h1>
                                 
                                 <form onSubmit={submit} className="space-y-8">
+
+                                    {flash?.error && (
+                                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3">
+                                            <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
+                                            <div className="space-y-1">
+                                                <p className="font-semibold text-red-800">Gagal Memproses Donasi</p>
+                                                <p className="leading-relaxed">{flash.error}</p>
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     {/* Amount Selection */}
                                     <div className="space-y-4">
@@ -108,15 +118,38 @@ export default function Donate({ program }: any) {
                                         <h2 className="text-xl font-bold text-slate-800 border-t pt-8">Metode Pembayaran</h2>
                                         
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <label className={`relative flex cursor-pointer rounded-xl border-2 p-4 flex-col gap-3 transition-all ${data.channel === 'online' ? 'border-insani-blue bg-blue-50' : 'border-slate-200 hover:bg-slate-50'}`}>
-                                                <input type="radio" name="channel" value="online" checked={data.channel === 'online'} onChange={() => setData('channel', 'online')} className="sr-only" />
+                                            <label className={`relative flex rounded-xl border-2 p-4 flex-col gap-3 transition-all ${
+                                                !onlinePaymentAvailable 
+                                                    ? 'opacity-60 cursor-not-allowed border-slate-200 bg-slate-50' 
+                                                    : data.channel === 'online' 
+                                                        ? 'border-insani-blue bg-blue-50 cursor-pointer' 
+                                                        : 'border-slate-200 hover:bg-slate-50 cursor-pointer'
+                                            }`}>
+                                                <input 
+                                                    type="radio" 
+                                                    name="channel" 
+                                                    value="online" 
+                                                    disabled={!onlinePaymentAvailable}
+                                                    checked={data.channel === 'online'} 
+                                                    onChange={() => onlinePaymentAvailable && setData('channel', 'online')} 
+                                                    className="sr-only" 
+                                                />
                                                 <div className="flex justify-between items-center w-full">
                                                     <CreditCard className={`w-6 h-6 ${data.channel === 'online' ? 'text-insani-blue' : 'text-slate-400'}`} />
                                                     {data.channel === 'online' && <CheckCircle2 className="w-5 h-5 text-insani-blue" />}
+                                                    {!onlinePaymentAvailable && (
+                                                        <span className="text-[11px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
+                                                            Belum Dikonfigurasi
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <span className="block font-bold text-slate-800">Online Payment</span>
-                                                    <span className="block text-sm text-slate-500">Virtual Account, QRIS, e-Wallet</span>
+                                                    <span className="block text-sm text-slate-500">
+                                                        {onlinePaymentAvailable 
+                                                            ? 'Virtual Account, QRIS, e-Wallet' 
+                                                            : 'Layanan belum aktif di server. Gunakan transfer manual.'}
+                                                    </span>
                                                 </div>
                                             </label>
 

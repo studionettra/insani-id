@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Mail\DonationSuccessNotification;
+use App\Mail\NewDonationNotification;
+use App\Models\Donation;
+use App\Models\NotificationLog;
+use App\Services\NotificationGatewayService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+
+class SendDonationPaidNotification implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $donation;
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct(Donation $donation)
+    {
+        $this->donation = $donation;
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(NotificationGatewayService $waService): void
+    {
+        $donation = $this->donation->loadMissing(['program.creator', 'program.campaignerProfile']);
+
+        // 1. Send Email to Donor
+        if ($donation->donor_email) {
+            try {
+                Mail::to($donation->donor_email)->send(new DonationSuccessNotification($donation));
+
+                NotificationLog::create([
+                    'notifiable_type' => Donation::class,
+                    'notifiable_id' => $donation->id,
+                    'channel' => 'email',
+                    'recipient' => $donation->donor_email,
+                    'message' => 'Donation Success Email Sent',
+                    'status' => 'sent',
+                    'provider' => 'smtp',
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to send donation success email to {$donation->donor_email}: ".$e->getMessage());
+            }
+        }
+
+        // 2. Send WhatsApp to Donor
+        if ($donation->donor_phone) {
+            try {
+                $waService->sendDonationConfirmation($donation);
+
+                NotificationLog::create([
+                    'notifiable_type' => Donation::class,
+                    'notifiable_id' => $donation->id,
+                    'channel' => 'whatsapp',
+                    'recipient' => $donation->donor_phone,
+                    'message' => 'Donation Success WhatsApp Sent',
+                    'status' => 'sent',
+                    'provider' => config('services.whatsapp.provider', 'fonnte'),
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Failed to send donation success whatsapp to {$donation->donor_phone}: ".$e->getMessage());
+            }
+        }
+
+        // 3. Send Notification to Campaigner (Program Creator)
+        $creator = $donation->program?->creator;
+        if ($creator && $creator->email && $donation->program->campaigner_type !== 'internal') {
+            try {
+                Mail::to($creator->email)->send(new NewDonationNotification($donation));
+            } catch (\Exception $e) {
+                Log::error("Failed to send new donation alert email to campaigner {$creator->email}: ".$e->getMessage());
+            }
+
+            try {
+                $waService->sendNewDonationAlertToCampaigner($donation);
+            } catch (\Exception $e) {
+                Log::error('Failed to send new donation alert whatsapp to campaigner: '.$e->getMessage());
+            }
+        }
+    }
+}
