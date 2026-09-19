@@ -15,13 +15,13 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
 
 interface Program {
     id: number;
-    title: { id: string };
+    title: any;
     program_code: string;
-    category: { title: { id: string }, name: { id: string } };
+    category: any;
     campaigner_type: string;
     creator: { name: string, email: string, phone: string };
     campaignerProfile?: { institution_name: string, pic_name: string, type: string };
@@ -106,7 +106,7 @@ export default function ProgramShow({ program }: Props) {
 
     return (
         <>
-            <Head title={`Detail Program: ${program.title}`} />
+            <Head title={`Detail Program: ${getLocalizedValue(program.title)}`} />
 
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div>
@@ -163,13 +163,13 @@ export default function ProgramShow({ program }: Props) {
                                 <div className="mb-6">
                                     <img
                                         src={`/storage/${program.cover_image}`}
-                                        alt={program.title}
+                                        alt={getLocalizedValue(program.title)}
                                         className="w-full h-64 sm:h-[400px] object-cover rounded-lg border border-gray-100"
                                     />
                                 </div>
 
                                 <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
-                                    {program.title}
+                                    {getLocalizedValue(program.title)}
                                 </h2>
                                 <p className="text-gray-500 mb-6 font-mono text-sm tracking-wide">Kode: {program.program_code}</p>
 
@@ -177,13 +177,13 @@ export default function ProgramShow({ program }: Props) {
                                     <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
                                         <p className="text-sm font-medium text-gray-500 mb-1 uppercase tracking-wider">Target Donasi</p>
                                         <p className="font-bold text-2xl text-gray-900 tracking-tight">
-                                            {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
+                                             {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
                                         </p>
                                     </div>
                                     <div className="bg-blue-50 p-5 rounded-lg border border-blue-100">
                                         <p className="text-sm font-medium text-blue-600 mb-1 uppercase tracking-wider">Terkumpul</p>
                                         <p className="font-bold text-2xl text-[#1A56DB] tracking-tight">
-                                            {formatCurrency(program.collected_amount)}
+                                             {formatCurrency(program.collected_amount)}
                                         </p>
                                     </div>
                                 </div>
@@ -192,7 +192,7 @@ export default function ProgramShow({ program }: Props) {
                                     <h4 className="font-semibold text-gray-900 mb-4">Cerita Program</h4>
                                     <div
                                         className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-justify prose-a:text-[#1A56DB] prose-headings:text-gray-900 prose-strong:text-gray-900 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-gray-400 break-words overflow-hidden text-left"
-                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(program.story.id || program.story as unknown as string) }}
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(program.story)) }}
                                     />
                                 </div>
                             </div>
@@ -354,7 +354,7 @@ export default function ProgramShow({ program }: Props) {
                 open={isApproveConfirmOpen}
                 onOpenChange={setIsApproveConfirmOpen}
                 title="Publikasikan Program"
-                description={`Apakah Anda yakin ingin mempublikasikan program "${program.title}"? Program akan aktif tayang di halaman publik dan donatur dapat mulai berdonasi.`}
+                description={`Apakah Anda yakin ingin mempublikasikan program "${getLocalizedValue(program.title)}"? Program akan aktif tayang di halaman publik dan donatur dapat mulai berdonasi.`}
                 confirmText="Publikasikan"
                 variant="info"
                 loading={isUpdatingStatus}

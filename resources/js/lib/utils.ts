@@ -11,13 +11,14 @@ export function toUrl(url: NonNullable<InertiaLinkProps['href']>): string {
     return typeof url === 'string' ? url : url.url;
 }
 
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number | string): string {
+    const num = typeof value === 'string' ? parseFloat(value) || 0 : (value || 0);
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-    }).format(value);
+    }).format(num);
 }
 
 import { format } from 'date-fns';

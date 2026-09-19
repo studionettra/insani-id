@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 
 interface Program {
     id: number;
@@ -143,7 +143,7 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                     <TableRow key={program.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                                         <TableCell>
                                             <div className="font-medium text-gray-900 dark:text-white">
-                                                {program.title}
+                                                {getLocalizedValue(program.title)}
                                             </div>
                                             <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
                                                 {program.program_code}
@@ -152,13 +152,13 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                         <TableCell>
                                             <img
                                                 src={`/storage/${program.cover_image}`}
-                                                alt={program.title}
+                                                alt={getLocalizedValue(program.title)}
                                                 className="h-20 w-35 rounded-md object-cover border border-gray-200 dark:border-gray-700"
                                             />
                                         </TableCell>
-                                        <TableCell className="text-gray-600 dark:text-gray-300">{program.category?.name?.id || 'N/A'}</TableCell>
+                                        <TableCell className="text-gray-600 dark:text-gray-300">{getLocalizedValue(program.category?.name, 'N/A')}</TableCell>
                                         <TableCell>
-                                            <div className="font-medium text-gray-900 dark:text-white">{program.creator?.name}</div>
+                                            <div className="font-medium text-gray-900 dark:text-white">{program.creator?.name || 'Admin'}</div>
                                             <div className="text-xs text-gray-500 dark:text-gray-400 capitalize mt-0.5">{program.campaigner_type}</div>
                                         </TableCell>
                                         <TableCell>
@@ -224,7 +224,7 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                 open={!!programToDelete}
                 onOpenChange={(open) => !open && setProgramToDelete(null)}
                 title="Hapus Program Donasi"
-                description={`Apakah Anda yakin ingin menghapus program "${programToDelete?.title?.id || programToDelete?.title || ''}"? Seluruh data terkait program ini akan dihapus.`}
+                description={`Apakah Anda yakin ingin menghapus program "${programToDelete ? getLocalizedValue(programToDelete.title) : ''}"? Seluruh data terkait program ini akan dihapus.`}
                 variant="danger"
                 loading={isDeleting}
                 onConfirm={handleConfirmDelete}

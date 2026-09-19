@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import PublicLayout from '@/layouts/PublicLayout';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 
 interface Category {
     id: number;
@@ -117,7 +117,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
                                     }`}
                                 >
-                                    {cat.name.id || cat.name}
+                                    {getLocalizedValue(cat.name)}
                                 </button>
                             ))}
                         </div>
@@ -137,17 +137,17 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                             <div className="relative h-48 overflow-hidden">
                                                 <img 
                                                     src={`/storage/${program.cover_image}`} 
-                                                    alt={program.title as string} 
+                                                    alt={getLocalizedValue(program.title)} 
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
                                                 <Badge className="absolute top-3 right-3 bg-white/90 text-insani-blue hover:bg-white backdrop-blur-sm border-none font-semibold">
-                                                    {program.category?.name?.id || 'Kategori'}
+                                                    {getLocalizedValue(program.category?.name, 'Kategori')}
                                                 </Badge>
                                             </div>
                                             <CardContent className="flex-1 p-5 flex flex-col justify-between">
                                                 <div>
                                                     <h3 className="font-bold text-lg text-slate-800 mb-4 line-clamp-2 leading-tight group-hover:text-insani-blue transition-colors">
-                                                        {program.title}
+                                                        {getLocalizedValue(program.title)}
                                                     </h3>
                                                 </div>
 

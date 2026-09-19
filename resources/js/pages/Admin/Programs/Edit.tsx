@@ -1,23 +1,24 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import React, { useState } from 'react';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getLocalizedValue } from '@/lib/utils';
 
 interface Category {
     id: number;
-    name: { id: string };
+    name: any;
 }
 
 interface Program {
     id: number;
-    title: { id: string };
+    title: any;
     category_id: number;
     target_amount: string | null;
     deadline: string | null;
-    story: { id: string };
+    story: any;
     cover_image: string;
     video_url: string | null;
 }
@@ -28,12 +29,12 @@ interface Props {
 }
 
 export default function ProgramEdit({ categories, program }: Props) {
-    const { data, setData, put, processing, errors } = useForm({
-        title: program.title,
+    const { data, setData, post, processing, errors } = useForm({
+        title: getLocalizedValue(program.title),
         category_id: program.category_id,
         target_amount: program.target_amount || '',
         deadline: program.deadline ? program.deadline.split('T')[0] : '', // format YYYY-MM-DD
-        story: program.story,
+        story: getLocalizedValue(program.story),
         cover_image: null as File | null,
         video_url: program.video_url || '',
     });
@@ -44,19 +45,11 @@ export default function ProgramEdit({ categories, program }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Since we are uploading a file, we need to use post with _method=PUT to handle multipart/form-data correctly in Inertia
-        // Wait, Inertia's post method handles files. So we use router.post instead if we have files.
-        // Or we can use post to a special route.
-        // Actually, Inertia has a trick for PUT with files:
-        // https://inertiajs.com/file-uploads#multipart-limitations
-        // We will just use post and append _method: 'put'
-        import('@inertiajs/react').then(({ router }) => {
-            router.post(`/admin/programs/${program.id}`, {
-                _method: 'put',
-                ...data,
-            }, {
-                forceFormData: true,
-            });
+        router.post(`/admin/programs/${program.id}`, {
+            _method: 'put',
+            ...data,
+        }, {
+            forceFormData: true,
         });
     };
 
@@ -125,7 +118,7 @@ export default function ProgramEdit({ categories, program }: Props) {
                                 >
                                     <option value="">Pilih Kategori</option>
                                     {categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.name.id || cat.name}</option>
+                                        <option key={cat.id} value={cat.id}>{getLocalizedValue(cat.name)}</option>
                                     ))}
                                 </select>
                                 {errors.category_id && <p className="mt-1 text-xs text-red-500">{errors.category_id}</p>}

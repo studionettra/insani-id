@@ -6,10 +6,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getLocalizedValue } from '@/lib/utils';
 
 interface Category {
     id: number;
-    name: { id: string };
+    name: any;
 }
 
 interface Props {
@@ -106,7 +107,7 @@ export default function ProgramCreate({ categories }: Props) {
                                 >
                                     <option value="">Pilih Kategori</option>
                                     {categories.map(cat => (
-                                        <option key={cat.id} value={cat.id}>{cat.name.id || cat.name}</option>
+                                        <option key={cat.id} value={cat.id}>{getLocalizedValue(cat.name)}</option>
                                     ))}
                                 </select>
                                 {errors.category_id && <p className="mt-1 text-xs text-red-500">{errors.category_id}</p>}

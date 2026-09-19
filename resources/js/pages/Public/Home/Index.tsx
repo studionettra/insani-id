@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FadeIn } from '@/components/ui/fade-in';
 import PublicLayout from '@/layouts/PublicLayout';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 
 export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs }: any) {
     const { locale } = usePage().props as any;
@@ -261,17 +261,17 @@ return;
                                         <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
                                             <img 
                                                 src={`/storage/${program.cover_image}`} 
-                                                alt={program.title}
+                                                alt={getLocalizedValue(program.title)}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
                                             <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-zinc-900 shadow-sm">
-                                                {typeof program.category?.name === 'object' ? program.category.name?.id || program.category.name?.en : program.category?.name}
+                                                {getLocalizedValue(program.category?.name)}
                                             </div>
                                         </div>
                                         
                                         <div className="p-6 flex flex-col flex-grow">
                                             <h3 className="text-xl font-bold text-zinc-950 mb-4 line-clamp-2 group-hover:text-brand-600 transition-colors leading-tight tracking-tight">
-                                                {program.title}
+                                                {getLocalizedValue(program.title)}
                                             </h3>
                                             
                                             <div className="mt-auto pt-4 border-t border-zinc-50">
