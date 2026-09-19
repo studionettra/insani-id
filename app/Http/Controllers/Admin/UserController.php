@@ -46,6 +46,15 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'role' => ['required', 'string', 'exists:roles,name'],
+        ], [
+            'password.required' => 'Password wajib diisi.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok dengan password yang dimasukkan.',
+            'password.min' => 'Password minimal harus 8 karakter.',
+            'password.mixed' => 'Password harus mengandung kombinasi huruf besar dan huruf kecil.',
+            'password.letters' => 'Password harus mengandung setidaknya satu huruf.',
+            'password.symbols' => 'Password harus mengandung setidaknya satu simbol atau karakter khusus (contoh: !@#$%^&*).',
+            'password.numbers' => 'Password harus mengandung setidaknya satu angka.',
+            'password.uncompromised' => 'Password yang dimasukkan terindikasi pernah bocor dalam data publik. Gunakan password yang lebih aman.',
         ]);
 
         $user = User::create([
@@ -78,6 +87,15 @@ class UserController extends Controller
         if ($request->filled('password')) {
             $request->validate([
                 'password' => ['required', 'confirmed', Password::defaults()],
+            ], [
+                'password.required' => 'Password wajib diisi.',
+                'password.confirmed' => 'Konfirmasi password tidak cocok dengan password yang dimasukkan.',
+                'password.min' => 'Password minimal harus 8 karakter.',
+                'password.mixed' => 'Password harus mengandung kombinasi huruf besar dan huruf kecil.',
+                'password.letters' => 'Password harus mengandung setidaknya satu huruf.',
+                'password.symbols' => 'Password harus mengandung setidaknya satu simbol atau karakter khusus (contoh: !@#$%^&*).',
+                'password.numbers' => 'Password harus mengandung setidaknya satu angka.',
+                'password.uncompromised' => 'Password yang dimasukkan terindikasi pernah bocor dalam data publik. Gunakan password yang lebih aman.',
             ]);
             $user->update([
                 'password' => Hash::make($request->password),

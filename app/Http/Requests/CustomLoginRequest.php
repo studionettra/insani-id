@@ -2,20 +2,22 @@
 
 namespace App\Http\Requests;
 
-use Laravel\Fortify\Http\Requests\LoginRequest;
 use App\Rules\TurnstileRule;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Laravel\Fortify\Http\Requests\LoginRequest;
 
 class CustomLoginRequest extends LoginRequest
 {
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         $rules = parent::rules();
         $rules['cf-turnstile-response'] = ['required', 'string', new TurnstileRule];
+
         return $rules;
     }
 

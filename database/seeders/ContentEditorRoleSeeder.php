@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class ContentEditorRoleSeeder extends Seeder
 {
@@ -12,7 +15,7 @@ class ContentEditorRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Content Editor']);
+        $role = Role::firstOrCreate(['name' => 'Content Editor']);
 
         $permissions = [
             'manage_pages',
@@ -27,16 +30,16 @@ class ContentEditorRoleSeeder extends Seeder
         ];
 
         foreach ($permissions as $perm) {
-            $permission = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $perm]);
+            $permission = Permission::firstOrCreate(['name' => $perm]);
             $role->givePermissionTo($permission);
         }
 
         // Create a dummy content editor user
-        \App\Models\User::firstOrCreate(
+        User::firstOrCreate(
             ['email' => 'editor@insani.id'],
             [
                 'name' => 'Content Editor',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ]
         )->assignRole('Content Editor');

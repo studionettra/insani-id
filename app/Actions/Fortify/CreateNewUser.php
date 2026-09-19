@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Rules\TurnstileRule;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -22,9 +23,9 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
-            'cf-turnstile-response' => ['required', 'string', new \App\Rules\TurnstileRule],
+            'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
         ], [
-            'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).'
+            'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).',
         ])->validate();
 
         return User::create([

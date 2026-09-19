@@ -67,9 +67,32 @@ test('users can logout', function () {
 
     $response = $this->actingAs($user)->post(route('logout'));
 
-    $response->assertRedirect(route('home'));
+    $response->assertRedirect(route('login'));
 
     $this->assertGuest();
+});
+
+test('inertia users receive 409 location header on logout to prevent back history', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('logout'), [], ['X-Inertia' => 'true']);
+
+    $response->assertStatus(409);
+    $response->assertHeader('X-Inertia-Location', route('login'));
+
+    $this->assertGuest();
+});
+
+test('prevent back history headers are set on protected dashboard routes', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+
+    $cacheControl = $response->headers->get('Cache-Control');
+    expect($cacheControl)->toContain('no-cache')
+        ->toContain('no-store')
+        ->toContain('must-revalidate');
+    $response->assertHeader('Pragma', 'no-cache');
 });
 
 test('users are rate limited', function () {

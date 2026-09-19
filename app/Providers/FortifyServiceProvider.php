@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Requests\CustomLoginRequest;
+use App\Http\Responses\LogoutResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -11,8 +13,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Http\Requests\LoginRequest;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -21,7 +25,8 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(\Laravel\Fortify\Http\Requests\LoginRequest::class, \App\Http\Requests\CustomLoginRequest::class);
+        $this->app->bind(LoginRequest::class, CustomLoginRequest::class);
+        $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
     }
 
     /**
