@@ -11,9 +11,13 @@ type Props = {
 };
 
 export default function Register({ passwordRules }: Props) {
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const initialName = searchParams?.get('name') || '';
+    const initialEmail = searchParams?.get('email') || '';
+
     const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        email: '',
+        name: initialName,
+        email: initialEmail,
         password: '',
         password_confirmation: '',
         'cf-turnstile-response': '',
@@ -56,6 +60,15 @@ export default function Register({ passwordRules }: Props) {
                     <p className="mt-2 text-sm text-gray-600">
                         Bergabunglah dan mulai perjalanan kebaikan Anda bersama kami.
                     </p>
+
+                    {initialEmail && (
+                        <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-start gap-2">
+                            <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                            <span>
+                                Akun Anda akan otomatis terhubung dengan seluruh riwayat donasi sebelumnya yang menggunakan email <strong>{initialEmail}</strong>.
+                            </span>
+                        </div>
+                    )}
 
                     <form className="mt-8 space-y-5" onSubmit={submit}>
                         <div className="grid gap-2">
