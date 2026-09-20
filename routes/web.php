@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\DashboardController;
@@ -170,6 +171,11 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
             Route::get('reports/donations/export', [ReportController::class, 'exportDonations'])->name('reports.donations.export');
             Route::get('reports/disbursements/export', [ReportController::class, 'exportDisbursements'])->name('reports.disbursements.export');
+        });
+
+        Route::middleware('permission:settings.view')->group(function () {
+            Route::get('site-settings', [SiteSettingController::class, 'index'])->name('site-settings.index');
+            Route::post('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
         });
     });
 
