@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\AnalyticsCollectorController;
 use App\Http\Controllers\Api\ImageUploadController;
@@ -108,6 +109,8 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::get('/campaigner/status', [CampaignerRegistrationController::class, 'status'])->name('campaigner.status');
 
     Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service|Content Editor')->group(function () {
+        Route::post('/auto-translate', [TranslationController::class, 'translate'])->name('auto-translate');
+
         Route::middleware('permission:user.view')->group(function () {
             Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
         });
