@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { usePage, router } from '@inertiajs/react';
+import useTranslation from '@/hooks/use-translation';
 
 const flags = {
     id: 'https://cdn.gtranslate.net/flags/svg/id.svg',
@@ -8,11 +9,10 @@ const flags = {
 };
 
 export default function LanguageSwitcher() {
-    const { locale, supportedLocales } = usePage().props;
+    const { supportedLocales } = usePage().props;
+    const { t, locale: currentLang } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
-
-    const currentLang = locale || 'id';
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -49,8 +49,9 @@ export default function LanguageSwitcher() {
             <button 
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-100 transition-colors focus:outline-none active:scale-95"
-                title="Ganti Bahasa"
+                title={t('Ganti Bahasa')}
                 type="button"
+                aria-label={t('Ganti Bahasa')}
             >
                 <img 
                     src={currentFlag} 
@@ -61,7 +62,7 @@ export default function LanguageSwitcher() {
 
             {/* Custom Dropdown */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 py-2 w-44 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-zinc-200/80 z-50 flex flex-col gap-1 origin-top-right transition-all">
+                <div className="absolute ltr:right-0 rtl:left-0 end-0 mt-2 py-2 w-44 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-zinc-200/80 z-50 flex flex-col gap-1 origin-top-right transition-all">
                     {Object.entries(availableLocales).map(([code, item]) => (
                         <button
                             key={code}

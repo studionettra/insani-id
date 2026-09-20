@@ -65,6 +65,17 @@ class HandleInertiaRequests extends Middleware
 
                 return [];
             })(),
+            'translations' => (function () {
+                $locale = app()->getLocale();
+                $path = lang_path("{$locale}.json");
+                if (file_exists($path)) {
+                    $content = file_get_contents($path);
+
+                    return json_decode($content, true) ?: [];
+                }
+
+                return [];
+            })(),
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),

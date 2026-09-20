@@ -3,11 +3,12 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Home, Heart, PlusCircle, User } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { FlashMessages } from '@/components/flash-messages';
+import useTranslation from '@/hooks/use-translation';
 
 export default function PublicLayout({ children, title = '', hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
-    const { locale, auth, siteSettings } = usePage().props;
+    const { auth, siteSettings } = usePage().props;
+    const { t, locale, isRtl } = useTranslation();
     const { url } = usePage();
-    const isRtl = locale === 'ar';
     const isActive = (path) => path === '/' ? url === '/' : url.startsWith(path);
 
     useEffect(() => {
@@ -82,15 +83,15 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                         
                         {/* Desktop Navigation */}
                         <nav className="hidden md:flex items-center space-x-2 rtl:space-x-reverse text-sm lg:text-base font-medium">
-                            <Link href="/" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Beranda</Link>
-                            <Link href="/tentang-kami" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/tentang-kami') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Tentang Kami</Link>
-                            <Link href="/fokus-program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/fokus-program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Fokus Program</Link>
-                            <Link href="/program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Donasi</Link>
-                            <Link href="/berita" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/berita') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>Berita</Link>
+                            <Link href="/" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Beranda')}</Link>
+                            <Link href="/tentang-kami" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/tentang-kami') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Tentang Kami')}</Link>
+                            <Link href="/fokus-program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/fokus-program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Fokus Program')}</Link>
+                            <Link href="/program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Donasi')}</Link>
+                            <Link href="/berita" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/berita') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Berita')}</Link>
                         </nav>
                         
                         <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                            <div className="hidden sm:block">
+                            <div className="flex items-center">
                                 <LanguageSwitcher />
                             </div>
                             {auth?.user ? (
@@ -100,7 +101,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 </Link>
                             ) : (
                                 <Link href="/login" className="hidden md:inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 hover:shadow-md transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
-                                    Masuk
+                                    {t('Masuk')}
                                 </Link>
                             )}
                         </div>
@@ -167,31 +168,31 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                         {/* Kolom 2: Tautan Tentang */}
                         <div className="col-span-1 md:col-span-4 lg:col-span-2 lg:col-start-6">
-                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">Tentang</h3>
+                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">{t('Tentang')}</h3>
                             <ul className="space-y-3 text-sm text-blue-100">
                                 <li>
                                     <Link href="/tentang-kami" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Tentang Kami
+                                        {t('Tentang Kami')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/fokus-program" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Fokus Program
+                                        {t('Fokus Program')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/berita" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Berita & Kabar
+                                        {t('Berita')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/kontak" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Hubungi Kami
+                                        {t('Hubungi Kami')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/buat-program" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Jadi Campaigner
+                                        {t('Jadi Campaigner')}
                                     </Link>
                                 </li>
                             </ul>
@@ -199,31 +200,31 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                         {/* Kolom 3: Tautan Bantuan */}
                         <div className="col-span-1 md:col-span-4 lg:col-span-2">
-                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">Bantuan</h3>
+                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">{t('Bantuan')}</h3>
                             <ul className="space-y-3 text-sm text-blue-100">
                                 <li>
                                     <Link href="/pusat-bantuan" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Pusat Bantuan (FAQ)
+                                        {t('Pusat Bantuan (FAQ)')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/syarat-ketentuan" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Syarat & Ketentuan
+                                        {t('Syarat & Ketentuan')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/kebijakan-privasi" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Kebijakan Privasi
+                                        {t('Kebijakan Privasi')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/cara-donasi" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Cara Berdonasi
+                                        {t('Cara Berdonasi')}
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/cek-donasi" className="hover:text-cyan-400 hover:translate-x-1 inline-block transition-all duration-200">
-                                        Cek Status Donasi
+                                        {t('Cek Status Donasi')}
                                     </Link>
                                 </li>
                             </ul>
@@ -231,7 +232,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                         {/* Kolom 4: QRIS Donasi */}
                         <div className="col-span-1 md:col-span-4 lg:col-span-3 lg:col-start-10">
-                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">Donasi Cepat QRIS</h3>
+                            <h3 className="text-white font-semibold mb-6 tracking-wide text-sm uppercase">{t('Donasi Cepat QRIS')}</h3>
                             <div className="bg-white p-3 rounded-2xl shadow-xl inline-block hover:scale-105 transition-transform duration-300">
                                 <img 
                                     src={qrisImageUrl} 
@@ -240,7 +241,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 />
                             </div>
                             <p className="text-blue-100 text-xs mt-4 leading-relaxed max-w-[200px]">
-                                Scan QRIS untuk berdonasi langsung ke rekening resmi Yayasan Peduli Insani Indonesia.
+                                {t('Scan QRIS untuk berdonasi langsung ke rekening resmi Yayasan Peduli Insani Indonesia.')}
                             </p>
                         </div>
                     </div>
@@ -248,7 +249,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                     {/* Copyright & Bottom Bar */}
                     <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-blue-100/60 text-sm text-center md:text-left">
-                            &copy; {new Date().getFullYear()} Yayasan Peduli Insani Indonesia. Hak cipta dilindungi.
+                            &copy; {new Date().getFullYear()} {t('Yayasan Peduli Insani Indonesia')}. {t('Hak cipta dilindungi.')}
                         </p>
                     </div>
                 </div>
@@ -262,25 +263,25 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/') ? 'bg-brand-50' : 'bg-transparent'}`}>
                         <Home className="w-[22px] h-[22px]" strokeWidth={isActive('/') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">Beranda</span>
+                    <span className="text-[10px] font-medium mt-0.5">{t('Beranda')}</span>
                 </Link>
                 <Link href="/program" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/program') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/program') ? 'bg-brand-50' : 'bg-transparent'}`}>
                         <Heart className="w-[22px] h-[22px]" strokeWidth={isActive('/program') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">Donasi</span>
+                    <span className="text-[10px] font-medium mt-0.5">{t('Donasi')}</span>
                 </Link>
                 <Link href="/buat-program" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/buat-program') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/buat-program') ? 'bg-brand-50' : 'bg-transparent'}`}>
                         <PlusCircle className="w-[22px] h-[22px]" strokeWidth={isActive('/buat-program') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">Campaigner</span>
+                    <span className="text-[10px] font-medium mt-0.5">{t('Campaigner')}</span>
                 </Link>
                 <Link href={userAccountUrl} className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive(userAccountUrl) || isActive('/akun') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
                     <div className={`p-1.5 rounded-full transition-colors ${isActive(userAccountUrl) || isActive('/akun') ? 'bg-brand-50' : 'bg-transparent'}`}>
                         <User className="w-[22px] h-[22px]" strokeWidth={isActive(userAccountUrl) || isActive('/akun') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">Akun</span>
+                    <span className="text-[10px] font-medium mt-0.5">{t('Akun')}</span>
                 </Link>
             </nav>
             )}
