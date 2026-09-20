@@ -25,6 +25,7 @@ class ContentEditorRoleSeeder extends Seeder
             'manage_impact_stats',
             'manage_banners',
             'manage_contact_messages',
+            'manage_blog',
             'category.view',
             'dashboard.view',
         ];
