@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { FadeIn } from '@/components/ui/fade-in';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs }: any) {
     const { locale } = usePage().props as any;
@@ -258,7 +259,7 @@ return;
                                         href={`/program/${program.slug}`} 
                                         className="group flex flex-col h-full bg-white border border-zinc-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300"
                                     >
-                                        <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100">
+                                        <div className="relative aspect-video w-full overflow-hidden bg-zinc-100">
                                             <img 
                                                 src={`/storage/${program.cover_image}`} 
                                                 alt={getLocalizedValue(program.title)}
@@ -274,17 +275,16 @@ return;
                                                 {getLocalizedValue(program.title)}
                                             </h3>
                                             
-                                            <div className="mt-auto pt-4 border-t border-zinc-50">
-                                                {program.target_amount && (
-                                                    <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden mb-5">
-                                                        <div 
-                                                            className="bg-brand-600 h-full rounded-full transition-all duration-1000 ease-out relative" 
-                                                            style={{ width: `${Math.min(100, (program.collected_amount / program.target_amount) * 100)}%` }}
-                                                        >
-                                                            <div className="absolute inset-0 bg-white/20 w-full h-full origin-left animate-pulse"></div>
-                                                        </div>
-                                                    </div>
-                                                )}
+                                            <div className="mt-auto pt-4 border-t border-zinc-100">
+                                                <div className="mb-4">
+                                                    <DonationProgressBar 
+                                                        collectedAmount={program.collected_amount}
+                                                        targetAmount={program.target_amount}
+                                                        size="sm"
+                                                        percentagePlacement="top-right"
+                                                        percentageFormat="badge"
+                                                    />
+                                                </div>
                                                 
                                                 <div className="flex justify-between items-end">
                                                     <div>

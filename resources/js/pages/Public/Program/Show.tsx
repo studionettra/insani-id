@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const [expanded, setExpanded] = useState(false);
@@ -109,9 +110,6 @@ export default function ProgramShow({ program, auth }: Props) {
         });
     };
 
-    const progress = program.target_amount
-        ? Math.min(100, Math.round((program.collected_amount / parseFloat(program.target_amount)) * 100))
-        : null;
 
     const campaignerName = program.campaigner_type === 'internal'
         ? 'Insani Indonesia (Official)'
@@ -156,16 +154,19 @@ export default function ProgramShow({ program, auth }: Props) {
         </div>
     );
 
-    const renderDonationProgress = () => (
-        <div className="py-4 lg:py-0 border-t lg:border-t-0 border-b lg:border-b-0 border-slate-100">
-            {progress !== null ? (
+    const renderDonationProgress = () => {
+        const hasTarget = Boolean(program.target_amount && parseFloat(program.target_amount) > 0);
+
+        return (
+            <div className="py-4 lg:py-0 border-t lg:border-t-0 border-b lg:border-b-0 border-slate-100">
+                {hasTarget ? (
                     <>
-                        <div className="mb-2">
-                            <p className="text-2xl font-bold text-insani-blue mb-3">
+                        <div className="mb-3">
+                            <p className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight mb-2">
                                 {formatCurrency(program.collected_amount)}
                             </p>
-                            <div className="flex justify-between items-center mt-1">
-                                <p className="text-sm text-slate-500">
+                            <div className="flex justify-between items-center text-sm">
+                                <p className="text-slate-500">
                                     terkumpul dari target <span className="font-semibold text-slate-700">{formatCurrency(parseFloat(program.target_amount!))}</span>
                                 </p>
                                 {program.deadline ? (
@@ -173,29 +174,39 @@ export default function ProgramShow({ program, auth }: Props) {
                                         {Math.max(0, differenceInDays(new Date(program.deadline), new Date()))} hari lagi
                                     </p>
                                 ) : (
-                                    <p className="text-sm font-medium text-slate-500 shrink-0 bg-slate-100 px-2 py-0.5 rounded-full text-[10px]">
+                                    <p className="text-xs font-medium text-slate-500 shrink-0 bg-slate-100 px-2 py-0.5 rounded-full">
                                         Tanpa Batas Waktu
                                     </p>
                                 )}
                             </div>
                         </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2.5 mb-2 overflow-hidden">
-                            <div
-                                className="bg-insani-blue h-2.5 rounded-full transition-all duration-1000 ease-out"
-                                style={{ width: `${progress}%` }}
-                            ></div>
+                        <div className="mb-3">
+                            <DonationProgressBar
+                                collectedAmount={program.collected_amount}
+                                targetAmount={program.target_amount}
+                                size="md"
+                                percentagePlacement="top-right"
+                                percentageFormat="badge"
+                                label="Ketercapaian Target"
+                            />
                         </div>
                     </>
                 ) : (
                     <div>
-                        <p className="text-3xl font-bold text-insani-blue mb-1">
+                        <p className="text-3xl font-bold text-slate-900 mb-1">
                             {formatCurrency(program.collected_amount)}
                         </p>
-                        <p className="text-sm text-slate-500">Dana Terkumpul</p>
+                        <div className="flex items-center justify-between text-sm text-slate-500 mt-1">
+                            <span>Dana Terkumpul</span>
+                            <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-600">
+                                Donasi Fleksibel (Tanpa Target)
+                            </span>
+                        </div>
                     </div>
                 )}
-        </div>
-    );
+            </div>
+        );
+    };
 
     const renderCampaignerInfo = () => (
         <>

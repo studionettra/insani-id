@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Category {
     id: number;
@@ -127,14 +128,10 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                     {programs.data.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {programs.data.map(program => {
-                                const progress = program.target_amount 
-                                    ? Math.min(100, Math.round((program.collected_amount / parseFloat(program.target_amount)) * 100))
-                                    : null;
-
                                 return (
                                     <Link key={program.id} href={`/program/${program.slug}`} className="group h-full">
                                         <Card className="h-full flex flex-col overflow-hidden border-slate-200 hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
-                                            <div className="relative h-48 overflow-hidden">
+                                            <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
                                                 <img 
                                                     src={`/storage/${program.cover_image}`} 
                                                     alt={getLocalizedValue(program.title)} 
@@ -152,31 +149,30 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                                 </div>
 
                                                 <div className="mt-4">
-                                                    {progress !== null ? (
-                                                        <>
-                                                            <div className="w-full bg-slate-100 rounded-full h-2 mb-3 overflow-hidden">
-                                                                <div 
-                                                                    className="bg-insani-blue h-2 rounded-full transition-all duration-1000 ease-out" 
-                                                                    style={{ width: `${progress}%` }}
-                                                                ></div>
-                                                            </div>
-                                                            <div className="flex justify-between items-end text-sm">
-                                                                <div>
-                                                                    <p className="text-slate-500 text-xs mb-1">Terkumpul</p>
-                                                                    <p className="font-bold text-insani-blue">{formatCurrency(program.collected_amount)}</p>
-                                                                </div>
-                                                                <div className="text-right">
-                                                                    <p className="text-slate-500 text-xs mb-1">Sisa Hari</p>
-                                                                    <p className="font-medium text-slate-700">{/* To be calculated */} ∞</p>
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <div className="pt-2 border-t border-slate-100">
-                                                            <p className="text-slate-500 text-xs mb-1">Terkumpul</p>
-                                                            <p className="font-bold text-insani-blue text-lg">{formatCurrency(program.collected_amount)}</p>
+                                                    <div className="mb-3">
+                                                        <DonationProgressBar 
+                                                            collectedAmount={program.collected_amount}
+                                                            targetAmount={program.target_amount}
+                                                            size="sm"
+                                                            percentagePlacement="top-right"
+                                                            percentageFormat="badge"
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between items-end text-sm">
+                                                        <div>
+                                                            <p className="text-slate-500 text-xs mb-0.5">Terkumpul</p>
+                                                            <p className="font-bold text-slate-900">{formatCurrency(program.collected_amount)}</p>
+                                                            {program.target_amount && parseFloat(program.target_amount) > 0 && (
+                                                                <p className="text-[11px] text-slate-400">
+                                                                    dari {formatCurrency(parseFloat(program.target_amount))}
+                                                                </p>
+                                                            )}
                                                         </div>
-                                                    )}
+                                                        <div className="text-right">
+                                                            <p className="text-slate-500 text-xs mb-0.5">Sisa Hari</p>
+                                                            <p className="font-medium text-slate-700">∞</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </CardContent>
                                         </Card>

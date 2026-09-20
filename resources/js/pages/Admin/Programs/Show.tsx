@@ -16,6 +16,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
     id: number;
@@ -173,7 +174,7 @@ export default function ProgramShow({ program }: Props) {
                                 </h2>
                                 <p className="text-gray-500 mb-6 font-mono text-sm tracking-wide">Kode: {program.program_code}</p>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                                     <div className="bg-gray-50 p-5 rounded-lg border border-gray-100">
                                         <p className="text-sm font-medium text-gray-500 mb-1 uppercase tracking-wider">Target Donasi</p>
                                         <p className="font-bold text-2xl text-gray-900 tracking-tight">
@@ -186,6 +187,17 @@ export default function ProgramShow({ program }: Props) {
                                              {formatCurrency(program.collected_amount)}
                                         </p>
                                     </div>
+                                </div>
+
+                                <div className="mb-8 p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                                    <DonationProgressBar
+                                        collectedAmount={program.collected_amount}
+                                        targetAmount={program.target_amount}
+                                        size="md"
+                                        percentagePlacement="top-right"
+                                        percentageFormat="badge"
+                                        label="Persentase Ketercapaian Donasi"
+                                    />
                                 </div>
 
                                 <div>

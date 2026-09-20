@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
     id: number;
@@ -118,16 +119,13 @@ export default function AkunProgramIndex({ programs }: Props) {
                                                 
                                                 {(() => {
                                                     const hasTarget = Boolean(program.target_amount && parseFloat(program.target_amount) > 0);
-                                                    const progress = hasTarget
-                                                        ? Math.min(100, Math.round(((program.collected_amount || 0) / parseFloat(program.target_amount!)) * 100))
-                                                        : 0;
 
                                                     return (
                                                         <div className="mt-4 p-3.5 rounded-xl bg-slate-50/80 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800">
                                                             <div className="grid grid-cols-2 gap-4">
                                                                 <div>
                                                                     <p className="text-[11px] text-slate-500 dark:text-gray-400 uppercase font-semibold tracking-wider">Terkumpul</p>
-                                                                    <p className="font-bold text-base text-emerald-600 dark:text-emerald-400 mt-0.5">{formatCurrency(program.collected_amount)}</p>
+                                                                    <p className="font-bold text-base text-slate-900 dark:text-white mt-0.5">{formatCurrency(program.collected_amount)}</p>
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-[11px] text-slate-500 dark:text-gray-400 uppercase font-semibold tracking-wider">Target Donasi</p>
@@ -136,20 +134,16 @@ export default function AkunProgramIndex({ programs }: Props) {
                                                                     </p>
                                                                 </div>
                                                             </div>
-                                                            {hasTarget && (
-                                                                <div className="mt-3">
-                                                                    <div className="flex justify-between items-center text-xs text-slate-500 dark:text-gray-400 mb-1.5">
-                                                                        <span>Progres Pengumpulan</span>
-                                                                        <span className="font-semibold text-slate-700 dark:text-gray-200">{progress}%</span>
-                                                                    </div>
-                                                                    <div className="w-full bg-slate-200/70 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                                                                        <div 
-                                                                            className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400 transition-all duration-500" 
-                                                                            style={{ width: `${progress}%` }} 
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            )}
+                                                            <div className="mt-3">
+                                                                <DonationProgressBar
+                                                                    collectedAmount={program.collected_amount}
+                                                                    targetAmount={program.target_amount}
+                                                                    size="sm"
+                                                                    percentagePlacement="top-right"
+                                                                    percentageFormat="badge"
+                                                                    label="Progres Pengumpulan"
+                                                                />
+                                                            </div>
                                                         </div>
                                                     );
                                                 })()}

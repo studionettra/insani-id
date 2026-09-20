@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
     id: number;
@@ -184,6 +185,17 @@ export default function AkunProgramShow({ program }: Props) {
                                             {program.deadline ? formatDate(program.deadline) : 'Tanpa Batas Waktu'}
                                         </p>
                                     </div>
+                                </div>
+
+                                <div className="pt-3 border-t border-slate-100 dark:border-gray-800">
+                                    <DonationProgressBar
+                                        collectedAmount={program.collected_amount}
+                                        targetAmount={program.target_amount}
+                                        size="md"
+                                        percentagePlacement="top-right"
+                                        percentageFormat="badge"
+                                        label="Ketercapaian Target"
+                                    />
                                 </div>
                             </CardContent>
                         </Card>

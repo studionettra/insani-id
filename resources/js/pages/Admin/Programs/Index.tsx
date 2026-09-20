@@ -13,6 +13,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
     id: number;
@@ -22,6 +23,7 @@ interface Program {
     category: { title: { id: string }, name: { id: string } };
     campaigner_type: string;
     creator: { name: string };
+    target_amount?: string | null;
     collected_amount: number;
     status: string;
     published_at: string | null;
@@ -161,10 +163,23 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                             <div className="font-medium text-gray-900 dark:text-white">{program.creator?.name || 'Admin'}</div>
                                             <div className="text-xs text-gray-500 dark:text-gray-400 capitalize mt-0.5">{program.campaigner_type}</div>
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="font-semibold text-gray-900 dark:text-white">{formatCurrency(program.collected_amount)}</div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                                Target: {program.target_amount && parseFloat(program.target_amount) > 0 ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
+                                        <TableCell className="min-w-[190px]">
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-baseline justify-between gap-1">
+                                                    <span className="font-semibold text-gray-900 dark:text-white text-sm">
+                                                        {formatCurrency(program.collected_amount)}
+                                                    </span>
+                                                </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                    Target: {program.target_amount && parseFloat(program.target_amount) > 0 ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
+                                                </div>
+                                                <DonationProgressBar
+                                                    collectedAmount={program.collected_amount}
+                                                    targetAmount={program.target_amount}
+                                                    size="xs"
+                                                    percentagePlacement="top-right"
+                                                    percentageFormat="badge"
+                                                />
                                             </div>
                                         </TableCell>
                                         <TableCell>
