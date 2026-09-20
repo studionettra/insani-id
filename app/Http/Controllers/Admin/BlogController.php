@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPostCache;
+use App\Services\TranslationService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -64,17 +65,28 @@ class BlogController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required',
             'slug' => 'nullable|string|max:255|unique:blog_post_caches,slug',
-            'excerpt' => 'nullable|string',
-            'content_html' => 'required|string',
+            'excerpt' => 'nullable',
+            'content_html' => 'required',
             'wp_category' => 'required|string|max:100',
             'featured_image' => 'nullable|image|max:3072',
             'status' => 'required|in:published,draft',
             'published_at' => 'nullable|date',
         ]);
 
-        $slug = ! empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($validated['title']);
+        $translationService = app(TranslationService::class);
+        $titleInput = $request->title;
+        $excerptInput = $request->excerpt;
+        $contentInput = is_array($request->content_html) ? $request->content_html : Purifier::clean($request->content_html);
+
+        $titleTranslations = is_array($titleInput)
+            ? $titleInput
+            : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        $primaryTitle = is_array($titleInput) ? ($titleInput['id'] ?? reset($titleInput)) : (string) $titleInput;
+
+        $slug = ! empty($validated['slug']) ? Str::slug($validated['slug']) : Str::slug($primaryTitle);
         $originalSlug = $slug;
         $count = 1;
         while (BlogPostCache::where('slug', $slug)->exists()) {
@@ -90,7 +102,20 @@ class BlogController extends Controller
         $validated['featured_image_url'] = $featuredImageUrl;
         unset($validated['featured_image']);
 
-        $validated['content_html'] = Purifier::clean($validated['content_html']);
+        $excerptTranslations = null;
+        if (! empty($excerptInput)) {
+            $excerptTranslations = is_array($excerptInput)
+                ? $excerptInput
+                : ($translationService->translateFields(['excerpt' => (string) $excerptInput])['excerpt'] ?? ['id' => (string) $excerptInput]);
+        }
+
+        $contentTranslations = is_array($contentInput)
+            ? $contentInput
+            : ($translationService->translateFields(['content' => (string) $contentInput], ['en', 'ar'], 'id', ['content'])['content'] ?? ['id' => (string) $contentInput]);
+
+        $validated['title'] = $titleTranslations;
+        $validated['excerpt'] = $excerptTranslations;
+        $validated['content_html'] = $contentTranslations;
         $validated['author_id'] = auth()->id();
         $validated['published_at'] = ! empty($validated['published_at']) ? Carbon::parse($validated['published_at']) : now();
 
@@ -109,7 +134,11 @@ class BlogController extends Controller
             ->pluck('wp_category');
 
         return inertia('Admin/Blogs/Edit', [
-            'blog' => $blog,
+            'blog' => array_merge($blog->toArray(), [
+                'title_translations' => $blog->getTranslations('title'),
+                'excerpt_translations' => $blog->getTranslations('excerpt'),
+                'content_translations' => $blog->getTranslations('content_html'),
+            ]),
             'categories' => $categories,
         ]);
     }
@@ -117,10 +146,10 @@ class BlogController extends Controller
     public function update(Request $request, BlogPostCache $blog): RedirectResponse
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required',
             'slug' => ['required', 'string', 'max:255', Rule::unique('blog_post_caches', 'slug')->ignore($blog->id)],
-            'excerpt' => 'nullable|string',
-            'content_html' => 'required|string',
+            'excerpt' => 'nullable',
+            'content_html' => 'required',
             'wp_category' => 'required|string|max:100',
             'featured_image' => 'nullable|image|max:3072',
             'status' => 'required|in:published,draft',
@@ -137,7 +166,29 @@ class BlogController extends Controller
         }
         unset($validated['featured_image']);
 
-        $validated['content_html'] = Purifier::clean($validated['content_html']);
+        $translationService = app(TranslationService::class);
+        $titleInput = $request->title;
+        $excerptInput = $request->excerpt;
+        $contentInput = is_array($request->content_html) ? $request->content_html : Purifier::clean($request->content_html);
+
+        $titleTranslations = is_array($titleInput)
+            ? $titleInput
+            : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        $excerptTranslations = null;
+        if (! empty($excerptInput)) {
+            $excerptTranslations = is_array($excerptInput)
+                ? $excerptInput
+                : ($translationService->translateFields(['excerpt' => (string) $excerptInput])['excerpt'] ?? ['id' => (string) $excerptInput]);
+        }
+
+        $contentTranslations = is_array($contentInput)
+            ? $contentInput
+            : ($translationService->translateFields(['content' => (string) $contentInput], ['en', 'ar'], 'id', ['content'])['content'] ?? ['id' => (string) $contentInput]);
+
+        $validated['title'] = $titleTranslations;
+        $validated['excerpt'] = $excerptTranslations;
+        $validated['content_html'] = $contentTranslations;
         $validated['published_at'] = ! empty($validated['published_at']) ? Carbon::parse($validated['published_at']) : $blog->published_at;
 
         $blog->update($validated);

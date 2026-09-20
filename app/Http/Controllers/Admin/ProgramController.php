@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Program;
+use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -49,22 +50,36 @@ class ProgramController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required',
             'category_id' => 'required|exists:categories,id',
             'target_amount' => 'nullable|numeric|min:0',
             'deadline' => 'nullable|date|after:today',
-            'story' => 'required|string',
+            'story' => 'required',
             'cover_image' => 'required|image|max:2048',
             'video_url' => 'nullable|url',
         ]);
+
+        $translationService = app(TranslationService::class);
+        $titleInput = $request->title;
+        $storyInput = $request->story;
+
+        $titleTranslations = is_array($titleInput)
+            ? $titleInput
+            : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        $storyTranslations = is_array($storyInput)
+            ? $storyInput
+            : ($translationService->translateFields(['story' => (string) $storyInput], ['en', 'ar'], 'id', ['story'])['story'] ?? ['id' => (string) $storyInput]);
+
+        $primaryTitle = is_array($titleInput) ? ($titleInput['id'] ?? reset($titleInput)) : (string) $titleInput;
 
         $coverImagePath = $request->file('cover_image')->store('programs/covers', 'public');
 
         $program = new Program;
         $program->program_code = 'PRG-'.date('Ymd').'-'.strtoupper(Str::random(4));
-        $program->title = $request->title;
-        $program->story = $request->story;
-        $program->slug = Str::slug($request->title).'-'.Str::random(4);
+        $program->title = $titleTranslations;
+        $program->story = $storyTranslations;
+        $program->slug = Str::slug($primaryTitle).'-'.Str::random(4);
         $program->category_id = $request->category_id;
         $program->campaigner_type = 'internal';
         $program->created_by = auth()->id();
@@ -102,7 +117,10 @@ class ProgramController extends Controller
         $categories = Category::where('is_active', true)->get();
 
         return Inertia::render('Admin/Programs/Edit', [
-            'program' => $program,
+            'program' => array_merge($program->toArray(), [
+                'title_translations' => $program->getTranslations('title'),
+                'story_translations' => $program->getTranslations('story'),
+            ]),
             'categories' => $categories,
         ]);
     }
@@ -115,17 +133,29 @@ class ProgramController extends Controller
         $program = Program::findOrFail($id);
 
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required',
             'category_id' => 'required|exists:categories,id',
             'target_amount' => 'nullable|numeric|min:0',
             'deadline' => 'nullable|date',
-            'story' => 'required|string',
+            'story' => 'required',
             'cover_image' => 'nullable|image|max:2048',
             'video_url' => 'nullable|url',
         ]);
 
-        $program->title = $request->title;
-        $program->story = $request->story;
+        $translationService = app(TranslationService::class);
+        $titleInput = $request->title;
+        $storyInput = $request->story;
+
+        $titleTranslations = is_array($titleInput)
+            ? $titleInput
+            : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        $storyTranslations = is_array($storyInput)
+            ? $storyInput
+            : ($translationService->translateFields(['story' => (string) $storyInput], ['en', 'ar'], 'id', ['story'])['story'] ?? ['id' => (string) $storyInput]);
+
+        $program->title = $titleTranslations;
+        $program->story = $storyTranslations;
         $program->category_id = $request->category_id;
         $program->target_amount = $request->target_amount;
         $program->deadline = $request->deadline;

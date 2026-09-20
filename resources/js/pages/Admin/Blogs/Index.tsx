@@ -25,6 +25,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { getLocalizedValue } from '@/lib/utils';
 
 interface BlogsIndexProps {
     blogs: any;
@@ -199,10 +200,10 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
                                             </TableCell>
                                             <TableCell className="max-w-md">
                                                 <div className="font-semibold text-slate-900 dark:text-white line-clamp-1">
-                                                    {blog.title}
+                                                    {getLocalizedValue(blog.title)}
                                                 </div>
                                                 <div className="text-xs text-slate-500 line-clamp-1 mt-0.5">
-                                                    {blog.excerpt || 'Tidak ada ringkasan'}
+                                                    {getLocalizedValue(blog.excerpt) || 'Tidak ada ringkasan'}
                                                 </div>
                                                 <div className="text-[11px] text-slate-400 font-mono mt-1">
                                                     /{blog.slug}

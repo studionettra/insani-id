@@ -1,6 +1,8 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Upload, X, ImageIcon, Calendar, Sparkles } from 'lucide-react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ArrowLeft, Upload, X, Calendar, Sparkles } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,12 +16,15 @@ interface BlogCreateProps {
 export default function BlogCreate({ categories = [] }: BlogCreateProps) {
     const today = new Date().toISOString().split('T')[0];
 
-    const { data, setData, post, processing, errors } = useForm({
-        title: '',
+    const [contentLocale, setContentLocale] = useState<'id' | 'en' | 'ar'>('id');
+    const [titles, setTitles] = useState<Record<string, string>>({ id: '', en: '', ar: '' });
+    const [excerpts, setExcerpts] = useState<Record<string, string>>({ id: '', en: '', ar: '' });
+    const [contents, setContents] = useState<Record<string, string>>({ id: '', en: '', ar: '' });
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    const { data, setData, processing, errors } = useForm({
         slug: '',
         wp_category: '',
-        excerpt: '',
-        content_html: '',
         featured_image: null as File | null,
         status: 'published',
         published_at: today,
@@ -38,16 +43,78 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value;
-        setData((prev) => ({
-            ...prev,
-            title: newTitle,
-            slug: isAutoSlug ? slugify(newTitle) : prev.slug,
-        }));
+        setTitles(prev => ({ ...prev, [contentLocale]: newTitle }));
+        if (contentLocale === 'id' && isAutoSlug) {
+            setData('slug', slugify(newTitle));
+        }
     };
 
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsAutoSlug(false);
         setData('slug', slugify(e.target.value));
+    };
+
+    const handleAutoTranslate = async () => {
+        const sourceTitle = titles.id;
+        const sourceExcerpt = excerpts.id;
+        const sourceContent = contents.id;
+
+        if (!sourceTitle.trim()) {
+            toast.error('Silakan isi judul berita dalam Bahasa Indonesia terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const res = await fetch('/admin/auto-translate', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                body: JSON.stringify({
+                    fields: {
+                        title: sourceTitle,
+                        excerpt: sourceExcerpt,
+                        content: sourceContent,
+                    },
+                }),
+            });
+
+            const json = await res.json();
+            if (json.success && json.translations) {
+                const trTitle = json.translations.title || {};
+                const trExcerpt = json.translations.excerpt || {};
+                const trContent = json.translations.content || {};
+
+                setTitles(prev => ({
+                    ...prev,
+                    en: trTitle.en || prev.en,
+                    ar: trTitle.ar || prev.ar,
+                }));
+
+                setExcerpts(prev => ({
+                    ...prev,
+                    en: trExcerpt.en || prev.en,
+                    ar: trExcerpt.ar || prev.ar,
+                }));
+
+                setContents(prev => ({
+                    ...prev,
+                    en: trContent.en || prev.en,
+                    ar: trContent.ar || prev.ar,
+                }));
+
+                toast.success('✨ Terjemahan EN & AR berita berhasil dibuat! Silakan cek tab bahasa.');
+            } else {
+                toast.error('Gagal menerjemahkan berita.');
+            }
+        } catch (e) {
+            toast.error('Terjadi kesalahan saat memproses terjemahan.');
+        } finally {
+            setIsTranslating(false);
+        }
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +132,12 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/admin/blogs');
+        router.post('/admin/blogs', {
+            ...data,
+            title: titles,
+            excerpt: excerpts,
+            content_html: contents,
+        });
     };
 
     return (
@@ -109,23 +181,39 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
+                    {/* Auto Translate Bar */}
+                    <div className="lg:col-span-12">
+                        <AutoTranslateBar
+                            activeLocale={contentLocale}
+                            onLocaleChange={setContentLocale}
+                            onAutoTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            hasTranslations={Boolean(titles.en && titles.ar)}
+                        />
+                    </div>
+
                     {/* Main Column (8 cols) */}
                     <div className="lg:col-span-8 flex flex-col gap-6">
                         
                         {/* Title & Slug Card */}
                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col gap-4">
-                            <div>
-                                <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                    Judul Berita <span className="text-red-500">*</span>
+                            <div dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
+                                <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                                    <span>Judul Berita ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span></span>
+                                    {contentLocale !== 'id' && (
+                                        <span className="text-[11px] text-slate-400 font-normal lowercase">
+                                            bisa diedit manual atau digenerate otomatis
+                                        </span>
+                                    )}
                                 </Label>
                                 <Input
                                     id="title"
                                     type="text"
-                                    value={data.title}
+                                    value={titles[contentLocale] || ''}
                                     onChange={handleTitleChange}
-                                    placeholder="Masukkan judul artikel berita yang menarik..."
+                                    placeholder={contentLocale === 'id' ? 'Masukkan judul artikel berita yang menarik...' : `Judul berita (${contentLocale.toUpperCase()})...`}
                                     className="mt-1.5 text-lg font-semibold h-12"
-                                    required
+                                    required={contentLocale === 'id'}
                                 />
                                 {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
                             </div>
@@ -139,7 +227,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                         type="button"
                                         onClick={() => {
                                             setIsAutoSlug(true);
-                                            setData('slug', slugify(data.title));
+                                            setData('slug', slugify(titles.id || ''));
                                         }}
                                         className="text-[11px] text-insani-blue hover:underline flex items-center gap-1"
                                     >
@@ -162,14 +250,14 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                 {errors.slug && <p className="text-xs text-red-500 mt-1">{errors.slug}</p>}
                             </div>
 
-                            <div>
+                            <div dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
                                 <Label htmlFor="excerpt" className="text-xs font-semibold text-slate-500">
-                                    Ringkasan / Excerpt (Opsional)
+                                    Ringkasan / Excerpt ({contentLocale.toUpperCase()}) (Opsional)
                                 </Label>
                                 <Textarea
                                     id="excerpt"
-                                    value={data.excerpt}
-                                    onChange={(e) => setData('excerpt', e.target.value)}
+                                    value={excerpts[contentLocale] || ''}
+                                    onChange={(e) => setExcerpts(prev => ({ ...prev, [contentLocale]: e.target.value }))}
                                     placeholder="Tuliskan 1-2 kalimat ringkasan yang akan tampil di kartu preview dan pencarian..."
                                     rows={3}
                                     className="mt-1.5 text-sm"
@@ -181,16 +269,17 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                         {/* Rich Text Editor Card */}
                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col gap-2">
                             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Isi Konten Berita <span className="text-red-500">*</span>
+                                Isi Konten Berita ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
                             </Label>
                             <p className="text-xs text-slate-400 mb-2">
                                 Gunakan editor di bawah untuk memformat teks, menambahkan subjudul, kutipan, dan gambar di dalam konten.
                             </p>
 
-                            <div className="min-h-[400px]">
+                            <div className="min-h-[400px]" dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
                                 <RichTextEditor
-                                    value={data.content_html}
-                                    onChange={(val) => setData('content_html', val)}
+                                    key={`blog-content-${contentLocale}`}
+                                    value={contents[contentLocale] || ''}
+                                    onChange={(val) => setContents(prev => ({ ...prev, [contentLocale]: val }))}
                                     placeholder="Tuliskan cerita lengkap berita di sini..."
                                 />
                             </div>

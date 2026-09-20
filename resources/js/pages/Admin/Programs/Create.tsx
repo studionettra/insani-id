@@ -1,6 +1,8 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -18,21 +20,92 @@ interface Props {
 }
 
 export default function ProgramCreate({ categories }: Props) {
+    const [contentLocale, setContentLocale] = useState<'id' | 'en' | 'ar'>('id');
+    const [titles, setTitles] = useState<Record<string, string>>({
+        id: '',
+        en: '',
+        ar: '',
+    });
+    const [stories, setStories] = useState<Record<string, string>>({
+        id: '',
+        en: '',
+        ar: '',
+    });
+    const [isTranslating, setIsTranslating] = useState(false);
+
     const { data, setData, post, processing, errors } = useForm({
-        title: '',
         category_id: '',
         target_amount: '',
         deadline: '',
-        story: '',
         cover_image: null as File | null,
         video_url: '',
     });
 
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
 
+    const handleAutoTranslate = async () => {
+        const sourceTitle = titles.id;
+        const sourceStory = stories.id;
+
+        if (!sourceTitle.trim()) {
+            toast.error('Silakan isi judul program dalam Bahasa Indonesia terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const res = await fetch('/admin/auto-translate', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                body: JSON.stringify({
+                    fields: {
+                        title: sourceTitle,
+                        story: sourceStory,
+                    },
+                }),
+            });
+
+            const json = await res.json();
+            if (json.success && json.translations) {
+                const trTitle = json.translations.title || {};
+                const trStory = json.translations.story || {};
+
+                setTitles(prev => ({
+                    ...prev,
+                    en: trTitle.en || prev.en,
+                    ar: trTitle.ar || prev.ar,
+                }));
+
+                setStories(prev => ({
+                    ...prev,
+                    en: trStory.en || prev.en,
+                    ar: trStory.ar || prev.ar,
+                }));
+
+                toast.success('✨ Terjemahan EN & AR berhasil dibuat! Silakan cek tab bahasa.');
+            } else {
+                toast.error('Gagal menerjemahkan konten.');
+            }
+        } catch (e) {
+            toast.error('Terjadi kesalahan saat memproses terjemahan.');
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/admin/programs');
+        router.post('/admin/programs', {
+            ...data,
+            title: titles,
+            story: stories,
+        }, {
+            forceFormData: true,
+        });
     };
 
     const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,20 +148,35 @@ export default function ProgramCreate({ categories }: Props) {
                             </AlertDescription>
                         </Alert>
 
+                        <AutoTranslateBar
+                            activeLocale={contentLocale}
+                            onLocaleChange={setContentLocale}
+                            onAutoTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            hasTranslations={Boolean(titles.en && titles.ar)}
+                        />
+
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             {/* Judul Program */}
-                            <div className="md:col-span-2 space-y-1.5">
-                                <Label htmlFor="title" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Judul Program <span className="text-red-500">*</span>
+                            <div className="md:col-span-2 space-y-1.5" dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
+                                <Label htmlFor="title" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
+                                    <span>
+                                        Judul Program ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
+                                    </span>
+                                    {contentLocale !== 'id' && (
+                                        <span className="text-[11px] text-slate-400 font-normal">
+                                            Dapat diedit manual atau digenerate otomatis
+                                        </span>
+                                    )}
                                 </Label>
                                 <Input
                                     id="title"
                                     type="text"
-                                    placeholder="Contoh: Bantuan Sembako untuk Lansia Dhuafa"
-                                    value={data.title}
-                                    onChange={(e) => setData('title', e.target.value)}
+                                    placeholder={contentLocale === 'id' ? 'Contoh: Bantuan Sembako untuk Lansia Dhuafa' : `Judul Program (${contentLocale.toUpperCase()})`}
+                                    value={titles[contentLocale] || ''}
+                                    onChange={(e) => setTitles(prev => ({ ...prev, [contentLocale]: e.target.value }))}
                                     className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB]"
-                                    required
+                                    required={contentLocale === 'id'}
                                 />
                                 {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
                             </div>
@@ -189,11 +277,14 @@ export default function ProgramCreate({ categories }: Props) {
                             </div>
 
                             {/* Story */}
-                            <div className="md:col-span-2">
-                                <Label htmlFor="story" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Cerita & Latar Belakang <span className="text-red-500">*</span></Label>
+                            <div className="md:col-span-2" dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
+                                <Label htmlFor="story" className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Cerita & Latar Belakang ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
+                                </Label>
                                 <RichTextEditor
-                                    value={data.story}
-                                    onChange={value => setData('story', value)}
+                                    key={`story-editor-${contentLocale}`}
+                                    value={stories[contentLocale] || ''}
+                                    onChange={value => setStories(prev => ({ ...prev, [contentLocale]: value }))}
                                     placeholder="Ceritakan mengapa program ini dibuat secara detail..."
                                 />
                                 {errors.story && <p className="text-red-500 text-sm mt-1">{errors.story}</p>}
