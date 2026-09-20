@@ -1,9 +1,11 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Calendar, User, ArrowRight, Search, X, BookOpen } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
+import { getLocalizedValue } from '@/lib/utils';
 
 interface BlogIndexProps {
     blogs: any;
@@ -15,7 +17,7 @@ interface BlogIndexProps {
 }
 
 export default function BlogIndex({ blogs, categories = [], filters = {} }: BlogIndexProps) {
-    const { locale } = usePage().props as any;
+    const { t, locale, isRtl } = useTranslation();
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
 
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -196,15 +198,15 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
                                             </div>
                                             
                                             <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-insani-blue transition-colors leading-snug">
-                                                {blog.title}
+                                                {getLocalizedValue(blog.title, locale)}
                                             </h3>
                                             
                                             <p className="text-gray-600 mb-6 flex-grow line-clamp-3 text-sm leading-relaxed">
-                                                {blog.excerpt}
+                                                {getLocalizedValue(blog.excerpt, locale)}
                                             </p>
                                             
                                             <div className="flex items-center text-insani-blue font-semibold text-sm group-hover:text-insani-darkblue pt-2 border-t border-slate-50">
-                                                Baca Selengkapnya <ArrowRight className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+                                                {t('Baca Selengkapnya')} <ArrowRight className={`w-4 h-4 ${isRtl ? 'mr-1.5 rotate-180' : 'ml-1.5'} group-hover:translate-x-1 transition-transform`} />
                                             </div>
                                         </div>
                                     </Link>

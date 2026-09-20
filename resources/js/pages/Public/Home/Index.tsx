@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import React, { useState, useEffect } from 'react';
@@ -8,9 +8,10 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { renderStatIcon } from '@/components/ui/icon-picker';
+import useTranslation from '@/hooks/use-translation';
 
 export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs }: any) {
-    const { locale } = usePage().props as any;
+    const { t, locale, isRtl } = useTranslation();
     const reduce = useReducedMotion();
     
     // --- Banner Slider Logic ---
@@ -37,7 +38,7 @@ return;
     };
 
     return (
-        <PublicLayout title="Beranda">
+        <PublicLayout title={t('Beranda')}>
             
             {/* 1. Hero Banners Section */}
             <section className="relative w-full h-[85dvh] min-h-[600px] overflow-hidden bg-zinc-50">
@@ -75,7 +76,7 @@ return;
                                             <FadeIn delay={0.1}>
                                                 <Button asChild size="lg" className="bg-white text-zinc-950 hover:bg-zinc-100 rounded-full font-semibold px-8 h-12 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
                                                     <a href={banner.cta_link}>
-                                                        Selengkapnya <ArrowRight className="ml-2 h-4 w-4" />
+                                                        {t('Lihat Selengkapnya', 'Selengkapnya')} <ArrowRight className="ml-2 h-4 w-4 rtl:rotate-180" />
                                                     </a>
                                                 </Button>
                                             </FadeIn>
@@ -115,7 +116,7 @@ return;
                     </>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                        <span className="text-gray-400 font-medium">Belum ada banner aktif</span>
+                        <span className="text-gray-400 font-medium">{t('Belum ada banner aktif')}</span>
                     </div>
                 )}
             </section>
@@ -128,10 +129,10 @@ return;
                             <div className="lg:col-span-5 lg:sticky lg:top-32">
                                 <FadeIn>
                                     <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 leading-[1.1]">
-                                        Jejak Kebaikan<br />Bersama
+                                        {t('Jejak Kebaikan Bersama')}
                                     </h2>
                                     <p className="mt-6 text-lg text-zinc-600 max-w-md leading-relaxed">
-                                        Berkat dukungan Anda, kami telah menyalurkan bantuan ke berbagai wilayah yang membutuhkan. Setiap donasi menciptakan perubahan nyata.
+                                        {t('Berkat dukungan Anda, kami telah menyalurkan bantuan ke berbagai wilayah yang membutuhkan. Setiap donasi menciptakan perubahan nyata.')}
                                     </p>
                                 </FadeIn>
                             </div>
@@ -152,11 +153,11 @@ return;
                                             {stat.value}
                                         </div>
                                         <div className="text-lg font-semibold text-zinc-900">
-                                            {stat.title_translations?.id || (typeof stat.title === 'object' ? stat.title?.id || stat.title?.en : stat.title)}
+                                            {t(getLocalizedValue(stat.title_translations || stat.title, locale))}
                                         </div>
                                         {stat.category && (
                                             <div className="text-sm text-zinc-500 mt-2 font-medium">
-                                                {stat.category}
+                                                {t(stat.category)}
                                             </div>
                                         )}
                                     </FadeIn>
@@ -173,10 +174,10 @@ return;
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
                         <FadeIn className="max-w-2xl mb-16">
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-6">
-                                Fokus Program
+                                {t('Fokus Program')}
                             </h2>
                             <p className="text-lg text-zinc-600 leading-relaxed">
-                                Pilar kebaikan yang kami salurkan untuk memberdayakan dan membangkitkan harapan umat di berbagai aspek kehidupan.
+                                {t('Pilar kebaikan yang kami salurkan untuk memberdayakan dan membangkitkan harapan umat di berbagai aspek kehidupan.')}
                             </p>
                         </FadeIn>
                         
@@ -213,17 +214,17 @@ return;
                                             {cat.pillar_image && (
                                                 <img 
                                                     src={`/storage/${cat.pillar_image}`} 
-                                                    alt={typeof cat.name === 'object' ? cat.name?.id : cat.name} 
+                                                    alt={getLocalizedValue(cat.name, locale)} 
                                                     className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 group-hover:opacity-80 transition-all duration-700 ease-out" 
                                                 />
                                             )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent p-8 flex flex-col justify-end">
                                                 <div className="flex justify-between items-end">
                                                     <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                                                        {cat.name_translations?.id || (typeof cat.name === 'object' ? cat.name?.id || cat.name?.en : cat.name)}
+                                                        {t(getLocalizedValue(cat.name_translations || cat.name, locale))}
                                                     </h3>
                                                     <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-zinc-950 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 shadow-lg">
-                                                        <ArrowUpRight className="w-5 h-5" />
+                                                        <ArrowUpRight className="w-5 h-5 rtl:rotate-90" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -243,16 +244,16 @@ return;
                         <FadeIn className="flex flex-col mb-16">
                             <div className="max-w-2xl mb-8">
                                 <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-6">
-                                    Bantu Mereka Sekarang
+                                    {t('Bantu Mereka Sekarang')}
                                 </h2>
                                 <p className="text-lg text-zinc-600 leading-relaxed">
-                                    Pilih program kebaikan dan salurkan donasi Anda hari ini.
+                                    {t('Pilih program kebaikan dan salurkan donasi Anda hari ini.')}
                                 </p>
                             </div>
                             <div>
                                 <Button asChild variant="outline" className="rounded-full h-11 px-6 border-zinc-200 hover:bg-zinc-50 text-zinc-950 transition-all active:scale-[0.98]">
                                     <Link href="/program">
-                                        Lihat Semua Program <ArrowRight className="w-4 h-4 ml-2" />
+                                        {t('Lihat Semua Program')} <ArrowRight className="w-4 h-4 ml-2 rtl:rotate-180" />
                                     </Link>
                                 </Button>
                             </div>
@@ -268,17 +269,17 @@ return;
                                         <div className="relative aspect-video w-full overflow-hidden bg-zinc-100">
                                             <img 
                                                 src={`/storage/${program.cover_image}`} 
-                                                alt={getLocalizedValue(program.title)}
+                                                alt={getLocalizedValue(program.title, locale)}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
                                             <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-zinc-900 shadow-sm">
-                                                {getLocalizedValue(program.category?.name)}
+                                                {t(getLocalizedValue(program.category?.name, locale))}
                                             </div>
                                         </div>
                                         
                                         <div className="p-6 flex flex-col flex-grow">
                                             <h3 className="text-xl font-bold text-zinc-950 mb-4 line-clamp-2 group-hover:text-brand-600 transition-colors leading-tight tracking-tight">
-                                                {getLocalizedValue(program.title)}
+                                                {getLocalizedValue(program.title, locale)}
                                             </h3>
                                             
                                             <div className="mt-auto pt-4 border-t border-zinc-100">
@@ -294,13 +295,13 @@ return;
                                                 
                                                 <div className="flex justify-between items-end">
                                                     <div>
-                                                        <p className="text-xs font-medium text-zinc-500 mb-1 uppercase tracking-wider">Terkumpul</p>
+                                                        <p className="text-xs font-medium text-zinc-500 mb-1 uppercase tracking-wider">{t('Terkumpul')}</p>
                                                         <p className="font-bold text-zinc-950 tracking-tight text-lg">
                                                             {formatCurrency(program.collected_amount)}
                                                         </p>
                                                     </div>
                                                     <div className="text-sm font-bold text-brand-600 flex items-center group-hover:translate-x-1 transition-transform">
-                                                        Donasi <ArrowRight className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        {t('Donasi')} <ArrowRight className="w-4 h-4 ml-1 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -320,16 +321,16 @@ return;
                         <FadeIn className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
                             <div className="max-w-xl">
                                 <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-6">
-                                    Kabar Terbaru
+                                    {t('Kabar Terbaru')}
                                 </h2>
                                 <p className="text-lg text-zinc-600 leading-relaxed">
-                                    Baca berita dan laporan penyaluran program yang telah Anda dukung.
+                                    {t('Baca berita dan laporan penyaluran program yang telah Anda dukung.')}
                                 </p>
                             </div>
                             <div>
                                 <Button asChild variant="outline" className="rounded-full h-11 px-6 border-zinc-200 hover:bg-zinc-100 text-zinc-950 transition-all active:scale-[0.98]">
                                     <Link href="/berita">
-                                        Baca Semua Berita
+                                        {t('Baca Semua Berita')}
                                     </Link>
                                 </Button>
                             </div>

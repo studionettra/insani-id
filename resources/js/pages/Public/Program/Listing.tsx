@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
+import useTranslation from '@/hooks/use-translation';
 
 interface Category {
     id: number;
@@ -35,10 +36,13 @@ interface Props {
     filters: {
         category: string | null;
         search: string | null;
+        sort?: string;
     };
 }
 
 export default function ProgramListing({ programs, categories, filters }: Props) {
+    const { t, locale } = useTranslation();
+
     const handleFilterChange = (key: string, value: string) => {
         const query = { ...filters, [key]: value || undefined };
         router.get('/program', query, { preserveState: true });
@@ -46,15 +50,15 @@ export default function ProgramListing({ programs, categories, filters }: Props)
 
     return (
         <PublicLayout>
-            <Head title="Program Donasi" />
+            <Head title={t('Program Donasi')} />
 
             <div className="bg-white">
                 {/* Hero Section */}
                 <div className="bg-insani-blue/5 py-12 md:py-20">
                     <div className="container mx-auto px-4 max-w-6xl text-center">
-                        <h1 className="text-3xl md:text-5xl font-bold text-slate-800 mb-4">Program Donasi</h1>
+                        <h1 className="text-3xl md:text-5xl font-bold text-slate-800 mb-4">{t('Program Donasi')}</h1>
                         <p className="text-slate-600 max-w-2xl mx-auto text-lg">
-                            Pilih program kebaikan yang ingin Anda dukung hari ini. Setiap donasi Anda membawa harapan baru bagi mereka yang membutuhkan.
+                            {t('Pilih program kebaikan yang ingin Anda dukung hari ini. Setiap donasi Anda membawa harapan baru bagi mereka yang membutuhkan.')}
                         </p>
                     </div>
                 </div>
@@ -69,11 +73,11 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                         {/* Search & Sort Centered */}
                         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-3xl justify-center z-10">
                             <div className="relative flex-1">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 rtl:right-4 rtl:left-auto" />
                                 <Input 
                                     type="text"
-                                    placeholder="Cari program donasi..."
-                                    className="pl-12 h-12 w-full bg-slate-50/80 border-slate-200 focus:bg-white focus:border-insani-blue focus:ring-insani-blue/20 rounded-xl transition-all text-base shadow-sm"
+                                    placeholder={t('Cari program donasi...')}
+                                    className="pl-12 rtl:pr-12 rtl:pl-4 h-12 w-full bg-slate-50/80 border-slate-200 focus:bg-white focus:border-insani-blue focus:ring-insani-blue/20 rounded-xl transition-all text-base shadow-sm"
                                     defaultValue={filters.search || ''}
                                     onKeyDown={e => {
                                         if (e.key === 'Enter') {
@@ -87,9 +91,9 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                 value={filters.sort || 'terbaru'}
                                 onChange={(e) => handleFilterChange('sort', e.target.value)}
                             >
-                                <option value="terbaru">Terbaru</option>
-                                <option value="terlama">Terlama</option>
-                                <option value="terbanyak">Terkumpul Terbanyak</option>
+                                <option value="terbaru">{t('Terbaru')}</option>
+                                <option value="terlama">{t('Terlama')}</option>
+                                <option value="terbanyak">{t('Terkumpul Terbanyak')}</option>
                             </select>
                         </div>
 
@@ -106,7 +110,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                         : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
                                 }`}
                             >
-                                Semua
+                                {t('Semua')}
                             </button>
                             {categories.map(cat => (
                                 <button 
@@ -118,7 +122,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
                                     }`}
                                 >
-                                    {getLocalizedValue(cat.name)}
+                                    {t(getLocalizedValue(cat.name, locale))}
                                 </button>
                             ))}
                         </div>
@@ -134,17 +138,17 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                             <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
                                                 <img 
                                                     src={`/storage/${program.cover_image}`} 
-                                                    alt={getLocalizedValue(program.title)} 
+                                                    alt={getLocalizedValue(program.title, locale)} 
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                 />
                                                 <Badge className="absolute top-3 right-3 bg-white/90 text-insani-blue hover:bg-white backdrop-blur-sm border-none font-semibold">
-                                                    {getLocalizedValue(program.category?.name, 'Kategori')}
+                                                    {t(getLocalizedValue(program.category?.name, locale, 'Kategori'))}
                                                 </Badge>
                                             </div>
                                             <CardContent className="flex-1 p-5 flex flex-col justify-between">
                                                 <div>
                                                     <h3 className="font-bold text-lg text-slate-800 mb-4 line-clamp-2 leading-tight group-hover:text-insani-blue transition-colors">
-                                                        {getLocalizedValue(program.title)}
+                                                        {getLocalizedValue(program.title, locale)}
                                                     </h3>
                                                 </div>
 
@@ -160,16 +164,16 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                                     </div>
                                                     <div className="flex justify-between items-end text-sm">
                                                         <div>
-                                                            <p className="text-slate-500 text-xs mb-0.5">Terkumpul</p>
+                                                            <p className="text-slate-500 text-xs mb-0.5">{t('Terkumpul')}</p>
                                                             <p className="font-bold text-slate-900">{formatCurrency(program.collected_amount)}</p>
                                                             {program.target_amount && parseFloat(program.target_amount) > 0 && (
                                                                 <p className="text-[11px] text-slate-400">
-                                                                    dari {formatCurrency(parseFloat(program.target_amount))}
+                                                                    {t('dari target', 'dari')} {formatCurrency(parseFloat(program.target_amount))}
                                                                 </p>
                                                             )}
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="text-slate-500 text-xs mb-0.5">Sisa Hari</p>
+                                                            <p className="text-slate-500 text-xs mb-0.5">{t('Sisa Hari')}</p>
                                                             <p className="font-medium text-slate-700">∞</p>
                                                         </div>
                                                     </div>
@@ -185,8 +189,8 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-4">
                                 <Search className="w-8 h-8" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-800 mb-2">Program Tidak Ditemukan</h3>
-                            <p className="text-slate-500">Silakan coba dengan kata kunci atau kategori yang berbeda.</p>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">{t('Program Tidak Ditemukan')}</h3>
+                            <p className="text-slate-500">{t('Silakan coba dengan kata kunci atau kategori yang berbeda.')}</p>
                         </div>
                     )}
 

@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify';
 import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,11 +13,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
 import { trackShareProgram, trackViewContent } from '@/lib/analytics';
 import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue } from '@/lib/utils';
 
 const UpdateCard = ({ update }: { update: any }) => {
+    const { t, locale } = useTranslation();
     const [expanded, setExpanded] = useState(false);
 
     return (
@@ -25,11 +28,11 @@ const UpdateCard = ({ update }: { update: any }) => {
                 <Calendar className="w-4 h-4" />
                 {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: dateId })}
             </div>
-            <h3 className="font-bold text-lg text-slate-800 mb-3">{update.title}</h3>
+            <h3 className="font-bold text-lg text-slate-800 mb-3">{getLocalizedValue(update.title, locale)}</h3>
             <div className="relative">
                 <div
                     className={`text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden transition-all duration-300 ${expanded ? '' : 'max-h-40'}`}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(update.content, locale)) }}
                 />
                 {!expanded && (
                     <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
@@ -40,7 +43,7 @@ const UpdateCard = ({ update }: { update: any }) => {
                     onClick={() => setExpanded(!expanded)}
                     className="text-insani-blue font-medium text-sm hover:underline focus:outline-none"
                 >
-                    {expanded ? 'Tutup' : 'Baca Selengkapnya'}
+                    {expanded ? t('Tutup') : t('Baca Selengkapnya')}
                 </button>
             </div>
         </div>
@@ -80,21 +83,22 @@ interface Props {
 }
 
 export default function ProgramShow({ program, auth }: Props) {
+    const { t, locale, isRtl } = useTranslation();
     const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur'>('cerita');
     const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    const programTitle = getLocalizedValue(program.title);
-    const programStory = getLocalizedValue(program.story);
-    const categoryName = program.category ? getLocalizedValue(program.category.name) : undefined;
+    const programTitle = getLocalizedValue(program.title, locale);
+    const programStory = getLocalizedValue(program.story, locale);
+    const categoryName = program.category ? getLocalizedValue(program.category.name, locale) : undefined;
 
     useEffect(() => {
         trackViewContent(programTitle, program.id, categoryName);
     }, [program.id]);
 
     const baseProgramUrl = typeof window !== 'undefined' ? `${window.location.origin}/program/${program.slug}` : `https://insani.id/program/${program.slug}`;
-    const shareText = `Mari bersama bantu program kebaikan: "${programTitle}" melalui Insani Indonesia`;
+    const shareText = `${t('Mari bersama bantu program kebaikan:', 'Mari bersama bantu program kebaikan:')} "${programTitle}" ${t('melalui Insani Indonesia')}`;
 
     const buildShareLink = (channel: string) => {
         return `${baseProgramUrl}?utm_source=${channel}&utm_medium=share_button&utm_campaign=${encodeURIComponent(program.slug)}`;
@@ -128,7 +132,6 @@ export default function ProgramShow({ program, auth }: Props) {
         });
     };
 
-
     const campaignerName = program.campaigner_type === 'internal'
         ? 'Insani Indonesia (Official)'
         : (program.campaignerProfile?.type === 'lembaga'
@@ -139,7 +142,7 @@ export default function ProgramShow({ program, auth }: Props) {
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
             navigator.clipboard.writeText(copyShareUrl).then(() => {
                 setCopied(true);
-                toast.success("Tautan program berhasil disalin!");
+                toast.success(t('Tautan berhasil disalin!'));
                 setTimeout(() => setCopied(false), 2500);
             });
             trackShareProgram({
@@ -174,7 +177,7 @@ export default function ProgramShow({ program, auth }: Props) {
     const renderProgramTitle = () => (
         <div className="mb-4">
             <Badge variant="outline" className="text-insani-blue border-insani-blue/30 bg-insani-blue/5 mb-3">
-                {getLocalizedValue(program.category?.name, 'Kategori')}
+                {categoryName || t('Kategori')}
             </Badge>
             <h1 className="text-xl lg:text-xl font-bold text-slate-800 leading-tight mb-2">
                 {programTitle}
@@ -195,15 +198,15 @@ export default function ProgramShow({ program, auth }: Props) {
                             </p>
                             <div className="flex justify-between items-center text-sm">
                                 <p className="text-slate-500">
-                                    terkumpul dari target <span className="font-semibold text-slate-700">{formatCurrency(parseFloat(program.target_amount!))}</span>
+                                    {t('Terkumpul')} {t('dari target')} <span className="font-semibold text-slate-700">{formatCurrency(parseFloat(program.target_amount!))}</span>
                                 </p>
                                 {program.deadline ? (
                                     <p className="text-sm font-medium text-slate-600 shrink-0">
-                                        {Math.max(0, differenceInDays(new Date(program.deadline), new Date()))} hari lagi
+                                        {Math.max(0, differenceInDays(new Date(program.deadline), new Date()))} {t('Hari lagi')}
                                     </p>
                                 ) : (
                                     <p className="text-xs font-medium text-slate-500 shrink-0 bg-slate-100 px-2 py-0.5 rounded-full">
-                                        Tanpa Batas Waktu
+                                        {t('Tanpa Batas Waktu', 'Tanpa Batas Waktu')}
                                     </p>
                                 )}
                             </div>
@@ -215,7 +218,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                 size="md"
                                 percentagePlacement="top-right"
                                 percentageFormat="badge"
-                                label="Ketercapaian Target"
+                                label={t('Ketercapaian Target', 'Target')}
                             />
                         </div>
                     </>
@@ -225,9 +228,9 @@ export default function ProgramShow({ program, auth }: Props) {
                             {formatCurrency(program.collected_amount)}
                         </p>
                         <div className="flex items-center justify-between text-sm text-slate-500 mt-1">
-                            <span>Dana Terkumpul</span>
+                            <span>{t('Terkumpul')}</span>
                             <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-600">
-                                Donasi Fleksibel (Tanpa Target)
+                                {t('Donasi Fleksibel (Tanpa Target)', 'Donasi Fleksibel')}
                             </span>
                         </div>
                     </div>
@@ -238,7 +241,7 @@ export default function ProgramShow({ program, auth }: Props) {
 
     const renderCampaignerInfo = () => (
         <>
-            <h3 className="font-semibold text-sm text-slate-500 mb-3">Penggalang Dana</h3>
+            <h3 className="font-semibold text-sm text-slate-500 mb-3">{t('Penggalang Dana')}</h3>
             <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-insani-blue/10 flex items-center justify-center text-insani-blue flex-shrink-0">
                     <ShieldCheck className="w-5 h-5" />
@@ -248,16 +251,16 @@ export default function ProgramShow({ program, auth }: Props) {
                         {campaignerName}
                         <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
                     </p>
-                    <p className="text-[11px] text-slate-500">Akun Terverifikasi</p>
+                    <p className="text-[11px] text-slate-500">{t('Akun Terverifikasi')}</p>
                 </div>
             </div>
         </>
     );
 
     return (
-        <PublicLayout hideFooter={true} hideMobileNav={true} hideTopNav={true}>
+        <PublicLayout hideFooter={false} hideMobileNav={true} hideTopNav={false}>
             <Head>
-                <title>{`${programTitle} - Program Kebaikan Insani`}</title>
+                <title>{`${programTitle} - ${t('Program Kebaikan Insani', 'Program Kebaikan Insani')}`}</title>
                 <meta name="description" content={metaDescription} />
                 <link rel="canonical" href={baseProgramUrl} />
 
@@ -282,10 +285,10 @@ export default function ProgramShow({ program, auth }: Props) {
 
                     {/* Breadcrumbs */}
                     <div className="hidden lg:flex items-center text-sm text-slate-500 mb-6">
-                        <Link href="/" className="hover:text-insani-blue transition-colors">Beranda</Link>
-                        <ChevronRight className="w-4 h-4 mx-2" />
-                        <Link href="/program" className="hover:text-insani-blue transition-colors">Program Donasi</Link>
-                        <ChevronRight className="w-4 h-4 mx-2" />
+                        <Link href="/" className="hover:text-insani-blue transition-colors">{t('Beranda')}</Link>
+                        <ChevronRight className={`w-4 h-4 mx-2 ${isRtl ? 'rotate-180' : ''}`} />
+                        <Link href="/program" className="hover:text-insani-blue transition-colors">{t('Program Donasi')}</Link>
+                        <ChevronRight className={`w-4 h-4 mx-2 ${isRtl ? 'rotate-180' : ''}`} />
                         <span className="text-slate-800 font-medium truncate max-w-[200px] sm:max-w-xs">
                             {programTitle}
                         </span>
@@ -302,8 +305,11 @@ export default function ProgramShow({ program, auth }: Props) {
                                     href="/program"
                                     className="lg:hidden absolute top-4 left-4 z-10 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
                                 >
-                                    <ArrowLeft className="w-5 h-5" />
+                                    <ArrowLeft className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
                                 </Link>
+                                <div className="lg:hidden absolute top-4 right-4 z-10">
+                                    <LanguageSwitcher />
+                                </div>
                                 {(() => {
                                     const embedUrl = getYouTubeEmbedUrl(program.video_url);
 
@@ -349,19 +355,19 @@ export default function ProgramShow({ program, auth }: Props) {
                                             onClick={() => setActiveTab('cerita')}
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'cerita' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            Cerita
+                                            {t('Cerita')}
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('kabar')}
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'kabar' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            Kabar <Badge variant="secondary" className="ml-2 text-xs">{program.updates?.length || 0}</Badge>
+                                            {t('Kabar')} <Badge variant="secondary" className="ml-2 text-xs">{program.updates?.length || 0}</Badge>
                                         </button>
                                         <button
                                             onClick={() => setActiveTab('donatur')}
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'donatur' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
-                                            Donatur <Badge variant="secondary" className="ml-2 text-xs">{program.comments?.length || 0}</Badge>
+                                            {t('Donatur')} <Badge variant="secondary" className="ml-2 text-xs">{program.comments?.length || 0}</Badge>
                                         </button>
                                     </div>
 
@@ -370,7 +376,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                         <div className="animate-in fade-in slide-in-from-bottom-2">
                                             <div className="mb-3 pb-4 border-b border-slate-100 flex items-center gap-2 text-sm text-slate-500">
                                                 <Calendar className="w-4 h-4 text-slate-400" />
-                                                <span>Program diterbitkan pada <span className="font-medium text-slate-700">{formatDate(program.published_at)}</span></span>
+                                                <span>{t('Program diterbitkan pada')} <span className="font-medium text-slate-700">{formatDate(program.published_at)}</span></span>
                                             </div>
 
                                             <div
@@ -385,7 +391,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
                                             {(!program.updates || program.updates.length === 0) ? (
                                                 <div className="text-center py-10 text-slate-500">
-                                                    Belum ada kabar terbaru untuk program ini.
+                                                    {t('Belum ada kabar terbaru untuk program ini.')}
                                                 </div>
                                             ) : (
                                                 <>
@@ -399,7 +405,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                                                 onClick={() => setVisibleUpdatesCount(prev => prev + 5)}
                                                                 className="border-insani-blue text-insani-blue hover:bg-insani-blue/5"
                                                             >
-                                                                Muat Lebih Banyak Kabar
+                                                                {t('Muat Lebih Banyak Kabar')}
                                                             </Button>
                                                         </div>
                                                     )}
@@ -415,13 +421,13 @@ export default function ProgramShow({ program, auth }: Props) {
                                             <div className="bg-slate-50 rounded-xl p-5 mb-8 border border-slate-100">
                                                 <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                                                     <MessageCircle className="w-5 h-5 text-insani-blue" />
-                                                    Tulis Dukungan & Doa
+                                                    {t('Tulis Dukungan & Doa')}
                                                 </h3>
                                                 <form onSubmit={submitComment} className="space-y-4">
                                                     {!auth?.user && (
                                                         <div>
                                                             <Input
-                                                                placeholder="Nama Anda"
+                                                                placeholder={t('Nama Anda')}
                                                                 value={commentForm.data.name}
                                                                 onChange={e => commentForm.setData('name', e.target.value)}
                                                                 required
@@ -432,7 +438,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                                     )}
                                                     <div>
                                                         <Textarea
-                                                            placeholder="Tulis dukungan, doa, atau komentar positif..."
+                                                            placeholder={t('Tulis dukungan, doa, atau komentar positif...')}
                                                             value={commentForm.data.body}
                                                             onChange={e => commentForm.setData('body', e.target.value)}
                                                             required
@@ -442,7 +448,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                                         {commentForm.errors.body && <p className="text-sm text-destructive mt-1">{commentForm.errors.body}</p>}
                                                     </div>
                                                     <Button type="submit" disabled={commentForm.processing} className="bg-insani-blue hover:bg-blue-700">
-                                                        {commentForm.processing ? 'Mengirim...' : 'Kirim Doa'}
+                                                        {commentForm.processing ? t('Mengirim...') : t('Kirim Doa')}
                                                     </Button>
                                                 </form>
                                             </div>
@@ -451,7 +457,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                             <div className="space-y-4">
                                                 {(!program.comments || program.comments.length === 0) ? (
                                                     <div className="text-center py-10 text-slate-500">
-                                                        Belum ada doa dan dukungan. Jadilah yang pertama!
+                                                        {t('Belum ada donasi atau doa yang masuk.')} {t('Jadilah yang pertama mendoakan atau berdonasi untuk program ini!')}
                                                     </div>
                                                 ) : (
                                                     program.comments.map((comment: any) => (
@@ -464,7 +470,7 @@ export default function ProgramShow({ program, auth }: Props) {
                                                                     <span className="font-bold text-slate-800">{comment.name}</span>
                                                                     {comment.donation_id && (
                                                                         <Badge variant="secondary" className="text-[10px] px-2 py-0 h-4 bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200">
-                                                                            Donatur
+                                                                            {t('Donatur')}
                                                                         </Badge>
                                                                     )}
                                                                     <span className="text-xs text-slate-400 ml-2">
@@ -499,18 +505,16 @@ export default function ProgramShow({ program, auth }: Props) {
                                     <div className="space-y-3">
                                         <Link href={`/program/${program.slug}/donasi`} className="w-full">
                                             <Button className="mb-3 w-full bg-insani-blue hover:bg-blue-700 text-white font-semibold h-12 text-lg shadow-md hover:shadow-lg transition-all rounded-xl">
-                                                Donasi Sekarang
+                                                {t('Donasi Sekarang')}
                                             </Button>
                                         </Link>
                                         <Button onClick={handleShare} variant="outline" className="w-full h-12 text-slate-600 border-slate-200 hover:bg-slate-50 transition-colors">
                                             <Share2 className="w-5 h-5 mr-2" />
-                                            Bagikan Program
+                                            {t('Bagikan Program Ini')}
                                         </Button>
                                     </div>
                                 </CardContent>
                             </Card>
-
-
 
                         </div>
                     </div>
@@ -526,11 +530,11 @@ export default function ProgramShow({ program, auth }: Props) {
                         className="w-[28%] h-12 flex-shrink-0 flex items-center justify-center border-insani-blue text-insani-blue rounded-md bg-white hover:bg-insani-blue/5 font-semibold text-sm px-2"
                     >
                         <Share2 className="w-4 h-4 mr-1.5" />
-                        Bagikan
+                        {t('Bagikan')}
                     </Button>
                     <Link href={`/program/${program.slug}/donasi`} className="flex-1 block w-full">
                         <Button className="w-full h-12 bg-insani-blue hover:bg-blue-700 text-white font-semibold text-base shadow-md transition-all rounded-md">
-                            Donasi Sekarang
+                            {t('Donasi Sekarang')}
                         </Button>
                     </Link>
                 </div>
@@ -540,10 +544,10 @@ export default function ProgramShow({ program, auth }: Props) {
                 <DialogContent className="sm:max-w-md p-6 bg-white rounded-2xl">
                     <DialogHeader className="text-left">
                         <DialogTitle className="text-lg font-bold text-slate-800">
-                            Bagikan Program Kebaikan
+                            {t('Bagikan Program Ini')}
                         </DialogTitle>
                         <DialogDescription className="text-sm text-slate-500">
-                            Sebarkan program ini ke keluarga dan kerabat untuk memperluas jangkauan kebaikan.
+                            {t('Sebarkan program ini ke keluarga dan kerabat untuk memperluas jangkauan kebaikan.', 'Sebarkan program ini ke keluarga dan kerabat untuk memperluas jangkauan kebaikan.')}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -645,12 +649,12 @@ export default function ProgramShow({ program, auth }: Props) {
                             {copied ? (
                                 <>
                                     <Check className="w-3.5 h-3.5 mr-1.5" />
-                                    Tersalin
+                                    {t('Tersalin', 'Tersalin')}
                                 </>
                             ) : (
                                 <>
                                     <Copy className="w-3.5 h-3.5 mr-1.5" />
-                                    Salin
+                                    {t('Salin Tautan')}
                                 </>
                             )}
                         </Button>
@@ -663,7 +667,7 @@ export default function ProgramShow({ program, auth }: Props) {
                             className="w-full mt-1 text-xs text-slate-600 border-slate-200 hover:bg-slate-50"
                         >
                             <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
-                            Opsi Berbagi Lainnya (Sistem)
+                            {t('Opsi Berbagi Lainnya (Sistem)', 'Opsi Berbagi Lainnya')}
                         </Button>
                     )}
                 </DialogContent>

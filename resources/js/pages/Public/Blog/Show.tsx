@@ -1,20 +1,26 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Calendar, User, ArrowLeft, Eye, Share2, Copy, Check } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
 import { trackShareProgram } from '@/lib/analytics';
+import { getLocalizedValue } from '@/lib/utils';
 
 export default function BlogShow({ blog, relatedBlogs }: any) {
-    const { locale } = usePage().props as any;
+    const { t, locale, isRtl } = useTranslation();
     const [copied, setCopied] = useState(false);
 
+    const blogTitle = getLocalizedValue(blog.title, locale);
+    const blogContent = getLocalizedValue(blog.content_html || blog.content || '', locale);
+    const blogExcerpt = getLocalizedValue(blog.excerpt || '', locale);
+
     const baseShareUrl = typeof window !== 'undefined' ? `${window.location.origin}/berita/${blog.slug}` : `https://insani.id/berita/${blog.slug}`;
-    const rawDescription = blog.excerpt || blog.content_html || '';
+    const rawDescription = blogExcerpt || blogContent || '';
     const cleanExcerpt = rawDescription
         ? rawDescription.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
-        : `Baca selengkapnya mengenai ${blog.title} di Insani Indonesia.`;
+        : `Baca selengkapnya mengenai ${blogTitle} di Insani Indonesia.`;
     const imageUrl = blog.thumbnail_url || blog.featured_image_url || '/images/logo/logo-landscape-color.png';
     const absoluteImageUrl = imageUrl.startsWith('http')
         ? imageUrl
@@ -26,7 +32,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
 
     const handleShare = (channel: string, targetUrl: string) => {
         trackShareProgram({
-            programTitle: blog.title,
+            programTitle: blogTitle,
             shareChannel: channel,
             url: targetUrl,
         });
@@ -42,7 +48,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
         window.open(targetUrl, '_blank', 'noopener,noreferrer');
     };
 
-    const shareText = `Baca artikel menarik: "${blog.title}" di Insani Indonesia`;
+    const shareText = `${t('Baca artikel menarik:', 'Baca artikel menarik:')} "${blogTitle}" ${t('melalui Insani Indonesia')}`;
     const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + buildShareLink('whatsapp'))}`;
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(buildShareLink('facebook'))}`;
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(buildShareLink('telegram'))}&text=${encodeURIComponent(shareText)}`;
@@ -50,16 +56,16 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
     const copyUrl = buildShareLink('copy_link');
 
     return (
-        <PublicLayout title={blog.title}>
+        <PublicLayout title={blogTitle}>
             <Head>
-                <title>{`${blog.title} - Insani Indonesia`}</title>
+                <title>{`${blogTitle} - Insani Indonesia`}</title>
                 <meta name="description" content={cleanExcerpt} />
                 <link rel="canonical" href={baseShareUrl} />
 
                 {/* Open Graph / Facebook / WhatsApp */}
                 <meta property="og:type" content="article" />
                 <meta property="og:url" content={baseShareUrl} />
-                <meta property="og:title" content={`${blog.title} - Insani Indonesia`} />
+                <meta property="og:title" content={`${blogTitle} - Insani Indonesia`} />
                 <meta property="og:description" content={cleanExcerpt} />
                 <meta property="og:image" content={absoluteImageUrl} />
                 <meta property="og:site_name" content="Insani Indonesia" />
@@ -67,7 +73,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:url" content={baseShareUrl} />
-                <meta name="twitter:title" content={`${blog.title} - Insani Indonesia`} />
+                <meta name="twitter:title" content={`${blogTitle} - Insani Indonesia`} />
                 <meta name="twitter:description" content={cleanExcerpt} />
                 <meta name="twitter:image" content={absoluteImageUrl} />
             </Head>
@@ -76,7 +82,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     
                     <Link href="/berita" className="inline-flex items-center text-insani-blue hover:text-insani-darkblue mb-8 font-medium">
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Indeks Berita
+                        <ArrowLeft className={`w-4 h-4 ${isRtl ? 'ml-2 rotate-180' : 'mr-2'}`} /> {t('Kembali')}
                     </Link>
                     
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
@@ -86,7 +92,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                             <div className="w-full aspect-[21/9] bg-slate-100">
                                 <img 
                                     src={blog.thumbnail_url} 
-                                    alt={blog.title} 
+                                    alt={blogTitle} 
                                     className="w-full h-full object-cover" 
                                 />
                             </div>
@@ -102,27 +108,27 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                                 )}
                                 <span className="flex items-center">
                                     <Calendar className="w-4 h-4 mr-2 text-insani-blue" />
-                                    {new Date(blog.published_at).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                    {new Date(blog.published_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : (locale === 'en' ? 'en-US' : 'id-ID'), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                 </span>
                                 <span className="flex items-center">
                                     <User className="w-4 h-4 mr-2 text-insani-blue" />
-                                    Oleh: {blog.author_name || 'Admin Insani'}
+                                    {blog.author_name || 'Admin Insani'}
                                 </span>
                                 <span className="flex items-center text-slate-500">
                                     <Eye className="w-4 h-4 mr-1.5 text-insani-blue" />
-                                    {(blog.views_count || 0).toLocaleString('id-ID')} pembaca
+                                    {(blog.views_count || 0).toLocaleString(locale === 'ar' ? 'ar-EG' : (locale === 'en' ? 'en-US' : 'id-ID'))} pembaca
                                 </span>
                             </div>
                             
                             {/* Title */}
                             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight">
-                                {blog.title}
+                                {blogTitle}
                             </h1>
                             
                             {/* Content */}
                             <div 
                                 className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
-                                dangerouslySetInnerHTML={{ __html: blog.content_html || blog.content || '' }} 
+                                dangerouslySetInnerHTML={{ __html: blogContent }} 
                             />
 
                             {/* Smart Share Section */}
@@ -190,9 +196,9 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                 <section className="py-16 bg-white border-t border-slate-200">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-end mb-8">
-                            <h2 className="text-2xl font-bold text-insani-darkblue">Berita Lainnya</h2>
+                            <h2 className="text-2xl font-bold text-insani-darkblue">{t('Berita Lainnya', 'Berita Lainnya')}</h2>
                             <Link href="/berita" className="text-insani-blue font-semibold hover:text-insani-darkblue">
-                                Lihat Semua
+                                {t('Lihat Semua')}
                             </Link>
                         </div>
                         
@@ -207,7 +213,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                                         <div className="aspect-[16/10] bg-slate-200 overflow-hidden">
                                             <img 
                                                 src={item.thumbnail_url} 
-                                                alt={item.title} 
+                                                alt={getLocalizedValue(item.title, locale)} 
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                                             />
                                         </div>
@@ -220,10 +226,10 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                                                         {item.wp_category}
                                                     </span>
                                                 )}
-                                                <span>{new Date(item.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                                <span>{new Date(item.published_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : (locale === 'en' ? 'en-US' : 'id-ID'), { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                                             </div>
                                             <h3 className="font-bold text-slate-800 text-lg line-clamp-2 group-hover:text-insani-blue transition-colors">
-                                                {item.title}
+                                                {getLocalizedValue(item.title, locale)}
                                             </h3>
                                         </div>
                                     </div>
