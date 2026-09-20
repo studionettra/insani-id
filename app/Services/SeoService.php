@@ -88,10 +88,21 @@ class SeoService
         if ($component === 'Public/Blog/Show' && ! empty($props['blog'])) {
             $blog = $props['blog'];
 
-            $title = (string) (data_get($blog, 'title') ?: 'Kabar & Berita Insani');
+            $rawTitle = data_get($blog, 'title');
+            $title = is_array($rawTitle)
+                ? ($rawTitle[app()->getLocale()] ?? $rawTitle['id'] ?? reset($rawTitle))
+                : (string) ($rawTitle ?: 'Kabar & Berita Insani');
 
             $rawExcerpt = data_get($blog, 'excerpt');
+            if (is_array($rawExcerpt)) {
+                $rawExcerpt = $rawExcerpt[app()->getLocale()] ?? $rawExcerpt['id'] ?? reset($rawExcerpt);
+            }
+
             $rawContent = data_get($blog, 'content_html');
+            if (is_array($rawContent)) {
+                $rawContent = $rawContent[app()->getLocale()] ?? $rawContent['id'] ?? reset($rawContent);
+            }
+
             $cleanExcerpt = ! empty($rawExcerpt)
                 ? trim(strip_tags((string) $rawExcerpt))
                 : (! empty($rawContent) ? trim(strip_tags((string) $rawContent)) : '');
