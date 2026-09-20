@@ -69,6 +69,8 @@ class HomepageBannerController extends Controller
                 Storage::disk('public')->delete($homepage_banner->desktop_image_url);
             }
             $validated['desktop_image_url'] = $request->file('desktop_image_url')->store('banners', 'public');
+        } else {
+            unset($validated['desktop_image_url']);
         }
 
         if ($request->hasFile('mobile_image_url')) {
@@ -76,6 +78,8 @@ class HomepageBannerController extends Controller
                 Storage::disk('public')->delete($homepage_banner->mobile_image_url);
             }
             $validated['mobile_image_url'] = $request->file('mobile_image_url')->store('banners/mobile', 'public');
+        } else {
+            unset($validated['mobile_image_url']);
         }
 
         $homepage_banner->update($validated);

@@ -41,8 +41,9 @@ class ManagementMemberController extends Controller
         ]);
 
         if ($request->hasFile('image_url')) {
-            $validated['image_url'] = $request->file('image_url')->store('management', 'public');
+            $validated['photo_url'] = $request->file('image_url')->store('management', 'public');
         }
+        unset($validated['image_url']);
 
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
@@ -68,11 +69,12 @@ class ManagementMemberController extends Controller
         ]);
 
         if ($request->hasFile('image_url')) {
-            if ($management_member->image_url) {
-                Storage::disk('public')->delete($management_member->image_url);
+            if ($management_member->photo_url) {
+                Storage::disk('public')->delete($management_member->photo_url);
             }
-            $validated['image_url'] = $request->file('image_url')->store('management', 'public');
+            $validated['photo_url'] = $request->file('image_url')->store('management', 'public');
         }
+        unset($validated['image_url']);
 
         $management_member->update($validated);
 
@@ -81,8 +83,8 @@ class ManagementMemberController extends Controller
 
     public function destroy(ManagementMember $management_member)
     {
-        if ($management_member->image_url) {
-            Storage::disk('public')->delete($management_member->image_url);
+        if ($management_member->photo_url) {
+            Storage::disk('public')->delete($management_member->photo_url);
         }
         $management_member->delete();
 

@@ -27,9 +27,10 @@ interface TableRowProps {
 
 // Props for TableCell
 interface TableCellProps {
-  children: ReactNode; // Cell content
+  children?: ReactNode; // Cell content
   isHeader?: boolean; // If true, renders as <th>, otherwise <td>
   className?: string; // Optional className for styling
+  colSpan?: number;
 }
 
 // Table Component
@@ -61,10 +62,12 @@ const TableCell: React.FC<TableCellProps> = ({
   children,
   isHeader = false,
   className,
+  colSpan,
 }) => {
   const CellTag = isHeader ? "th" : "td";
   return (
     <CellTag 
+      colSpan={colSpan}
       className={cn(
         isHeader 
           ? "h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]" 

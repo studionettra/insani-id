@@ -17,6 +17,8 @@ class ImpactStat extends Model
         'label',
         'is_active',
         'sort_order',
+        'title',
+        'category',
     ];
 
     public $translatable = [
@@ -27,4 +29,48 @@ class ImpactStat extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    protected $appends = [
+        'title',
+        'title_translations',
+        'category',
+    ];
+
+    public function setTitleAttribute($value): void
+    {
+        if (is_array($value)) {
+            $this->setTranslations('label', $value);
+        } else {
+            $this->setTranslation('label', app()->getLocale(), (string) $value);
+        }
+    }
+
+    public function getTitleAttribute(): ?string
+    {
+        return $this->getTranslation('label', app()->getLocale(), false)
+            ?: $this->getTranslation('label', 'id', false);
+    }
+
+    public function getTitleTranslationsAttribute(): array
+    {
+        return $this->getTranslations('label');
+    }
+
+    public function setCategoryAttribute($value): void
+    {
+        $this->attributes['group'] = match (strtolower(str_replace(' ', '_', (string) $value))) {
+            'dalam_negeri' => 'dalam_negeri',
+            'luar_negeri' => 'luar_negeri',
+            default => 'umum',
+        };
+    }
+
+    public function getCategoryAttribute(): string
+    {
+        return match ($this->group) {
+            'dalam_negeri' => 'Dalam Negeri',
+            'luar_negeri' => 'Luar Negeri',
+            default => 'Umum',
+        };
+    }
 }

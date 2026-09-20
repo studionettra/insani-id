@@ -28,4 +28,13 @@ class ManagementMember extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    protected $appends = [
+        'image_url',
+    ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->photo_url;
+    }
 }

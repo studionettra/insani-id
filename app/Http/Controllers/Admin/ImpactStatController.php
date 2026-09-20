@@ -12,7 +12,8 @@ class ImpactStatController extends Controller
     {
         $impactStats = ImpactStat::query()
             ->when(request('search'), function ($query, $search) {
-                $query->where('title', 'like', "%{$search}%");
+                $query->where('label', 'like', "%{$search}%")
+                    ->orWhere('value', 'like', "%{$search}%");
             })
             ->orderBy('sort_order')
             ->latest()

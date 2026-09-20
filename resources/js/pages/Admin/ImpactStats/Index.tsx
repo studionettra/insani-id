@@ -20,6 +20,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { IconPicker, renderStatIcon } from '@/components/ui/icon-picker';
 
 export default function ImpactStatsIndex({ impactStats, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
@@ -31,7 +32,7 @@ export default function ImpactStatsIndex({ impactStats, filters }: any) {
         title: { id: '', en: '', ar: '' },
         value: '',
         icon: '',
-        category: '',
+        category: 'Dalam Negeri',
         is_active: true,
         sort_order: 0,
     });
@@ -48,6 +49,14 @@ export default function ImpactStatsIndex({ impactStats, filters }: any) {
     const openCreateModal = () => {
         reset();
         clearErrors();
+        setData({
+            title: { id: '', en: '', ar: '' },
+            value: '',
+            icon: '',
+            category: 'Dalam Negeri',
+            is_active: true,
+            sort_order: 0,
+        });
         setIsCreateModalOpen(true);
     };
 
@@ -61,7 +70,7 @@ export default function ImpactStatsIndex({ impactStats, filters }: any) {
             },
             value: stat.value || '',
             icon: stat.icon || '',
-            category: stat.category || '',
+            category: stat.category || 'Dalam Negeri',
             is_active: stat.is_active,
             sort_order: stat.sort_order,
         });
@@ -133,7 +142,7 @@ return;
                             />
                         </form>
                         
-                        <Button onClick={openCreateModal} className="bg-insani-turquoise hover:bg-insani-turquoise/90 text-white">
+                        <Button onClick={openCreateModal} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                             <Plus className="mr-2 h-4 w-4" /> Tambah Stat
                         </Button>
                     </div>
@@ -162,7 +171,14 @@ return;
                                 impactStats.data.map((stat: any) => (
                                     <TableRow key={stat.id}>
                                         <TableCell>{stat.category}</TableCell>
-                                        <TableCell>{stat.title_translations?.id || stat.title}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2.5">
+                                                {renderStatIcon(stat.icon, "w-4 h-4 text-[#1A56DB] shrink-0")}
+                                                <span className="font-medium text-gray-900 dark:text-white">
+                                                    {stat.title_translations?.id || stat.title}
+                                                </span>
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="font-semibold text-lg">{stat.value}</TableCell>
                                         <TableCell className="text-center">{stat.sort_order}</TableCell>
                                         <TableCell>
@@ -204,22 +220,26 @@ return;
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <form onSubmit={submitCreate}>
-                        <DialogHeader>
+                <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                    <form onSubmit={submitCreate} className="flex flex-col h-full max-h-[90vh] overflow-hidden">
+                        <DialogHeader className="p-6 pb-4 border-b shrink-0">
                             <DialogTitle>Tambah Statistik Dampak</DialogTitle>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="category">Kategori *</Label>
-                                    <Input
+                                    <Label htmlFor="category">Kategori (Cakupan Wilayah) *</Label>
+                                    <select
                                         id="category"
-                                        placeholder="cth: Dalam Negeri"
                                         value={data.category}
                                         onChange={(e) => setData('category', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                                         required
-                                    />
+                                    >
+                                        <option value="Dalam Negeri">Dalam Negeri</option>
+                                        <option value="Luar Negeri">Luar Negeri</option>
+                                        <option value="Umum">Umum</option>
+                                    </select>
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                                 </div>
                                 <div className="grid gap-2">
@@ -257,12 +277,11 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="icon">Icon Class (Opsional)</Label>
-                                <Input
+                                <Label htmlFor="icon">Ikon Visual (Opsional)</Label>
+                                <IconPicker
                                     id="icon"
-                                    placeholder="cth: fa-solid fa-users"
                                     value={data.icon}
-                                    onChange={(e) => setData('icon', e.target.value)}
+                                    onChange={(iconName) => setData('icon', iconName)}
                                 />
                                 {errors.icon && <p className="text-sm text-red-500">{errors.icon}</p>}
                             </div>
@@ -292,11 +311,11 @@ return;
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
+                        <DialogFooter className="p-4 border-t bg-gray-50 dark:bg-gray-800/50 shrink-0">
                             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-insani-blue hover:bg-insani-blue/90 text-white">
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                 {processing ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                         </DialogFooter>
@@ -306,22 +325,26 @@ return;
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <form onSubmit={submitEdit}>
-                        <DialogHeader>
+                <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                    <form onSubmit={submitEdit} className="flex flex-col h-full max-h-[90vh] overflow-hidden">
+                        <DialogHeader className="p-6 pb-4 border-b shrink-0">
                             <DialogTitle>Edit Statistik Dampak</DialogTitle>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_category">Kategori *</Label>
-                                    <Input
+                                    <Label htmlFor="edit_category">Kategori (Cakupan Wilayah) *</Label>
+                                    <select
                                         id="edit_category"
-                                        placeholder="cth: Dalam Negeri"
                                         value={data.category}
                                         onChange={(e) => setData('category', e.target.value)}
+                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                                         required
-                                    />
+                                    >
+                                        <option value="Dalam Negeri">Dalam Negeri</option>
+                                        <option value="Luar Negeri">Luar Negeri</option>
+                                        <option value="Umum">Umum</option>
+                                    </select>
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                                 </div>
                                 <div className="grid gap-2">
@@ -359,12 +382,11 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_icon">Icon Class (Opsional)</Label>
-                                <Input
+                                <Label htmlFor="edit_icon">Ikon Visual (Opsional)</Label>
+                                <IconPicker
                                     id="edit_icon"
-                                    placeholder="cth: fa-solid fa-users"
                                     value={data.icon}
-                                    onChange={(e) => setData('icon', e.target.value)}
+                                    onChange={(iconName) => setData('icon', iconName)}
                                 />
                                 {errors.icon && <p className="text-sm text-red-500">{errors.icon}</p>}
                             </div>
@@ -394,11 +416,11 @@ return;
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
+                        <DialogFooter className="p-4 border-t bg-gray-50 dark:bg-gray-800/50 shrink-0">
                             <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-insani-blue hover:bg-insani-blue/90 text-white">
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                 {processing ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                         </DialogFooter>

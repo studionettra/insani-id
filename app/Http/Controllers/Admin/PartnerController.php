@@ -63,6 +63,8 @@ class PartnerController extends Controller
                 Storage::disk('public')->delete($partner->logo_url);
             }
             $validated['logo_url'] = $request->file('logo_url')->store('partners', 'public');
+        } else {
+            unset($validated['logo_url']);
         }
 
         $partner->update($validated);

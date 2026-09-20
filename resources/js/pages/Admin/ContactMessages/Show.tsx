@@ -110,7 +110,7 @@ export default function ContactMessagesShow({ message }: any) {
                             
                             <div className="pt-4 mt-2 border-t flex flex-col gap-2">
                                 <a href={`mailto:${message.email}?subject=Balasan: ${message.subject}`} className="w-full">
-                                    <Button className="w-full bg-insani-blue hover:bg-insani-blue/90 text-white">
+                                    <Button className="w-full bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                         Balas via Email
                                     </Button>
                                 </a>

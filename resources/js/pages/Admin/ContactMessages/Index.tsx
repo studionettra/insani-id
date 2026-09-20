@@ -130,7 +130,7 @@ export default function ContactMessagesIndex({ messages, filters }: any) {
                                                     <Button
                                                         variant={!message.is_read ? "default" : "outline"}
                                                         size="icon"
-                                                        className={!message.is_read ? "bg-insani-blue hover:bg-insani-blue/90" : ""}
+                                                        className={!message.is_read ? "bg-[#1A56DB] hover:bg-[#1e40af] text-white" : ""}
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                     </Button>

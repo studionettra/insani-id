@@ -132,7 +132,7 @@ return;
                             />
                         </form>
                         
-                        <Button onClick={openCreateModal} className="bg-insani-turquoise hover:bg-insani-turquoise/90 text-white">
+                        <Button onClick={openCreateModal} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                             <Plus className="mr-2 h-4 w-4" /> Tambah Banner
                         </Button>
                     </div>
@@ -308,7 +308,7 @@ return;
                             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-insani-blue hover:bg-insani-blue/90 text-white">
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                 {processing ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                         </DialogFooter>
@@ -407,7 +407,7 @@ return;
                             <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-insani-blue hover:bg-insani-blue/90 text-white">
+                            <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                 {processing ? 'Menyimpan...' : 'Simpan'}
                             </Button>
                         </DialogFooter>

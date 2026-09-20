@@ -123,6 +123,8 @@ class CategoryController extends BaseController
                 Storage::disk('public')->delete($category->icon);
             }
             $validated['icon'] = $request->file('icon')->store('categories', 'public');
+        } else {
+            unset($validated['icon']);
         }
 
         if ($request->hasFile('pillar_image')) {
@@ -130,6 +132,8 @@ class CategoryController extends BaseController
                 Storage::disk('public')->delete($category->pillar_image);
             }
             $validated['pillar_image'] = $request->file('pillar_image')->store('categories/pillars', 'public');
+        } else {
+            unset($validated['pillar_image']);
         }
 
         $validated['is_disaster_category'] = $validated['is_disaster_category'] ?? false;
