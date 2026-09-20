@@ -27,6 +27,16 @@ export function AppSidebar() {
             icon: LayoutGrid,
             // Everyone who can access admin panel can see dashboard
         },
+        ...(!permissions.includes('donation.view') ? [{
+            title: 'Donasi Saya',
+            href: '/akun/donasi-saya',
+            icon: BookOpen,
+        }] : []),
+        ...(!permissions.includes('program.view') ? [{
+            title: 'Jelajah Program',
+            href: '/program',
+            icon: BookOpen,
+        }] : []),
         ...(permissions.includes('user.view') ? [{
             title: 'Pengguna',
             href: '/admin/users',

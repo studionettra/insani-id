@@ -15,12 +15,27 @@ interface SidebarContextProps {
 const SidebarContext = createContext<SidebarContextProps | undefined>(undefined);
 
 export const SidebarProvider = ({ children }: { children: ReactNode }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebar_expanded');
+      if (saved !== null) {
+        return saved === 'true';
+      }
+      return true;
+    }
+    return true;
+  });
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
+    setIsExpanded((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sidebar_expanded', String(next));
+      }
+      return next;
+    });
   };
 
   const toggleMobileSidebar = () => {
