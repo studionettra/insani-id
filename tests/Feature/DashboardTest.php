@@ -156,6 +156,75 @@ test('admin user receives administrator role flag', function () {
         ->component('dashboard')
         ->where('userRoleInfo.isAdministrator', true)
         ->where('userRoleInfo.isCampaigner', false)
+        ->where('userRoleInfo.isStaff', true)
         ->where('campaignerStats', null)
+    );
+});
+
+test('donor user receives personalized donorStats and is not flagged as staff', function () {
+    Role::firstOrCreate(['name' => 'Donatur', 'guard_name' => 'web']);
+
+    $donor = User::factory()->create(['email' => 'ahmad@example.com']);
+    $donor->assignRole('Donatur');
+
+    $category = Category::create([
+        'name' => 'Kemanusiaan',
+        'slug' => 'kemanusiaan',
+        'platform_fee_percent' => 5,
+    ]);
+
+    $program1 = Program::factory()->create([
+        'category_id' => $category->id,
+        'status' => 'published',
+    ]);
+
+    $program2 = Program::factory()->create([
+        'category_id' => $category->id,
+        'status' => 'published',
+    ]);
+
+    // Paid donation 1
+    Donation::factory()->create([
+        'donor_user_id' => $donor->id,
+        'donor_email' => $donor->email,
+        'program_id' => $program1->id,
+        'amount' => 150000,
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    // Paid donation 2
+    Donation::factory()->create([
+        'donor_user_id' => $donor->id,
+        'donor_email' => $donor->email,
+        'program_id' => $program2->id,
+        'amount' => 250000,
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    // Pending donation 3
+    Donation::factory()->create([
+        'donor_user_id' => $donor->id,
+        'donor_email' => $donor->email,
+        'program_id' => $program1->id,
+        'amount' => 50000,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($donor)
+        ->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->where('userRoleInfo.isDonor', true)
+        ->where('userRoleInfo.isStaff', false)
+        ->where('userRoleInfo.isCampaigner', false)
+        ->where('donorStats.totalDonated', 400000)
+        ->where('donorStats.paidDonationsCount', 2)
+        ->where('donorStats.helpedProgramsCount', 2)
+        ->where('donorStats.pendingCount', 1)
+        ->has('donorStats.recentDonations', 3)
     );
 });

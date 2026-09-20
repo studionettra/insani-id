@@ -26,6 +26,13 @@ class DashboardController extends Controller
         $isVerifikator = in_array('Verifikator', $roles);
         $isKeuangan = in_array('Keuangan', $roles);
         $isCampaigner = in_array('Campaigner Individu', $roles) || in_array('Campaigner Lembaga', $roles);
+        $isStaff = $isAdministrator || $isProgramOfficer || $isVerifikator || $isKeuangan
+            || in_array('Customer Service', $roles)
+            || in_array('Eksekutif', $roles)
+            || in_array('Relawan Lapangan', $roles)
+            || in_array('Content Editor', $roles);
+
+        $isDonor = in_array('Donatur', $roles) || (! $isStaff && ! $isCampaigner);
 
         // General Platform Stats (for Admins, Keuangan, Program Officer, Eksekutif)
         $totalDonations = (float) Donation::where('status', 'paid')->sum('amount');
@@ -41,6 +48,40 @@ class DashboardController extends Controller
         $totalDisbursed = (float) Disbursement::where('status', 'transferred')->sum('requested_amount');
         $pendingDisbursements = (float) Disbursement::where('status', 'pending')->sum('requested_amount');
         $pendingOfflineDonations = Donation::where('channel', 'offline')->where('status', 'pending')->count();
+
+        // Donor Specific Data
+        $donorStats = null;
+        if ($isDonor) {
+            $donorDonationsQuery = Donation::where(function ($query) use ($user) {
+                $query->where('donor_user_id', $user->id)
+                    ->orWhere('donor_email', $user->email);
+            });
+
+            $totalDonated = (float) (clone $donorDonationsQuery)->where('status', 'paid')->sum('amount');
+            $paidDonationsCount = (clone $donorDonationsQuery)->where('status', 'paid')->count();
+            $helpedProgramsCount = (clone $donorDonationsQuery)->where('status', 'paid')->distinct('program_id')->count('program_id');
+            $pendingDonations = (clone $donorDonationsQuery)
+                ->with('program')
+                ->where('status', 'pending')
+                ->latest()
+                ->get();
+            $pendingCount = $pendingDonations->count();
+
+            $recentDonations = (clone $donorDonationsQuery)
+                ->with(['program.category', 'payments'])
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $donorStats = [
+                'totalDonated' => $totalDonated,
+                'paidDonationsCount' => $paidDonationsCount,
+                'helpedProgramsCount' => $helpedProgramsCount,
+                'pendingCount' => $pendingCount,
+                'pendingDonations' => $pendingDonations,
+                'recentDonations' => $recentDonations,
+            ];
+        }
 
         // Campaigner Specific Data
         $campaignerStats = null;
@@ -65,6 +106,12 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $recommendedPrograms = Program::with('category')
+            ->where('status', 'published')
+            ->latest()
+            ->take(3)
+            ->get();
+
         return Inertia::render('dashboard', [
             'stats' => [
                 'totalDonations' => $totalDonations,
@@ -77,14 +124,18 @@ class DashboardController extends Controller
                 'pendingDisbursements' => $pendingDisbursements,
                 'pendingOfflineDonations' => $pendingOfflineDonations,
             ],
+            'donorStats' => $donorStats,
             'campaignerStats' => $campaignerStats,
             'recentCampaigns' => $recentCampaigns,
+            'recommendedPrograms' => $recommendedPrograms,
             'userRoleInfo' => [
                 'isAdministrator' => $isAdministrator,
                 'isProgramOfficer' => $isProgramOfficer,
                 'isVerifikator' => $isVerifikator,
                 'isKeuangan' => $isKeuangan,
                 'isCampaigner' => $isCampaigner,
+                'isDonor' => $isDonor,
+                'isStaff' => $isStaff,
             ],
         ]);
     }
