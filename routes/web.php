@@ -48,6 +48,7 @@ Route::group([
     Route::get('/program/{program:slug}/donasi', [DonationController::class, 'create'])->name('donation.create');
     Route::post('/program/{program:slug}/donasi', [DonationController::class, 'store'])->name('donation.store');
     Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])->name('donation.status');
+    Route::get('/cek-donasi', [DonationController::class, 'lookup'])->name('donation.lookup');
     Route::get('/program/{slug}', [ProgramListingController::class, 'show'])->name('program.show');
 
     // Public Pages

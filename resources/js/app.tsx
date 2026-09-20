@@ -12,8 +12,6 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name.startsWith('Public/Akun/Donasi'):
-                return null;
             case name.startsWith('Public/Akun/') || name.startsWith('Public/CampaignerRegistration/'):
                 return TailAdminLayout;
             case name === 'welcome' || name.startsWith('Public/'):

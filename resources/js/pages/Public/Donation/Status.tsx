@@ -9,10 +9,13 @@ import {
     ExternalLink,
     ChevronRight,
     ArrowRight,
-    Sparkles
+    Sparkles,
+    ShieldCheck,
+    Printer
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import DonationReceiptModal from '@/components/donation/DonationReceiptModal';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -20,6 +23,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 export default function Status({ donation }: any) {
     const { auth } = usePage().props as any;
     const [isChecking, setIsChecking] = useState(false);
+    const [showReceipt, setShowReceipt] = useState(false);
 
     const title = donation.program?.title?.id || donation.program?.title || 'Program Donasi';
     const latestPayment = donation.payments && donation.payments.length > 0 ? donation.payments[0] : null;
@@ -112,7 +116,7 @@ export default function Status({ donation }: any) {
         <PublicLayout>
             <Head title={`Status Donasi ${donation.donation_code}`} />
 
-            <div className="bg-slate-50 min-h-screen py-8 md:py-12">
+            <div className="bg-slate-50 min-h-screen py-8 md:py-12 print:hidden">
                 <div className="container mx-auto px-4 max-w-2xl">
                     
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
@@ -185,9 +189,9 @@ export default function Status({ donation }: any) {
                                     <span className="text-slate-500">ID Transaksi</span>
                                     <span className="font-mono font-bold text-slate-800">{donation.donation_code}</span>
                                 </div>
-                                <div className="flex justify-between items-center py-2.5 border-b border-dashed border-slate-200">
-                                    <span className="text-slate-500">Program Donasi</span>
-                                    <span className="font-medium text-slate-800 truncate max-w-[220px] text-right">{title}</span>
+                                <div className="flex justify-between items-start gap-4 py-2.5 border-b border-dashed border-slate-200">
+                                    <span className="text-slate-500 shrink-0">Program Donasi</span>
+                                    <span className="font-medium text-slate-800 text-right leading-snug">{title}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2.5 border-b border-dashed border-slate-200">
                                     <span className="text-slate-500">Nama Donatur</span>
@@ -208,6 +212,20 @@ export default function Status({ donation }: any) {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Action Button: Official Receipt when Paid */}
+                            {donation.status === 'paid' && (
+                                <div className="pt-2">
+                                    <Button 
+                                        type="button"
+                                        onClick={() => setShowReceipt(true)}
+                                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
+                                    >
+                                        <Printer className="w-4 h-4" />
+                                        <span>Lihat & Cetak Kuitansi Resmi</span>
+                                    </Button>
+                                </div>
+                            )}
 
                             {/* Guest Donor Registration CTA */}
                             {!auth?.user && (
@@ -308,6 +326,12 @@ export default function Status({ donation }: any) {
 
                 </div>
             </div>
+
+            {/* Donation Receipt Modal */}
+            <DonationReceiptModal 
+                receipt={showReceipt ? donation : null}
+                onClose={() => setShowReceipt(false)}
+            />
         </PublicLayout>
     );
 }

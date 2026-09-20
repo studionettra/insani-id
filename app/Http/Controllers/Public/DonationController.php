@@ -8,6 +8,7 @@ use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Services\XenditPaymentService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class DonationController extends Controller
@@ -134,6 +135,37 @@ class DonationController extends Controller
 
         return inertia('Public/Donation/Status', [
             'donation' => $donation,
+        ]);
+    }
+
+    /**
+     * Search and view donation history for guest donors.
+     */
+    public function lookup(Request $request)
+    {
+        $search = trim((string) $request->input('q', ''));
+        $donations = null;
+
+        if (! empty($search)) {
+            // If query matches a donation code, check direct redirection
+            if (str_starts_with(strtoupper($search), 'DON-')) {
+                $exactDonation = Donation::where('donation_code', strtoupper($search))->first();
+                if ($exactDonation) {
+                    return redirect()->route('donation.status', ['donationCode' => $exactDonation->donation_code]);
+                }
+            }
+
+            $donations = Donation::with(['program.category', 'payments'])
+                ->where('donor_email', $search)
+                ->orWhere('donation_code', $search)
+                ->latest()
+                ->paginate(10)
+                ->withQueryString();
+        }
+
+        return inertia('Public/Donation/Lookup', [
+            'search' => $search,
+            'donations' => $donations,
         ]);
     }
 }
