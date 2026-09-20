@@ -17,9 +17,12 @@ import {
     ArrowRight
 } from 'lucide-react';
 import React from 'react';
+import ConversionFunnelCard from '@/components/analytics/ConversionFunnelCard';
+import DonationTrendChart from '@/components/analytics/DonationTrendChart';
+import UtmSourcePieChart from '@/components/analytics/UtmSourcePieChart';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Props {
     stats: {
@@ -33,6 +36,40 @@ interface Props {
         pendingDisbursements: number;
         pendingOfflineDonations: number;
     };
+    analyticsData?: {
+        donationTrends: {
+            categories: string[];
+            amounts: number[];
+            counts: number[];
+        };
+        utmSources: {
+            labels: string[];
+            series: number[];
+            details: Array<{
+                name: string;
+                raw_source: string;
+                count: number;
+                amount: number;
+            }>;
+        };
+        funnel: {
+            totalViews: number;
+            totalAttempts: number;
+            totalPaid: number;
+            conversionRate: number;
+        };
+        topPrograms: Array<{
+            id: number;
+            title: string;
+            slug: string;
+            category?: string;
+            collected_amount: number;
+            target_amount: number;
+            views_count: number;
+            donation_count: number;
+            conversion_rate: number;
+        }>;
+    } | null;
     donorStats?: {
         totalDonated: number;
         paidDonationsCount: number;
@@ -63,34 +100,56 @@ interface Props {
 }
 
 const getProgramTitle = (title: any): string => {
-    if (!title) return 'Program Tanpa Judul';
-    if (typeof title === 'string') return title;
+    if (!title) {
+return 'Program Tanpa Judul';
+}
+
+    if (typeof title === 'string') {
+return title;
+}
+
     if (typeof title === 'object' && title !== null) {
         if (typeof title.id === 'string' && title.id.trim() !== '') {
             return title.id;
         }
+
         const values = Object.values(title).filter(v => typeof v === 'string' && v.trim() !== '');
+
         if (values.length > 0) {
             return values[0] as string;
         }
     }
+
     return String(title || 'Program Tanpa Judul');
 };
 
 const getCategoryName = (category: any): string => {
-    if (!category) return 'Kategori';
+    if (!category) {
+return 'Kategori';
+}
+
     const name = category.name;
-    if (!name) return 'Kategori';
-    if (typeof name === 'string') return name;
+
+    if (!name) {
+return 'Kategori';
+}
+
+    if (typeof name === 'string') {
+return name;
+}
+
     if (typeof name === 'object' && name !== null) {
         if (typeof name.id === 'string' && name.id.trim() !== '') {
             return name.id;
         }
+
         const values = Object.values(name).filter(v => typeof v === 'string' && v.trim() !== '');
+
         if (values.length > 0) {
             return values[0] as string;
         }
     }
+
     return String(name || 'Kategori');
 };
 
@@ -139,6 +198,7 @@ const renderStatusBadge = (status: string) => {
 
 export default function Dashboard({ 
     stats = {} as any, 
+    analyticsData,
     donorStats, 
     campaignerStats, 
     recentCampaigns = [], 
@@ -151,6 +211,7 @@ export default function Dashboard({
     const isStaff = userRoleInfo?.isStaff ?? (userRoleInfo?.isAdministrator || userRoleInfo?.isProgramOfficer || userRoleInfo?.isVerifikator || userRoleInfo?.isKeuangan);
 
     let createProgramUrl = '/buat-program';
+
     if (userRoleInfo?.isAdministrator || userRoleInfo?.isProgramOfficer) {
         createProgramUrl = '/admin/programs/create';
     } else if (isCampaigner) {
@@ -161,7 +222,7 @@ export default function Dashboard({
         <>
             <Head title={isDonor ? "Dashboard Donatur" : (isCampaigner ? "Dashboard Penggalang Dana" : "Dashboard")} />
             
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4 lg:p-6">
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-hidden rounded-xl p-4 lg:p-6">
                 
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
@@ -430,6 +491,33 @@ export default function Dashboard({
                         </>
                     )}
                 </div>
+
+                {/* Staff & Admin Interactive Analytics Section */}
+                {Boolean(isStaff && analyticsData) && (
+                    <div className="space-y-6">
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            <div className="lg:col-span-2">
+                                <DonationTrendChart
+                                    categories={analyticsData!.donationTrends.categories}
+                                    amounts={analyticsData!.donationTrends.amounts}
+                                    counts={analyticsData!.donationTrends.counts}
+                                />
+                            </div>
+                            <div>
+                                <UtmSourcePieChart
+                                    labels={analyticsData!.utmSources.labels}
+                                    series={analyticsData!.utmSources.series}
+                                    details={analyticsData!.utmSources.details}
+                                />
+                            </div>
+                        </div>
+
+                        <ConversionFunnelCard
+                            funnel={analyticsData!.funnel}
+                            topPrograms={analyticsData!.topPrograms}
+                        />
+                    </div>
+                )}
                 
                 {/* Main Content Split */}
                 <div className="grid gap-6 lg:grid-cols-3 flex-1 mt-2">
@@ -453,7 +541,7 @@ export default function Dashboard({
                                         </Link>
                                     </Button>
                                 </div>
-                                <div className="p-0 overflow-x-auto">
+                                <div className="p-0 overflow-x-auto custom-scrollbar">
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-gray-50/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">
                                             <tr>
@@ -569,14 +657,14 @@ export default function Dashboard({
                                         </Link>
                                     </Button>
                                 </div>
-                                <div className="p-0 overflow-x-auto">
+                                <div className="p-0 overflow-x-auto custom-scrollbar">
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-gray-50/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">
                                             <tr>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Program</th>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Target Donasi</th>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Terkumpul</th>
-                                                <th className="px-5 py-3.5 text-right whitespace-nowrap">Aksi</th>
+                                                <th className="px-4 sm:px-5 py-3.5">Program</th>
+                                                <th className="px-3 sm:px-4 py-3.5 whitespace-nowrap">Target</th>
+                                                <th className="px-3 sm:px-4 py-3.5 whitespace-nowrap">Terkumpul</th>
+                                                <th className="px-4 sm:px-5 py-3.5 text-right whitespace-nowrap">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -586,29 +674,29 @@ export default function Dashboard({
 
                                                     return (
                                                         <tr key={program.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/50 transition-colors">
-                                                            <td className="px-5 py-4">
+                                                            <td className="px-4 sm:px-5 py-3 sm:py-3.5">
                                                                 <div className="flex items-center gap-3">
                                                                     {program.cover_image ? (
                                                                         <img 
                                                                             src={program.cover_image.startsWith('http') ? program.cover_image : `/storage/${program.cover_image}`} 
                                                                             alt={getProgramTitle(program?.title)} 
-                                                                            className="w-16 h-10 rounded-lg aspect-video object-cover border border-gray-200/80 dark:border-gray-700/80 shrink-0 shadow-2xs"
+                                                                            className="w-12 h-9 sm:w-14 sm:h-10 rounded-lg aspect-video object-cover border border-gray-200/80 dark:border-gray-700/80 shrink-0 shadow-2xs"
                                                                         />
                                                                     ) : (
-                                                                        <div className="w-16 h-10 rounded-lg aspect-video bg-brand-50 dark:bg-brand-950/50 border border-brand-100 dark:border-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                                                                        <div className="w-12 h-9 sm:w-14 sm:h-10 rounded-lg aspect-video bg-brand-50 dark:bg-brand-950/50 border border-brand-100 dark:border-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
                                                                             <Target className="w-4 h-4" />
                                                                         </div>
                                                                     )}
                                                                     <div className="min-w-0 flex-1">
-                                                                        <div className="font-semibold text-gray-900 dark:text-white text-sm truncate max-w-[200px] sm:max-w-xs md:max-w-sm" title={getProgramTitle(program?.title)}>
+                                                                        <div className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[180px] md:max-w-xs" title={getProgramTitle(program?.title)}>
                                                                             {getProgramTitle(program?.title)}
                                                                         </div>
-                                                                        <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+                                                                        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
                                                                             <span className="font-medium text-gray-600 dark:text-gray-300">{getCategoryName(program?.category)}</span>
                                                                             {program.program_code && (
                                                                                 <>
                                                                                     <span className="text-gray-300 dark:text-gray-700">•</span>
-                                                                                    <span className="font-mono text-[11px] text-gray-400 dark:text-gray-500">{program.program_code}</span>
+                                                                                    <span className="font-mono text-[10px] sm:text-[11px] text-gray-400 dark:text-gray-500">{program.program_code}</span>
                                                                                 </>
                                                                             )}
                                                                             {program.status && program.status !== 'published' && (
@@ -621,31 +709,31 @@ export default function Dashboard({
                                                                     </div>
                                                                 </div>
                                                             </td>
-                                                            <td className="px-5 py-4 whitespace-nowrap">
+                                                            <td className="px-3 sm:px-4 py-3 sm:py-3.5 whitespace-nowrap">
                                                                 {hasTarget ? (
                                                                     <div className="flex flex-col">
-                                                                        <span className="text-sm font-bold text-gray-900 dark:text-white">
+                                                                        <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
                                                                             {formatCurrency(parseFloat(program.target_amount))}
                                                                         </span>
-                                                                        <span className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                                                                        <span className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                                                                             {program.deadline ? `Batas: ${formatDate(program.deadline)}` : 'Target Terbuka'}
                                                                         </span>
                                                                     </div>
                                                                 ) : (
                                                                     <div className="flex flex-col">
-                                                                        <span className="inline-flex items-center w-fit px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                                                                        <span className="inline-flex items-center w-fit px-2 py-0.5 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                                                                             Tanpa Target
                                                                         </span>
-                                                                        <span className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
                                                                             Fleksibel
                                                                         </span>
                                                                     </div>
                                                                 )}
                                                             </td>
-                                                            <td className="px-5 py-4 min-w-[170px]">
-                                                                <div className="flex flex-col gap-1.5">
+                                                            <td className="px-3 sm:px-4 py-3 sm:py-3.5 min-w-[130px] sm:min-w-[150px]">
+                                                                <div className="flex flex-col gap-1">
                                                                     <div className="flex items-baseline justify-between gap-2 text-xs">
-                                                                        <span className="font-bold text-gray-900 dark:text-white text-sm">
+                                                                        <span className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm">
                                                                             {formatCurrency(program.collected_amount || 0)}
                                                                         </span>
                                                                     </div>
@@ -658,21 +746,21 @@ export default function Dashboard({
                                                                     />
                                                                 </div>
                                                             </td>
-                                                            <td className="px-5 py-4 text-right whitespace-nowrap">
-                                                                <div className="flex items-center justify-end gap-2">
-                                                                    <Button asChild variant="outline" size="sm" className="rounded-lg h-8 px-3 text-xs font-semibold border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                                                                        <Link href={`/program/${program.slug}`}>
+                                                            <td className="px-4 sm:px-5 py-3 sm:py-3.5 text-right whitespace-nowrap">
+                                                                <div className="flex items-center justify-end gap-1.5">
+                                                                    <Button asChild variant="outline" size="sm" className="rounded-lg h-7 px-2.5 text-xs font-medium border-gray-200 dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                                                        <Link href={`/program/${program.slug}`} target="_blank">
                                                                             Lihat
                                                                         </Link>
                                                                     </Button>
                                                                     {isCampaigner ? (
-                                                                        <Button asChild variant="ghost" size="sm" className="rounded-lg h-8 px-3 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 hover:bg-brand-50 dark:hover:bg-brand-950/50">
+                                                                        <Button asChild size="sm" className="rounded-lg h-7 px-2.5 text-xs font-semibold bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                                                             <Link href={`/akun/programs/${program.id}`}>
                                                                                 Detail
                                                                             </Link>
                                                                         </Button>
                                                                     ) : (
-                                                                        <Button asChild variant="ghost" size="sm" className="rounded-lg h-8 px-3 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 hover:bg-brand-50 dark:hover:bg-brand-950/50">
+                                                                        <Button asChild size="sm" className="rounded-lg h-7 px-2.5 text-xs font-semibold bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                                                             <Link href={`/admin/programs/${program.id}`}>
                                                                                 Kelola
                                                                             </Link>

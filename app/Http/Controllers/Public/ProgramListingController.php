@@ -66,6 +66,12 @@ class ProgramListingController extends Controller
             ->where('status', 'published')
             ->firstOrFail();
 
+        $sessionKey = 'viewed_program_'.$program->id;
+        if (! session()->has($sessionKey)) {
+            $program->increment('views_count');
+            session()->put($sessionKey, now()->timestamp);
+        }
+
         return Inertia::render('Public/Program/Show', [
             'program' => $program,
         ]);

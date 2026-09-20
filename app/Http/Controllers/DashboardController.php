@@ -112,6 +112,104 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
+        // Staff Analytics Data (Charts, UTM Breakdown, Conversion Funnel)
+        $analyticsData = null;
+        if ($isStaff) {
+            $startDate = Carbon::now()->subDays(29)->startOfDay();
+            $dailyDonations = Donation::where('status', 'paid')
+                ->where('paid_at', '>=', $startDate)
+                ->selectRaw('DATE(paid_at) as date, SUM(amount) as total_amount, COUNT(id) as count')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->keyBy('date');
+
+            $dates = [];
+            $amounts = [];
+            $counts = [];
+            for ($i = 29; $i >= 0; $i--) {
+                $carbonDate = Carbon::now()->subDays($i);
+                $dateKey = $carbonDate->format('Y-m-d');
+                $dates[] = $carbonDate->format('d M');
+                $amounts[] = isset($dailyDonations[$dateKey]) ? (float) $dailyDonations[$dateKey]->total_amount : 0.0;
+                $counts[] = isset($dailyDonations[$dateKey]) ? (int) $dailyDonations[$dateKey]->count : 0;
+            }
+
+            // Channel Breakdown (UTM Source)
+            $sourceBreakdown = Donation::where('status', 'paid')
+                ->selectRaw("COALESCE(NULLIF(utm_source, ''), 'Direct / Organik') as source, COUNT(id) as count, SUM(amount) as total_amount")
+                ->groupBy('source')
+                ->orderByDesc('total_amount')
+                ->get();
+
+            $sourceLabels = [];
+            $sourceSeries = [];
+            $sourceDetails = [];
+            foreach ($sourceBreakdown as $sb) {
+                $formattedName = ucfirst(str_replace(['_', '-'], ' ', $sb->source));
+                $sourceLabels[] = $formattedName;
+                $sourceSeries[] = (int) $sb->count;
+                $sourceDetails[] = [
+                    'name' => $formattedName,
+                    'raw_source' => $sb->source,
+                    'count' => (int) $sb->count,
+                    'amount' => (float) $sb->total_amount,
+                ];
+            }
+
+            // Funnel Metrics
+            $totalProgramViews = (int) Program::where('status', 'published')->sum('views_count');
+            $totalDonationAttempts = Donation::count();
+            $totalPaidDonations = Donation::where('status', 'paid')->count();
+            $overallConversionRate = $totalProgramViews > 0
+                ? round(($totalPaidDonations / $totalProgramViews) * 100, 2)
+                : ($totalDonationAttempts > 0 ? round(($totalPaidDonations / $totalDonationAttempts) * 100, 2) : 0.0);
+
+            // Top Performing Programs
+            $topPrograms = Program::with('category')
+                ->where('status', 'published')
+                ->orderByDesc('collected_amount')
+                ->take(5)
+                ->get()
+                ->map(function ($p) {
+                    $donationCount = Donation::where('program_id', $p->id)->where('status', 'paid')->count();
+                    $views = (int) $p->views_count;
+                    $conversionRate = $views > 0 ? round(($donationCount / $views) * 100, 1) : 0.0;
+
+                    return [
+                        'id' => $p->id,
+                        'title' => $p->title,
+                        'slug' => $p->slug,
+                        'category' => $p->category?->name,
+                        'collected_amount' => (float) $p->collected_amount,
+                        'target_amount' => (float) $p->target_amount,
+                        'views_count' => $views,
+                        'donation_count' => $donationCount,
+                        'conversion_rate' => $conversionRate,
+                    ];
+                });
+
+            $analyticsData = [
+                'donationTrends' => [
+                    'categories' => $dates,
+                    'amounts' => $amounts,
+                    'counts' => $counts,
+                ],
+                'utmSources' => [
+                    'labels' => $sourceLabels,
+                    'series' => $sourceSeries,
+                    'details' => $sourceDetails,
+                ],
+                'funnel' => [
+                    'totalViews' => $totalProgramViews,
+                    'totalAttempts' => $totalDonationAttempts,
+                    'totalPaid' => $totalPaidDonations,
+                    'conversionRate' => $overallConversionRate,
+                ],
+                'topPrograms' => $topPrograms,
+            ];
+        }
+
         return Inertia::render('dashboard', [
             'stats' => [
                 'totalDonations' => $totalDonations,
@@ -124,6 +222,7 @@ class DashboardController extends Controller
                 'pendingDisbursements' => $pendingDisbursements,
                 'pendingOfflineDonations' => $pendingOfflineDonations,
             ],
+            'analyticsData' => $analyticsData,
             'donorStats' => $donorStats,
             'campaignerStats' => $campaignerStats,
             'recentCampaigns' => $recentCampaigns,

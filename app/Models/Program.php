@@ -34,6 +34,7 @@ class Program extends Model
         'cover_image',
         'video_url',
         'status',
+        'views_count',
         'rejection_notes',
         'published_at',
         'closed_at',
@@ -42,6 +43,7 @@ class Program extends Model
     protected $casts = [
         'target_amount' => 'decimal:2',
         'collected_amount' => 'decimal:2',
+        'views_count' => 'integer',
         'deadline' => 'date',
         'published_at' => 'datetime',
         'closed_at' => 'datetime',

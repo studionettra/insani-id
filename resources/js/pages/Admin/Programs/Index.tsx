@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -13,7 +14,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
-import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
     id: number;
@@ -25,6 +25,7 @@ interface Program {
     creator: { name: string };
     target_amount?: string | null;
     collected_amount: number;
+    views_count?: number;
     status: string;
     published_at: string | null;
 }
@@ -50,7 +51,10 @@ export default function ProgramsIndex({ programs, filters }: Props) {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleConfirmDelete = () => {
-        if (!programToDelete) return;
+        if (!programToDelete) {
+return;
+}
+
         setIsDeleting(true);
         router.delete(`/admin/programs/${programToDelete.id}`, {
             onFinish: () => {
@@ -135,6 +139,7 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                 <TableHead className="font-medium text-gray-500 dark:text-gray-400">Kategori</TableHead>
                                 <TableHead className="font-medium text-gray-500 dark:text-gray-400">Pembuat</TableHead>
                                 <TableHead className="font-medium text-gray-500 dark:text-gray-400">Terkumpul</TableHead>
+                                <TableHead className="font-medium text-gray-500 dark:text-gray-400 text-center">Dilihat</TableHead>
                                 <TableHead className="font-medium text-gray-500 dark:text-gray-400">Status</TableHead>
                                 <TableHead className="text-center font-medium text-gray-500 dark:text-gray-400">Aksi</TableHead>
                             </TableRow>
@@ -181,6 +186,12 @@ export default function ProgramsIndex({ programs, filters }: Props) {
                                                     percentageFormat="badge"
                                                 />
                                             </div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                                <Eye className="w-3.5 h-3.5 text-slate-400" />
+                                                {(program.views_count || 0).toLocaleString('id-ID')}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             {getStatusBadge(program.status)}
