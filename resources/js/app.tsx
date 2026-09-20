@@ -5,6 +5,7 @@ import { initializeTheme } from '@/hooks/use-appearance';
 import AuthLayout from '@/layouts/auth-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import TailAdminLayout from '@/layouts/TailAdmin/AppLayout';
+import { trackPageView } from '@/lib/analytics';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -51,10 +52,19 @@ if (typeof window !== 'undefined') {
         }
     });
 
-    router.on('navigate', () => {
+    router.on('navigate', (event) => {
         if (sessionStorage.getItem('logged_out') === 'true') {
             sessionStorage.removeItem('logged_out');
             window.location.replace('/login');
+
+            return;
+        }
+
+        const url = event.detail.page.url;
+
+        // Only track public/donor pages, skip internal admin/dashboard/settings routes
+        if (!url.startsWith('/admin') && !url.startsWith('/dashboard') && !url.startsWith('/settings')) {
+            trackPageView(url, document.title);
         }
     });
 }

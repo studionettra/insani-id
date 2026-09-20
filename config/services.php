@@ -23,11 +23,6 @@ return [
         'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
     ],
 
-    'wordpress' => [
-        'url' => env('WORDPRESS_URL'),
-        'webhook_secret' => env('WORDPRESS_WEBHOOK_SECRET'),
-    ],
-
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

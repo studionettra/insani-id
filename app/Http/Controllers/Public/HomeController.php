@@ -36,7 +36,8 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
-        $latestBlogs = BlogPostCache::latest('published_at')
+        $latestBlogs = BlogPostCache::published()
+            ->latest('published_at')
             ->take(3)
             ->get();
 

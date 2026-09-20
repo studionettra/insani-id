@@ -7,6 +7,7 @@ import { FadeIn } from '@/components/ui/fade-in';
 import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
+import { renderStatIcon } from '@/components/ui/icon-picker';
 
 export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs }: any) {
     const { locale } = usePage().props as any;
@@ -140,8 +141,13 @@ return;
                                     <FadeIn 
                                         key={stat.id}
                                         delay={i * 0.1}
-                                        className="flex flex-col border-l-2 border-zinc-100 pl-6 hover:border-brand-300 transition-colors duration-500"
+                                        className="flex flex-col border-l-2 border-zinc-100 pl-6 hover:border-brand-300 transition-colors duration-500 group"
                                     >
+                                        {stat.icon && (
+                                            <div className="w-11 h-11 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center mb-4 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-300">
+                                                {renderStatIcon(stat.icon, "w-6 h-6")}
+                                            </div>
+                                        )}
                                         <div className="text-5xl md:text-6xl font-bold tracking-tighter text-brand-600 mb-4">
                                             {stat.value}
                                         </div>

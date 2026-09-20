@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\CampaignerVerificationController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CommentModerationController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\AnalyticsCollectorController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Public\AboutController;
@@ -31,7 +34,6 @@ use App\Http\Controllers\Public\FocusProgramController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController as PublicPageController;
 use App\Http\Controllers\Public\ProgramListingController;
-use App\Http\Controllers\Webhook\WordPressWebhookController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -92,9 +94,10 @@ Route::group([
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle'])
     ->middleware('verify.xendit-callback-token')
     ->name('webhooks.xendit');
-Route::post('/webhooks/wordpress', [WordPressWebhookController::class, 'handle'])
-    ->middleware('verify.wordpress-webhook-token')
-    ->name('webhooks.wordpress');
+
+// First-Party Analytics Collector
+Route::post('/analytics/collect', [AnalyticsCollectorController::class, 'collect'])->name('analytics.collect');
+Route::post('/analytics/heartbeat', [AnalyticsCollectorController::class, 'heartbeat'])->name('analytics.heartbeat');
 
 Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -142,6 +145,10 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::resource('contact-messages', ContactMessageController::class)->only(['index', 'show', 'destroy']);
         });
 
+        Route::middleware('permission:manage_blog')->group(function () {
+            Route::resource('blogs', AdminBlogController::class)->except(['show']);
+        });
+
         Route::middleware('permission:donation.view')->group(function () {
             Route::get('/donations', [App\Http\Controllers\Admin\DonationController::class, 'index'])->name('donations.index');
             Route::post('/donations/{donation}/confirm', [App\Http\Controllers\Admin\DonationController::class, 'confirm'])->name('donations.confirm');
@@ -172,6 +179,10 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
             Route::get('reports/donations/export', [ReportController::class, 'exportDonations'])->name('reports.donations.export');
             Route::get('reports/disbursements/export', [ReportController::class, 'exportDisbursements'])->name('reports.disbursements.export');
+
+            Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+            Route::get('analytics/realtime', [AnalyticsController::class, 'realtime'])->name('analytics.realtime');
+            Route::get('analytics/events', [AnalyticsController::class, 'events'])->name('analytics.events');
         });
 
         Route::middleware('permission:settings.view')->group(function () {
@@ -183,6 +194,10 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::post('/programs/{program}/comments', [CommentController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('programs.comments.store');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/upload-image', [ImageUploadController::class, 'upload'])->name('upload.image.root');
+    });
 
     Route::middleware('auth')->prefix('akun')->name('akun.')->group(function () {
         // Donor route

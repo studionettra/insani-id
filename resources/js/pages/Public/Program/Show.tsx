@@ -3,8 +3,9 @@ import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
 import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,8 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
+import { trackShareProgram, trackViewContent } from '@/lib/analytics';
 import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue } from '@/lib/utils';
-import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const [expanded, setExpanded] = useState(false);
@@ -86,8 +87,25 @@ export default function ProgramShow({ program, auth }: Props) {
 
     const programTitle = getLocalizedValue(program.title);
     const programStory = getLocalizedValue(program.story);
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://insani.id/program/${program.slug}`;
+    const categoryName = program.category ? getLocalizedValue(program.category.name) : undefined;
+
+    useEffect(() => {
+        trackViewContent(programTitle, program.id, categoryName);
+    }, [program.id]);
+
+    const baseProgramUrl = typeof window !== 'undefined' ? `${window.location.origin}/program/${program.slug}` : `https://insani.id/program/${program.slug}`;
     const shareText = `Mari bersama bantu program kebaikan: "${programTitle}" melalui Insani Indonesia`;
+
+    const buildShareLink = (channel: string) => {
+        return `${baseProgramUrl}?utm_source=${channel}&utm_medium=share_button&utm_campaign=${encodeURIComponent(program.slug)}`;
+    };
+
+    const whatsappShareUrl = buildShareLink('whatsapp');
+    const facebookShareUrl = buildShareLink('facebook');
+    const telegramShareUrl = buildShareLink('telegram');
+    const twitterShareUrl = buildShareLink('twitter');
+    const copyShareUrl = buildShareLink('copy_link');
+    const nativeShareUrl = buildShareLink('native_share');
     const metaDescription = programStory
         ? programStory.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
         : `Bantu wujudkan program ${programTitle} bersama Insani Indonesia.`;
@@ -119,10 +137,15 @@ export default function ProgramShow({ program, auth }: Props) {
 
     const copyToClipboard = () => {
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
-            navigator.clipboard.writeText(shareUrl).then(() => {
+            navigator.clipboard.writeText(copyShareUrl).then(() => {
                 setCopied(true);
                 toast.success("Tautan program berhasil disalin!");
                 setTimeout(() => setCopied(false), 2500);
+            });
+            trackShareProgram({
+                programTitle,
+                shareChannel: 'copy_link',
+                url: copyShareUrl,
             });
         }
     };
@@ -136,8 +159,13 @@ export default function ProgramShow({ program, auth }: Props) {
             navigator.share({
                 title: `${programTitle} - Insani Indonesia`,
                 text: shareText,
-                url: shareUrl,
+                url: nativeShareUrl,
             }).catch(() => {});
+            trackShareProgram({
+                programTitle,
+                shareChannel: 'native_share',
+                url: nativeShareUrl,
+            });
         } else {
             copyToClipboard();
         }
@@ -231,11 +259,11 @@ export default function ProgramShow({ program, auth }: Props) {
             <Head>
                 <title>{`${programTitle} - Program Kebaikan Insani`}</title>
                 <meta name="description" content={metaDescription} />
-                <link rel="canonical" href={shareUrl} />
+                <link rel="canonical" href={baseProgramUrl} />
 
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
-                <meta property="og:url" content={shareUrl} />
+                <meta property="og:url" content={baseProgramUrl} />
                 <meta property="og:title" content={programTitle} />
                 <meta property="og:description" content={metaDescription} />
                 <meta property="og:image" content={coverImageUrl} />
@@ -243,7 +271,7 @@ export default function ProgramShow({ program, auth }: Props) {
 
                 {/* Twitter */}
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:url" content={shareUrl} />
+                <meta name="twitter:url" content={baseProgramUrl} />
                 <meta name="twitter:title" content={programTitle} />
                 <meta name="twitter:description" content={metaDescription} />
                 <meta name="twitter:image" content={coverImageUrl} />
@@ -399,7 +427,6 @@ export default function ProgramShow({ program, auth }: Props) {
                                                                 required
                                                                 className="bg-white"
                                                             />
-                                                            {/* @ts-ignore */}
                                                             {commentForm.errors.name && <p className="text-sm text-destructive mt-1">{commentForm.errors.name}</p>}
                                                         </div>
                                                     )}
@@ -412,7 +439,6 @@ export default function ProgramShow({ program, auth }: Props) {
                                                             rows={3}
                                                             className="bg-white"
                                                         />
-                                                        {/* @ts-ignore */}
                                                         {commentForm.errors.body && <p className="text-sm text-destructive mt-1">{commentForm.errors.body}</p>}
                                                     </div>
                                                     <Button type="submit" disabled={commentForm.processing} className="bg-insani-blue hover:bg-blue-700">
@@ -538,9 +564,10 @@ export default function ProgramShow({ program, auth }: Props) {
                     <div className="grid grid-cols-4 gap-2 py-3">
                         {/* WhatsApp */}
                         <a
-                            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`}
+                            href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareText}\n\n${whatsappShareUrl}`)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => trackShareProgram({ programTitle, shareChannel: 'whatsapp', url: whatsappShareUrl })}
                             className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-emerald-50 transition-colors group text-center"
                         >
                             <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
@@ -553,9 +580,10 @@ export default function ProgramShow({ program, auth }: Props) {
 
                         {/* Facebook */}
                         <a
-                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                            href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(facebookShareUrl)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => trackShareProgram({ programTitle, shareChannel: 'facebook', url: facebookShareUrl })}
                             className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-blue-50 transition-colors group text-center"
                         >
                             <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20 group-hover:scale-105 transition-transform">
@@ -568,9 +596,10 @@ export default function ProgramShow({ program, auth }: Props) {
 
                         {/* Telegram */}
                         <a
-                            href={`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`}
+                            href={`https://t.me/share/url?url=${encodeURIComponent(telegramShareUrl)}&text=${encodeURIComponent(shareText)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => trackShareProgram({ programTitle, shareChannel: 'telegram', url: telegramShareUrl })}
                             className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-sky-50 transition-colors group text-center"
                         >
                             <div className="w-12 h-12 rounded-full bg-sky-500 text-white flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
@@ -583,9 +612,10 @@ export default function ProgramShow({ program, auth }: Props) {
 
                         {/* Twitter / X */}
                         <a
-                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(twitterShareUrl)}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => trackShareProgram({ programTitle, shareChannel: 'twitter', url: twitterShareUrl })}
                             className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-100 transition-colors group text-center"
                         >
                             <div className="w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md shadow-slate-900/20 group-hover:scale-105 transition-transform">
@@ -602,7 +632,7 @@ export default function ProgramShow({ program, auth }: Props) {
                         <input
                             type="text"
                             readOnly
-                            value={shareUrl}
+                            value={copyShareUrl}
                             className="w-full bg-transparent px-3 text-xs text-slate-600 outline-none truncate"
                         />
                         <Button

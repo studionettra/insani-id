@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\EnsureCampaignerVerified;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoCache;
 use App\Http\Middleware\PreventBackHistory;
-use App\Http\Middleware\VerifyWordPressWebhookToken;
 use App\Http\Middleware\VerifyXenditCallbackToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -28,13 +28,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+        $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']);
 
         $middleware->web(append: [
             PreventBackHistory::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            CaptureUtmParameters::class,
         ]);
 
         $middleware->alias([
@@ -49,12 +50,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'no-cache' => NoCache::class,
             'verify.xendit-callback-token' => VerifyXenditCallbackToken::class,
-            'verify.wordpress-webhook-token' => VerifyWordPressWebhookToken::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
             'webhooks/xendit',
-            'webhooks/wordpress',
+            'analytics/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -21,7 +21,9 @@ import {
   TrendingUp,
   Handshake,
   Mail,
-  Settings
+  Settings,
+  Newspaper,
+  Activity
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -88,6 +90,10 @@ const AppSidebar: React.FC = () => {
         icon: <Paperclip className="w-5 h-5" />,
         name: "Laporan",
         path: "/admin/reports",
+    }, {
+        icon: <Activity className="w-5 h-5" />,
+        name: "Analitik Web",
+        path: "/admin/analytics",
     }] : []),
     ...(permissions.includes('user.view') || isSuperadmin ? [{
         icon: <Users className="w-5 h-5" />,
@@ -136,6 +142,11 @@ const AppSidebar: React.FC = () => {
         icon: <Mail className="w-5 h-5" />,
         name: "Pesan Kontak",
         path: "/admin/contact-messages",
+    }] : []),
+    ...(permissions.includes('manage_blog') || isSuperadmin ? [{
+        icon: <Newspaper className="w-5 h-5" />,
+        name: "Manajemen Berita",
+        path: "/admin/blogs",
     }] : []),
     ...(permissions.includes('comment.moderate') || isSuperadmin ? [{
         icon: <MessageCircleCode className="w-5 h-5" />,

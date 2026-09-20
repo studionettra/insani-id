@@ -25,14 +25,13 @@ it('renders OpenGraph meta tags on program detail page for crawlers', function (
 
 it('renders OpenGraph meta tags on blog detail page for crawlers', function () {
     $blog = BlogPostCache::create([
-        'wp_post_id' => 99991,
         'title' => 'Penyaluran Paket Pangan Ramadhan Insani',
         'slug' => 'penyaluran-paket-pangan-ramadhan',
         'excerpt' => 'Alhamdulillah telah tersalurkan 500 paket pangan ke masyarakat.',
         'content_html' => '<p>Alhamdulillah telah tersalurkan 500 paket pangan ke masyarakat.</p>',
         'featured_image_url' => 'https://example.com/blog-hero.jpg',
+        'status' => 'published',
         'published_at' => now(),
-        'synced_at' => now(),
     ]);
 
     $response = $this->get("/berita/{$blog->slug}");
