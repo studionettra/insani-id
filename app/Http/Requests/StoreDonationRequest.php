@@ -36,6 +36,12 @@ class StoreDonationRequest extends FormRequest
             'channel' => ['required', 'in:online,offline'],
             'payment_method' => ['nullable', 'string', 'in:virtual_account,ewallet,qris,credit_card,bank_transfer_manual'],
             'payment_channel' => ['nullable', 'string', 'max:50'],
+            'utm_source' => ['nullable', 'string', 'max:100'],
+            'utm_medium' => ['nullable', 'string', 'max:100'],
+            'utm_campaign' => ['nullable', 'string', 'max:150'],
+            'utm_term' => ['nullable', 'string', 'max:100'],
+            'utm_content' => ['nullable', 'string', 'max:150'],
+            'referrer_url' => ['nullable', 'string', 'max:500'],
         ];
     }
 

@@ -13,11 +13,12 @@ import {
     ShieldCheck,
     Printer
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import DonationReceiptModal from '@/components/donation/DonationReceiptModal';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/PublicLayout';
+import { trackDonationSuccess } from '@/lib/analytics';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default function Status({ donation }: any) {
@@ -27,6 +28,22 @@ export default function Status({ donation }: any) {
 
     const title = donation.program?.title?.id || donation.program?.title || 'Program Donasi';
     const latestPayment = donation.payments && donation.payments.length > 0 ? donation.payments[0] : null;
+
+    useEffect(() => {
+        if (donation.status === 'paid') {
+            const trackKey = `tracked_donation_${donation.donation_code}`;
+            if (typeof window !== 'undefined' && !sessionStorage.getItem(trackKey)) {
+                trackDonationSuccess({
+                    donationCode: donation.donation_code,
+                    programTitle: title,
+                    amount: Number(donation.amount),
+                    paymentChannel: latestPayment?.payment_channel,
+                    paymentMethod: latestPayment?.payment_method || donation.payment_method,
+                });
+                sessionStorage.setItem(trackKey, '1');
+            }
+        }
+    }, [donation.status, donation.donation_code, donation.amount, title, latestPayment, donation.payment_method]);
 
     const getPaymentMethodDisplay = () => {
         const channel = latestPayment?.payment_channel?.toUpperCase();

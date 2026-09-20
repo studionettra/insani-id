@@ -12,15 +12,41 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        // For the dashboard view, we can provide some basic stats
-        $totalDonations = Donation::where('status', 'paid')->sum('amount');
-        $totalDisbursements = Disbursement::where('status', 'transferred')->sum('requested_amount');
+        $totalDonations = (float) Donation::where('status', 'paid')->sum('amount');
+        $totalDisbursements = (float) Disbursement::where('status', 'transferred')->sum('requested_amount');
+
+        // Attribution and Marketing Channel Performance
+        $channelAttributions = Donation::where('status', 'paid')
+            ->selectRaw("
+                COALESCE(NULLIF(utm_source, ''), 'Direct / Organik') as source,
+                COALESCE(NULLIF(utm_medium, ''), '-') as medium,
+                COALESCE(NULLIF(utm_campaign, ''), '-') as campaign,
+                COUNT(id) as transactions_count,
+                SUM(amount) as total_amount,
+                AVG(amount) as average_amount,
+                MAX(amount) as max_amount
+            ")
+            ->groupBy('source', 'medium', 'campaign')
+            ->orderByDesc('total_amount')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'source' => $row->source,
+                    'medium' => $row->medium,
+                    'campaign' => $row->campaign,
+                    'transactions_count' => (int) $row->transactions_count,
+                    'total_amount' => (float) $row->total_amount,
+                    'average_amount' => round((float) $row->average_amount, 0),
+                    'max_amount' => (float) $row->max_amount,
+                ];
+            });
 
         return inertia('Admin/Reports/Index', [
             'stats' => [
                 'totalDonations' => $totalDonations,
                 'totalDisbursements' => $totalDisbursements,
             ],
+            'channelAttributions' => $channelAttributions,
         ]);
     }
 
@@ -47,7 +73,7 @@ class ReportController extends Controller
             'Expires' => '0',
         ];
 
-        $columns = ['ID Donasi', 'Tanggal Lunas', 'Program', 'Nama Donatur', 'Nominal', 'Metode Pembayaran'];
+        $columns = ['ID Donasi', 'Tanggal Lunas', 'Program', 'Nama Donatur', 'Nominal', 'Metode Pembayaran', 'Sumber (UTM Source)', 'Media (UTM Medium)', 'Kampanye (UTM Campaign)', 'Referrer'];
 
         $callback = function () use ($donations, $columns) {
             $file = fopen('php://output', 'w');
@@ -60,8 +86,23 @@ class ReportController extends Controller
                 $row['Nama Donatur'] = $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name;
                 $row['Nominal'] = $donation->amount;
                 $row['Metode Pembayaran'] = $donation->payment_method;
+                $row['Sumber (UTM Source)'] = $donation->utm_source ?? 'Direct / Organik';
+                $row['Media (UTM Medium)'] = $donation->utm_medium ?? '';
+                $row['Kampanye (UTM Campaign)'] = $donation->utm_campaign ?? '';
+                $row['Referrer'] = $donation->referrer_url ?? '';
 
-                fputcsv($file, [$row['ID Donasi'], $row['Tanggal Lunas'], $row['Program'], $row['Nama Donatur'], $row['Nominal'], $row['Metode Pembayaran']]);
+                fputcsv($file, [
+                    $row['ID Donasi'],
+                    $row['Tanggal Lunas'],
+                    $row['Program'],
+                    $row['Nama Donatur'],
+                    $row['Nominal'],
+                    $row['Metode Pembayaran'],
+                    $row['Sumber (UTM Source)'],
+                    $row['Media (UTM Medium)'],
+                    $row['Kampanye (UTM Campaign)'],
+                    $row['Referrer'],
+                ]);
             }
 
             fclose($file);

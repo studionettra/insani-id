@@ -34,11 +34,19 @@ class DonationController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('utm_source')) {
+            $query->where('utm_source', $request->utm_source);
+        }
+
+        if ($request->filled('utm_campaign')) {
+            $query->where('utm_campaign', $request->utm_campaign);
+        }
+
         $donations = $query->latest()->paginate(10)->withQueryString();
 
         return inertia('Admin/Donation/Index', [
             'donations' => $donations,
-            'filters' => $request->only(['search', 'status']),
+            'filters' => $request->only(['search', 'status', 'utm_source', 'utm_campaign']),
         ]);
     }
 

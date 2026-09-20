@@ -25,6 +25,13 @@ class Donation extends Model
         'channel',
         'status',
         'paid_at',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'utm_term',
+        'utm_content',
+        'referrer_url',
+        'landing_page',
     ];
 
     protected $casts = [

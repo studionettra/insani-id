@@ -1,10 +1,11 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Search, Filter, Eye, CheckCircle, AlertCircle } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { Search, CheckCircle, AlertCircle } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -13,17 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogPortal,
-} from '@/components/ui/dialog';
 import { index as donationsIndex, confirm as donationsConfirm } from '@/routes/admin/donations';
-import { route as wayfinder } from '@/routes/admin/wayfinder';
 
 export default function Index({ donations, filters }: any) {
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -32,7 +23,7 @@ export default function Index({ donations, filters }: any) {
 
     const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            router.get(donationsIndex.url({ search: e.currentTarget.value, status: filters.status }), undefined, { preserveState: true });
+            router.get(donationsIndex.url({ query: { search: e.currentTarget.value, status: filters.status } }), undefined, { preserveState: true });
         }
     };
 
@@ -42,9 +33,12 @@ export default function Index({ donations, filters }: any) {
     };
 
     const handleConfirmSubmit = async () => {
-        if (!confirmingDonation) return;
+        if (!confirmingDonation) {
+return;
+}
 
         setLoadingConfirm(true);
+
         try {
             await router.post(
                 donationsConfirm.url({ donation: confirmingDonation }),
@@ -105,6 +99,7 @@ export default function Index({ donations, filters }: any) {
                                     <TableHead className="font-medium text-gray-500 dark:text-gray-400">Program</TableHead>
                                     <TableHead className="font-medium text-gray-500 dark:text-gray-400">Metode</TableHead>
                                     <TableHead className="font-medium text-gray-500 dark:text-gray-400">Nominal</TableHead>
+                                    <TableHead className="font-medium text-gray-500 dark:text-gray-400">Kanal / Sumber</TableHead>
                                     <TableHead className="font-medium text-gray-500 dark:text-gray-400">Status</TableHead>
                                     <TableHead className="font-medium text-gray-500 dark:text-gray-400 text-right">Aksi</TableHead>
                                 </TableRow>
@@ -128,6 +123,22 @@ export default function Index({ donations, filters }: any) {
                                             Rp {parseInt(donation.amount).toLocaleString('id-ID')}
                                         </TableCell>
                                         <TableCell>
+                                            {donation.utm_source ? (
+                                                <div>
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
+                                                        {donation.utm_source}
+                                                    </span>
+                                                    {donation.utm_campaign && (
+                                                        <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 truncate max-w-[120px]" title={donation.utm_campaign}>
+                                                            {donation.utm_campaign}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-gray-400 dark:text-gray-500">Direct / Organik</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
                                             <Badge variant="outline" className={`font-medium ${
                                                 donation.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800' :
                                                 donation.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-800' : 
@@ -149,7 +160,7 @@ export default function Index({ donations, filters }: any) {
                                 ))}
                                 {donations.data.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={8} className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+                                        <TableCell colSpan={9} className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
                                             Tidak ada data donasi ditemukan.
                                         </TableCell>
                                     </TableRow>

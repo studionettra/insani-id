@@ -1,24 +1,24 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { toast } from 'sonner';
 import { 
     ChevronRight, 
     ShieldCheck, 
     CreditCard, 
     Landmark, 
-    CheckCircle2, 
-    AlertCircle, 
-    QrCode, 
     Smartphone, 
     Info,
-    Check
+    Check,
+    AlertCircle,
+    QrCode
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
+import { trackInitiateDonation } from '@/lib/analytics';
 import { getLocalizedValue, formatCurrency } from '@/lib/utils';
 
 interface PaymentChannel {
@@ -186,6 +186,8 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
     const initialMethod = onlinePaymentAvailable ? 'qris' : 'bank_transfer_manual';
     const initialCategory = onlinePaymentAvailable ? 'online' : 'offline';
 
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+
     const { data, setData, post, processing, errors } = useForm({
         amount: presets[2], // Default 50rb
         donor_name: auth?.user?.name || '',
@@ -196,6 +198,11 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
         channel: initialCategory,
         payment_method: initialMethod,
         payment_channel: initialChannel,
+        utm_source: urlParams?.get('utm_source') || urlParams?.get('ref') || '',
+        utm_medium: urlParams?.get('utm_medium') || '',
+        utm_campaign: urlParams?.get('utm_campaign') || '',
+        utm_term: urlParams?.get('utm_term') || '',
+        utm_content: urlParams?.get('utm_content') || '',
     });
 
     const [activeTab, setActiveTab] = useState<'qris' | 'virtual_account' | 'ewallet' | 'manual'>(
@@ -208,13 +215,18 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
 
     // Check if the current amount is valid for the selected channel
     const amountValidationNotice = useMemo(() => {
-        if (!selectedChannelDef) return null;
+        if (!selectedChannelDef) {
+return null;
+}
+
         if (data.amount < selectedChannelDef.min_amount) {
             return `Minimal donasi untuk ${selectedChannelDef.name} adalah ${formatCurrency(selectedChannelDef.min_amount)}`;
         }
+
         if (data.amount > selectedChannelDef.max_amount) {
             return `Maksimal donasi untuk ${selectedChannelDef.name} adalah ${formatCurrency(selectedChannelDef.max_amount)}. Silakan pilih metode Virtual Account atau Transfer Bank.`;
         }
+
         return null;
     }, [data.amount, selectedChannelDef]);
 
@@ -227,23 +239,33 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
         }));
     };
 
+    const title = getLocalizedValue(program.title);
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (data.amount < 10000) {
             toast.error('Minimal donasi adalah Rp 10.000');
+
             return;
         }
 
         if (amountValidationNotice) {
             toast.error(amountValidationNotice);
+
             return;
         }
 
+        trackInitiateDonation({
+            programId: program.id,
+            programTitle: title,
+            amount: Number(data.amount),
+            paymentChannel: data.payment_channel,
+            paymentMethod: data.payment_method,
+        });
+
         post(`/program/${program.slug}/donasi`);
     };
-
-    const title = getLocalizedValue(program.title);
 
     const qrisChannels = channels.filter(c => c.category === 'qris');
     const vaChannels = channels.filter(c => c.category === 'virtual_account');
@@ -346,7 +368,10 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                                 disabled={!onlinePaymentAvailable}
                                                 onClick={() => {
                                                     setActiveTab('qris');
-                                                    if (qrisChannels[0]) selectChannel(qrisChannels[0]);
+
+                                                    if (qrisChannels[0]) {
+selectChannel(qrisChannels[0]);
+}
                                                 }}
                                                 className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                                                     activeTab === 'qris'
@@ -363,7 +388,10 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                                 disabled={!onlinePaymentAvailable}
                                                 onClick={() => {
                                                     setActiveTab('virtual_account');
-                                                    if (vaChannels[0]) selectChannel(vaChannels[0]);
+
+                                                    if (vaChannels[0]) {
+selectChannel(vaChannels[0]);
+}
                                                 }}
                                                 className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                                                     activeTab === 'virtual_account'
@@ -380,7 +408,10 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                                 disabled={!onlinePaymentAvailable}
                                                 onClick={() => {
                                                     setActiveTab('ewallet');
-                                                    if (ewalletChannels[0]) selectChannel(ewalletChannels[0]);
+
+                                                    if (ewalletChannels[0]) {
+selectChannel(ewalletChannels[0]);
+}
                                                 }}
                                                 className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                                                     activeTab === 'ewallet'
@@ -396,7 +427,10 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                                 type="button"
                                                 onClick={() => {
                                                     setActiveTab('manual');
-                                                    if (manualChannels[0]) selectChannel(manualChannels[0]);
+
+                                                    if (manualChannels[0]) {
+selectChannel(manualChannels[0]);
+}
                                                 }}
                                                 className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
                                                     activeTab === 'manual'

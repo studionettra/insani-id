@@ -63,6 +63,14 @@ class DonationController extends Controller
             $totalAmount += $uniqueCode;
         }
 
+        $utmSource = $validated['utm_source'] ?? session('utm_source') ?? $request->cookie('utm_source');
+        $utmMedium = $validated['utm_medium'] ?? session('utm_medium') ?? $request->cookie('utm_medium');
+        $utmCampaign = $validated['utm_campaign'] ?? session('utm_campaign') ?? $request->cookie('utm_campaign');
+        $utmTerm = $validated['utm_term'] ?? session('utm_term') ?? $request->cookie('utm_term');
+        $utmContent = $validated['utm_content'] ?? session('utm_content') ?? $request->cookie('utm_content');
+        $referrerUrl = $validated['referrer_url'] ?? session('referrer_url') ?? $request->header('referer');
+        $landingPage = session('landing_page');
+
         $donation = Donation::create([
             'donation_code' => $donationCode,
             'program_id' => $program->id,
@@ -76,6 +84,13 @@ class DonationController extends Controller
             'unique_code' => $uniqueCode,
             'channel' => $validated['channel'],
             'status' => 'pending',
+            'utm_source' => $utmSource,
+            'utm_medium' => $utmMedium,
+            'utm_campaign' => $utmCampaign,
+            'utm_term' => $utmTerm,
+            'utm_content' => $utmContent,
+            'referrer_url' => $referrerUrl,
+            'landing_page' => $landingPage,
         ]);
 
         if ($donation->channel === 'online') {
