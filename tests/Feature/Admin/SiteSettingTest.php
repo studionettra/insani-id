@@ -68,3 +68,20 @@ it('allows administrator to update contact and social media settings', function 
     expect($qrisPath)->not->toBeNull();
     Storage::disk('public')->assertExists($qrisPath);
 });
+
+it('allows administrator to update tracking and analytics pixel settings', function () {
+    actingAs($this->admin)
+        ->post(route('admin.site-settings.update'), [
+            'google_tag_manager_id' => 'GTM-TEST1234',
+            'google_analytics_id' => 'G-ABC123XYZ',
+            'meta_pixel_id' => '9876543210',
+            'tiktok_pixel_id' => 'TIKTOK12345',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect(AppSetting::get('google_tag_manager_id'))->toBe('GTM-TEST1234');
+    expect(AppSetting::get('google_analytics_id'))->toBe('G-ABC123XYZ');
+    expect(AppSetting::get('meta_pixel_id'))->toBe('9876543210');
+    expect(AppSetting::get('tiktok_pixel_id'))->toBe('TIKTOK12345');
+});

@@ -1,15 +1,15 @@
 import { Head, useForm } from '@inertiajs/react';
 import { 
     Phone, 
-    Mail, 
-    MapPin, 
-    Globe, 
     Share2, 
     QrCode, 
     FileText, 
     Save, 
     UploadCloud,
-    CheckCircle2
+    CheckCircle2,
+    BarChart3,
+    Sparkles,
+    Info
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,10 @@ export default function SiteSettingsIndex({ settings }: Props) {
         social_threads: settings.social_threads || 'https://www.threads.com/@insaniindonesia',
         footer_description: settings.footer_description || 'Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan universal.',
         qris_image: null as File | null,
+        google_tag_manager_id: settings.google_tag_manager_id || '',
+        google_analytics_id: settings.google_analytics_id || '',
+        meta_pixel_id: settings.meta_pixel_id || '',
+        tiktok_pixel_id: settings.tiktok_pixel_id || '',
     });
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -40,6 +44,7 @@ export default function SiteSettingsIndex({ settings }: Props) {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         setData('qris_image', file);
+
         if (file) {
             setPreviewUrl(URL.createObjectURL(file));
         } else {
@@ -308,6 +313,118 @@ export default function SiteSettingsIndex({ settings }: Props) {
                                     {errors.qris_image && <p className="text-xs text-red-500 mt-1">{errors.qris_image}</p>}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Card 5: Pelacakan & Analitik */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                                    <BarChart3 className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-base font-semibold text-gray-900 dark:text-white">Pelacakan & Analitik (GTM & Pixels)</h2>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Konfigurasi container tag dan piksel iklan untuk mengukur trafik dan konversi donasi.</p>
+                                </div>
+                            </div>
+                            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 px-2.5 py-1 rounded-full">
+                                <Sparkles className="w-3 h-3" /> Hanya aktif di halaman publik
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Google Tag Manager */}
+                            <div className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="google_tag_manager_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                        Google Tag Manager (GTM) Container ID
+                                    </Label>
+                                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
+                                        Direkomendasikan
+                                    </span>
+                                </div>
+                                <Input
+                                    id="google_tag_manager_id"
+                                    value={data.google_tag_manager_id}
+                                    onChange={(e) => setData('google_tag_manager_id', e.target.value)}
+                                    placeholder="cth: GTM-XXXXXXX"
+                                    className="font-mono text-xs"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    Jika GTM diisi, tag GA4 dan Meta Pixel cukup dikelola terpusat di dashboard GTM Anda.
+                                </p>
+                                {errors.google_tag_manager_id && (
+                                    <p className="text-xs text-red-500">{errors.google_tag_manager_id}</p>
+                                )}
+                            </div>
+
+                            {/* Google Analytics 4 */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="google_analytics_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                    Google Analytics 4 (GA4) Measurement ID
+                                </Label>
+                                <Input
+                                    id="google_analytics_id"
+                                    value={data.google_analytics_id}
+                                    onChange={(e) => setData('google_analytics_id', e.target.value)}
+                                    placeholder="cth: G-XXXXXXXXXX"
+                                    className="font-mono text-xs"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    Digunakan langsung jika Anda tidak memasang container GTM di atas.
+                                </p>
+                                {errors.google_analytics_id && (
+                                    <p className="text-xs text-red-500">{errors.google_analytics_id}</p>
+                                )}
+                            </div>
+
+                            {/* Meta Pixel */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="meta_pixel_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                    Meta Pixel ID (Facebook / Instagram Ads)
+                                </Label>
+                                <Input
+                                    id="meta_pixel_id"
+                                    value={data.meta_pixel_id}
+                                    onChange={(e) => setData('meta_pixel_id', e.target.value)}
+                                    placeholder="cth: 123456789012345"
+                                    className="font-mono text-xs"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    ID Piksel Meta untuk melacak konversi iklan dan retargeting donatur.
+                                </p>
+                                {errors.meta_pixel_id && (
+                                    <p className="text-xs text-red-500">{errors.meta_pixel_id}</p>
+                                )}
+                            </div>
+
+                            {/* TikTok Pixel */}
+                            <div className="space-y-1.5">
+                                <Label htmlFor="tiktok_pixel_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                    TikTok Pixel ID (Opsional)
+                                </Label>
+                                <Input
+                                    id="tiktok_pixel_id"
+                                    value={data.tiktok_pixel_id}
+                                    onChange={(e) => setData('tiktok_pixel_id', e.target.value)}
+                                    placeholder="cth: CXXXXXXXXXXXXXXX"
+                                    className="font-mono text-xs"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    ID Piksel TikTok Ads untuk pelacakan iklan video TikTok.
+                                </p>
+                                {errors.tiktok_pixel_id && (
+                                    <p className="text-xs text-red-500">{errors.tiktok_pixel_id}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="mt-5 p-3.5 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-lg flex items-start gap-2.5 text-xs text-blue-800 dark:text-blue-300">
+                            <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+                            <span>
+                                <strong>Catatan Teknis SPA:</strong> Sistem Insani ID secara otomatis mengirimkan <em>Virtual Pageview</em> dan event e-commerce standar (<code>InitiateCheckout</code> dan <code>Purchase</code> / donasi sukses) setiap kali pengunjung berinteraksi dengan website.
+                            </span>
                         </div>
                     </div>
 

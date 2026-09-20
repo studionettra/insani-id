@@ -39,6 +39,10 @@ class SiteSettingController extends Controller
             'social_threads' => 'nullable|string|max:255',
             'footer_description' => 'nullable|string|max:1000',
             'qris_image' => 'nullable|image|max:3072',
+            'google_tag_manager_id' => 'nullable|string|max:50',
+            'google_analytics_id' => 'nullable|string|max:50',
+            'meta_pixel_id' => 'nullable|string|max:50',
+            'tiktok_pixel_id' => 'nullable|string|max:50',
         ]);
 
         if ($request->hasFile('qris_image')) {
@@ -66,6 +70,10 @@ class SiteSettingController extends Controller
             'social_x',
             'social_threads',
             'footer_description',
+            'google_tag_manager_id',
+            'google_analytics_id',
+            'meta_pixel_id',
+            'tiktok_pixel_id',
         ];
 
         foreach ($textFields as $field) {
