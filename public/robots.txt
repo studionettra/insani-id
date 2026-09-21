@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /akun/
+Disallow: /settings/
+Disallow: /login
+Disallow: /register
+Disallow: /api/
+
+Sitemap: https://insani.id/sitemap.xml

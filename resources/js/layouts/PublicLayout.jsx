@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Home, Heart, PlusCircle, User } from 'lucide-react';
-import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { Home, Heart, PlusCircle, User, Compass, HandHeart } from 'lucide-react';
+import PublicSearchDialog from '@/components/public/PublicSearchDialog';
+import PublicAccountDropdown from '@/components/public/PublicAccountDropdown';
 import { FlashMessages } from '@/components/flash-messages';
 import useTranslation from '@/hooks/use-translation';
 
@@ -60,7 +61,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
             {/* Header (Desktop & Mobile) */}
             {!hideTopNav && (
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm transition-all duration-300 print:hidden">
+            <header className="sticky top-0 z-[100] bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm transition-all duration-300 print:hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
@@ -82,28 +83,28 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                         </div>
                         
                         {/* Desktop Navigation */}
-                        <nav className="hidden md:flex items-center space-x-2 rtl:space-x-reverse text-sm lg:text-base font-medium">
+                        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 rtl:space-x-reverse text-sm lg:text-base font-medium">
                             <Link href="/" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Beranda')}</Link>
                             <Link href="/tentang-kami" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/tentang-kami') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Tentang Kami')}</Link>
                             <Link href="/fokus-program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/fokus-program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Fokus Program')}</Link>
-                            <Link href="/program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Donasi')}</Link>
+                            <Link href="/kontak" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/kontak') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Kontak')}</Link>
                             <Link href="/berita" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/berita') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Berita')}</Link>
                         </nav>
                         
-                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                            <div className="flex items-center">
-                                <LanguageSwitcher />
+                        <div className="flex items-center gap-2 sm:gap-2.5 rtl:space-x-reverse">
+                            <PublicSearchDialog />
+                            <div className="hidden md:block">
+                                <PublicAccountDropdown variant="desktop" />
                             </div>
-                            {auth?.user ? (
-                                <Link href={userAccountUrl} className="hidden md:inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 hover:shadow-xs transition-all duration-200 active:scale-95 border border-brand-200">
-                                    <User className="w-4 h-4 mr-1.5 text-brand-600" />
-                                    {auth.user.name?.split(' ')[0]}
+                            <div className="hidden md:block">
+                                <Link
+                                    href="/program"
+                                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-brand-600 via-emerald-600 to-emerald-500 hover:from-brand-700 hover:to-emerald-600 shadow-sm hover:shadow-md shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 active:scale-95 border border-emerald-400/30"
+                                >
+                                    <Heart className="w-4 h-4 fill-white" />
+                                    <span>{t('Donasi Sekarang')}</span>
                                 </Link>
-                            ) : (
-                                <Link href="/login" className="hidden md:inline-flex items-center justify-center px-6 py-2.5 rounded-full text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 hover:shadow-md transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
-                                    {t('Masuk')}
-                                </Link>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,7 +123,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-insani-blue/50 to-transparent"></div>
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-insani-blue/10 rounded-l-full blur-3xl transform translate-x-1/2 opacity-50"></div>
                 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-28 md:py-20 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8">
                         {/* Kolom 1: Logo & Profil Singkat */}
                         <div className="col-span-1 md:col-span-12 lg:col-span-4">
@@ -130,7 +131,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 <img 
                                     src="/images/logo/logo-landscape-white.png" 
                                     alt="Insani Indonesia" 
-                                    className="h-25 w-auto object-contain hover:opacity-90 transition-opacity"
+                                    className="h-16 md:h-20 w-auto object-contain hover:opacity-90 transition-opacity"
                                 />
                             </Link>
                             <p className="text-blue-100 text-sm leading-relaxed max-w-sm mb-8">
@@ -153,7 +154,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 </a>
                                 {/* Threads */}
                                 <a href={threadsUrl} target="_blank" rel="noopener noreferrer" aria-label="Threads" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300 hover:scale-110">
-                                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-2.022 18.293c-2.735 0-4.831-1.642-4.831-4.707 0-3.13 2.184-4.856 5.067-4.856 2.001 0 3.395.845 3.967 2.148h-1.696c-.347-.638-1.12-1.026-2.128-1.026-1.666 0-3.081 1.054-3.081 3.528 0 2.378 1.4 3.42 2.956 3.42 1.83 0 3.037-1.166 3.037-3.238v-2.92h-3.328v-1.424h4.945v5.338c0 1.042-.324 1.847-.96 2.385-.644.545-1.584.825-2.787.825zm4.847-5.111v-.158h-3.693v.098c0 1.258.85 2.126 2.176 2.126.966 0 1.631-.418 1.956-1.155h1.564c-.456 1.488-1.782 2.388-3.563 2.388-2.226 0-3.864-1.536-3.864-3.666 0-2.164 1.547-3.714 3.738-3.714 2.144 0 3.585 1.492 3.585 3.57v.511h-1.899zM12 9.47c-.94 0-1.716.638-1.836 1.624h3.655c-.13-1.025-.916-1.624-1.819-1.624z"/></svg>
+                                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098c1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z"/></svg>
                                 </a>
                                 {/* X (Twitter) */}
                                 <a href={xUrl} target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300 hover:scale-110">
@@ -256,33 +257,49 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
             </footer>
             )}
 
-            {/* Bottom Navigation (Mobile Only) */}
+            {/* Bottom Navigation (Mobile Only) with Floating Center Button */}
             {!hideMobileNav && (
-            <nav className="md:hidden fixed bottom-0 w-full bg-white/90 backdrop-blur-xl border-t border-gray-200/60 z-50 flex justify-around py-2 pb-safe shadow-[0_-4px_12px_rgba(0,0,0,0.05)] print:hidden">
-                <Link href="/" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+            <nav className="md:hidden fixed bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-gray-200/60 z-50 flex items-center justify-around py-1.5 pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.06)] print:hidden">
+                {/* 1. Beranda */}
+                <Link href="/" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isActive('/') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
                     <div className={`p-1.5 rounded-full transition-colors ${isActive('/') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <Home className="w-[22px] h-[22px]" strokeWidth={isActive('/') ? 2.5 : 2} />
+                        <Home className="w-5 h-5" strokeWidth={isActive('/') ? 2.5 : 2} />
                     </div>
                     <span className="text-[10px] font-medium mt-0.5">{t('Beranda')}</span>
                 </Link>
-                <Link href="/program" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/program') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/program') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <Heart className="w-[22px] h-[22px]" strokeWidth={isActive('/program') ? 2.5 : 2} />
+
+                {/* 2. Fokus Program */}
+                <Link href="/fokus-program" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isActive('/fokus-program') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/fokus-program') ? 'bg-brand-50' : 'bg-transparent'}`}>
+                        <Compass className="w-5 h-5" strokeWidth={isActive('/fokus-program') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Donasi')}</span>
+                    <span className="text-[10px] font-medium mt-0.5">{t('Fokus')}</span>
                 </Link>
-                <Link href="/buat-program" className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive('/buat-program') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/buat-program') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <PlusCircle className="w-[22px] h-[22px]" strokeWidth={isActive('/buat-program') ? 2.5 : 2} />
+
+                {/* 3. Floating Center Action: DONASI */}
+                <Link
+                    href="/program"
+                    className="relative -top-4 flex flex-col items-center group active:scale-90 transition-transform duration-200"
+                    aria-label={t('Donasi Sekarang')}
+                >
+                    <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-brand-600 via-emerald-600 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-brand-600/35 border-4 border-white group-hover:scale-105 transition-transform">
+                        <Heart className="w-6 h-6 fill-white" />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Campaigner')}</span>
+                    <span className="text-[10px] font-bold text-brand-700 mt-0.5 tracking-tight">
+                        {t('Donasi')}
+                    </span>
                 </Link>
-                <Link href={userAccountUrl} className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${isActive(userAccountUrl) || isActive('/akun') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive(userAccountUrl) || isActive('/akun') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <User className="w-[22px] h-[22px]" strokeWidth={isActive(userAccountUrl) || isActive('/akun') ? 2.5 : 2} />
+
+                {/* 4. Cek Status Donasi */}
+                <Link href="/cek-donasi" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isActive('/cek-donasi') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/cek-donasi') ? 'bg-brand-50' : 'bg-transparent'}`}>
+                        <HandHeart className="w-5 h-5" strokeWidth={isActive('/cek-donasi') ? 2.5 : 2} />
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Akun')}</span>
+                    <span className="text-[10px] font-medium mt-0.5">{t('Cek Donasi')}</span>
                 </Link>
+
+                {/* 5. Akun (Bottom Sheet Drawer) */}
+                <PublicAccountDropdown variant="mobile" />
             </nav>
             )}
         </div>

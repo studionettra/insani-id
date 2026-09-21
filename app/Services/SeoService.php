@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 class SeoService
 {
     /**
-     * Resolve OpenGraph and meta tags from Inertia page payload and current request.
+     * Resolve OpenGraph, meta tags, and Schema.org JSON-LD from Inertia page payload and current request.
      *
      * @param  array<string, mixed>  $page
      * @return array{
@@ -18,7 +18,8 @@ class SeoService
      *     type: string,
      *     site_name: string,
      *     card: string,
-     *     is_private: bool
+     *     is_private: bool,
+     *     schema?: array<string, mixed>|null
      * }
      */
     public static function resolve(array $page): array
@@ -27,6 +28,23 @@ class SeoService
         $currentUrl = url()->current();
         $defaultDescription = 'Platform Galang Dana dan Donasi Online Insani Indonesia. Bersama menebar kebaikan dan kepedulian untuk sesama.';
         $defaultImage = asset('images/logo/logo-landscape-color.png');
+
+        $organizationSchema = [
+            '@type' => 'NGO',
+            '@id' => url('/').'#organization',
+            'name' => $siteName,
+            'url' => url('/'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => $defaultImage,
+            ],
+            'sameAs' => [
+                'https://www.facebook.com/insaniindonesia',
+                'https://www.instagram.com/insaniindonesia',
+                'https://x.com/officialinsani',
+                'https://www.youtube.com/@insaniindonesia',
+            ],
+        ];
 
         $isAdminOrDashboard = request()->is('dashboard*', 'admin*', 'akun*', 'settings*');
         if ($isAdminOrDashboard) {
@@ -39,6 +57,7 @@ class SeoService
                 'site_name' => $siteName,
                 'card' => 'summary',
                 'is_private' => true,
+                'schema' => null,
             ];
         }
 
@@ -72,6 +91,56 @@ class SeoService
                     : asset('storage/'.ltrim($coverImage, '/'));
             }
 
+            $schema = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    $organizationSchema,
+                    [
+                        '@type' => 'BreadcrumbList',
+                        '@id' => $currentUrl.'#breadcrumb',
+                        'itemListElement' => [
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 1,
+                                'name' => 'Beranda',
+                                'item' => url('/'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 2,
+                                'name' => 'Program Donasi',
+                                'item' => route('program.index'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 3,
+                                'name' => $title,
+                                'item' => $currentUrl,
+                            ],
+                        ],
+                    ],
+                    [
+                        '@type' => 'WebPage',
+                        '@id' => $currentUrl.'#webpage',
+                        'url' => $currentUrl,
+                        'name' => $title,
+                        'description' => $description,
+                        'image' => $image,
+                        'breadcrumb' => [
+                            '@id' => $currentUrl.'#breadcrumb',
+                        ],
+                        'mainEntity' => [
+                            '@type' => 'DonateAction',
+                            'name' => $title,
+                            'description' => $description,
+                            'recipient' => [
+                                '@id' => url('/').'#organization',
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
             return [
                 'title' => "{$title} - {$siteName}",
                 'description' => $description,
@@ -81,6 +150,7 @@ class SeoService
                 'site_name' => $siteName,
                 'card' => 'summary_large_image',
                 'is_private' => false,
+                'schema' => $schema,
             ];
         }
 
@@ -119,6 +189,60 @@ class SeoService
                     : asset('storage/'.ltrim($blogImage, '/'));
             }
 
+            $publishedAt = data_get($blog, 'published_at');
+            $updatedAt = data_get($blog, 'synced_at') ?: data_get($blog, 'updated_at') ?: $publishedAt;
+
+            $schema = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    $organizationSchema,
+                    [
+                        '@type' => 'BreadcrumbList',
+                        '@id' => $currentUrl.'#breadcrumb',
+                        'itemListElement' => [
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 1,
+                                'name' => 'Beranda',
+                                'item' => url('/'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 2,
+                                'name' => 'Kabar & Berita',
+                                'item' => route('blog.index'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 3,
+                                'name' => $title,
+                                'item' => $currentUrl,
+                            ],
+                        ],
+                    ],
+                    [
+                        '@type' => 'NewsArticle',
+                        '@id' => $currentUrl.'#article',
+                        'url' => $currentUrl,
+                        'headline' => $title,
+                        'description' => $description,
+                        'image' => $image,
+                        'datePublished' => $publishedAt ? date('c', strtotime((string) $publishedAt)) : null,
+                        'dateModified' => $updatedAt ? date('c', strtotime((string) $updatedAt)) : null,
+                        'author' => [
+                            '@id' => url('/').'#organization',
+                        ],
+                        'publisher' => [
+                            '@id' => url('/').'#organization',
+                        ],
+                        'mainEntityOfPage' => [
+                            '@type' => 'WebPage',
+                            '@id' => $currentUrl,
+                        ],
+                    ],
+                ],
+            ];
+
             return [
                 'title' => "{$title} - {$siteName}",
                 'description' => $description,
@@ -128,10 +252,81 @@ class SeoService
                 'site_name' => $siteName,
                 'card' => 'summary_large_image',
                 'is_private' => false,
+                'schema' => $schema,
             ];
         }
 
-        // 3. Static CMS Pages (Public/Page/Show)
+        // 3. Focus Program Detail Page
+        if ($component === 'Public/FocusProgram/Show' && ! empty($props['pillar'])) {
+            $pillar = $props['pillar'];
+            $rawName = data_get($pillar, 'name_translations') ?: data_get($pillar, 'name');
+            $title = is_array($rawName)
+                ? ($rawName[app()->getLocale()] ?? $rawName['id'] ?? reset($rawName))
+                : (string) ($rawName ?: 'Fokus Program');
+
+            $rawDesc = data_get($pillar, 'description_translations') ?: data_get($pillar, 'description');
+            $desc = is_array($rawDesc)
+                ? ($rawDesc[app()->getLocale()] ?? $rawDesc['id'] ?? reset($rawDesc))
+                : (string) ($rawDesc ?: '');
+
+            $cleanDesc = trim(strip_tags((string) $desc));
+            $description = ! empty($cleanDesc)
+                ? Str::limit($cleanDesc, 160)
+                : "Fokus Program {$title} bersama {$siteName}.";
+
+            $pillarImage = data_get($pillar, 'pillar_image');
+            $image = $defaultImage;
+            if (! empty($pillarImage)) {
+                $image = str_starts_with($pillarImage, 'http://') || str_starts_with($pillarImage, 'https://')
+                    ? $pillarImage
+                    : asset('storage/'.ltrim($pillarImage, '/'));
+            }
+
+            $schema = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    $organizationSchema,
+                    [
+                        '@type' => 'BreadcrumbList',
+                        '@id' => $currentUrl.'#breadcrumb',
+                        'itemListElement' => [
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 1,
+                                'name' => 'Beranda',
+                                'item' => url('/'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 2,
+                                'name' => 'Fokus Program',
+                                'item' => route('focus.index'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 3,
+                                'name' => $title,
+                                'item' => $currentUrl,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            return [
+                'title' => "{$title} - Fokus Program - {$siteName}",
+                'description' => $description,
+                'image' => $image,
+                'url' => $currentUrl,
+                'type' => 'website',
+                'site_name' => $siteName,
+                'card' => 'summary_large_image',
+                'is_private' => false,
+                'schema' => $schema,
+            ];
+        }
+
+        // 4. Static CMS Pages (Public/Page/Show)
         if ($component === 'Public/Page/Show' && ! empty($props['page'])) {
             $cmsPage = $props['page'];
             $title = (string) (data_get($cmsPage, 'meta_title') ?: data_get($cmsPage, 'title') ?: 'Halaman Informasi');
@@ -149,21 +344,49 @@ class SeoService
                 'site_name' => $siteName,
                 'card' => 'summary_large_image',
                 'is_private' => false,
+                'schema' => [
+                    '@context' => 'https://schema.org',
+                    '@graph' => [
+                        $organizationSchema,
+                    ],
+                ],
             ];
         }
 
-        // 4. Known Public Pages mapping
+        // 5. Known Public Pages mapping
         $customTitles = [
             'Public/Home/Index' => "Platform Galang Dana & Donasi Online - {$siteName}",
             'Public/About/Index' => "Tentang Kami - {$siteName}",
             'Public/FocusProgram/Index' => "Fokus Program Kebaikan - {$siteName}",
             'Public/Contact/Create' => "Hubungi Kami - {$siteName}",
+            'Public/Program/Listing' => "Daftar Program Donasi - {$siteName}",
             'Public/Program/Index' => "Daftar Program Donasi - {$siteName}",
             'Public/Blog/Index' => "Kabar & Berita Terbaru - {$siteName}",
             'Public/CampaignerRegistration/Create' => "Daftar Penggalang Dana - {$siteName}",
+            'Public/Donation/Lookup' => "Cek Status & Riwayat Donasi - {$siteName}",
         ];
 
         $pageTitle = $customTitles[$component] ?? "{$siteName} - Platform Galang Dana dan Donasi";
+
+        $schema = null;
+        if ($component === 'Public/Home/Index') {
+            $schema = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    $organizationSchema,
+                    [
+                        '@type' => 'WebSite',
+                        '@id' => url('/').'#website',
+                        'url' => url('/'),
+                        'name' => $siteName,
+                        'description' => $defaultDescription,
+                        'publisher' => [
+                            '@id' => url('/').'#organization',
+                        ],
+                    ],
+                ],
+            ];
+        }
 
         return [
             'title' => $pageTitle,
@@ -174,6 +397,7 @@ class SeoService
             'site_name' => $siteName,
             'card' => 'summary_large_image',
             'is_private' => false,
+            'schema' => $schema,
         ];
     }
 }
