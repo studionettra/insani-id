@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Fundraiser;
 use App\Models\Program;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -72,8 +73,32 @@ class ProgramListingController extends Controller
             session()->put($sessionKey, now()->timestamp);
         }
 
+        $refCode = request()->query('ref') ?? session('referral_code') ?? request()->cookie('referral_code');
+        $currentFundraiser = null;
+        if ($refCode) {
+            $currentFundraiser = Fundraiser::with('user:id,name')
+                ->where('program_id', $program->id)
+                ->where('referral_code', $refCode)
+                ->where('is_active', true)
+                ->first();
+        }
+
+        $topFundraisers = Fundraiser::with('user:id,name')
+            ->where('program_id', $program->id)
+            ->where('is_active', true)
+            ->orderByDesc('collected_amount')
+            ->take(10)
+            ->get();
+
+        $userFundraiser = auth()->check()
+            ? Fundraiser::where('program_id', $program->id)->where('user_id', auth()->id())->first()
+            : null;
+
         return Inertia::render('Public/Program/Show', [
             'program' => $program,
+            'currentFundraiser' => $currentFundraiser,
+            'topFundraisers' => $topFundraisers,
+            'userFundraiser' => $userFundraiser,
         ]);
     }
 }

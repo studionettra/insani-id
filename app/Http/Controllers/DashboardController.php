@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CampaignerProfile;
 use App\Models\Disbursement;
 use App\Models\Donation;
+use App\Models\Fundraiser;
 use App\Models\Program;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -96,6 +97,25 @@ class DashboardController extends Controller
                 'totalDonors' => Donation::whereIn('program_id', $myProgramIds)->where('status', 'paid')->count(),
                 'totalDisbursed' => (float) Disbursement::whereIn('program_id', $myProgramIds)->where('status', 'transferred')->sum('requested_amount'),
                 'myPrograms' => Program::where('created_by', $user->id)->with('category')->latest()->take(5)->get(),
+            ];
+        }
+
+        // Fundraiser Specific Data
+        $fundraiserCount = Fundraiser::where('user_id', $user->id)->count();
+        $isFundraiser = in_array('Fundraiser', $roles) || $fundraiserCount > 0;
+        $fundraiserStats = null;
+        if ($fundraiserCount > 0) {
+            $myFundraisers = Fundraiser::where('user_id', $user->id)
+                ->with('program.category')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $fundraiserStats = [
+                'count' => $fundraiserCount,
+                'totalCollected' => (float) Fundraiser::where('user_id', $user->id)->sum('collected_amount'),
+                'totalDonors' => (int) Fundraiser::where('user_id', $user->id)->sum('donors_count'),
+                'fundraisers' => $myFundraisers,
             ];
         }
 
@@ -225,6 +245,7 @@ class DashboardController extends Controller
             'analyticsData' => $analyticsData,
             'donorStats' => $donorStats,
             'campaignerStats' => $campaignerStats,
+            'fundraiserStats' => $fundraiserStats,
             'recentCampaigns' => $recentCampaigns,
             'recommendedPrograms' => $recommendedPrograms,
             'userRoleInfo' => [
@@ -233,6 +254,7 @@ class DashboardController extends Controller
                 'isVerifikator' => $isVerifikator,
                 'isKeuangan' => $isKeuangan,
                 'isCampaigner' => $isCampaigner,
+                'isFundraiser' => $isFundraiser,
                 'isDonor' => $isDonor,
                 'isStaff' => $isStaff,
             ],

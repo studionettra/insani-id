@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DisbursementController;
 use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\FundraiserController as AdminFundraiserController;
 use App\Http\Controllers\Admin\HomepageBannerController;
 use App\Http\Controllers\Admin\ImpactStatController;
 use App\Http\Controllers\Admin\ManagementMemberController;
@@ -30,11 +31,15 @@ use App\Http\Controllers\Public\CampaignerRegistrationController;
 use App\Http\Controllers\Public\CommentController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\DonationController;
+use App\Http\Controllers\Public\DonationReceiptController;
 use App\Http\Controllers\Public\DonorDonationController;
 use App\Http\Controllers\Public\FocusProgramController;
+use App\Http\Controllers\Public\FundraiserController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController as PublicPageController;
 use App\Http\Controllers\Public\ProgramListingController;
+use App\Http\Controllers\Public\SearchController;
+use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -49,18 +54,24 @@ Route::group([
     // Public Program Listing & Detail
     Route::get('/program', [ProgramListingController::class, 'index'])->name('program.index');
     Route::get('/program/{program:slug}/donasi', [DonationController::class, 'create'])->name('donation.create');
-    Route::post('/program/{program:slug}/donasi', [DonationController::class, 'store'])->name('donation.store');
+    Route::post('/program/{program:slug}/donasi', [DonationController::class, 'store'])
+        ->middleware('throttle:15,1')
+        ->name('donation.store');
     Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])->name('donation.status');
+    Route::get('/donasi/kwitansi/{donationCode}', [DonationReceiptController::class, 'show'])->name('donation.receipt');
     Route::get('/cek-donasi', [DonationController::class, 'lookup'])->name('donation.lookup');
     Route::get('/program/{slug}', [ProgramListingController::class, 'show'])->name('program.show');
 
     // Public Pages
     Route::get('/tentang-kami', [AboutController::class, 'index'])->name('about.index');
     Route::get('/fokus-program', [FocusProgramController::class, 'index'])->name('focus.index');
+    Route::get('/fokus-program/{category:slug}', [FocusProgramController::class, 'show'])->name('focus.show');
     Route::get('/berita', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/berita/{slug}', [BlogController::class, 'show'])->name('blog.show');
     Route::get('/kontak', [ContactController::class, 'create'])->name('contact.create');
-    Route::post('/kontak', [ContactController::class, 'store'])->name('contact.store');
+    Route::post('/kontak', [ContactController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('contact.store');
 
     // Smart Redirect for "Galang Dana" / Create Program
     Route::get('/buat-program', function () {
@@ -91,14 +102,26 @@ Route::group([
     Route::get('/halaman/{slug}', [PublicPageController::class, 'show'])->name('page.show');
 });
 
+// Dynamic Sitemap XML
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+// Public Instant Search API
+Route::get('/api/public/search', [SearchController::class, 'search'])
+    ->middleware('throttle:30,1')
+    ->name('api.public.search');
+
 // Webhooks
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle'])
     ->middleware('verify.xendit-callback-token')
     ->name('webhooks.xendit');
 
 // First-Party Analytics Collector
-Route::post('/analytics/collect', [AnalyticsCollectorController::class, 'collect'])->name('analytics.collect');
-Route::post('/analytics/heartbeat', [AnalyticsCollectorController::class, 'heartbeat'])->name('analytics.heartbeat');
+Route::post('/analytics/collect', [AnalyticsCollectorController::class, 'collect'])
+    ->middleware('throttle:60,1')
+    ->name('analytics.collect');
+Route::post('/analytics/heartbeat', [AnalyticsCollectorController::class, 'heartbeat'])
+    ->middleware('throttle:60,1')
+    ->name('analytics.heartbeat');
 
 Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -107,6 +130,11 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::get('/campaigner/register', [CampaignerRegistrationController::class, 'create'])->name('campaigner.register');
     Route::post('/campaigner/register', [CampaignerRegistrationController::class, 'store'])->name('campaigner.register.store');
     Route::get('/campaigner/status', [CampaignerRegistrationController::class, 'status'])->name('campaigner.status');
+    Route::get('/campaigner/documents/{id}', [CampaignerRegistrationController::class, 'viewDocument'])->name('campaigner.document');
+
+    // Fundraiser Actions
+    Route::post('/program/{program:slug}/fundraiser', [FundraiserController::class, 'store'])->name('program.fundraiser.store');
+    Route::get('/akun/fundraiser', [FundraiserController::class, 'myFundraisers'])->name('akun.fundraiser.index');
 
     Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service|Content Editor')->group(function () {
         Route::post('/auto-translate', [TranslationController::class, 'translate'])->name('auto-translate');
@@ -160,8 +188,11 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('permission:campaigner.verify')->group(function () {
             Route::get('/campaigners', [CampaignerVerificationController::class, 'index'])->name('campaigners.index');
             Route::get('/campaigners/{id}', [CampaignerVerificationController::class, 'show'])->name('campaigners.show');
+            Route::get('/campaigners/{id}/documents/{docId}', [CampaignerVerificationController::class, 'viewDocument'])->name('campaigners.document');
             Route::put('/campaigners/{id}/status', [CampaignerVerificationController::class, 'updateStatus'])->name('campaigners.update-status');
         });
+
+        Route::get('/fundraisers', [AdminFundraiserController::class, 'index'])->name('fundraisers.index');
 
         Route::middleware('permission:program.view')->group(function () {
             Route::resource('programs', ProgramController::class);

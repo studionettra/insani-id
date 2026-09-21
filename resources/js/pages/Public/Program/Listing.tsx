@@ -49,7 +49,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
     };
 
     return (
-        <PublicLayout>
+        <PublicLayout title={t('Program Donasi')}>
             <Head title={t('Program Donasi')} />
 
             <div className="bg-white">

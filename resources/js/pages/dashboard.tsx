@@ -86,6 +86,12 @@ interface Props {
         totalDisbursed: number;
         myPrograms: any[];
     } | null;
+    fundraiserStats?: {
+        count: number;
+        totalCollected: number;
+        totalDonors: number;
+        fundraisers: any[];
+    } | null;
     recentCampaigns: any[];
     recommendedPrograms?: any[];
     userRoleInfo: {
@@ -94,6 +100,7 @@ interface Props {
         isVerifikator: boolean;
         isKeuangan: boolean;
         isCampaigner: boolean;
+        isFundraiser?: boolean;
         isDonor?: boolean;
         isStaff?: boolean;
     };
@@ -201,6 +208,7 @@ export default function Dashboard({
     analyticsData,
     donorStats, 
     campaignerStats, 
+    fundraiserStats,
     recentCampaigns = [], 
     recommendedPrograms = [], 
     userRoleInfo 
@@ -874,23 +882,88 @@ export default function Dashboard({
                                     </div>
                                 )}
 
-                                {/* Secondary CTA: Become a Campaigner */}
-                                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white dark:border-blue-900/40 dark:from-blue-950/20 dark:to-gray-900 p-5 shadow-xs">
-                                    <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3 shadow-xs">
-                                        <Sparkles className="w-4 h-4" />
+                                {/* Aktivitas Fundraiser Saya jika ada */}
+                                {fundraiserStats && fundraiserStats.count > 0 && (
+                                    <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-white dark:border-emerald-900/40 dark:from-emerald-950/20 dark:to-gray-900 p-5 shadow-xs">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                                                <Sparkles className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">
+                                                Relawan Aktif
+                                            </span>
+                                        </div>
+                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Fundraiser Saya</h3>
+                                        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-emerald-100 dark:border-emerald-900/30">
+                                            <div>
+                                                <span className="text-[10px] text-gray-400 uppercase font-bold block">Terkumpul</span>
+                                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(fundraiserStats.totalCollected)}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-[10px] text-gray-400 uppercase font-bold block">Donatur Diajak</span>
+                                                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{fundraiserStats.totalDonors} orang</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-3.5 pt-2">
+                                            <Link 
+                                                href="/akun/fundraiser" 
+                                                className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 gap-1"
+                                            >
+                                                Kelola Tautan & Donatur
+                                                <ArrowRight className="w-3.5 h-3.5" />
+                                            </Link>
+                                        </div>
                                     </div>
-                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Ingin Menggalang Dana?</h3>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
-                                        Punya inisiatif kebaikan atau yayasan sosial? Anda dapat mengajukan diri menjadi penggalang dana terverifikasi di Insani.
-                                    </p>
-                                    <div className="mt-3.5">
-                                        <Link 
-                                            href="/campaigner/register" 
-                                            className="inline-flex items-center text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 gap-1"
-                                        >
-                                            Daftar Sebagai Penggalang Dana
-                                            <ArrowRight className="w-3.5 h-3.5" />
-                                        </Link>
+                                )}
+
+                                {/* Dua Skema Tawaran Keterlibatan */}
+                                <div className="space-y-3">
+                                    {/* Skema A: Fundraiser (Instan & Mudah) */}
+                                    {(!fundraiserStats || fundraiserStats.count === 0) && (
+                                        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-white dark:border-emerald-900/40 dark:from-emerald-950/20 dark:to-gray-900 p-5 shadow-xs">
+                                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center mb-3 shadow-xs">
+                                                <Sparkles className="w-4 h-4" />
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Bantu Sebarkan Kebaikan</h3>
+                                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">Instan</span>
+                                            </div>
+                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                                                Pilih program aktif, dapatkan tautan referral khusus Anda, dan ajak keluarga serta kerabat berdonasi tanpa syarat rumit.
+                                            </p>
+                                            <div className="mt-3.5">
+                                                <Link 
+                                                    href="/program" 
+                                                    className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 gap-1"
+                                                >
+                                                    Mulai Jadi Fundraiser
+                                                    <ArrowRight className="w-3.5 h-3.5" />
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Skema B: Campaigner (Penggalang Dana Resmi) */}
+                                    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white dark:border-blue-900/40 dark:from-blue-950/20 dark:to-gray-900 p-5 shadow-xs">
+                                        <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3 shadow-xs">
+                                            <Target className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Punya Inisiatif Sendiri?</h3>
+                                            <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.2 rounded">Verifikasi KYC</span>
+                                        </div>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                                            Memiliki yayasan sosial atau program kemanusiaan? Ajukan verifikasi identitas untuk membuat penggalangan dana resmi di Insani.
+                                        </p>
+                                        <div className="mt-3.5">
+                                            <Link 
+                                                href="/campaigner/register" 
+                                                className="inline-flex items-center text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 gap-1"
+                                            >
+                                                Daftar Jadi Campaigner
+                                                <ArrowRight className="w-3.5 h-3.5" />
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             </>
@@ -914,6 +987,12 @@ export default function Dashboard({
                                                 <Link href="/admin/campaigners">
                                                     <Users className="w-4 h-4 mr-2.5 text-blue-600 dark:text-blue-400" />
                                                     Verifikasi Dokumen Campaigner
+                                                </Link>
+                                            </Button>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/fundraisers">
+                                                    <Sparkles className="w-4 h-4 mr-2.5 text-purple-600 dark:text-purple-400" />
+                                                    Manajemen Relawan Fundraiser
                                                 </Link>
                                             </Button>
                                             <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
