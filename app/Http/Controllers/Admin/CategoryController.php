@@ -27,6 +27,8 @@ class CategoryController extends BaseController
         $categories = Category::orderBy('sort_order')->orderBy('id', 'desc')->get()->map(function ($c) {
             $c->name_translations = $c->getTranslations('name');
             $c->description_translations = $c->getTranslations('description');
+            $c->reality_title_translations = $c->getTranslations('reality_title');
+            $c->reality_description_translations = $c->getTranslations('reality_description');
 
             return $c;
         });
@@ -102,7 +104,16 @@ class CategoryController extends BaseController
             'platform_fee_percent' => 'nullable|numeric|min:0|max:100',
             'is_disaster_category' => 'boolean',
             'is_focus_program' => 'boolean',
-            'pillar_image' => 'nullable|image|max:2048',
+            'pillar_image' => 'nullable|image|max:4096',
+            'reality_title' => 'nullable|array',
+            'reality_description' => 'nullable|array',
+            'reality_source' => 'nullable|string|max:255',
+            'video_url' => 'nullable|string|max:500',
+            'stats_metrics' => 'nullable',
+            'gallery_images' => 'nullable|array',
+            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
+            'existing_gallery' => 'nullable|array',
+            'existing_gallery.*' => 'string',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ]);
@@ -136,6 +147,31 @@ class CategoryController extends BaseController
             unset($validated['pillar_image']);
         }
 
+        // Process stats_metrics if string
+        if (isset($validated['stats_metrics']) && is_string($validated['stats_metrics'])) {
+            $validated['stats_metrics'] = json_decode($validated['stats_metrics'], true) ?: [];
+        }
+
+        // Process gallery
+        if ($request->has('existing_gallery') || $request->hasFile('gallery_images')) {
+            $currentGallery = $category->distribution_gallery ?? [];
+            $existingKept = $validated['existing_gallery'] ?? [];
+
+            $removedImages = array_diff($currentGallery, $existingKept);
+            foreach ($removedImages as $removed) {
+                Storage::disk('public')->delete($removed);
+            }
+
+            $gallery = array_values($existingKept);
+            if ($request->hasFile('gallery_images')) {
+                foreach ($request->file('gallery_images') as $file) {
+                    $gallery[] = $file->store('categories/gallery', 'public');
+                }
+            }
+            $validated['distribution_gallery'] = $gallery;
+        }
+        unset($validated['gallery_images'], $validated['existing_gallery']);
+
         $validated['is_disaster_category'] = $validated['is_disaster_category'] ?? false;
         $validated['is_focus_program'] = $validated['is_focus_program'] ?? false;
 
@@ -167,7 +203,32 @@ class CategoryController extends BaseController
                 Storage::disk('public')->delete($category->pillar_image);
             }
             $validated['pillar_image'] = $request->file('pillar_image')->store('categories/pillars', 'public');
+        } else {
+            unset($validated['pillar_image']);
         }
+
+        // Process stats_metrics if string
+        if (isset($validated['stats_metrics']) && is_string($validated['stats_metrics'])) {
+            $validated['stats_metrics'] = json_decode($validated['stats_metrics'], true) ?: [];
+        }
+
+        // Process gallery
+        $currentGallery = $category->distribution_gallery ?? [];
+        $existingKept = $validated['existing_gallery'] ?? [];
+
+        $removedImages = array_diff($currentGallery, $existingKept);
+        foreach ($removedImages as $removed) {
+            Storage::disk('public')->delete($removed);
+        }
+
+        $gallery = array_values($existingKept);
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $file) {
+                $gallery[] = $file->store('categories/gallery', 'public');
+            }
+        }
+        $validated['distribution_gallery'] = $gallery;
+        unset($validated['gallery_images'], $validated['existing_gallery']);
 
         $category->update($validated);
 

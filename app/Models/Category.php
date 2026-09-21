@@ -19,11 +19,17 @@ class Category extends Model
         'is_disaster_category',
         'is_focus_program',
         'pillar_image',
+        'reality_title',
+        'reality_description',
+        'reality_source',
+        'stats_metrics',
+        'video_url',
+        'distribution_gallery',
         'is_active',
         'sort_order',
     ];
 
-    public $translatable = ['name', 'description'];
+    public $translatable = ['name', 'description', 'reality_title', 'reality_description'];
 
     public function programs()
     {
@@ -42,5 +48,7 @@ class Category extends Model
         'is_focus_program' => 'boolean',
         'is_active' => 'boolean',
         'platform_fee_percent' => 'decimal:2',
+        'stats_metrics' => 'array',
+        'distribution_gallery' => 'array',
     ];
 }

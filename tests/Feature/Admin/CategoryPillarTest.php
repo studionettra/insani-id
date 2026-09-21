@@ -84,3 +84,34 @@ it('allows administrator to update standard category fields', function () {
     expect($this->category->name)->toBe('Admin Edited Name');
     expect($this->category->platform_fee_percent)->toEqual(10);
 });
+
+it('allows updating detailed focus program fields including gallery and metrics', function () {
+    Storage::fake('public');
+
+    $galleryImage = UploadedFile::fake()->image('dist1.jpg');
+
+    actingAs($this->editor)
+        ->patch(route('admin.categories.update-pillar', $this->category), [
+            'is_focus_program' => true,
+            'reality_title' => ['id' => 'Krisis Lapangan'],
+            'reality_description' => ['id' => 'Deskripsi krisis.'],
+            'reality_source' => 'Sumber: Data 2026',
+            'video_url' => 'https://www.youtube.com/watch?v=12345678901',
+            'stats_metrics' => [
+                ['value' => '10.000+', 'label' => ['id' => 'Penerima Manfaat'], 'icon' => 'Users'],
+            ],
+            'gallery_images' => [$galleryImage],
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $this->category->refresh();
+
+    expect($this->category->is_focus_program)->toBeTrue();
+    expect($this->category->getTranslation('reality_title', 'id'))->toBe('Krisis Lapangan');
+    expect($this->category->reality_source)->toBe('Sumber: Data 2026');
+    expect($this->category->video_url)->toBe('https://www.youtube.com/watch?v=12345678901');
+    expect($this->category->stats_metrics)->toHaveCount(1);
+    expect($this->category->distribution_gallery)->toHaveCount(1);
+    Storage::disk('public')->assertExists($this->category->distribution_gallery[0]);
+});
