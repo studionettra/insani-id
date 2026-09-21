@@ -232,15 +232,24 @@ export default function Status({ donation }: any) {
 
                             {/* Action Button: Official Receipt when Paid */}
                             {donation.status === 'paid' && (
-                                <div className="pt-2">
+                                <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
                                     <Button 
                                         type="button"
                                         onClick={() => setShowReceipt(true)}
-                                        className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
+                                        className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
                                     >
                                         <Printer className="w-4 h-4" />
-                                        <span>Lihat & Cetak Kuitansi Resmi</span>
+                                        <span>Lihat Kuitansi</span>
                                     </Button>
+                                    <a
+                                        href={`/donasi/kwitansi/${donation.donation_code}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 h-12 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-xs transition-all"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                        <span>Cetak PDF Resmi</span>
+                                    </a>
                                 </div>
                             )}
 

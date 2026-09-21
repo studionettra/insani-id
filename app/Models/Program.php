@@ -28,6 +28,7 @@ class Program extends Model
         'created_by',
         'verified_by',
         'target_amount',
+        'is_continuous',
         'collected_amount',
         'deadline',
         'story',
@@ -42,6 +43,7 @@ class Program extends Model
 
     protected $casts = [
         'target_amount' => 'decimal:2',
+        'is_continuous' => 'boolean',
         'collected_amount' => 'decimal:2',
         'views_count' => 'integer',
         'deadline' => 'date',
@@ -97,6 +99,11 @@ class Program extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function fundraisers()
+    {
+        return $this->hasMany(Fundraiser::class);
     }
 
     public function getActivitylogOptions(): LogOptions

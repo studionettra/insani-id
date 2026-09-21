@@ -37,6 +37,7 @@ class CheckProgramStatus extends Command
         // 1. Reached their target_amount (handled here assuming collected_amount >= target_amount)
         // 2. Passed their deadline
         $programs = Program::where('status', 'published')
+            ->where('is_continuous', false)
             ->where(function ($query) use ($now) {
                 $query->whereNotNull('deadline')->where('deadline', '<', $now)
                     ->orWhereRaw('collected_amount >= target_amount AND target_amount IS NOT NULL AND target_amount > 0');
