@@ -47,9 +47,10 @@ class ContactController extends Controller
             'message' => $validated['message'],
         ]);
 
-        // Send Email Notification
+        // Send Email Notification (Queued)
         try {
-            Mail::to('sapa@insani.id')->send(new ContactMessageNotification($message));
+            $adminEmail = config('mail.from.address', 'sapa@insani.id');
+            Mail::to($adminEmail)->queue(new ContactMessageNotification($message));
         } catch (\Exception $e) {
             Log::error('Gagal mengirim email notifikasi kontak: '.$e->getMessage());
         }
