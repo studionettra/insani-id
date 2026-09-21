@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDonationRequest;
 use App\Models\Donation;
+use App\Models\Fundraiser;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Services\XenditPaymentService;
@@ -71,10 +72,25 @@ class DonationController extends Controller
         $referrerUrl = $validated['referrer_url'] ?? session('referrer_url') ?? $request->header('referer');
         $landingPage = session('landing_page');
 
+        $refCode = $validated['referral_code'] ?? $validated['ref'] ?? $request->input('ref') ?? session('referral_code') ?? $request->cookie('referral_code');
+        $fundraiser = null;
+        if ($refCode) {
+            $fundraiser = Fundraiser::where('program_id', $program->id)
+                ->where('referral_code', $refCode)
+                ->where('is_active', true)
+                ->first();
+        }
+
+        if ($fundraiser && empty($utmSource)) {
+            $utmSource = 'fundraiser_'.$fundraiser->referral_code;
+        }
+
         $donation = Donation::create([
             'donation_code' => $donationCode,
             'program_id' => $program->id,
             'donor_user_id' => auth()->id(),
+            'fundraiser_id' => $fundraiser?->id,
+            'fundraiser_user_id' => $fundraiser?->user_id,
             'donor_name' => $validated['donor_name'],
             'donor_email' => $validated['donor_email'],
             'donor_phone' => $validated['donor_phone'],

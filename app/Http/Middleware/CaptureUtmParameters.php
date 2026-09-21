@@ -39,6 +39,12 @@ class CaptureUtmParameters
                 Cookie::queue('utm_source', (string) $source, self::COOKIE_LIFETIME);
             }
 
+            if ($request->has('ref')) {
+                $refCode = (string) $request->input('ref');
+                session(['referral_code' => $refCode]);
+                Cookie::queue('referral_code', $refCode, self::COOKIE_LIFETIME);
+            }
+
             if ($medium) {
                 session(['utm_medium' => (string) $medium]);
                 Cookie::queue('utm_medium', (string) $medium, self::COOKIE_LIFETIME);

@@ -15,6 +15,8 @@ class Donation extends Model
         'donation_code',
         'program_id',
         'donor_user_id',
+        'fundraiser_id',
+        'fundraiser_user_id',
         'donor_name',
         'donor_email',
         'donor_phone',
@@ -48,6 +50,16 @@ class Donation extends Model
     public function donor()
     {
         return $this->belongsTo(User::class, 'donor_user_id');
+    }
+
+    public function fundraiser()
+    {
+        return $this->belongsTo(Fundraiser::class);
+    }
+
+    public function fundraiserUser()
+    {
+        return $this->belongsTo(User::class, 'fundraiser_user_id');
     }
 
     public function payments()

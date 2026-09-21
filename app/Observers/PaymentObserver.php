@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Jobs\SendDonationPaidNotification;
 use App\Models\Comment;
 use App\Models\Donation;
+use App\Models\Fundraiser;
 use App\Models\Payment;
 use App\Models\Program;
 use Illuminate\Support\Facades\DB;
@@ -61,12 +62,30 @@ class PaymentObserver
 
                     $updates = ['collected_amount' => $totalCollected];
 
-                    // Check if program reached its target amount
-                    if ($program->target_amount && $totalCollected >= $program->target_amount && $program->status === 'published') {
+                    // Check if program reached its target amount (only if not continuous)
+                    if (! $program->is_continuous && $program->target_amount && $totalCollected >= $program->target_amount && $program->status === 'published') {
                         $updates['status'] = 'completed';
                     }
 
                     $program->update($updates);
+                }
+
+                // Recalculate fundraiser's collected amount and donors count if referred
+                if ($donation->fundraiser_id) {
+                    $fundraiser = Fundraiser::whereKey($donation->fundraiser_id)->lockForUpdate()->first();
+                    if ($fundraiser) {
+                        $fundraiserCollected = Donation::where('fundraiser_id', $fundraiser->id)
+                            ->where('status', 'paid')
+                            ->sum('amount');
+                        $fundraiserDonors = Donation::where('fundraiser_id', $fundraiser->id)
+                            ->where('status', 'paid')
+                            ->count();
+
+                        $fundraiser->update([
+                            'collected_amount' => $fundraiserCollected,
+                            'donors_count' => $fundraiserDonors,
+                        ]);
+                    }
                 }
             });
 

@@ -2,7 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, Sparkles, Users, Target, TrendingUp, Heart } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
@@ -71,6 +72,24 @@ interface Program {
     comments?: any[];
 }
 
+interface FundraiserItem {
+    id: number;
+    user_id: number;
+    program_id: number;
+    referral_code: string;
+    target_amount: number | string | null;
+    personal_message: string | null;
+    collected_amount: number;
+    donors_count: number;
+    progress_percentage: number;
+    referral_url: string;
+    user?: {
+        id: number;
+        name: string;
+        avatar?: string;
+    };
+}
+
 interface Props {
     program: Program;
     auth: {
@@ -80,14 +99,19 @@ interface Props {
             email: string;
         } | null;
     };
+    currentFundraiser?: FundraiserItem | null;
+    topFundraisers?: FundraiserItem[];
+    userFundraiser?: FundraiserItem | null;
 }
 
-export default function ProgramShow({ program, auth }: Props) {
+export default function ProgramShow({ program, auth, currentFundraiser, topFundraisers = [], userFundraiser }: Props) {
     const { t, locale, isRtl } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur'>('cerita');
+    const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur' | 'fundraiser'>('cerita');
     const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [isFundraiserModalOpen, setIsFundraiserModalOpen] = useState(false);
+    const [fundraiserCopied, setFundraiserCopied] = useState(false);
 
     const programTitle = getLocalizedValue(program.title, locale);
     const programStory = getLocalizedValue(program.story, locale);
@@ -130,6 +154,38 @@ export default function ProgramShow({ program, auth }: Props) {
             preserveScroll: true,
             onSuccess: () => commentForm.reset('body'),
         });
+    };
+
+    const fundraiserForm = useForm({
+        target_amount: '',
+        personal_message: '',
+    });
+
+    const handleCreateFundraiser = (e: React.FormEvent) => {
+        e.preventDefault();
+        fundraiserForm.post(`/program/${program.slug}/fundraiser`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('Selamat! Tautan fundraiser Anda siap dibagikan.'));
+            },
+        });
+    };
+
+    const fundraiserUrl = userFundraiser
+        ? (typeof window !== 'undefined' ? `${window.location.origin}/program/${program.slug}?ref=${userFundraiser.referral_code}` : `https://insani.id/program/${program.slug}?ref=${userFundraiser.referral_code}`)
+        : '';
+    const fundraiserShareText = `${t('Mari bersama saya bantu program kebaikan:', 'Mari bersama saya bantu program kebaikan:')} "${programTitle}" ${t('melalui Insani Indonesia')}`;
+    const fundraiserWhatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${fundraiserShareText}\n\n${fundraiserUrl}`)}`;
+    const fundraiserFacebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fundraiserUrl)}`;
+
+    const copyFundraiserToClipboard = () => {
+        if (typeof navigator !== 'undefined' && navigator.clipboard && fundraiserUrl) {
+            navigator.clipboard.writeText(fundraiserUrl).then(() => {
+                setFundraiserCopied(true);
+                toast.success(t('Tautan fundraiser berhasil disalin!'));
+                setTimeout(() => setFundraiserCopied(false), 2500);
+            });
+        }
     };
 
     const campaignerName = program.campaigner_type === 'internal'
@@ -258,7 +314,7 @@ export default function ProgramShow({ program, auth }: Props) {
     );
 
     return (
-        <PublicLayout hideFooter={false} hideMobileNav={true} hideTopNav={false}>
+        <PublicLayout title={programTitle} hideFooter={false} hideMobileNav={true} hideTopNav={false}>
             <Head>
                 <title>{`${programTitle} - ${t('Program Kebaikan Insani', 'Program Kebaikan Insani')}`}</title>
                 <meta name="description" content={metaDescription} />
@@ -293,6 +349,34 @@ export default function ProgramShow({ program, auth }: Props) {
                             {programTitle}
                         </span>
                     </div>
+
+                    {/* Fundraiser Referral Banner */}
+                    {currentFundraiser && (
+                        <div className="mb-6 mx-4 lg:mx-0 bg-gradient-to-r from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200/80 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 shadow-xs">
+                            <div className="w-11 h-11 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 font-bold text-sm shadow-xs ring-2 ring-emerald-100">
+                                {currentFundraiser.user?.name ? currentFundraiser.user.name.charAt(0).toUpperCase() : 'R'}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                        <Sparkles className="w-3 h-3 text-emerald-700" />
+                                        {t('Relawan Fundraiser')}
+                                    </span>
+                                    <span className="text-xs text-slate-500">
+                                        {t('Mengajak Anda berdonasi di program ini')}
+                                    </span>
+                                </div>
+                                <p className="text-sm font-bold text-slate-900 mt-1">
+                                    {currentFundraiser.user?.name}
+                                </p>
+                                {currentFundraiser.personal_message && (
+                                    <p className="text-xs text-slate-600 italic mt-1 bg-white/80 p-2.5 rounded-xl border border-emerald-100 leading-relaxed">
+                                        &ldquo;{currentFundraiser.personal_message}&rdquo;
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -368,6 +452,12 @@ export default function ProgramShow({ program, auth }: Props) {
                                             className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'donatur' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                         >
                                             {t('Donatur')} <Badge variant="secondary" className="ml-2 text-xs">{program.comments?.length || 0}</Badge>
+                                        </button>
+                                        <button
+                                            onClick={() => setActiveTab('fundraiser')}
+                                            className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'fundraiser' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            {t('Fundraiser')} <Badge variant="secondary" className="ml-2 text-xs">{topFundraisers?.length || 0}</Badge>
                                         </button>
                                     </div>
 
@@ -487,6 +577,75 @@ export default function ProgramShow({ program, auth }: Props) {
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Tab Content: Fundraiser */}
+                                    {activeTab === 'fundraiser' && (
+                                        <div className="animate-in fade-in slide-in-from-bottom-2 space-y-4">
+                                            <div className="flex items-center justify-between p-4 bg-emerald-50/60 rounded-xl border border-emerald-100 flex-wrap gap-3">
+                                                <div>
+                                                    <h3 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                                                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                                                        {t('Gerakan Relawan Fundraiser')}
+                                                    </h3>
+                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                        {t('Bantu sebarkan program ini dan pantau donasi yang berhasil Anda ajak.')}
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        if (!auth?.user) {
+                                                            window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                                                            return;
+                                                        }
+                                                        setIsFundraiserModalOpen(true);
+                                                    }}
+                                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-xs"
+                                                >
+                                                    {userFundraiser ? t('Lihat Tautan Saya') : t('Gabung Jadi Fundraiser')}
+                                                </Button>
+                                            </div>
+
+                                            {(!topFundraisers || topFundraisers.length === 0) ? (
+                                                <div className="text-center py-10 text-slate-500">
+                                                    <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                                                    <p className="text-sm font-medium">{t('Belum ada relawan fundraiser untuk program ini.')}</p>
+                                                    <p className="text-xs text-slate-400 mt-1">{t('Jadilah yang pertama mengajak kebaikan!')}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {topFundraisers.map((item, idx) => (
+                                                        <div key={item.id} className="p-4 rounded-xl border border-slate-100 bg-white hover:border-emerald-200 transition-colors shadow-xs">
+                                                            <div className="flex items-start gap-3">
+                                                                <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">
+                                                                    {item.user?.name ? item.user.name.charAt(0).toUpperCase() : `#${idx + 1}`}
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <p className="text-xs font-bold text-slate-800 truncate">
+                                                                            {item.user?.name || 'Relawan Insani'}
+                                                                        </p>
+                                                                        <Badge variant="outline" className="text-[10px] text-emerald-700 border-emerald-200 bg-emerald-50">
+                                                                            {item.donors_count} {t('donatur')}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    {item.personal_message && (
+                                                                        <p className="text-[11px] text-slate-500 line-clamp-1 italic mt-0.5">
+                                                                            &ldquo;{item.personal_message}&rdquo;
+                                                                        </p>
+                                                                    )}
+                                                                    <div className="mt-2 text-xs">
+                                                                        <span className="text-slate-400 text-[10px] uppercase font-semibold">{t('Terkumpul')}:</span>{' '}
+                                                                        <span className="font-bold text-emerald-700">{formatCurrency(item.collected_amount)}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
@@ -511,6 +670,20 @@ export default function ProgramShow({ program, auth }: Props) {
                                         <Button onClick={handleShare} variant="outline" className="w-full h-12 text-slate-600 border-slate-200 hover:bg-slate-50 transition-colors">
                                             <Share2 className="w-5 h-5 mr-2" />
                                             {t('Bagikan Program Ini')}
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                if (!auth?.user) {
+                                                    window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                                                    return;
+                                                }
+                                                setIsFundraiserModalOpen(true);
+                                            }}
+                                            variant="outline"
+                                            className="w-full h-11 border-dashed border-emerald-400 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/70 transition-colors font-semibold flex items-center justify-center gap-2 rounded-xl"
+                                        >
+                                            <Sparkles className="w-4 h-4 text-emerald-600" />
+                                            {userFundraiser ? t('Lihat Tautan Fundraiser Saya') : t('Jadi Fundraiser Program Ini')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -669,6 +842,146 @@ export default function ProgramShow({ program, auth }: Props) {
                             <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
                             {t('Opsi Berbagi Lainnya (Sistem)', 'Opsi Berbagi Lainnya')}
                         </Button>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Fundraiser Modal */}
+            <Dialog open={isFundraiserModalOpen} onOpenChange={setIsFundraiserModalOpen}>
+                <DialogContent className="sm:max-w-md p-6 bg-white rounded-2xl">
+                    <DialogHeader className="text-left">
+                        <DialogTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-emerald-600" />
+                            {userFundraiser ? t('Tautan Fundraiser Anda') : t('Jadi Relawan Fundraiser')}
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-slate-500">
+                            {userFundraiser 
+                                ? t('Bagikan tautan unik Anda untuk mengajak lebih banyak kebaikan.')
+                                : t('Ajak keluarga dan sahabat berdonasi untuk program ini melalui tautan referral pribadi Anda.')}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {userFundraiser ? (
+                        <div className="space-y-4 pt-2">
+                            {/* Stats Card */}
+                            <div className="grid grid-cols-2 gap-3 p-3.5 bg-emerald-50/70 border border-emerald-100 rounded-xl">
+                                <div>
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">{t('Terkumpul')}</span>
+                                    <span className="text-base font-extrabold text-emerald-700">{formatCurrency(userFundraiser.collected_amount)}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">{t('Donatur Diajak')}</span>
+                                    <span className="text-base font-extrabold text-slate-800">{userFundraiser.donors_count} {t('orang')}</span>
+                                </div>
+                                {userFundraiser.target_amount && Number(userFundraiser.target_amount) > 0 && (
+                                    <div className="col-span-2 pt-2 border-t border-emerald-100/80">
+                                        <div className="flex justify-between text-xs text-slate-500 mb-1">
+                                            <span>{t('Target Pribadi')}: {formatCurrency(Number(userFundraiser.target_amount))}</span>
+                                            <span className="font-semibold text-emerald-700">{userFundraiser.progress_percentage}%</span>
+                                        </div>
+                                        <div className="w-full bg-emerald-200/60 rounded-full h-2">
+                                            <div 
+                                                className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                                                style={{ width: `${Math.min(100, userFundraiser.progress_percentage)}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Share Grid */}
+                            <div className="grid grid-cols-2 gap-2 pt-1">
+                                <a
+                                    href={fundraiserWhatsappUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+                                >
+                                    <Share2 className="w-4 h-4" />
+                                    <span>WhatsApp</span>
+                                </a>
+                                <a
+                                    href={fundraiserFacebookUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-center gap-2 p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+                                >
+                                    <Share2 className="w-4 h-4" />
+                                    <span>Facebook</span>
+                                </a>
+                            </div>
+
+                            {/* Copy Link Input Bar */}
+                            <div className="flex items-center gap-2 p-1.5 bg-slate-100 rounded-xl border border-slate-200">
+                                <input
+                                    type="text"
+                                    readOnly
+                                    value={fundraiserUrl}
+                                    className="w-full bg-transparent px-3 text-xs text-slate-600 outline-none truncate"
+                                />
+                                <Button
+                                    size="sm"
+                                    onClick={copyFundraiserToClipboard}
+                                    className={`flex-shrink-0 h-9 px-4 text-xs font-semibold rounded-lg transition-all ${
+                                        fundraiserCopied ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    }`}
+                                >
+                                    {fundraiserCopied ? (
+                                        <>
+                                            <Check className="w-3.5 h-3.5 mr-1.5" />
+                                            {t('Tersalin')}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy className="w-3.5 h-3.5 mr-1.5" />
+                                            {t('Salin')}
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleCreateFundraiser} className="space-y-4 pt-2">
+                            <div>
+                                <Label htmlFor="target_amount" className="text-xs font-medium text-slate-700">
+                                    {t('Target Pengumpulan Dana Pribadi (Opsional)')}
+                                </Label>
+                                <Input
+                                    id="target_amount"
+                                    type="number"
+                                    placeholder="Contoh: 1000000"
+                                    value={fundraiserForm.data.target_amount}
+                                    onChange={(e) => fundraiserForm.setData('target_amount', e.target.value)}
+                                    className="mt-1"
+                                />
+                                <p className="text-[11px] text-slate-400 mt-1">
+                                    {t('Tentukan target penggalangan dana yang ingin Anda capai bersama donatur Anda.')}
+                                </p>
+                            </div>
+
+                            <div>
+                                <Label htmlFor="personal_message" className="text-xs font-medium text-slate-700">
+                                    {t('Kalimat Ajakan / Pesan Motivasi (Opsional)')}
+                                </Label>
+                                <Textarea
+                                    id="personal_message"
+                                    rows={3}
+                                    placeholder={t('Contoh: Mari bersama saya bantu wujudkan kebaikan untuk program ini...')}
+                                    value={fundraiserForm.data.personal_message}
+                                    onChange={(e) => fundraiserForm.setData('personal_message', e.target.value)}
+                                    className="mt-1"
+                                />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={fundraiserForm.processing}
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-11 rounded-xl shadow-xs"
+                            >
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                {fundraiserForm.processing ? t('Membuat Tautan...') : t('Aktifkan & Buat Tautan Fundraiser')}
+                            </Button>
+                        </form>
                     )}
                 </DialogContent>
             </Dialog>

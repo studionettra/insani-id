@@ -42,6 +42,8 @@ class StoreDonationRequest extends FormRequest
             'utm_term' => ['nullable', 'string', 'max:100'],
             'utm_content' => ['nullable', 'string', 'max:150'],
             'referrer_url' => ['nullable', 'string', 'max:500'],
+            'referral_code' => ['nullable', 'string', 'max:100'],
+            'ref' => ['nullable', 'string', 'max:100'],
         ];
     }
 
