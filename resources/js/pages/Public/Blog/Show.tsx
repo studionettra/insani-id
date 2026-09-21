@@ -7,6 +7,7 @@ import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
 import { trackShareProgram } from '@/lib/analytics';
 import { getLocalizedValue } from '@/lib/utils';
+import DOMPurify from 'dompurify';
 
 export default function BlogShow({ blog, relatedBlogs }: any) {
     const { t, locale, isRtl } = useTranslation();
@@ -128,7 +129,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                             {/* Content */}
                             <div 
                                 className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
-                                dangerouslySetInnerHTML={{ __html: blogContent }} 
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blogContent) }} 
                             />
 
                             {/* Smart Share Section */}

@@ -9,6 +9,7 @@ use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Mews\Purifier\Facades\Purifier;
 
 class ProgramController extends Controller
 {
@@ -53,6 +54,7 @@ class ProgramController extends Controller
             'title' => 'required',
             'category_id' => 'required|exists:categories,id',
             'target_amount' => 'nullable|numeric|min:0',
+            'is_continuous' => 'nullable|boolean',
             'deadline' => 'nullable|date|after:today',
             'story' => 'required',
             'cover_image' => 'required|image|max:2048',
@@ -71,6 +73,10 @@ class ProgramController extends Controller
             ? $storyInput
             : ($translationService->translateFields(['story' => (string) $storyInput], ['en', 'ar'], 'id', ['story'])['story'] ?? ['id' => (string) $storyInput]);
 
+        foreach ($storyTranslations as $lang => $content) {
+            $storyTranslations[$lang] = Purifier::clean($content);
+        }
+
         $primaryTitle = is_array($titleInput) ? ($titleInput['id'] ?? reset($titleInput)) : (string) $titleInput;
 
         $coverImagePath = $request->file('cover_image')->store('programs/covers', 'public');
@@ -84,6 +90,7 @@ class ProgramController extends Controller
         $program->campaigner_type = 'internal';
         $program->created_by = auth()->id();
         $program->target_amount = $request->target_amount;
+        $program->is_continuous = $request->boolean('is_continuous');
         $program->deadline = $request->deadline;
         $program->cover_image = $coverImagePath;
         $program->video_url = $request->video_url;
@@ -136,6 +143,7 @@ class ProgramController extends Controller
             'title' => 'required',
             'category_id' => 'required|exists:categories,id',
             'target_amount' => 'nullable|numeric|min:0',
+            'is_continuous' => 'nullable|boolean',
             'deadline' => 'nullable|date',
             'story' => 'required',
             'cover_image' => 'nullable|image|max:2048',
@@ -154,10 +162,15 @@ class ProgramController extends Controller
             ? $storyInput
             : ($translationService->translateFields(['story' => (string) $storyInput], ['en', 'ar'], 'id', ['story'])['story'] ?? ['id' => (string) $storyInput]);
 
+        foreach ($storyTranslations as $lang => $content) {
+            $storyTranslations[$lang] = Purifier::clean($content);
+        }
+
         $program->title = $titleTranslations;
         $program->story = $storyTranslations;
         $program->category_id = $request->category_id;
         $program->target_amount = $request->target_amount;
+        $program->is_continuous = $request->boolean('is_continuous');
         $program->deadline = $request->deadline;
         $program->video_url = $request->video_url;
 
@@ -195,9 +208,10 @@ class ProgramController extends Controller
         ]);
 
         if ($request->status === 'published') {
-            // Regex to detect common bank account numbers in Indonesia (simple version)
+            // Regex to detect common bank account numbers in Indonesia
             // Look for sequences of 10 to 16 digits, ignoring spaces or dashes
-            $story = preg_replace('/[\s\-]/', '', $program->story);
+            $rawStory = is_array($program->story) ? implode(' ', $program->story) : (string) $program->story;
+            $story = preg_replace('/[\s\-]/', '', strip_tags($rawStory));
             if (preg_match('/\d{10,16}/', $story)) {
                 return redirect()->back()->withErrors([
                     'status' => 'Peringatan: Terdeteksi kemungkinan nomor rekening di dalam deskripsi program. Harap periksa kembali sebelum mempublikasikan.',

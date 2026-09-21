@@ -5,7 +5,7 @@ use App\Http\Middleware\EnsureCampaignerVerified;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoCache;
-use App\Http\Middleware\PreventBackHistory;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\VerifyXenditCallbackToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -31,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']);
 
         $middleware->web(append: [
-            PreventBackHistory::class,
+            SecurityHeaders::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,

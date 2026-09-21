@@ -52,9 +52,9 @@ class DonationController extends Controller
 
     public function confirm(Request $request, Donation $donation)
     {
-        // Admin or Campaigner who owns the program
-        if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga']) && $donation->program->created_by !== auth()->id()) {
-            abort(403);
+        // Only authorized staff (Administrator or Keuangan) can confirm manual donations
+        if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga']) || ! auth()->user()->hasAnyRole(['Administrator', 'Keuangan', 'Program Officer'])) {
+            abort(403, 'Hanya tim Keuangan atau Administrator yang berwenang mengonfirmasi donasi manual.');
         }
 
         if ($donation->status === 'paid' || $donation->channel !== 'offline') {

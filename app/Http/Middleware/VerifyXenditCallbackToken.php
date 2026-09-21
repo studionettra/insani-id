@@ -16,13 +16,13 @@ class VerifyXenditCallbackToken
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $xenditXCallbackToken = config('services.xendit.webhook_token');
-        $reqToken = $request->header('x-callback-token');
+        $xenditXCallbackToken = (string) config('services.xendit.webhook_token');
+        $reqToken = (string) $request->header('x-callback-token');
 
-        if ($reqToken !== $xenditXCallbackToken) {
-            Log::warning('Unauthorized Xendit Webhook Token', [
+        if (empty($xenditXCallbackToken) || empty($reqToken) || ! hash_equals($xenditXCallbackToken, $reqToken)) {
+            Log::warning('Unauthorized Xendit Webhook attempt', [
                 'ip' => $request->ip(),
-                'token_received' => $reqToken,
+                'has_token_header' => $request->hasHeader('x-callback-token'),
             ]);
 
             return response()->json(['message' => 'Unauthorized token'], 403);

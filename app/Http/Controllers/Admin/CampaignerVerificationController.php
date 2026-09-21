@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class CampaignerVerificationController extends Controller
 {
@@ -88,5 +89,20 @@ class CampaignerVerificationController extends Controller
         }
 
         return redirect()->route('admin.campaigners.index')->with('success', 'Status verifikasi berhasil diperbarui.');
+    }
+
+    public function viewDocument($id, $docId)
+    {
+        $document = VerificationDocument::where('campaigner_profile_id', $id)->findOrFail($docId);
+
+        if (Storage::disk('local')->exists($document->file_path)) {
+            return Storage::disk('local')->response($document->file_path);
+        }
+
+        if (Storage::disk('public')->exists($document->file_path)) {
+            return Storage::disk('public')->response($document->file_path);
+        }
+
+        abort(404, 'Dokumen verifikasi tidak ditemukan.');
     }
 }

@@ -136,7 +136,7 @@ export default function CampaignerShow({ campaigner }: any) {
                                     <div key={doc.id} className="border border-gray-200 bg-gray-50/30 p-5 rounded-lg space-y-4">
                                         <div className="flex justify-between items-start">
                                             <div className="font-semibold text-gray-900">{getDocTitle(doc.document_type)}</div>
-                                            <a href={`/storage/${doc.file_path}`} target="_blank" rel="noreferrer" className="text-[#1A56DB] text-sm font-medium flex items-center hover:underline bg-blue-50 px-3 py-1.5 rounded-md">
+                                            <a href={`/admin/campaigners/${campaigner.id}/documents/${doc.id}`} target="_blank" rel="noreferrer" className="text-[#1A56DB] text-sm font-medium flex items-center hover:underline bg-blue-50 px-3 py-1.5 rounded-md">
                                                 Lihat Dokumen <ExternalLink className="ml-1.5 w-4 h-4" />
                                             </a>
                                         </div>

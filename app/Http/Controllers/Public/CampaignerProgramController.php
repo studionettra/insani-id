@@ -7,7 +7,9 @@ use App\Models\Category;
 use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Mews\Purifier\Facades\Purifier;
 
 class CampaignerProgramController extends Controller
 {
@@ -55,12 +57,20 @@ class CampaignerProgramController extends Controller
 
         $coverImagePath = $request->file('cover_image')->store('programs/covers', 'public');
 
+        $cleanedStory = Purifier::clean($request->story);
+        $strippedStory = preg_replace('/[\s\-]/', '', strip_tags($cleanedStory));
+        if (preg_match('/\d{10,16}/', $strippedStory)) {
+            throw ValidationException::withMessages([
+                'story' => 'Demi keamanan dan transparansi, penulisan nomor rekening pribadi di dalam cerita program tidak diperbolehkan. Seluruh donasi akan diproses melalui sistem pembayaran resmi yayasan.',
+            ]);
+        }
+
         $campaignerProfile = auth()->user()->campaignerProfile;
 
         $program = new Program;
         $program->program_code = 'PRG-'.date('Ymd').'-'.strtoupper(Str::random(4));
         $program->title = $request->title;
-        $program->story = $request->story;
+        $program->story = $cleanedStory;
         $program->slug = Str::slug($request->title).'-'.Str::random(4);
         $program->category_id = $request->category_id;
         $program->campaigner_type = $campaignerProfile->type;
@@ -133,8 +143,16 @@ class CampaignerProgramController extends Controller
             'video_url' => 'nullable|url',
         ]);
 
+        $cleanedStory = Purifier::clean($request->story);
+        $strippedStory = preg_replace('/[\s\-]/', '', strip_tags($cleanedStory));
+        if (preg_match('/\d{10,16}/', $strippedStory)) {
+            throw ValidationException::withMessages([
+                'story' => 'Demi keamanan dan transparansi, penulisan nomor rekening pribadi di dalam cerita program tidak diperbolehkan. Seluruh donasi akan diproses melalui sistem pembayaran resmi yayasan.',
+            ]);
+        }
+
         $program->title = $request->title;
-        $program->story = $request->story;
+        $program->story = $cleanedStory;
         $program->category_id = $request->category_id;
         $program->target_amount = $request->target_amount;
         $program->deadline = $request->deadline;

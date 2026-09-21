@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Program;
 use App\Models\ProgramUpdate;
 use Illuminate\Http\Request;
+use Mews\Purifier\Facades\Purifier;
 
 class CampaignerProgramUpdateController extends Controller
 {
@@ -41,7 +42,7 @@ class CampaignerProgramUpdateController extends Controller
 
         $program->updates()->create([
             'title' => $validated['title'],
-            'content' => $validated['content'],
+            'content' => Purifier::clean($validated['content']),
             'is_published' => $validated['is_published'] ?? true,
             'created_by' => auth()->id(),
         ]);
@@ -65,7 +66,7 @@ class CampaignerProgramUpdateController extends Controller
 
         $update->update([
             'title' => $validated['title'],
-            'content' => $validated['content'],
+            'content' => Purifier::clean($validated['content']),
             'is_published' => $validated['is_published'] ?? true,
         ]);
 

@@ -18,4 +18,9 @@ class VerificationDocument extends Model
     {
         return $this->belongsTo(CampaignerProfile::class, 'campaigner_profile_id');
     }
+
+    public function campaignerProfile()
+    {
+        return $this->belongsTo(CampaignerProfile::class, 'campaigner_profile_id');
+    }
 }

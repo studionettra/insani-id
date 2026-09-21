@@ -49,8 +49,8 @@ export default function ContactCreate() {
     const [isSuccess, setIsSuccess] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
     
-    // Cloudflare Turnstile Testing Sitekey (Always Passes)
-    const turnstileSiteKey = '1x00000000000000000000AA';
+    // Cloudflare Turnstile Sitekey
+    const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
     const turnstileRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<any>(null);
 

@@ -1,7 +1,18 @@
 import { Head } from '@inertiajs/react';
 import PublicLayout from '@/layouts/PublicLayout';
+import DOMPurify from 'dompurify';
 
-export default function Show({ page }) {
+interface PageProps {
+    page: {
+        title: string;
+        meta_title?: string;
+        meta_description?: string;
+        content_html: string;
+        attachment_url?: string;
+    };
+}
+
+export default function Show({ page }: PageProps) {
     return (
         <PublicLayout>
             <Head>
@@ -20,7 +31,7 @@ export default function Show({ page }) {
 
                         <div 
                             className="prose prose-lg prose-cyan max-w-none text-gray-600"
-                            dangerouslySetInnerHTML={{ __html: page.content_html }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content_html) }}
                         />
 
                         {page.attachment_url && (

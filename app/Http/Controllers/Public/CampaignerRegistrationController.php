@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\CampaignerProfile;
+use App\Models\VerificationDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CampaignerRegistrationController extends Controller
 {
@@ -77,7 +79,7 @@ class CampaignerRegistrationController extends Controller
 
             foreach ($documents as $type => $file) {
                 if ($file) {
-                    $path = $file->store("verification_documents/{$user->id}", 'public');
+                    $path = $file->store("verification_documents/{$user->id}", 'local');
                     $profile->documents()->create([
                         'document_type' => $type,
                         'file_path' => $path,
@@ -100,5 +102,24 @@ class CampaignerRegistrationController extends Controller
         return inertia('Public/CampaignerRegistration/Status', [
             'profile' => $profile,
         ]);
+    }
+
+    public function viewDocument(Request $request, $id)
+    {
+        $document = VerificationDocument::with('campaignerProfile')->findOrFail($id);
+
+        if ($document->campaignerProfile->user_id !== $request->user()->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (Storage::disk('local')->exists($document->file_path)) {
+            return Storage::disk('local')->response($document->file_path);
+        }
+
+        if (Storage::disk('public')->exists($document->file_path)) {
+            return Storage::disk('public')->response($document->file_path);
+        }
+
+        abort(404, 'Dokumen tidak ditemukan.');
     }
 }
