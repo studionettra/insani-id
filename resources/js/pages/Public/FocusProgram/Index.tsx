@@ -1,64 +1,93 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import React from 'react';
+import { FadeIn } from '@/components/ui/fade-in';
 import PublicLayout from '@/layouts/PublicLayout';
+import { getLocalizedValue } from '@/lib/utils';
+import useTranslation from '@/hooks/use-translation';
 
 export default function FocusProgramIndex({ pillars }: any) {
-    const { locale } = usePage().props as any;
+    const { t, locale } = useTranslation();
 
     return (
-        <PublicLayout title="Fokus Program">
+        <PublicLayout title={t('Fokus Program')}>
             
-            <div className="bg-insani-darkblue text-white py-16 md:py-24">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">Fokus Program</h1>
-                    <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto">
-                        Pilar kebaikan utama yang kami dedikasikan untuk memberdayakan dan membangkitkan harapan umat.
-                    </p>
+            {/* Hero Section */}
+            <div className="relative bg-gradient-to-br from-insani-darkblue via-slate-900 to-insani-darkblue text-white py-20 md:py-28 overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(#00a6c0_1px,transparent_1px)] [background-size:24px_24px] opacity-15"></div>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <FadeIn>
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-insani-turquoise text-xs font-semibold mb-6 border border-white/10">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>{t('Pilar Kebaikan Berkelanjutan')}</span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+                            {t('Fokus Program')}
+                        </h1>
+                        <p className="text-lg md:text-xl text-blue-100/90 max-w-3xl mx-auto leading-relaxed font-normal">
+                            {t('Pilar kebaikan utama yang kami dedikasikan untuk memberdayakan, melindungi, dan membangkitkan harapan umat di berbagai dimensi kehidupan.')}
+                        </p>
+                    </FadeIn>
                 </div>
             </div>
 
-            <section className="py-16 md:py-24 bg-white">
+            {/* Pillar Grid Section */}
+            <section className="py-20 md:py-28 bg-slate-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {pillars && pillars.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {pillars.map((cat: any) => (
-                                <Link 
-                                    key={cat.id} 
-                                    href={`/program?category=${cat.id}`} 
-                                    className="group flex flex-col bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300"
-                                >
-                                    <div className="aspect-[16/10] bg-gray-100 overflow-hidden relative">
-                                        {cat.pillar_image ? (
-                                            <img 
-                                                src={`/storage/${cat.pillar_image}`} 
-                                                alt={typeof cat.name === 'object' ? cat.name?.id : cat.name} 
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-insani-blue/10 text-insani-blue text-xl font-bold">
-                                                {typeof cat.name === 'object' ? cat.name?.id || cat.name?.en : cat.name}
+                            {pillars.map((cat: any, index: number) => {
+                                const catName = t(getLocalizedValue(cat.name_translations || cat.name, locale));
+                                const catDesc = t(getLocalizedValue(cat.description_translations || cat.description, locale)) || 
+                                    t(`Dedikasi kebaikan berkelanjutan untuk program bantuan dan pemberdayaan dalam pilar ${catName}.`);
+
+                                return (
+                                    <FadeIn key={cat.id} delay={index * 0.1}>
+                                        <Link 
+                                            href={`/fokus-program/${cat.slug}`} 
+                                            className="group flex flex-col h-full bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-brand-300 transition-all duration-300 hover:-translate-y-1.5"
+                                        >
+                                            <div className="aspect-[16/10] bg-slate-100 overflow-hidden relative">
+                                                {cat.pillar_image ? (
+                                                    <img 
+                                                        src={`/storage/${cat.pillar_image}`} 
+                                                        alt={catName} 
+                                                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out" 
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-900 to-slate-900 text-white text-2xl font-bold px-6 text-center">
+                                                        {catName}
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
+                                                <div className="absolute bottom-5 left-6 right-6">
+                                                    <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold uppercase tracking-wider mb-2">
+                                                        {t('Pilar')}
+                                                    </span>
+                                                    <h2 className="text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-brand-300 transition-colors">
+                                                        {catName}
+                                                    </h2>
+                                                </div>
                                             </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                        <h3 className="absolute bottom-6 left-6 right-6 text-2xl font-bold text-white group-hover:text-insani-turquoise transition-colors">
-                                            {cat.name_translations?.id || (typeof cat.name === 'object' ? cat.name?.id || cat.name?.en : cat.name)}
-                                        </h3>
-                                    </div>
-                                    <div className="p-6 flex flex-col flex-grow">
-                                        <p className="text-gray-600 mb-6 flex-grow">
-                                            {cat.description_translations?.id || (typeof cat.description === 'object' ? cat.description?.id : cat.description) || `Berbagai program donasi dan kebaikan yang berfokus pada ${typeof cat.name === 'object' ? cat.name?.id : cat.name}.`}
-                                        </p>
-                                        <div className="flex items-center text-insani-blue font-semibold group-hover:text-insani-darkblue">
-                                            Lihat Program <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                            <div className="p-6 md:p-8 flex flex-col flex-grow">
+                                                <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-grow line-clamp-3">
+                                                    {catDesc}
+                                                </p>
+                                                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-brand-600 font-semibold text-sm group-hover:text-brand-700">
+                                                    <span>{t('Pelajari Selengkapnya')}</span>
+                                                    <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-all duration-300">
+                                                        <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </FadeIn>
+                                );
+                            })}
                         </div>
                     ) : (
-                        <div className="text-center py-20 bg-slate-50 rounded-2xl border border-slate-100">
-                            <p className="text-gray-500">Belum ada fokus program yang ditambahkan.</p>
+                        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200">
+                            <p className="text-slate-500">{t('Belum ada fokus program yang ditambahkan.')}</p>
                         </div>
                     )}
                 </div>
