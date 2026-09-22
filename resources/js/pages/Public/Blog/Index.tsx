@@ -1,6 +1,7 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Calendar, User, ArrowRight, Search, X, BookOpen } from 'lucide-react';
 import React, { useState } from 'react';
+import GoogleAd from '@/components/ads/GoogleAd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useTranslation from '@/hooks/use-translation';
@@ -18,6 +19,7 @@ interface BlogIndexProps {
 
 export default function BlogIndex({ blogs, categories = [], filters = {} }: BlogIndexProps) {
     const { t, locale, isRtl } = useTranslation();
+    const { siteSettings } = usePage().props as any;
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
 
     const handleSearchSubmit = (e: React.FormEvent) => {
@@ -152,6 +154,12 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
             {/* Articles Grid */}
             <section className="py-12 md:py-16 bg-white min-h-[50vh]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Google AdSense Slot (Blog Index Banner) */}
+                    <GoogleAd 
+                        slot={siteSettings?.adsense_slot_blog_index} 
+                        className="mb-10 max-w-4xl mx-auto"
+                    />
+
                     {blogs && blogs.data && blogs.data.length > 0 ? (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">

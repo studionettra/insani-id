@@ -9,12 +9,18 @@ import {
     CheckCircle2,
     BarChart3,
     Sparkles,
-    Info
+    Info,
+    Megaphone,
+    ShieldCheck,
+    Globe,
+    ExternalLink
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Props {
     settings: Record<string, string>;
@@ -37,6 +43,13 @@ export default function SiteSettingsIndex({ settings }: Props) {
         google_analytics_id: settings.google_analytics_id || '',
         meta_pixel_id: settings.meta_pixel_id || '',
         tiktok_pixel_id: settings.tiktok_pixel_id || '',
+        adsense_enabled: settings.adsense_enabled || '0',
+        google_adsense_client_id: settings.google_adsense_client_id || '',
+        adsense_slot_blog_index: settings.adsense_slot_blog_index || '',
+        adsense_slot_article_top: settings.adsense_slot_article_top || '',
+        adsense_slot_article_middle: settings.adsense_slot_article_middle || '',
+        adsense_slot_article_bottom: settings.adsense_slot_article_bottom || '',
+        ads_txt_content: settings.ads_txt_content || '',
     });
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -425,6 +438,185 @@ export default function SiteSettingsIndex({ settings }: Props) {
                             <span>
                                 <strong>Catatan Teknis SPA:</strong> Sistem Insani ID secara otomatis mengirimkan <em>Virtual Pageview</em> dan event e-commerce standar (<code>InitiateCheckout</code> dan <code>Purchase</code> / donasi sukses) setiap kali pengunjung berinteraksi dengan website.
                             </span>
+                        </div>
+                    </div>
+
+                    {/* Card 6: Monetisasi & Google AdSense (Khusus Berita) */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
+                                    <Megaphone className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                                            Google AdSense (Monetisasi Khusus Berita)
+                                        </h2>
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full">
+                                            Khusus /berita
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        Atur penayangan unit iklan Google AdSense dan file otorisasi publisher ads.txt.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/60 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
+                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                                    {data.adsense_enabled === '1' ? 'Iklan Aktif' : 'Iklan Nonaktif'}
+                                </span>
+                                <Switch
+                                    checked={data.adsense_enabled === '1'}
+                                    onCheckedChange={(checked) => setData('adsense_enabled', checked ? '1' : '0')}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            {/* Publisher Client ID */}
+                            <div className="space-y-1.5 max-w-xl">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="google_adsense_client_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                        Google AdSense Publisher ID (Client ID)
+                                    </Label>
+                                    <span className="text-[10px] font-mono text-gray-500">format: ca-pub-XXXXXXXXXXXXXXXX</span>
+                                </div>
+                                <Input
+                                    id="google_adsense_client_id"
+                                    value={data.google_adsense_client_id}
+                                    onChange={(e) => setData('google_adsense_client_id', e.target.value)}
+                                    placeholder="ca-pub-1234567890123456"
+                                    className="font-mono text-xs"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    Ditemukan di dashboard AdSense Anda (Akun &gt; Pengaturan &gt; Informasi akun).
+                                </p>
+                                {errors.google_adsense_client_id && (
+                                    <p className="text-xs text-red-500">{errors.google_adsense_client_id}</p>
+                                )}
+                            </div>
+
+                            {/* Slot IDs Grid */}
+                            <div>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+                                    Unit Slot Iklan Berita (Ad Slots)
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {/* Slot 1: Blog Index */}
+                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                                        <Label htmlFor="adsense_slot_blog_index" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
+                                            1. Halaman Daftar Berita
+                                        </Label>
+                                        <p className="text-[11px] text-gray-400">Banner di atas daftar artikel (/berita)</p>
+                                        <Input
+                                            id="adsense_slot_blog_index"
+                                            value={data.adsense_slot_blog_index}
+                                            onChange={(e) => setData('adsense_slot_blog_index', e.target.value)}
+                                            placeholder="cth: 1234567890"
+                                            className="font-mono text-xs mt-1"
+                                        />
+                                        {errors.adsense_slot_blog_index && (
+                                            <p className="text-xs text-red-500">{errors.adsense_slot_blog_index}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Slot 2: Article Top */}
+                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                                        <Label htmlFor="adsense_slot_article_top" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
+                                            2. Atas Konten Artikel
+                                        </Label>
+                                        <p className="text-[11px] text-gray-400">Sebelum paragraf awal artikel</p>
+                                        <Input
+                                            id="adsense_slot_article_top"
+                                            value={data.adsense_slot_article_top}
+                                            onChange={(e) => setData('adsense_slot_article_top', e.target.value)}
+                                            placeholder="cth: 2345678901"
+                                            className="font-mono text-xs mt-1"
+                                        />
+                                        {errors.adsense_slot_article_top && (
+                                            <p className="text-xs text-red-500">{errors.adsense_slot_article_top}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Slot 3: Article Middle (In-Article) */}
+                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                                        <Label htmlFor="adsense_slot_article_middle" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
+                                            3. Tengah Paragraf (In-Article)
+                                        </Label>
+                                        <p className="text-[11px] text-gray-400">Disisipkan setelah paragraf ke-3</p>
+                                        <Input
+                                            id="adsense_slot_article_middle"
+                                            value={data.adsense_slot_article_middle}
+                                            onChange={(e) => setData('adsense_slot_article_middle', e.target.value)}
+                                            placeholder="cth: 3456789012"
+                                            className="font-mono text-xs mt-1"
+                                        />
+                                        {errors.adsense_slot_article_middle && (
+                                            <p className="text-xs text-red-500">{errors.adsense_slot_article_middle}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Slot 4: Article Bottom */}
+                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                                        <Label htmlFor="adsense_slot_article_bottom" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
+                                            4. Bawah Konten Artikel
+                                        </Label>
+                                        <p className="text-[11px] text-gray-400">Sebelum kotak Bagikan Berita</p>
+                                        <Input
+                                            id="adsense_slot_article_bottom"
+                                            value={data.adsense_slot_article_bottom}
+                                            onChange={(e) => setData('adsense_slot_article_bottom', e.target.value)}
+                                            placeholder="cth: 4567890123"
+                                            className="font-mono text-xs mt-1"
+                                        />
+                                        {errors.adsense_slot_article_bottom && (
+                                            <p className="text-xs text-red-500">{errors.adsense_slot_article_bottom}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* ads.txt Editor */}
+                            <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                    <Label htmlFor="ads_txt_content" className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                        <Globe className="w-4 h-4 text-emerald-600" />
+                                        Isi File ads.txt (Otorisasi Publisher)
+                                    </Label>
+                                    <a 
+                                        href="/ads.txt" 
+                                        target="_blank" 
+                                        rel="noreferrer" 
+                                        className="text-xs text-brand-600 dark:text-brand-400 hover:underline inline-flex items-center gap-1 font-medium"
+                                    >
+                                        Buka domain.com/ads.txt <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                </div>
+                                <Textarea
+                                    id="ads_txt_content"
+                                    rows={3}
+                                    value={data.ads_txt_content}
+                                    onChange={(e) => setData('ads_txt_content', e.target.value)}
+                                    placeholder="google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0"
+                                    className="font-mono text-xs leading-relaxed"
+                                />
+                                <p className="text-xs text-gray-400">
+                                    Jika dikosongkan namun <em>Publisher ID</em> di atas diisi, sistem akan otomatis menghasilkan baris standar Google AdSense saat file diakses.
+                                </p>
+                                {errors.ads_txt_content && (
+                                    <p className="text-xs text-red-500">{errors.ads_txt_content}</p>
+                                )}
+                            </div>
+
+                            {/* Isolation Protection Guarantee Notice */}
+                            <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-lg flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
+                                <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                                <span>
+                                    <strong>Jaminan Isolasi Kebaikan:</strong> Iklan Google AdSense hanya akan dimuat dan ditampilkan pada rute <code>/berita</code> dan <code>/berita/&#123;slug&#125;</code>. Seluruh halaman program, donasi, checkout pembayaran, formulir campaigner, dan dashboard admin dijamin 100% bebas dari script dan tayangan iklan.
+                                </span>
+                            </div>
                         </div>
                     </div>
 

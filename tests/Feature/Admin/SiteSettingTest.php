@@ -85,3 +85,26 @@ it('allows administrator to update tracking and analytics pixel settings', funct
     expect(AppSetting::get('meta_pixel_id'))->toBe('9876543210');
     expect(AppSetting::get('tiktok_pixel_id'))->toBe('TIKTOK12345');
 });
+
+it('allows administrator to update google adsense and ads.txt settings', function () {
+    actingAs($this->admin)
+        ->post(route('admin.site-settings.update'), [
+            'adsense_enabled' => '1',
+            'google_adsense_client_id' => 'ca-pub-9998887776665554',
+            'adsense_slot_blog_index' => '111222333',
+            'adsense_slot_article_top' => '222333444',
+            'adsense_slot_article_middle' => '333444555',
+            'adsense_slot_article_bottom' => '444555666',
+            'ads_txt_content' => 'google.com, pub-9998887776665554, DIRECT, f08c47fec0942fa0',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect(AppSetting::get('adsense_enabled'))->toBe('1');
+    expect(AppSetting::get('google_adsense_client_id'))->toBe('ca-pub-9998887776665554');
+    expect(AppSetting::get('adsense_slot_blog_index'))->toBe('111222333');
+    expect(AppSetting::get('adsense_slot_article_top'))->toBe('222333444');
+    expect(AppSetting::get('adsense_slot_article_middle'))->toBe('333444555');
+    expect(AppSetting::get('adsense_slot_article_bottom'))->toBe('444555666');
+    expect(AppSetting::get('ads_txt_content'))->toBe('google.com, pub-9998887776665554, DIRECT, f08c47fec0942fa0');
+});

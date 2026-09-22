@@ -43,6 +43,13 @@ class SiteSettingController extends Controller
             'google_analytics_id' => 'nullable|string|max:50',
             'meta_pixel_id' => 'nullable|string|max:50',
             'tiktok_pixel_id' => 'nullable|string|max:50',
+            'adsense_enabled' => 'nullable|string|in:0,1',
+            'google_adsense_client_id' => 'nullable|string|max:100',
+            'adsense_slot_blog_index' => 'nullable|string|max:50',
+            'adsense_slot_article_top' => 'nullable|string|max:50',
+            'adsense_slot_article_middle' => 'nullable|string|max:50',
+            'adsense_slot_article_bottom' => 'nullable|string|max:50',
+            'ads_txt_content' => 'nullable|string|max:5000',
         ]);
 
         if ($request->hasFile('qris_image')) {
@@ -74,6 +81,13 @@ class SiteSettingController extends Controller
             'google_analytics_id',
             'meta_pixel_id',
             'tiktok_pixel_id',
+            'adsense_enabled',
+            'google_adsense_client_id',
+            'adsense_slot_blog_index',
+            'adsense_slot_article_top',
+            'adsense_slot_article_middle',
+            'adsense_slot_article_bottom',
+            'ads_txt_content',
         ];
 
         foreach ($textFields as $field) {
@@ -82,6 +96,19 @@ class SiteSettingController extends Controller
                     ['key' => $field],
                     ['value' => $request->input($field)]
                 );
+            }
+        }
+
+        // Sync ads.txt file if configured
+        if ($request->has('ads_txt_content') || $request->has('google_adsense_client_id')) {
+            $adsTxtContent = trim((string) $request->input('ads_txt_content'));
+            if (! empty($adsTxtContent)) {
+                @file_put_contents(public_path('ads.txt'), $adsTxtContent.PHP_EOL);
+            } elseif ($pubId = $request->input('google_adsense_client_id')) {
+                $cleanPub = preg_replace('/[^0-9]/', '', (string) $pubId);
+                if (! empty($cleanPub)) {
+                    @file_put_contents(public_path('ads.txt'), "google.com, pub-{$cleanPub}, DIRECT, f08c47fec0942fa0".PHP_EOL);
+                }
             }
         }
 

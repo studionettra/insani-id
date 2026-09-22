@@ -41,6 +41,7 @@ use App\Http\Controllers\Public\ProgramListingController;
 use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
+use App\Models\AppSetting;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -104,6 +105,29 @@ Route::group([
 
 // Dynamic Sitemap XML
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+// Google AdSense ads.txt
+Route::get('/ads.txt', function () {
+    $content = AppSetting::get('ads_txt_content');
+    if (! $content) {
+        $pubId = AppSetting::get('google_adsense_client_id');
+        if ($pubId) {
+            $cleanPub = preg_replace('/[^0-9]/', '', (string) $pubId);
+            if (! empty($cleanPub)) {
+                $content = "google.com, pub-{$cleanPub}, DIRECT, f08c47fec0942fa0";
+            }
+        }
+    }
+
+    if (! $content) {
+        abort(404);
+    }
+
+    return response($content, 200, [
+        'Content-Type' => 'text/plain; charset=utf-8',
+        'Cache-Control' => 'public, max-age=86400',
+    ]);
+})->name('ads.txt');
 
 // Public Instant Search API
 Route::get('/api/public/search', [SearchController::class, 'search'])

@@ -1,7 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Calendar, User, ArrowLeft, Eye, Share2, Copy, Check } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
+import GoogleAd from '@/components/ads/GoogleAd';
 import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
@@ -11,11 +12,25 @@ import DOMPurify from 'dompurify';
 
 export default function BlogShow({ blog, relatedBlogs }: any) {
     const { t, locale, isRtl } = useTranslation();
+    const { siteSettings } = usePage().props as any;
     const [copied, setCopied] = useState(false);
 
     const blogTitle = getLocalizedValue(blog.title, locale);
     const blogContent = getLocalizedValue(blog.content_html || blog.content || '', locale);
     const blogExcerpt = getLocalizedValue(blog.excerpt || '', locale);
+
+    // Split content to safely inject in-article ad between paragraphs
+    const contentParts = useMemo(() => {
+        if (!blogContent) return { before: '', after: '' };
+        const paragraphs = blogContent.split('</p>');
+        // If article has at least 4 paragraphs, insert ad after paragraph 3
+        if (paragraphs.length > 4) {
+            const before = paragraphs.slice(0, 3).join('</p>') + '</p>';
+            const after = paragraphs.slice(3).join('</p>');
+            return { before, after };
+        }
+        return { before: blogContent, after: '' };
+    }, [blogContent]);
 
     const baseShareUrl = typeof window !== 'undefined' ? `${window.location.origin}/berita/${blog.slug}` : `https://insani.id/berita/${blog.slug}`;
     const rawDescription = blogExcerpt || blogContent || '';
@@ -125,11 +140,44 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight">
                                 {blogTitle}
                             </h1>
+
+                            {/* Google AdSense Slot: Top Article */}
+                            <GoogleAd 
+                                slot={siteSettings?.adsense_slot_article_top} 
+                                className="mb-8"
+                            />
                             
-                            {/* Content */}
-                            <div 
-                                className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
-                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blogContent) }} 
+                            {/* Content (with optional in-article ad in the middle) */}
+                            {contentParts.after ? (
+                                <>
+                                    <div 
+                                        className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentParts.before) }} 
+                                    />
+
+                                    {/* Google AdSense Slot: In-Article Middle */}
+                                    <GoogleAd 
+                                        slot={siteSettings?.adsense_slot_article_middle} 
+                                        format="fluid"
+                                        className="my-8"
+                                    />
+
+                                    <div 
+                                        className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentParts.after) }} 
+                                    />
+                                </>
+                            ) : (
+                                <div 
+                                    className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blogContent) }} 
+                                />
+                            )}
+
+                            {/* Google AdSense Slot: Bottom Article */}
+                            <GoogleAd 
+                                slot={siteSettings?.adsense_slot_article_bottom} 
+                                className="mt-8 mb-4"
                             />
 
                             {/* Smart Share Section */}
