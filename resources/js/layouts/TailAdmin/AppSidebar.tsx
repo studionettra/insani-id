@@ -2,188 +2,265 @@ import { Link, usePage } from "@inertiajs/react";
 import { 
   Users, 
   BookOpen, 
-  FolderGit2, 
-  LayoutGrid, 
   Briefcase, 
   Gift, 
-  GiftIcon, 
-  CheckCheckIcon, 
-  Check, 
   BadgeCheck, 
-  Paperclip, 
   MessageCircleCode, 
-  BadgeCent, 
-  BadgeHelp, 
-  CaseLower, 
   WalletCards, 
-  ListChecksIcon,
   Image as ImageIcon,
-  TrendingUp,
-  Handshake,
-  Mail,
-  Settings,
-  Newspaper,
-  Activity
+  Mail, 
+  Settings, 
+  Newspaper, 
+  Activity, 
+  Building2,
+  HeartHandshake,
+  Layers,
+  Megaphone,
+  CreditCard,
+  FileSpreadsheet,
+  BadgeHelp,
+  MessageSquareQuote,
+  Sparkles
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { GridIcon, ChevronDownIcon, HorizontaLDots } from "@/icons";
 import { useSidebar } from "./context/SidebarContext";
 
+type SubNavItem = {
+  name: string;
+  path: string;
+  pro?: boolean;
+  new?: boolean;
+};
+
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: SubNavItem[];
+};
+
+type NavGroup = {
+  key: string;
+  title: string;
+  items: NavItem[];
 };
 
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen } = useSidebar();
+  const { isExpanded, isMobileOpen, toggleSidebar } = useSidebar();
   const { url, props } = usePage();
   const { auth } = props as any;
-  const permissions = auth?.user?.permissions || [];
-  const roles = auth?.user?.roles || [];
-  const isSuperadmin = roles.includes('Administrator');
+  const permissions: string[] = auth?.user?.permissions || [];
+  const roles: string[] = auth?.user?.roles || [];
+  const isSuperadmin: boolean = roles.includes('Administrator');
 
-  const mainNavItems: NavItem[] = [
+  const navGroups: NavGroup[] = [
     {
-        icon: <GridIcon />,
-        name: "Dashboard",
-        path: "/dashboard",
+      key: "overview",
+      title: "Ringkasan",
+      items: [
+        {
+          icon: <GridIcon className="w-5 h-5" />,
+          name: "Dashboard",
+          path: "/dashboard",
+        },
+        ...((permissions.includes('report.view') || isSuperadmin) ? [{
+          icon: <Activity className="w-5 h-5" />,
+          name: "Analitik Web",
+          path: "/admin/analytics",
+        }] : []),
+        ...(!isSuperadmin && !permissions.includes('donation.view') ? [{
+          icon: <BookOpen className="w-5 h-5" />,
+          name: "Donasi Saya",
+          path: "/akun/donasi-saya",
+        }] : []),
+        ...(!isSuperadmin && !permissions.includes('program.view') ? [{
+          icon: <Gift className="w-5 h-5" />,
+          name: "Jelajah Program",
+          path: "/program",
+        }] : []),
+      ],
     },
-    ...(!isSuperadmin && !permissions.includes('donation.view') ? [{
-        icon: <BookOpen className="w-5 h-5" />,
-        name: "Donasi Saya",
-        path: "/akun/donasi-saya",
-    }] : []),
-    ...(!isSuperadmin && !permissions.includes('program.view') ? [{
-        icon: <GiftIcon className="w-5 h-5" />,
-        name: "Jelajah Program",
-        path: "/program",
-    }] : []),
-    ...(permissions.includes('program.create') && !isSuperadmin ? [{
-        icon: <Briefcase className="w-5 h-5" />,
-        name: "Program Saya",
-        path: "/akun/programs",
-    }] : []),
-    ...(permissions.includes('program.view') || isSuperadmin ? [{
-        icon: <GiftIcon className="w-5 h-5" />,
-        name: "Program Donasi",
-        path: "/admin/programs",
-    }] : []),
-    ...(permissions.includes('donation.view') || isSuperadmin ? [{
-        icon: <BookOpen className="w-5 h-5" />,
-        name: "Manajemen Donasi",
-        path: "/admin/donations",
-    }] : []),
-    ...(permissions.includes('campaigner.view') || isSuperadmin ? [{
-        icon: <BadgeCheck className="w-5 h-5" />,
-        name: "Verifikasi Campaigner",
-        path: "/admin/campaigners",
-    }] : []),
-    ...(permissions.includes('disbursement.view') || isSuperadmin ? [{
-        icon: <WalletCards className="w-5 h-5" />,
-        name: "Penyaluran Dana",
-        path: "/admin/disbursements",
-    }] : []),
-    ...(permissions.includes('report.view') || isSuperadmin ? [{
-        icon: <Paperclip className="w-5 h-5" />,
-        name: "Laporan",
-        path: "/admin/reports",
-    }, {
-        icon: <Activity className="w-5 h-5" />,
-        name: "Analitik Web",
-        path: "/admin/analytics",
-    }] : []),
-    ...(permissions.includes('user.view') || isSuperadmin ? [{
-        icon: <Users className="w-5 h-5" />,
-        name: "Pengguna",
-        path: "/admin/users",
-    }] : []),
+    {
+      key: "campaigns",
+      title: "Program & Galang Dana",
+      items: [
+        ...((permissions.includes('program.view') || isSuperadmin) ? [{
+          icon: <HeartHandshake className="w-5 h-5" />,
+          name: "Program Donasi",
+          path: "/admin/programs",
+        }] : []),
+        ...(permissions.includes('program.create') && !isSuperadmin ? [{
+          icon: <Briefcase className="w-5 h-5" />,
+          name: "Program Saya",
+          path: "/akun/programs",
+        }] : []),
+        {
+          icon: <Sparkles className="w-5 h-5" />,
+          name: "Fundraiser Saya",
+          path: "/akun/fundraiser",
+        },
+        ...((permissions.includes('category.view') || isSuperadmin) ? [{
+          icon: <Layers className="w-5 h-5" />,
+          name: "Kategori Program",
+          path: "/admin/categories",
+        }] : []),
+        ...((permissions.includes('campaigner.view') || permissions.includes('campaigner.verify') || isSuperadmin) ? [{
+          icon: <BadgeCheck className="w-5 h-5" />,
+          name: "Verifikasi Campaigner",
+          path: "/admin/campaigners",
+        }] : []),
+        ...((permissions.includes('fundraiser.view') || isSuperadmin) ? [{
+          icon: <Megaphone className="w-5 h-5" />,
+          name: "Relawan Fundraiser",
+          path: "/admin/fundraisers",
+        }] : []),
+      ],
+    },
+    {
+      key: "finance",
+      title: "Transaksi & Keuangan",
+      items: [
+        ...((permissions.includes('donation.view') || isSuperadmin) ? [{
+          icon: <CreditCard className="w-5 h-5" />,
+          name: "Manajemen Donasi",
+          path: "/admin/donations",
+        }] : []),
+        ...((permissions.includes('donation.view') || permissions.includes('manage_settings') || isSuperadmin) ? [{
+          icon: <Building2 className="w-5 h-5" />,
+          name: "Rekening Bank",
+          path: "/admin/bank-accounts",
+        }] : []),
+        ...((permissions.includes('disbursement.view') || isSuperadmin) ? [{
+          icon: <WalletCards className="w-5 h-5" />,
+          name: "Penyaluran Dana",
+          path: "/admin/disbursements",
+        }] : []),
+        ...((permissions.includes('report.view') || isSuperadmin) ? [{
+          icon: <FileSpreadsheet className="w-5 h-5" />,
+          name: "Laporan & Rekap",
+          path: "/admin/reports",
+        }] : []),
+      ],
+    },
+    {
+      key: "communication",
+      title: "Layanan & Interaksi",
+      items: [
+        ...((permissions.includes('manage_contact_messages') || isSuperadmin) ? [{
+          icon: <Mail className="w-5 h-5" />,
+          name: "Pesan Masuk",
+          path: "/admin/contact-messages",
+        }] : []),
+        ...((permissions.includes('comment.moderate') || isSuperadmin) ? [{
+          icon: <MessageCircleCode className="w-5 h-5" />,
+          name: "Komentar & Doa",
+          path: "/admin/comments",
+        }] : []),
+      ],
+    },
+    {
+      key: "content",
+      title: "Konten & Publikasi",
+      items: [
+        ...((permissions.includes('manage_blog') || isSuperadmin) ? [{
+          icon: <Newspaper className="w-5 h-5" />,
+          name: "Berita & Cerita",
+          path: "/admin/blogs",
+        }] : []),
+        ...((permissions.includes('manage_banners') || isSuperadmin) ? [{
+          icon: <ImageIcon className="w-5 h-5" />,
+          name: "Banner Beranda",
+          path: "/admin/homepage-banners",
+        }] : []),
+        ...((permissions.includes('manage_banners') || isSuperadmin) ? [{
+          icon: <MessageSquareQuote className="w-5 h-5" />,
+          name: "Testimoni Donatur",
+          path: "/admin/testimonials",
+        }] : []),
+        ...((permissions.includes('manage_pages') || isSuperadmin) ? [{
+          icon: <BookOpen className="w-5 h-5" />,
+          name: "Halaman Statis",
+          path: "/admin/pages",
+        }] : []),
+        ...((permissions.includes('manage_faqs') || isSuperadmin) ? [{
+          icon: <BadgeHelp className="w-5 h-5" />,
+          name: "Tanya Jawab (FAQ)",
+          path: "/admin/faqs",
+        }] : []),
+        ...(() => {
+          const profileSubItems: SubNavItem[] = [
+            ...((permissions.includes('manage_management') || isSuperadmin) ? [{
+              name: "Dewan Pengurus",
+              path: "/admin/management-members",
+            }] : []),
+            ...((permissions.includes('manage_legal_documents') || permissions.includes('manage_pages') || isSuperadmin) ? [{
+              name: "Dokumen Legalitas",
+              path: "/admin/legal-documents",
+            }] : []),
+            ...((permissions.includes('manage_partners') || isSuperadmin) ? [{
+              name: "Mitra Kerja Sama",
+              path: "/admin/partners",
+            }] : []),
+            ...((permissions.includes('manage_impact_stats') || isSuperadmin) ? [{
+              name: "Statistik Dampak",
+              path: "/admin/impact-stats",
+            }] : []),
+          ];
+
+          if (profileSubItems.length === 0) return [];
+
+          return [{
+            icon: <Building2 className="w-5 h-5" />,
+            name: "Profil Lembaga",
+            subItems: profileSubItems,
+          }];
+        })(),
+      ],
+    },
+    {
+      key: "settings",
+      title: "Sistem & Pengaturan",
+      items: [
+        ...((permissions.includes('user.view') || isSuperadmin) ? [{
+          icon: <Users className="w-5 h-5" />,
+          name: "Kelola Pengguna",
+          path: "/admin/users",
+        }] : []),
+        ...((permissions.includes('settings.view') || permissions.includes('settings.update') || isSuperadmin) ? [{
+          icon: <Settings className="w-5 h-5" />,
+          name: "Pengaturan Website",
+          path: "/admin/site-settings",
+        }] : []),
+      ],
+    },
   ];
 
-  const othersItems: NavItem[] = [
-    ...(permissions.includes('manage_banners') || isSuperadmin ? [{
-        icon: <ImageIcon className="w-5 h-5" />,
-        name: "Banner Beranda",
-        path: "/admin/homepage-banners",
-    }] : []),
-    ...(permissions.includes('manage_impact_stats') || isSuperadmin ? [{
-        icon: <TrendingUp className="w-5 h-5" />,
-        name: "Statistik Dampak",
-        path: "/admin/impact-stats",
-    }] : []),
-    ...(permissions.includes('category.view') || isSuperadmin ? [{
-        icon: <ListChecksIcon className="w-5 h-5" />,
-        name: "Kategori",
-        path: "/admin/categories",
-    }] : []),
-    ...(permissions.includes('manage_partners') || isSuperadmin ? [{
-        icon: <Handshake className="w-5 h-5" />,
-        name: "Mitra Kerja Sama",
-        path: "/admin/partners",
-    }] : []),
-    ...(permissions.includes('manage_management') || isSuperadmin ? [{
-        icon: <Users className="w-5 h-5" />,
-        name: "Dewan Pengurus",
-        path: "/admin/management-members",
-    }] : []),
-    ...(permissions.includes('manage_pages') || isSuperadmin ? [{
-        icon: <BookOpen className="w-5 h-5" />,
-        name: "Halaman Statis",
-        path: "/admin/pages",
-    }] : []),
-    ...(permissions.includes('manage_faqs') || isSuperadmin ? [{
-        icon: <BadgeHelp className="w-5 h-5" />,
-        name: "Tanya Jawab (FAQ)",
-        path: "/admin/faqs",
-    }] : []),
-    ...(permissions.includes('manage_contact_messages') || isSuperadmin ? [{
-        icon: <Mail className="w-5 h-5" />,
-        name: "Pesan Kontak",
-        path: "/admin/contact-messages",
-    }] : []),
-    ...(permissions.includes('manage_blog') || isSuperadmin ? [{
-        icon: <Newspaper className="w-5 h-5" />,
-        name: "Manajemen Berita",
-        path: "/admin/blogs",
-    }] : []),
-    ...(permissions.includes('comment.moderate') || isSuperadmin ? [{
-        icon: <MessageCircleCode className="w-5 h-5" />,
-        name: "Komentar & Doa",
-        path: "/admin/comments",
-    }] : []),
-    ...(permissions.includes('settings.view') || permissions.includes('settings.update') || isSuperadmin ? [{
-        icon: <Settings className="w-5 h-5" />,
-        name: "Pengaturan Website",
-        path: "/admin/site-settings",
-    }] : []),
-  ];
+  // Filter out empty groups so headers don't render needlessly
+  const visibleGroups = navGroups.filter((g) => g.items.length > 0);
 
-  const [openSubmenu, setOpenSubmenu] = useState<{
-    type: "main" | "others";
-    index: number;
-  } | null>(null);
+  const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
   const [subMenuHeight, setSubMenuHeight] = useState<Record<string, number>>({});
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isActive = useCallback(
-    (path: string) => url === path || url.startsWith(path + '/'),
+    (path?: string) => {
+      if (!path) return false;
+      return url === path || url.startsWith(path + '/');
+    },
     [url]
   );
 
   useEffect(() => {
     let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? mainNavItems : othersItems;
-      items.forEach((nav, index) => {
+    visibleGroups.forEach((group) => {
+      group.items.forEach((nav, index) => {
         if (nav.subItems) {
+          const key = `${group.key}-${index}`;
           nav.subItems.forEach((subItem) => {
             if (isActive(subItem.path)) {
-              setOpenSubmenu({
-                type: menuType as "main" | "others",
-                index,
-              });
+              setOpenSubmenuKey(key);
               submenuMatched = true;
             }
           });
@@ -192,92 +269,52 @@ const AppSidebar: React.FC = () => {
     });
 
     if (!submenuMatched) {
-      setOpenSubmenu(null);
+      setOpenSubmenuKey(null);
     }
   }, [url, isActive]);
 
   useEffect(() => {
-    if (openSubmenu !== null) {
-      const key = `${openSubmenu.type}-${openSubmenu.index}`;
-
-      if (subMenuRefs.current[key]) {
-        setSubMenuHeight((prevHeights) => ({
-          ...prevHeights,
-          [key]: subMenuRefs.current[key]?.scrollHeight || 0,
-        }));
-      }
+    if (openSubmenuKey !== null && subMenuRefs.current[openSubmenuKey]) {
+      setSubMenuHeight((prev) => ({
+        ...prev,
+        [openSubmenuKey]: subMenuRefs.current[openSubmenuKey]?.scrollHeight || 0,
+      }));
     }
-  }, [openSubmenu]);
+  }, [openSubmenuKey]);
 
-  const handleSubmenuToggle = (index: number, menuType: "main" | "others") => {
-    setOpenSubmenu((prevOpenSubmenu) => {
-      if (
-        prevOpenSubmenu &&
-        prevOpenSubmenu.type === menuType &&
-        prevOpenSubmenu.index === index
-      ) {
-        return null;
-      }
-
-      return { type: menuType, index };
-    });
+  const handleSubmenuToggle = (key: string) => {
+    if (!isExpanded && !isMobileOpen) {
+      toggleSidebar();
+    }
+    setOpenSubmenuKey((prev) => (prev === key ? null : key));
   };
 
-  const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
-      {items.map((nav, index) => (
-        <li key={nav.name}>
-          {nav.subItems ? (
-            <button
-              onClick={() => handleSubmenuToggle(index, menuType)}
-              title={!isExpanded ? nav.name : undefined}
-              className={`menu-item group ${
-                openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "menu-item-active"
-                  : "menu-item-inactive"
-              } cursor-pointer ${
-                !isExpanded
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
-              }`}
-            >
-              <span
-                className={`menu-item-icon-size  ${
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
-                }`}
-              >
-                {nav.icon}
-              </span>
-              {(isExpanded || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
-              )}
-              {(isExpanded || isMobileOpen) && (
-                <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${
-                    openSubmenu?.type === menuType &&
-                    openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
-                  }`}
-                />
-              )}
-            </button>
-          ) : (
-            nav.path && (
-              <Link
-                href={nav.path}
+  const renderMenuItems = (items: NavItem[], groupKey: string) => (
+    <ul className="flex flex-col gap-1.5">
+      {items.map((nav, index) => {
+        const itemKey = `${groupKey}-${index}`;
+        const isSubmenuOpen = openSubmenuKey === itemKey;
+        const isParentActive = nav.subItems?.some((subItem) => isActive(subItem.path));
+
+        return (
+          <li key={nav.name}>
+            {nav.subItems ? (
+              <button
+                onClick={() => handleSubmenuToggle(itemKey)}
                 title={!isExpanded ? nav.name : undefined}
                 className={`menu-item group ${
-                  isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  isParentActive || isSubmenuOpen
+                    ? "menu-item-active"
+                    : "menu-item-inactive"
+                } cursor-pointer ${
+                  !isExpanded ? "lg:justify-center" : "lg:justify-start"
                 }`}
               >
                 <span
                   className={`menu-item-icon-size flex items-center justify-center ${
-                    isActive(nav.path)
+                    isParentActive || isSubmenuOpen
                       ? "menu-item-icon-active text-brand-500"
-                      : "menu-item-icon-inactive text-gray-500 group-hover:text-gray-700"
+                      : "menu-item-icon-inactive text-gray-500 group-hover:text-gray-700 dark:text-gray-400"
                   }`}
                 >
                   {nav.icon}
@@ -285,66 +322,95 @@ const AppSidebar: React.FC = () => {
                 {(isExpanded || isMobileOpen) && (
                   <span className="menu-item-text">{nav.name}</span>
                 )}
-              </Link>
-            )
-          )}
-          {nav.subItems && (isExpanded || isMobileOpen) && (
-            <div
-              ref={(el) => {
-                subMenuRefs.current[`${menuType}-${index}`] = el;
-              }}
-              className="overflow-hidden transition-all duration-300"
-              style={{
-                height:
-                  openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? `${subMenuHeight[`${menuType}-${index}`]}px`
+                {(isExpanded || isMobileOpen) && (
+                  <ChevronDownIcon
+                    className={`ml-auto w-5 h-5 transition-transform duration-200 ${
+                      isSubmenuOpen ? "rotate-180 text-brand-500" : ""
+                    }`}
+                  />
+                )}
+              </button>
+            ) : (
+              nav.path && (
+                <Link
+                  href={nav.path}
+                  title={!isExpanded ? nav.name : undefined}
+                  className={`menu-item group ${
+                    isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+                  } ${!isExpanded ? "lg:justify-center" : "lg:justify-start"}`}
+                >
+                  <span
+                    className={`menu-item-icon-size flex items-center justify-center ${
+                      isActive(nav.path)
+                        ? "menu-item-icon-active text-brand-500"
+                        : "menu-item-icon-inactive text-gray-500 group-hover:text-gray-700 dark:text-gray-400"
+                    }`}
+                  >
+                    {nav.icon}
+                  </span>
+                  {(isExpanded || isMobileOpen) && (
+                    <span className="menu-item-text">{nav.name}</span>
+                  )}
+                </Link>
+              )
+            )}
+            {nav.subItems && (isExpanded || isMobileOpen) && (
+              <div
+                ref={(el) => {
+                  subMenuRefs.current[itemKey] = el;
+                }}
+                className="overflow-hidden transition-all duration-300"
+                style={{
+                  height: isSubmenuOpen
+                    ? `${subMenuHeight[itemKey] ?? "auto"}px`
                     : "0px",
-              }}
-            >
-              <ul className="mt-2 space-y-1 ml-9">
-                {nav.subItems.map((subItem) => (
-                  <li key={subItem.name}>
-                    <Link
-                      href={subItem.path}
-                      className={`menu-dropdown-item ${
-                        isActive(subItem.path)
-                          ? "menu-dropdown-item-active"
-                          : "menu-dropdown-item-inactive"
-                      }`}
-                    >
-                      {subItem.name}
-                      <span className="flex items-center gap-1 ml-auto">
-                        {subItem.new && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            new
-                          </span>
-                        )}
-                        {subItem.pro && (
-                          <span
-                            className={`ml-auto ${
-                              isActive(subItem.path)
-                                ? "menu-dropdown-badge-active"
-                                : "menu-dropdown-badge-inactive"
-                            } menu-dropdown-badge`}
-                          >
-                            pro
-                          </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </li>
-      ))}
+                }}
+              >
+                <ul className="mt-1 space-y-1 ml-9">
+                  {nav.subItems.map((subItem) => (
+                    <li key={subItem.name}>
+                      <Link
+                        href={subItem.path}
+                        className={`menu-dropdown-item ${
+                          isActive(subItem.path)
+                            ? "menu-dropdown-item-active"
+                            : "menu-dropdown-item-inactive"
+                        }`}
+                      >
+                        {subItem.name}
+                        <span className="flex items-center gap-1 ml-auto">
+                          {subItem.new && (
+                            <span
+                              className={`ml-auto ${
+                                isActive(subItem.path)
+                                  ? "menu-dropdown-badge-active"
+                                  : "menu-dropdown-badge-inactive"
+                              } menu-dropdown-badge`}
+                            >
+                              new
+                            </span>
+                          )}
+                          {subItem.pro && (
+                            <span
+                              className={`ml-auto ${
+                                isActive(subItem.path)
+                                  ? "menu-dropdown-badge-active"
+                                  : "menu-dropdown-badge-inactive"
+                              } menu-dropdown-badge`}
+                            >
+                              pro
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </li>
+        );
+      })}
     </ul>
   );
 
@@ -392,42 +458,23 @@ const AppSidebar: React.FC = () => {
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isMobileOpen ? (
-                  "Menu"
-                ) : (
-                  <HorizontaLDots className="size-6" />
-                )}
-              </h2>
-              {renderMenuItems(mainNavItems, "main")}
-            </div>
-            
-            {othersItems.length > 0 && (
-                <div className="">
-                  <h2
-                    className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                      !isExpanded
-                        ? "lg:justify-center"
-                        : "justify-start"
-                    }`}
-                  >
-                    {isExpanded || isMobileOpen ? (
-                      "Konten & Pengaturan"
-                    ) : (
-                      <HorizontaLDots />
-                    )}
-                  </h2>
-                  {renderMenuItems(othersItems, "others")}
-                </div>
-            )}
+          <div className="flex flex-col gap-6">
+            {visibleGroups.map((group) => (
+              <div key={group.key}>
+                <h2
+                  className={`mb-2.5 text-[11px] font-semibold uppercase tracking-wider flex leading-[18px] text-gray-400 dark:text-gray-500 ${
+                    !isExpanded ? "lg:justify-center" : "justify-start px-3"
+                  }`}
+                >
+                  {isExpanded || isMobileOpen ? (
+                    group.title
+                  ) : (
+                    <HorizontaLDots className="size-4" />
+                  )}
+                </h2>
+                {renderMenuItems(group.items, group.key)}
+              </div>
+            ))}
           </div>
         </nav>
       </div>

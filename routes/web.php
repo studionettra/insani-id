@@ -164,6 +164,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::get('/akun/fundraiser', [FundraiserController::class, 'myFundraisers'])->name('akun.fundraiser.index');
 
     Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service|Content Editor')->group(function () {
+        Route::get('/', fn () => redirect()->route('dashboard'))->name('dashboard');
         Route::post('/auto-translate', [TranslationController::class, 'translate'])->name('auto-translate');
 
         Route::middleware('permission:user.view')->group(function () {

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Activity, BookOpen, FolderGit2, LayoutGrid, Users } from 'lucide-react';
+import { Activity, BookOpen, FileCheck, FolderGit2, LayoutGrid, Sparkles, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -62,6 +62,16 @@ export function AppSidebar() {
             href: '/admin/programs',
             icon: LayoutGrid, // You can use a different icon like 'Heart' if imported
         }] : []),
+        ...(permissions.includes('fundraiser.view') ? [{
+            title: 'Relawan Fundraiser',
+            href: '/admin/fundraisers',
+            icon: Users,
+        }] : []),
+        {
+            title: 'Fundraiser Saya',
+            href: '/akun/fundraiser',
+            icon: Sparkles,
+        },
         ...(permissions.includes('program.view') ? [{
             title: 'Manajemen Donasi',
             href: '/admin/donations',
@@ -100,6 +110,11 @@ export function AppSidebar() {
             title: 'Tim Manajemen',
             href: '/admin/management-members',
             icon: Users,
+        }] : []),
+        ...(permissions.includes('manage_legal_documents') || permissions.includes('manage_pages') ? [{
+            title: 'Dokumen Legalitas',
+            href: '/admin/legal-documents',
+            icon: FileCheck,
         }] : []),
         ...(permissions.includes('manage_partners') ? [{
             title: 'Mitra Kerja Sama',
