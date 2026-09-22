@@ -25,12 +25,7 @@ class DonationReceiptController extends Controller
 
         $payment = $donation->payments()->whereIn('gateway_status', ['PAID', 'SETTLED'])->latest()->first();
 
-        $settings = AppSetting::whereIn('key', [
-            'site_name',
-            'contact_email',
-            'contact_whatsapp',
-            'contact_address',
-        ])->pluck('value', 'key');
+        $settings = AppSetting::pluck('value', 'key')->toArray();
 
         return view('receipt', [
             'donation' => $donation,

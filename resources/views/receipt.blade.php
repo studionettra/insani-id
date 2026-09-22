@@ -249,7 +249,11 @@
         <div class="receipt-card">
             <div class="receipt-header">
                 <div class="receipt-brand">
-                    <h1>{{ $settings['site_name'] ?? 'Insani Indonesia' }}</h1>
+                    @if(!empty($settings['site_logo']))
+                        <img src="{{ asset('storage/' . $settings['site_logo']) }}" alt="{{ $settings['site_name'] ?? 'Insani Indonesia' }}" style="max-height: 42px; width: auto; margin-bottom: 6px; display: block;">
+                    @else
+                        <h1>{{ $settings['site_name'] ?? 'Insani Indonesia' }}</h1>
+                    @endif
                     <p>Bukti Tanda Terima Donasi Sah</p>
                 </div>
                 <div class="receipt-badge">
@@ -330,10 +334,24 @@
                         </div>
                     </div>
 
-                    <div class="signature-section">
-                        <p>Pengelola Donasi,</p>
-                        <div class="sign-title">Insani Indonesia</div>
-                        <p style="font-size: 11px; margin-top: 4px;">{{ $settings['contact_email'] ?? 'sapa@insani.id' }}</p>
+                    <div class="signature-section" style="position: relative; min-width: 190px;">
+                        <p style="font-size: 11px; margin-bottom: 4px; color: #475569;">{{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}</p>
+                        
+                        <div style="position: relative; height: 75px; margin: 4px 0; display: flex; align-items: center; justify-content: flex-end;">
+                            @if(!empty($settings['receipt_stamp_image']))
+                                <img src="{{ asset('storage/' . $settings['receipt_stamp_image']) }}" alt="Stempel Resmi" style="position: absolute; right: 25px; height: 70px; opacity: 0.85; z-index: 1; pointer-events: none;">
+                            @endif
+                            @if(!empty($settings['receipt_signature_image']))
+                                <img src="{{ asset('storage/' . $settings['receipt_signature_image']) }}" alt="Tanda Tangan" style="position: relative; height: 55px; z-index: 2;">
+                            @endif
+                        </div>
+
+                        <div class="sign-title" style="font-weight: 700; font-size: 13px; text-decoration: underline;">
+                            {{ $settings['receipt_signatory_name'] ?? 'Pengurus Yayasan' }}
+                        </div>
+                        <p style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                            {{ $settings['receipt_signatory_title'] ?? 'Bagian Keuangan & Donasi' }}
+                        </p>
                     </div>
                 </div>
             </div>
