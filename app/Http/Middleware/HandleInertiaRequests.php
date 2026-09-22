@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\AppSetting;
+use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -82,6 +83,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'siteSettings' => Cache::remember('site_settings_public', 3600, function () {
                 return AppSetting::pluck('value', 'key')->toArray();
+            }),
+            'bankAccounts' => Cache::remember('bank_accounts_public', 3600, function () {
+                return BankAccount::where('is_active', true)->orderBy('sort_order')->get();
             }),
         ];
     }

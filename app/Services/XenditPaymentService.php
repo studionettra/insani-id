@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\BankAccount;
 use App\Models\Donation;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
@@ -145,31 +146,57 @@ class XenditPaymentService
                 'min_amount' => 10000,
                 'max_amount' => 10000000,
             ],
-            // Manual Transfer
-            [
-                'code' => 'MANUAL_BSI',
-                'name' => 'Bank Syariah Indonesia (BSI)',
-                'subtitle' => 'Konfirmasi WhatsApp',
-                'category' => 'manual',
-                'method' => 'bank_transfer_manual',
-                'channel' => 'offline',
-                'min_amount' => 10000,
-                'max_amount' => 500000000,
-                'account_number' => '713 219 5026',
-                'account_name' => 'A.n Insani Indonesia',
-            ],
-            [
-                'code' => 'MANUAL_BRI',
-                'name' => 'Bank Rakyat Indonesia (BRI)',
-                'subtitle' => 'Konfirmasi WhatsApp',
-                'category' => 'manual',
-                'method' => 'bank_transfer_manual',
-                'channel' => 'offline',
-                'min_amount' => 10000,
-                'max_amount' => 500000000,
-                'account_number' => '0345 0100 1366 304',
-                'account_name' => 'A.n Insani Indonesia',
-            ],
+            // Manual Transfer channels loaded dynamically
+            ...((function () {
+                try {
+                    $accounts = BankAccount::where('is_active', true)->orderBy('sort_order')->get();
+                    if ($accounts->isNotEmpty()) {
+                        return $accounts->map(function ($acc) {
+                            return [
+                                'code' => $acc->bank_code ?: 'MANUAL_'.strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $acc->bank_name)),
+                                'name' => $acc->bank_name,
+                                'subtitle' => 'Konfirmasi WhatsApp',
+                                'category' => 'manual',
+                                'method' => 'bank_transfer_manual',
+                                'channel' => 'offline',
+                                'min_amount' => 10000,
+                                'max_amount' => 500000000,
+                                'account_number' => $acc->account_number,
+                                'account_name' => $acc->account_name,
+                            ];
+                        })->all();
+                    }
+                } catch (\Throwable $e) {
+                    // Fallback to defaults if table is not yet migrated
+                }
+
+                return [
+                    [
+                        'code' => 'MANUAL_BSI',
+                        'name' => 'Bank Syariah Indonesia (BSI)',
+                        'subtitle' => 'Konfirmasi WhatsApp',
+                        'category' => 'manual',
+                        'method' => 'bank_transfer_manual',
+                        'channel' => 'offline',
+                        'min_amount' => 10000,
+                        'max_amount' => 500000000,
+                        'account_number' => '713 219 5026',
+                        'account_name' => 'A.n Insani Indonesia',
+                    ],
+                    [
+                        'code' => 'MANUAL_BRI',
+                        'name' => 'Bank Rakyat Indonesia (BRI)',
+                        'subtitle' => 'Konfirmasi WhatsApp',
+                        'category' => 'manual',
+                        'method' => 'bank_transfer_manual',
+                        'channel' => 'offline',
+                        'min_amount' => 10000,
+                        'max_amount' => 500000000,
+                        'account_number' => '0345 0100 1366 304',
+                        'account_name' => 'A.n Insani Indonesia',
+                    ],
+                ];
+            })()),
         ];
     }
 

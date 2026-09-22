@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\CampaignerVerificationController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -212,6 +213,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('permission:donation.view')->group(function () {
             Route::get('/donations', [App\Http\Controllers\Admin\DonationController::class, 'index'])->name('donations.index');
             Route::post('/donations/{donation}/confirm', [App\Http\Controllers\Admin\DonationController::class, 'confirm'])->name('donations.confirm');
+            Route::resource('bank-accounts', BankAccountController::class)->except(['show', 'create', 'edit']);
         });
 
         Route::middleware('permission:campaigner.verify')->group(function () {
