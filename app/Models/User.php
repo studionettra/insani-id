@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -83,5 +84,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function referredDonations()
     {
         return $this->hasMany(Donation::class, 'fundraiser_user_id');
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        // Do not send reset email if user is deactivated
+        if (isset($this->is_active) && ! $this->is_active) {
+            return;
+        }
+
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

@@ -1,8 +1,11 @@
-import { useForm, Head, Link } from '@inertiajs/react';
+import { useForm, Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight, LoaderCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { siteSettings } = usePage().props as any;
+    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+
     const { post, processing } = useForm({});
 
     const submit = (e: React.FormEvent) => {
@@ -18,9 +21,9 @@ export default function VerifyEmail({ status }: { status?: string }) {
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo/logo-landscape-color.png" 
+                        src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-30 w-auto mb-3" 
+                        className="h-20 w-auto mb-3 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">

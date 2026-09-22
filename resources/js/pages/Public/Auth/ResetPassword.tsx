@@ -1,4 +1,4 @@
-import { useForm, Head } from '@inertiajs/react';
+import { useForm, Head, usePage } from '@inertiajs/react';
 import { ArrowRight, Lock, LoaderCircle, Mail } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,9 @@ type Props = {
 };
 
 export default function ResetPassword({ token, email }: Props) {
+    const { siteSettings } = usePage().props as any;
+    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+
     const { data, setData, post, processing, errors } = useForm({
         token: token,
         email: email,
@@ -32,16 +35,16 @@ export default function ResetPassword({ token, email }: Props) {
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo/logo-landscape-color.png" 
+                        src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-30 w-auto mb-3" 
+                        className="h-20 w-auto mb-3 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
-                        Reset Password
+                        Atur Ulang Kata Sandi
                     </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Silakan masukkan password baru Anda di bawah ini.
+                        Silakan buat kata sandi baru untuk akun Anda. Anda tidak perlu mengingat kata sandi lama.
                     </p>
 
                     <form className="mt-8 space-y-5" onSubmit={submit}>
@@ -64,7 +67,7 @@ export default function ResetPassword({ token, email }: Props) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password" className="text-gray-900">Password Baru</Label>
+                            <Label htmlFor="password" className="text-gray-900">Kata Sandi Baru</Label>
                             <div className="relative">
                                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                     <Lock className="h-4 w-4 text-gray-400" />
@@ -73,7 +76,7 @@ export default function ResetPassword({ token, email }: Props) {
                                     id="password"
                                     type="password"
                                     name="password"
-                                    placeholder="••••••••"
+                                    placeholder="Minimal 8 karakter (huruf, angka, simbol)"
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
                                     className="pl-10 h-11 bg-white text-gray-900 border-gray-200 [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
@@ -86,7 +89,10 @@ export default function ResetPassword({ token, email }: Props) {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation" className="text-gray-900">Konfirmasi Password</Label>
+                            <div>
+                                <Label htmlFor="password_confirmation" className="text-gray-900">Ulangi Kata Sandi Baru</Label>
+                                <p className="text-[11px] text-gray-500 mt-0.5">Ketik ulang kata sandi baru untuk memastikan tidak ada kesalahan ketik.</p>
+                            </div>
                             <div className="relative">
                                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                     <Lock className="h-4 w-4 text-gray-400" />
@@ -95,7 +101,7 @@ export default function ResetPassword({ token, email }: Props) {
                                     id="password_confirmation"
                                     type="password"
                                     name="password_confirmation"
-                                    placeholder="••••••••"
+                                    placeholder="Ketik ulang kata sandi baru"
                                     value={data.password_confirmation}
                                     onChange={(e) => setData('password_confirmation', e.target.value)}
                                     className="pl-10 h-11 bg-white text-gray-900 border-gray-200 [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
@@ -114,7 +120,7 @@ export default function ResetPassword({ token, email }: Props) {
                             {processing ? (
                                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                             ) : null}
-                            Simpan Password
+                            Simpan Kata Sandi Baru
                             {!processing && <ArrowRight className="ml-2 h-4 w-4" />}
                         </Button>
                     </form>

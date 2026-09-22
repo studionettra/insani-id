@@ -1,4 +1,4 @@
-import { useForm, Head } from '@inertiajs/react';
+import { useForm, Head, usePage } from '@inertiajs/react';
 import { ArrowRight, Lock, LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function ConfirmPassword() {
+    const { siteSettings } = usePage().props as any;
+    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+
     const { data, setData, post, processing, errors } = useForm({
         password: '',
     });
@@ -23,9 +26,9 @@ export default function ConfirmPassword() {
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo/logo-landscape-color.png" 
+                        src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-30 w-auto mb-3" 
+                        className="h-20 w-auto mb-3 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">

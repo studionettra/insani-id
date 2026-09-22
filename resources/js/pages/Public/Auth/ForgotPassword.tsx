@@ -1,4 +1,5 @@
-import { useForm, Head, Link } from '@inertiajs/react';
+import { useForm, Head, Link, usePage } from '@inertiajs/react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { ArrowRight, Mail, LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -6,11 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function ForgotPassword({ status }: { status?: string }) {
+    const { siteSettings } = usePage().props as any;
+    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+
     const { data, setData, post, processing, errors } = useForm({
         email: '',
+        'cf-turnstile-response': '',
     });
 
-    const submit = (e) => {
+    const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/forgot-password');
     };
@@ -23,9 +28,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo/logo-landscape-color.png" 
+                        src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-30 w-auto mb-3" 
+                        className="h-20 w-auto mb-3 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
@@ -63,10 +68,20 @@ export default function ForgotPassword({ status }: { status?: string }) {
                             <InputError message={errors.email} />
                         </div>
 
+                        {/* Cloudflare Turnstile */}
+                        <div className="flex flex-col items-center sm:items-start my-2">
+                            <Turnstile 
+                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+                                onSuccess={(token) => setData('cf-turnstile-response', token)}
+                                onExpire={() => setData('cf-turnstile-response', '')}
+                            />
+                            <InputError message={errors['cf-turnstile-response']} />
+                        </div>
+
                         <Button
                             type="submit"
                             className="w-full bg-brand-600 hover:bg-brand-700 hover:-translate-y-[1px] transition-transform text-white h-11 text-base shadow-sm"
-                            disabled={processing}
+                            disabled={processing || !data['cf-turnstile-response']}
                         >
                             {processing ? (
                                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />

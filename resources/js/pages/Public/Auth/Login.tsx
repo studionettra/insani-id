@@ -1,4 +1,4 @@
-import { useForm, Head, Link } from '@inertiajs/react';
+import { useForm, Head, Link, usePage } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
 import InputError from '@/components/input-error';
@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function Login({ status }: { status?: string }) {
+    const { siteSettings } = usePage().props as any;
+    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
@@ -15,7 +18,7 @@ export default function Login({ status }: { status?: string }) {
         'cf-turnstile-response': '',
     });
 
-    const submit = (e) => {
+    const submit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/login');
     };
@@ -28,9 +31,9 @@ export default function Login({ status }: { status?: string }) {
             <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32 lg:py-0">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo/logo-landscape-color.png" 
+                        src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-24 w-auto mb-3" 
+                        className="h-20 w-auto mb-3 object-contain" 
                     />
                     
                     <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
@@ -98,7 +101,7 @@ export default function Login({ status }: { status?: string }) {
                             <Checkbox 
                                 id="remember" 
                                 checked={data.remember}
-                                onCheckedChange={(checked) => setData('remember', checked)}
+                                onCheckedChange={(checked) => setData('remember', Boolean(checked))}
                             />
                             <Label 
                                 htmlFor="remember"

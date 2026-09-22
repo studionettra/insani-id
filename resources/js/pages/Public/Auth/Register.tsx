@@ -1,4 +1,4 @@
-import { useForm, Head, Link } from '@inertiajs/react';
+import { useForm, Head, Link, usePage } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { ArrowRight, Lock, Mail, User, LoaderCircle, Check, X } from 'lucide-react';
 import InputError from '@/components/input-error';
@@ -11,6 +11,9 @@ type Props = {
 };
 
 export default function Register({ passwordRules }: Props) {
+    const { siteSettings } = usePage().props as any;
+    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const initialName = searchParams?.get('name') || '';
     const initialEmail = searchParams?.get('email') || '';
@@ -49,9 +52,9 @@ export default function Register({ passwordRules }: Props) {
             <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
                     <img 
-                        src="/images/logo/logo-landscape-color.png" 
+                        src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-24 w-auto mb-3" 
+                        className="h-20 w-auto mb-3 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
