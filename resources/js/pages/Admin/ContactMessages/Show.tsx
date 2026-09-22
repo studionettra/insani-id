@@ -26,12 +26,12 @@ export default function ContactMessagesShow({ message }: any) {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin/contact-messages">
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" className="border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
                         </Link>
                         <div>
-                            <h2 className="text-2xl font-bold tracking-tight">Detail Pesan</h2>
+                            <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Detail Pesan</h2>
                         </div>
                     </div>
                     
@@ -44,41 +44,41 @@ export default function ContactMessagesShow({ message }: any) {
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-[1fr_300px]">
-                    <div className="rounded-md border bg-white shadow-sm flex flex-col">
-                        <div className="p-6 border-b bg-gray-50/50">
-                            <h3 className="text-xl font-semibold mb-2">{message.subject}</h3>
-                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500">
+                    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs flex flex-col overflow-hidden">
+                        <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+                            <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{message.subject}</h3>
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
                                 <div className="flex items-center gap-1.5">
                                     <User className="h-4 w-4" />
-                                    <span className="font-medium text-gray-900">{message.name}</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{message.name}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                     <Mail className="h-4 w-4" />
-                                    <a href={`mailto:${message.email}`} className="text-blue-600 hover:underline">{message.email}</a>
+                                    <a href={`mailto:${message.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">{message.email}</a>
                                 </div>
                                 {message.phone && (
                                     <div className="flex items-center gap-1.5">
                                         <Phone className="h-4 w-4" />
-                                        <a href={`tel:${message.phone}`} className="text-blue-600 hover:underline">{message.phone}</a>
+                                        <a href={`tel:${message.phone}`} className="text-blue-600 dark:text-blue-400 hover:underline">{message.phone}</a>
                                     </div>
                                 )}
                             </div>
                         </div>
                         
-                        <div className="p-6 flex-1 bg-white whitespace-pre-wrap text-gray-800 leading-relaxed min-h-[300px]">
+                        <div className="p-6 flex-1 bg-white dark:bg-gray-900 whitespace-pre-wrap text-gray-800 dark:text-gray-200 leading-relaxed min-h-[300px]">
                             {message.message}
                         </div>
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <div className="rounded-md border bg-white shadow-sm p-5 flex flex-col gap-4">
-                            <h4 className="font-semibold border-b pb-2">Informasi Pesan</h4>
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs p-5 flex flex-col gap-4">
+                            <h4 className="font-semibold text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-2">Informasi Pesan</h4>
                             
                             <div>
-                                <p className="text-xs text-gray-500 mb-1 flex items-center gap-1.5">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1.5">
                                     <Calendar className="h-3.5 w-3.5" /> Diterima Pada
                                 </p>
-                                <p className="text-sm font-medium">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
                                     {new Date(message.created_at).toLocaleDateString('id-ID', {
                                         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
                                     })}
@@ -90,10 +90,10 @@ export default function ContactMessagesShow({ message }: any) {
                             </div>
                             
                             <div>
-                                <p className="text-xs text-gray-500 mb-1 flex items-center gap-1.5">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1.5">
                                     <CheckCircle className="h-3.5 w-3.5" /> Status Baca
                                 </p>
-                                <p className="text-sm font-medium">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
                                     {message.read_at ? (
                                         <>
                                             Dibaca pada {new Date(message.read_at).toLocaleDateString('id-ID', {
@@ -103,12 +103,12 @@ export default function ContactMessagesShow({ message }: any) {
                                             })}
                                         </>
                                     ) : (
-                                        <span className="text-amber-600">Belum dibaca</span>
+                                        <span className="text-amber-600 dark:text-amber-400 font-medium">Belum dibaca</span>
                                     )}
                                 </p>
                             </div>
                             
-                            <div className="pt-4 mt-2 border-t flex flex-col gap-2">
+                            <div className="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-2">
                                 <a href={`mailto:${message.email}?subject=Balasan: ${message.subject}`} className="w-full">
                                     <Button className="w-full bg-[#1A56DB] hover:bg-[#1e40af] text-white">
                                         Balas via Email
@@ -116,7 +116,7 @@ export default function ContactMessagesShow({ message }: any) {
                                 </a>
                                 {message.phone && (
                                     <a href={`https://wa.me/${message.phone.replace(/[^0-9]/g, '').replace(/^0/, '62')}`} target="_blank" rel="noreferrer" className="w-full">
-                                        <Button variant="outline" className="w-full">
+                                        <Button variant="outline" className="w-full border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                             Hubungi via WhatsApp
                                         </Button>
                                     </a>

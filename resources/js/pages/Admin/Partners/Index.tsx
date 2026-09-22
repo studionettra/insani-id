@@ -112,19 +112,19 @@ return;
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Mitra Kerja Sama</h2>
-                        <p className="text-muted-foreground text-sm">
+                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Mitra Kerja Sama</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Kelola logo mitra dan kerja sama.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <form onSubmit={handleSearch} className="relative">
-                            <Search className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
+                            <Search className="text-gray-400 dark:text-gray-500 absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
                             <Input
                                 type="search"
                                 placeholder="Cari mitra..."
-                                className="w-full pl-8 sm:w-[250px]"
+                                className="w-full pl-8 sm:w-[250px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -136,54 +136,56 @@ return;
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-x-auto">
                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableCell className="font-medium">Logo & Nama</TableCell>
-                                <TableCell className="font-medium">URL Website</TableCell>
-                                <TableCell className="font-medium text-center">Urutan</TableCell>
-                                <TableCell className="font-medium">Status</TableCell>
-                                <TableCell className="text-right font-medium">Aksi</TableCell>
+                        <TableHeader className="bg-gray-50/70 dark:bg-gray-800/50">
+                            <TableRow className="border-gray-200 dark:border-gray-800">
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Logo & Nama</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">URL Website</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400 text-center">Urutan</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Status</TableCell>
+                                <TableCell className="text-right font-semibold text-xs text-gray-500 dark:text-gray-400">Aksi</TableCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {partners.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={5} className="h-24 text-center text-gray-500 dark:text-gray-400">
                                         Tidak ada data mitra.
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 partners.data.map((partner: any) => (
-                                    <TableRow key={partner.id}>
+                                    <TableRow key={partner.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors border-gray-200 dark:border-gray-800">
                                         <TableCell>
                                             <div className="flex items-center gap-4">
-                                                <div className="h-12 w-24 rounded border bg-gray-50 flex items-center justify-center p-2">
+                                                <div className="h-12 w-24 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-2">
                                                     {partner.logo_url ? (
                                                         <img src={`/storage/${partner.logo_url}`} alt={partner.name} className="max-h-full max-w-full object-contain" />
                                                     ) : (
-                                                        <span className="text-gray-400 text-xs">No Logo</span>
+                                                        <span className="text-gray-400 dark:text-gray-500 text-xs">No Logo</span>
                                                     )}
                                                 </div>
-                                                <div className="font-medium">{partner.name}</div>
+                                                <div className="font-medium text-gray-900 dark:text-white">{partner.name}</div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             {partner.website_url ? (
-                                                <a href={partner.website_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                                                <a href={partner.website_url} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
                                                     {partner.website_url}
                                                 </a>
-                                            ) : '-'}
+                                            ) : (
+                                                <span className="text-gray-400 dark:text-gray-500">-</span>
+                                            )}
                                         </TableCell>
-                                        <TableCell className="text-center">{partner.sort_order}</TableCell>
+                                        <TableCell className="text-center text-gray-600 dark:text-gray-300">{partner.sort_order}</TableCell>
                                         <TableCell>
                                             {partner.is_active ? (
-                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">
+                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60">
                                                     Aktif
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">
+                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
                                                     Nonaktif
                                                 </span>
                                             )}
@@ -193,6 +195,7 @@ return;
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
+                                                    className="border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                                                     onClick={() => openEditModal(partner)}
                                                 >
                                                     <Edit className="h-4 w-4" />
@@ -216,56 +219,60 @@ return;
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <form onSubmit={submitCreate}>
                         <DialogHeader>
-                            <DialogTitle>Tambah Mitra</DialogTitle>
+                            <DialogTitle className="text-gray-900 dark:text-white">Tambah Mitra</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Nama Mitra *</Label>
+                                <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Nama Mitra *</Label>
                                 <Input
                                     id="name"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     required
                                 />
                                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="logo">Logo Mitra *</Label>
+                                <Label htmlFor="logo" className="text-gray-700 dark:text-gray-300">Logo Mitra *</Label>
                                 <Input
                                     id="logo"
                                     type="file"
                                     onChange={(e) => setData('logo_url', e.target.files ? e.target.files[0] : null)}
                                     accept="image/*"
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white file:text-gray-900 dark:file:text-white"
                                     required
                                 />
-                                <p className="text-xs text-muted-foreground">Recomended: PNG/SVG dengan background transparan.</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Recomended: PNG/SVG dengan background transparan.</p>
                                 {errors.logo_url && <p className="text-sm text-red-500">{errors.logo_url}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="website_url">URL Website</Label>
+                                <Label htmlFor="website_url" className="text-gray-700 dark:text-gray-300">URL Website</Label>
                                 <Input
                                     id="website_url"
                                     type="url"
                                     placeholder="https://"
                                     value={data.website_url}
                                     onChange={(e) => setData('website_url', e.target.value)}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                 />
                                 {errors.website_url && <p className="text-sm text-red-500">{errors.website_url}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
                                         value={data.sort_order}
                                         onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -277,14 +284,14 @@ return;
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
-                                    <label htmlFor="is_active" className="text-sm font-medium leading-none">
+                                    <label htmlFor="is_active" className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 cursor-pointer">
                                         Aktif (Tampilkan di website)
                                     </label>
                                 </div>
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                            <Button type="button" variant="outline" className="border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" onClick={() => setIsCreateModalOpen(false)}>
                                 Batal
                             </Button>
                             <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
@@ -297,27 +304,28 @@ return;
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <form onSubmit={submitEdit}>
                         <DialogHeader>
-                            <DialogTitle>Edit Mitra</DialogTitle>
+                            <DialogTitle className="text-gray-900 dark:text-white">Edit Mitra</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_name">Nama Mitra *</Label>
+                                <Label htmlFor="edit_name" className="text-gray-700 dark:text-gray-300">Nama Mitra *</Label>
                                 <Input
                                     id="edit_name"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     required
                                 />
                                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_logo">Ganti Logo</Label>
+                                <Label htmlFor="edit_logo" className="text-gray-700 dark:text-gray-300">Ganti Logo</Label>
                                 {editingPartner?.logo_url && (
-                                    <div className="mb-2 h-16 w-32 border p-2 flex items-center justify-center bg-gray-50 rounded">
+                                    <div className="mb-2 h-16 w-32 border border-gray-200 dark:border-gray-700 p-2 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded">
                                         <img src={`/storage/${editingPartner.logo_url}`} alt="Current" className="max-h-full max-w-full object-contain" />
                                     </div>
                                 )}
@@ -326,30 +334,33 @@ return;
                                     type="file"
                                     onChange={(e) => setData('logo_url', e.target.files ? e.target.files[0] : null)}
                                     accept="image/*"
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white file:text-gray-900 dark:file:text-white"
                                 />
                                 {errors.logo_url && <p className="text-sm text-red-500">{errors.logo_url}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_website_url">URL Website</Label>
+                                <Label htmlFor="edit_website_url" className="text-gray-700 dark:text-gray-300">URL Website</Label>
                                 <Input
                                     id="edit_website_url"
                                     type="url"
                                     placeholder="https://"
                                     value={data.website_url}
                                     onChange={(e) => setData('website_url', e.target.value)}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                 />
                                 {errors.website_url && <p className="text-sm text-red-500">{errors.website_url}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"
                                         value={data.sort_order}
                                         onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -361,14 +372,14 @@ return;
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
-                                    <label htmlFor="edit_is_active" className="text-sm font-medium leading-none">
+                                    <label htmlFor="edit_is_active" className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 cursor-pointer">
                                         Aktif (Tampilkan di website)
                                     </label>
                                 </div>
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                            <Button type="button" variant="outline" className="border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" onClick={() => setIsEditModalOpen(false)}>
                                 Batal
                             </Button>
                             <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">

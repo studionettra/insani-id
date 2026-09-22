@@ -114,7 +114,7 @@ return;
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Banner Beranda</h2>
+                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Banner Beranda</h2>
                         <p className="text-muted-foreground text-sm">
                             Kelola gambar banner/slider utama di halaman beranda.
                         </p>
@@ -138,16 +138,16 @@ return;
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
                     <Table>
-                        <TableHeader>
+                        <TableHeader className="bg-gray-50/70 dark:bg-gray-800/50">
                             <TableRow>
-                                <TableCell className="font-medium">Gambar Desktop</TableCell>
-                                <TableCell className="font-medium">Gambar Mobile</TableCell>
-                                <TableCell className="font-medium">Judul & Link</TableCell>
-                                <TableCell className="font-medium text-center">Urutan</TableCell>
-                                <TableCell className="font-medium">Status</TableCell>
-                                <TableCell className="text-right font-medium">Aksi</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Gambar Desktop</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Gambar Mobile</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Judul & Link</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400 text-center">Urutan</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Status</TableCell>
+                                <TableCell className="text-right font-semibold text-xs text-gray-500 dark:text-gray-400">Aksi</TableCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -159,9 +159,9 @@ return;
                                 </TableRow>
                             ) : (
                                 banners.data.map((banner: any) => (
-                                    <TableRow key={banner.id}>
+                                    <TableRow key={banner.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                                         <TableCell>
-                                            <div className="h-16 w-32 rounded bg-gray-100 overflow-hidden flex items-center justify-center border">
+                                            <div className="h-16 w-32 rounded bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center border border-gray-200 dark:border-gray-700">
                                                 {banner.desktop_image_url ? (
                                                     <img src={`/storage/${banner.desktop_image_url}`} alt={banner.title} className="h-full w-full object-cover" />
                                                 ) : (
@@ -170,7 +170,7 @@ return;
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="h-16 w-12 rounded bg-gray-100 overflow-hidden flex items-center justify-center border">
+                                            <div className="h-16 w-12 rounded bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center border border-gray-200 dark:border-gray-700">
                                                 {banner.mobile_image_url ? (
                                                     <img src={`/storage/${banner.mobile_image_url}`} alt={banner.title} className="h-full w-full object-cover" />
                                                 ) : (
@@ -179,21 +179,21 @@ return;
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <div className="font-medium">{banner.title}</div>
+                                            <div className="font-medium text-gray-900 dark:text-white">{banner.title}</div>
                                             {banner.cta_link && (
-                                                <a href={banner.cta_link} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
+                                                <a href={banner.cta_link} target="_blank" rel="noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
                                                     Link Tautan
                                                 </a>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-center">{banner.sort_order}</TableCell>
+                                        <TableCell className="text-center font-mono text-sm text-gray-500 dark:text-gray-400">{banner.sort_order}</TableCell>
                                         <TableCell>
                                             {banner.is_active ? (
-                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">
+                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
                                                     Aktif
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">
+                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
                                                     Nonaktif
                                                 </span>
                                             )}
@@ -204,6 +204,7 @@ return;
                                                     variant="outline"
                                                     size="icon"
                                                     onClick={() => openEditModal(banner)}
+                                                    className="border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -226,14 +227,14 @@ return;
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <form onSubmit={submitCreate}>
-                        <DialogHeader>
-                            <DialogTitle>Tambah Banner Beranda</DialogTitle>
+                        <DialogHeader className="border-b border-gray-100 dark:border-gray-800 pb-3">
+                            <DialogTitle className="text-gray-900 dark:text-white">Tambah Banner Beranda</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="title">Judul Banner (Internal) *</Label>
+                                <Label htmlFor="title" className="text-gray-700 dark:text-gray-200">Judul Banner (Internal) *</Label>
                                 <Input
                                     id="title"
                                     value={data.title}
@@ -244,7 +245,7 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="desktop_image">Gambar Desktop *</Label>
+                                <Label htmlFor="desktop_image" className="text-gray-700 dark:text-gray-200">Gambar Desktop *</Label>
                                 <Input
                                     id="desktop_image"
                                     type="file"
@@ -257,7 +258,7 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="mobile_image">Gambar Mobile (Opsional)</Label>
+                                <Label htmlFor="mobile_image" className="text-gray-700 dark:text-gray-200">Gambar Mobile (Opsional)</Label>
                                 <Input
                                     id="mobile_image"
                                     type="file"
@@ -269,7 +270,7 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="cta_link">Link Tujuan (Tautan saat di-klik)</Label>
+                                <Label htmlFor="cta_link" className="text-gray-700 dark:text-gray-200">Link Tujuan (Tautan saat di-klik)</Label>
                                 <Input
                                     id="cta_link"
                                     placeholder="https://"
@@ -281,7 +282,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-200">Urutan (Sort Order)</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -298,13 +299,13 @@ return;
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
-                                    <label htmlFor="is_active" className="text-sm font-medium leading-none">
+                                    <label htmlFor="is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300 leading-none cursor-pointer">
                                         Aktif (Tampilkan di website)
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
+                        <DialogFooter className="border-t border-gray-100 dark:border-gray-800 pt-3">
                             <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
                                 Batal
                             </Button>
@@ -318,14 +319,14 @@ return;
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <form onSubmit={submitEdit}>
-                        <DialogHeader>
-                            <DialogTitle>Edit Banner Beranda</DialogTitle>
+                        <DialogHeader className="border-b border-gray-100 dark:border-gray-800 pb-3">
+                            <DialogTitle className="text-gray-900 dark:text-white">Edit Banner Beranda</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_title">Judul Banner (Internal) *</Label>
+                                <Label htmlFor="edit_title" className="text-gray-700 dark:text-gray-200">Judul Banner (Internal) *</Label>
                                 <Input
                                     id="edit_title"
                                     value={data.title}
@@ -336,9 +337,9 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_desktop_image">Ganti Gambar Desktop</Label>
+                                <Label htmlFor="edit_desktop_image" className="text-gray-700 dark:text-gray-200">Ganti Gambar Desktop</Label>
                                 {editingBanner?.desktop_image_url && (
-                                    <div className="mb-2 h-16 w-32 border overflow-hidden rounded bg-gray-50">
+                                    <div className="mb-2 h-16 w-32 border border-gray-200 dark:border-gray-700 overflow-hidden rounded bg-gray-50 dark:bg-gray-800">
                                         <img src={`/storage/${editingBanner.desktop_image_url}`} alt="Current" className="h-full w-full object-cover" />
                                     </div>
                                 )}
@@ -352,9 +353,9 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_mobile_image">Ganti Gambar Mobile (Opsional)</Label>
+                                <Label htmlFor="edit_mobile_image" className="text-gray-700 dark:text-gray-200">Ganti Gambar Mobile (Opsional)</Label>
                                 {editingBanner?.mobile_image_url && (
-                                    <div className="mb-2 h-16 w-12 border overflow-hidden rounded bg-gray-50">
+                                    <div className="mb-2 h-16 w-12 border border-gray-200 dark:border-gray-700 overflow-hidden rounded bg-gray-50 dark:bg-gray-800">
                                         <img src={`/storage/${editingBanner.mobile_image_url}`} alt="Current" className="h-full w-full object-cover" />
                                     </div>
                                 )}
@@ -368,7 +369,7 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_cta_link">Link Tujuan (Tautan saat di-klik)</Label>
+                                <Label htmlFor="edit_cta_link" className="text-gray-700 dark:text-gray-200">Link Tujuan (Tautan saat di-klik)</Label>
                                 <Input
                                     id="edit_cta_link"
                                     placeholder="https://"
@@ -380,7 +381,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-200">Urutan (Sort Order)</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"
@@ -397,13 +398,13 @@ return;
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
-                                    <label htmlFor="edit_is_active" className="text-sm font-medium leading-none">
+                                    <label htmlFor="edit_is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300 leading-none cursor-pointer">
                                         Aktif (Tampilkan di website)
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
+                        <DialogFooter className="border-t border-gray-100 dark:border-gray-800 pt-3">
                             <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
                                 Batal
                             </Button>

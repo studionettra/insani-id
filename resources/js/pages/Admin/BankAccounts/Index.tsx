@@ -172,8 +172,8 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Rekening Bank Yayasan</h2>
-                        <p className="text-sm text-slate-500">
+                        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Rekening Bank Yayasan</h2>
+                        <p className="text-sm text-slate-500 dark:text-gray-400">
                             Kelola rekening resmi yayasan untuk saluran pembayaran donasi manual dan transfer publik.
                         </p>
                     </div>
@@ -186,24 +186,24 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
                         <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                                 type="text"
                                 placeholder="Cari nama bank / no. rek..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 bg-white"
+                                className="pl-9 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             />
                         </div>
                         <Button type="submit" variant="secondary">Cari</Button>
                     </form>
 
                     <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <span className="text-xs text-slate-500 font-medium">Tipe:</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Tipe:</span>
                         <select
                             value={bankTypeFilter}
                             onChange={(e) => handleFilterChange(e.target.value)}
-                            className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                            className="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-insani-blue"
                         >
                             <option value="">Semua Tipe</option>
                             <option value="syariah">Syariah</option>
@@ -212,24 +212,24 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-slate-50/70">
-                                <TableHead className="w-16 text-center">Urutan</TableHead>
-                                <TableHead>Bank</TableHead>
-                                <TableHead>Nomor Rekening</TableHead>
-                                <TableHead>Atas Nama</TableHead>
-                                <TableHead>Tipe</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Aksi</TableHead>
+                            <TableRow className="bg-gray-50/70 dark:bg-gray-800/50">
+                                <TableHead className="w-16 text-center font-semibold text-xs text-gray-500 dark:text-gray-400">Urutan</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-500 dark:text-gray-400">Bank</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-500 dark:text-gray-400">Nomor Rekening</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-500 dark:text-gray-400">Atas Nama</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-500 dark:text-gray-400">Tipe</TableHead>
+                                <TableHead className="text-center font-semibold text-xs text-gray-500 dark:text-gray-400">Status</TableHead>
+                                <TableHead className="text-right font-semibold text-xs text-gray-500 dark:text-gray-400">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {accounts.data && accounts.data.length > 0 ? (
                                 accounts.data.map((acc) => (
-                                    <TableRow key={acc.id} className="hover:bg-slate-50/50">
-                                        <TableCell className="text-center font-mono text-sm text-slate-500">
+                                    <TableRow key={acc.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <TableCell className="text-center font-mono text-sm text-gray-500 dark:text-gray-400">
                                             {acc.sort_order}
                                         </TableCell>
                                         <TableCell>
@@ -238,48 +238,48 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                                     <img
                                                         src={acc.logo_url}
                                                         alt={acc.bank_name}
-                                                        className="h-8 w-12 object-contain rounded border border-slate-100 bg-white p-0.5"
+                                                        className="h-8 w-12 object-contain rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5"
                                                     />
                                                 ) : (
-                                                    <div className="h-8 w-12 rounded bg-slate-100 flex items-center justify-center text-slate-400">
+                                                    <div className="h-8 w-12 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700">
                                                         <Building2 className="h-4 w-4" />
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <span className="font-semibold text-slate-900 block">{acc.bank_name}</span>
+                                                    <span className="font-semibold text-gray-900 dark:text-white block">{acc.bank_name}</span>
                                                     {acc.bank_code && (
-                                                        <span className="text-[11px] font-mono text-slate-400">Kode: {acc.bank_code}</span>
+                                                        <span className="text-[11px] font-mono text-gray-400 dark:text-gray-500">Kode: {acc.bank_code}</span>
                                                     )}
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <span className="font-mono font-bold text-slate-800 text-sm tracking-wide">
+                                                <span className="font-mono font-bold text-gray-900 dark:text-white text-sm tracking-wide">
                                                     {acc.account_number}
                                                 </span>
                                                 <button
                                                     onClick={() => copyToClipboard(acc.account_number.replace(/\s+/g, ''), acc.id)}
-                                                    className="p-1 text-slate-400 hover:text-insani-blue rounded transition-colors"
+                                                    className="p-1 text-gray-400 hover:text-insani-blue dark:hover:text-blue-400 rounded transition-colors"
                                                     title="Salin nomor rekening"
                                                 >
                                                     {copiedId === acc.id ? (
-                                                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                                     ) : (
                                                         <Copy className="w-3.5 h-3.5" />
                                                     )}
                                                 </button>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-sm text-slate-600 font-medium">
+                                        <TableCell className="text-sm text-gray-600 dark:text-gray-300 font-medium">
                                             {acc.account_name}
                                         </TableCell>
                                         <TableCell>
                                             <span
                                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                                                     acc.bank_type === 'syariah'
-                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                                        : 'bg-blue-50 text-blue-700 border border-blue-200'
+                                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60'
+                                                        : 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60'
                                                 }`}
                                             >
                                                 {acc.bank_type === 'syariah' ? 'Syariah' : 'Konvensional'}
@@ -289,8 +289,8 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                             <span
                                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                                                     acc.is_active
-                                                        ? 'bg-emerald-100 text-emerald-800'
-                                                        : 'bg-slate-100 text-slate-600'
+                                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
+                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
                                                 }`}
                                             >
                                                 {acc.is_active ? 'Aktif' : 'Nonaktif'}
@@ -302,7 +302,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => openEditModal(acc)}
-                                                    className="h-8 w-8 p-0 text-slate-600 hover:text-insani-blue"
+                                                    className="h-8 w-8 p-0 text-gray-500 hover:text-insani-blue dark:text-gray-400 dark:hover:text-blue-400"
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -310,7 +310,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => setAccountToDelete(acc)}
-                                                    className="h-8 w-8 p-0 text-slate-600 hover:text-red-600"
+                                                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -320,7 +320,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="h-32 text-center text-slate-400">
+                                    <TableCell colSpan={7} className="h-32 text-center text-gray-400 dark:text-gray-500">
                                         Belum ada data rekening bank yayasan.
                                     </TableCell>
                                 </TableRow>
@@ -332,7 +332,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="max-w-lg bg-white">
+                <DialogContent className="max-w-lg border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <DialogHeader>
                         <DialogTitle>Tambah Rekening Bank</DialogTitle>
                         <DialogDescription>
@@ -397,7 +397,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                     id="bank_type"
                                     value={data.bank_type}
                                     onChange={(e) => setData('bank_type', e.target.value as any)}
-                                    className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                    className="w-full h-9 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
                                 >
                                     <option value="syariah">Bank Syariah</option>
                                     <option value="konvensional">Bank Konvensional</option>
@@ -433,7 +433,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                 rows={2}
                                 value={data.instructions}
                                 onChange={(e) => setData('instructions', e.target.value)}
-                                className="w-full rounded-md border border-slate-200 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-insani-blue"
                                 placeholder="Contoh: Transfer tepat sesuai nominal, lalu konfirmasi via WhatsApp."
                             />
                         </div>
@@ -444,7 +444,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                 checked={data.is_active}
                                 onCheckedChange={(checked) => setData('is_active', !!checked)}
                             />
-                            <Label htmlFor="is_active" className="text-sm font-medium cursor-pointer">
+                            <Label htmlFor="is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                 Aktifkan rekening ini untuk donasi publik
                             </Label>
                         </div>
@@ -463,7 +463,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="max-w-lg bg-white">
+                <DialogContent className="max-w-lg border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <DialogHeader>
                         <DialogTitle>Edit Rekening Bank</DialogTitle>
                         <DialogDescription>
@@ -524,7 +524,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                     id="edit_bank_type"
                                     value={data.bank_type}
                                     onChange={(e) => setData('bank_type', e.target.value as any)}
-                                    className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                    className="w-full h-9 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
                                 >
                                     <option value="syariah">Bank Syariah</option>
                                     <option value="konvensional">Bank Konvensional</option>
@@ -560,7 +560,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                 rows={2}
                                 value={data.instructions}
                                 onChange={(e) => setData('instructions', e.target.value)}
-                                className="w-full rounded-md border border-slate-200 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-insani-blue"
                             />
                         </div>
 
@@ -570,7 +570,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                 checked={data.is_active}
                                 onCheckedChange={(checked) => setData('is_active', !!checked)}
                             />
-                            <Label htmlFor="edit_is_active" className="text-sm font-medium cursor-pointer">
+                            <Label htmlFor="edit_is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                 Aktifkan rekening ini untuk donasi publik
                             </Label>
                         </div>

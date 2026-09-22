@@ -124,19 +124,19 @@ return;
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight">Statistik Dampak</h2>
-                        <p className="text-muted-foreground text-sm">
+                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Statistik Dampak</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Kelola angka statistik capaian program (penerima manfaat, jumlah program, dll).
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <form onSubmit={handleSearch} className="relative">
-                            <Search className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
+                            <Search className="text-gray-400 dark:text-gray-500 absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
                             <Input
                                 type="search"
                                 placeholder="Cari judul..."
-                                className="w-full pl-8 sm:w-[250px]"
+                                className="w-full pl-8 sm:w-[250px] bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -148,29 +148,29 @@ return;
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-x-auto">
                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableCell className="font-medium">Kategori</TableCell>
-                                <TableCell className="font-medium">Judul (Label)</TableCell>
-                                <TableCell className="font-medium">Nilai</TableCell>
-                                <TableCell className="font-medium text-center">Urutan</TableCell>
-                                <TableCell className="font-medium">Status</TableCell>
-                                <TableCell className="text-right font-medium">Aksi</TableCell>
+                        <TableHeader className="bg-gray-50/70 dark:bg-gray-800/50">
+                            <TableRow className="border-gray-200 dark:border-gray-800">
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Kategori</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Judul (Label)</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Nilai</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400 text-center">Urutan</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Status</TableCell>
+                                <TableCell className="text-right font-semibold text-xs text-gray-500 dark:text-gray-400">Aksi</TableCell>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {impactStats.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={6} className="h-24 text-center text-gray-500 dark:text-gray-400">
                                         Tidak ada data statistik.
                                     </TableCell>
                                 </TableRow>
                             ) : (
                                 impactStats.data.map((stat: any) => (
-                                    <TableRow key={stat.id}>
-                                        <TableCell>{stat.category}</TableCell>
+                                    <TableRow key={stat.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors border-gray-200 dark:border-gray-800">
+                                        <TableCell className="text-gray-600 dark:text-gray-300">{stat.category}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2.5">
                                                 {renderStatIcon(stat.icon, "w-4 h-4 text-[#1A56DB] shrink-0")}
@@ -179,15 +179,15 @@ return;
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="font-semibold text-lg">{stat.value}</TableCell>
-                                        <TableCell className="text-center">{stat.sort_order}</TableCell>
+                                        <TableCell className="font-semibold text-lg text-gray-900 dark:text-white">{stat.value}</TableCell>
+                                        <TableCell className="text-center text-gray-600 dark:text-gray-300">{stat.sort_order}</TableCell>
                                         <TableCell>
                                             {stat.is_active ? (
-                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">
+                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60">
                                                     Aktif
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800">
+                                                <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400">
                                                     Nonaktif
                                                 </span>
                                             )}
@@ -197,6 +197,7 @@ return;
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
+                                                    className="border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                                                     onClick={() => openEditModal(stat)}
                                                 >
                                                     <Edit className="h-4 w-4" />
@@ -220,20 +221,20 @@ return;
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <form onSubmit={submitCreate} className="flex flex-col h-full max-h-[90vh] overflow-hidden">
-                        <DialogHeader className="p-6 pb-4 border-b shrink-0">
-                            <DialogTitle>Tambah Statistik Dampak</DialogTitle>
+                        <DialogHeader className="p-6 pb-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
+                            <DialogTitle className="text-gray-900 dark:text-white">Tambah Statistik Dampak</DialogTitle>
                         </DialogHeader>
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="category">Kategori (Cakupan Wilayah) *</Label>
+                                    <Label htmlFor="category" className="text-gray-700 dark:text-gray-300">Kategori (Cakupan Wilayah) *</Label>
                                     <select
                                         id="category"
                                         value={data.category}
                                         onChange={(e) => setData('category', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                                        className="flex h-9 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1 text-sm text-gray-900 dark:text-white shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                                         required
                                     >
                                         <option value="Dalam Negeri">Dalam Negeri</option>
@@ -243,12 +244,13 @@ return;
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="value">Nilai Angka *</Label>
+                                    <Label htmlFor="value" className="text-gray-700 dark:text-gray-300">Nilai Angka *</Label>
                                     <Input
                                         id="value"
                                         placeholder="cth: 124M+"
                                         value={data.value}
                                         onChange={(e) => setData('value', e.target.value)}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                         required
                                     />
                                     {errors.value && <p className="text-sm text-red-500">{errors.value}</p>}
@@ -256,28 +258,31 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="title_id">Label Judul (ID) *</Label>
+                                <Label htmlFor="title_id" className="text-gray-700 dark:text-gray-300">Label Judul (ID) *</Label>
                                 <Input
                                     id="title_id"
                                     placeholder="cth: Penerima Manfaat"
                                     value={data.title.id}
                                     onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                     required
                                 />
                                 {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="title_en">Label Judul (EN)</Label>
+                                <Label htmlFor="title_en" className="text-gray-700 dark:text-gray-300">Label Judul (EN)</Label>
                                 <Input
                                     id="title_en"
+                                    placeholder="cth: Beneficiaries"
                                     value={data.title.en}
                                     onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                 />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="icon">Ikon Visual (Opsional)</Label>
+                                <Label htmlFor="icon" className="text-gray-700 dark:text-gray-300">Ikon Visual (Opsional)</Label>
                                 <IconPicker
                                     id="icon"
                                     value={data.icon}
@@ -288,12 +293,13 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
                                         value={data.sort_order}
                                         onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -305,14 +311,14 @@ return;
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
-                                    <label htmlFor="is_active" className="text-sm font-medium leading-none">
+                                    <label htmlFor="is_active" className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 cursor-pointer">
                                         Aktif (Tampilkan di website)
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter className="p-4 border-t bg-gray-50 dark:bg-gray-800/50 shrink-0">
-                            <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                        <DialogFooter className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 shrink-0">
+                            <Button type="button" variant="outline" className="border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" onClick={() => setIsCreateModalOpen(false)}>
                                 Batal
                             </Button>
                             <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
@@ -325,20 +331,20 @@ return;
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <form onSubmit={submitEdit} className="flex flex-col h-full max-h-[90vh] overflow-hidden">
-                        <DialogHeader className="p-6 pb-4 border-b shrink-0">
-                            <DialogTitle>Edit Statistik Dampak</DialogTitle>
+                        <DialogHeader className="p-6 pb-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
+                            <DialogTitle className="text-gray-900 dark:text-white">Edit Statistik Dampak</DialogTitle>
                         </DialogHeader>
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_category">Kategori (Cakupan Wilayah) *</Label>
+                                    <Label htmlFor="edit_category" className="text-gray-700 dark:text-gray-300">Kategori (Cakupan Wilayah) *</Label>
                                     <select
                                         id="edit_category"
                                         value={data.category}
                                         onChange={(e) => setData('category', e.target.value)}
-                                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                                        className="flex h-9 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1 text-sm text-gray-900 dark:text-white shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
                                         required
                                     >
                                         <option value="Dalam Negeri">Dalam Negeri</option>
@@ -348,12 +354,13 @@ return;
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_value">Nilai Angka *</Label>
+                                    <Label htmlFor="edit_value" className="text-gray-700 dark:text-gray-300">Nilai Angka *</Label>
                                     <Input
                                         id="edit_value"
                                         placeholder="cth: 124M+"
                                         value={data.value}
                                         onChange={(e) => setData('value', e.target.value)}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                         required
                                     />
                                     {errors.value && <p className="text-sm text-red-500">{errors.value}</p>}
@@ -361,28 +368,30 @@ return;
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_title_id">Label Judul (ID) *</Label>
+                                <Label htmlFor="edit_title_id" className="text-gray-700 dark:text-gray-300">Label Judul (ID) *</Label>
                                 <Input
                                     id="edit_title_id"
                                     placeholder="cth: Penerima Manfaat"
                                     value={data.title.id}
                                     onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                     required
                                 />
                                 {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_title_en">Label Judul (EN)</Label>
+                                <Label htmlFor="edit_title_en" className="text-gray-700 dark:text-gray-300">Label Judul (EN)</Label>
                                 <Input
                                     id="edit_title_en"
                                     value={data.title.en}
                                     onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                                 />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_icon">Ikon Visual (Opsional)</Label>
+                                <Label htmlFor="edit_icon" className="text-gray-700 dark:text-gray-300">Ikon Visual (Opsional)</Label>
                                 <IconPicker
                                     id="edit_icon"
                                     value={data.icon}
@@ -393,12 +402,13 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"
                                         value={data.sort_order}
                                         onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                             </div>
@@ -410,14 +420,14 @@ return;
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
-                                    <label htmlFor="edit_is_active" className="text-sm font-medium leading-none">
+                                    <label htmlFor="edit_is_active" className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 cursor-pointer">
                                         Aktif (Tampilkan di website)
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter className="p-4 border-t bg-gray-50 dark:bg-gray-800/50 shrink-0">
-                            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>
+                        <DialogFooter className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 shrink-0">
+                            <Button type="button" variant="outline" className="border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" onClick={() => setIsEditModalOpen(false)}>
                                 Batal
                             </Button>
                             <Button type="submit" disabled={processing} className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">

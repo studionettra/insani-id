@@ -147,8 +147,8 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Testimoni Donatur & Mitra</h2>
-                        <p className="text-sm text-slate-500">
+                        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Testimoni Donatur & Mitra</h2>
+                        <p className="text-sm text-slate-500 dark:text-gray-400">
                             Kelola cerita, ulasan, dan apresiasi donatur yang ditampilkan di halaman beranda.
                         </p>
                     </div>
@@ -161,36 +161,36 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                 <div className="flex items-center justify-between gap-4">
                     <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
                         <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
                                 type="text"
                                 placeholder="Cari nama / peran / ulasan..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9 bg-white"
+                                className="pl-9 bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             />
                         </div>
                         <Button type="submit" variant="secondary">Cari</Button>
                     </form>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-slate-50/70">
-                                <TableHead className="w-16 text-center">Urutan</TableHead>
-                                <TableHead>Profil Donatur</TableHead>
-                                <TableHead>Ulasan & Cerita</TableHead>
-                                <TableHead className="text-center">Rating</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Aksi</TableHead>
+                            <TableRow className="bg-gray-50/70 dark:bg-gray-800/50">
+                                <TableHead className="w-16 text-center font-semibold text-xs text-gray-500 dark:text-gray-400">Urutan</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-500 dark:text-gray-400">Profil Donatur</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-500 dark:text-gray-400">Ulasan & Cerita</TableHead>
+                                <TableHead className="text-center font-semibold text-xs text-gray-500 dark:text-gray-400">Rating</TableHead>
+                                <TableHead className="text-center font-semibold text-xs text-gray-500 dark:text-gray-400">Status</TableHead>
+                                <TableHead className="text-right font-semibold text-xs text-gray-500 dark:text-gray-400">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {testimonials.data && testimonials.data.length > 0 ? (
                                 testimonials.data.map((item) => (
-                                    <TableRow key={item.id} className="hover:bg-slate-50/50">
-                                        <TableCell className="text-center font-mono text-sm text-slate-500">
+                                    <TableRow key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <TableCell className="text-center font-mono text-sm text-gray-500 dark:text-gray-400">
                                             {item.sort_order}
                                         </TableCell>
                                         <TableCell>
@@ -199,23 +199,23 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                                     <img
                                                         src={item.avatar_url}
                                                         alt={item.name}
-                                                        className="h-10 w-10 object-cover rounded-full border border-slate-200"
+                                                        className="h-10 w-10 object-cover rounded-full border border-gray-200 dark:border-gray-700"
                                                     />
                                                 ) : (
-                                                    <div className="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
+                                                    <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700">
                                                         <User className="h-5 w-5" />
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <span className="font-semibold text-slate-900 block">{item.name}</span>
+                                                    <span className="font-semibold text-gray-900 dark:text-white block">{item.name}</span>
                                                     {item.role && (
-                                                        <span className="text-xs text-slate-500">{item.role}</span>
+                                                        <span className="text-xs text-gray-500 dark:text-gray-400">{item.role}</span>
                                                     )}
                                                 </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>
-                                            <p className="text-sm text-slate-600 line-clamp-2 max-w-md italic">
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 max-w-md italic">
                                                 "{item.content}"
                                             </p>
                                         </TableCell>
@@ -230,8 +230,8 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                             <span
                                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
                                                     item.is_active
-                                                        ? 'bg-emerald-100 text-emerald-800'
-                                                        : 'bg-slate-100 text-slate-600'
+                                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
+                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
                                                 }`}
                                             >
                                                 {item.is_active ? 'Aktif' : 'Nonaktif'}
@@ -243,7 +243,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => openEditModal(item)}
-                                                    className="h-8 w-8 p-0 text-slate-600 hover:text-insani-blue"
+                                                    className="h-8 w-8 p-0 text-gray-500 hover:text-insani-blue dark:text-gray-400 dark:hover:text-blue-400"
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -251,7 +251,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => setItemToDelete(item)}
-                                                    className="h-8 w-8 p-0 text-slate-600 hover:text-red-600"
+                                                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -261,7 +261,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="h-32 text-center text-slate-400">
+                                    <TableCell colSpan={6} className="h-32 text-center text-gray-400 dark:text-gray-500">
                                         Belum ada data testimoni donatur.
                                     </TableCell>
                                 </TableRow>
@@ -273,7 +273,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="max-w-lg bg-white">
+                <DialogContent className="max-w-lg border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <DialogHeader>
                         <DialogTitle>Tambah Testimoni</DialogTitle>
                         <DialogDescription>
@@ -283,7 +283,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
 
                     <form onSubmit={submitCreate} className="space-y-4">
                         <div>
-                            <Label htmlFor="name">Nama Donatur / Mitra *</Label>
+                            <Label htmlFor="name" className="text-gray-700 dark:text-gray-200">Nama Donatur / Mitra *</Label>
                             <Input
                                 id="name"
                                 value={data.name}
@@ -295,7 +295,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="role">Profesi / Status Donatur</Label>
+                            <Label htmlFor="role" className="text-gray-700 dark:text-gray-200">Profesi / Status Donatur</Label>
                             <Input
                                 id="role"
                                 value={data.role}
@@ -306,7 +306,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="content">Isi Testimoni / Ulasan *</Label>
+                            <Label htmlFor="content" className="text-gray-700 dark:text-gray-200">Isi Testimoni / Ulasan *</Label>
                             <Textarea
                                 id="content"
                                 rows={4}
@@ -320,12 +320,12 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="rating">Bintang Rating (1 - 5)</Label>
+                                <Label htmlFor="rating" className="text-gray-700 dark:text-gray-200">Bintang Rating (1 - 5)</Label>
                                 <select
                                     id="rating"
                                     value={data.rating}
                                     onChange={(e) => setData('rating', parseInt(e.target.value) || 5)}
-                                    className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                    className="w-full h-9 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
                                 >
                                     <option value={5}>⭐⭐⭐⭐⭐ (5 Bintang)</option>
                                     <option value={4}>⭐⭐⭐⭐ (4 Bintang)</option>
@@ -334,7 +334,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                             </div>
 
                             <div>
-                                <Label htmlFor="sort_order">Nomor Urut Tampil</Label>
+                                <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-200">Nomor Urut Tampil</Label>
                                 <Input
                                     id="sort_order"
                                     type="number"
@@ -345,7 +345,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="avatar">Foto Avatar (Opsional)</Label>
+                            <Label htmlFor="avatar" className="text-gray-700 dark:text-gray-200">Foto Avatar (Opsional)</Label>
                             <Input
                                 id="avatar"
                                 type="file"
@@ -361,7 +361,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                 checked={data.is_active}
                                 onCheckedChange={(checked) => setData('is_active', !!checked)}
                             />
-                            <Label htmlFor="is_active" className="text-sm font-medium cursor-pointer">
+                            <Label htmlFor="is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                 Tampilkan testimoni ini di halaman utama
                             </Label>
                         </div>
@@ -380,7 +380,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="max-w-lg bg-white">
+                <DialogContent className="max-w-lg border-gray-200 dark:border-gray-800 dark:bg-gray-900">
                     <DialogHeader>
                         <DialogTitle>Edit Testimoni</DialogTitle>
                         <DialogDescription>
@@ -390,7 +390,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
 
                     <form onSubmit={submitEdit} className="space-y-4">
                         <div>
-                            <Label htmlFor="edit_name">Nama Donatur / Mitra *</Label>
+                            <Label htmlFor="edit_name" className="text-gray-700 dark:text-gray-200">Nama Donatur / Mitra *</Label>
                             <Input
                                 id="edit_name"
                                 value={data.name}
@@ -401,7 +401,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="edit_role">Profesi / Status Donatur</Label>
+                            <Label htmlFor="edit_role" className="text-gray-700 dark:text-gray-200">Profesi / Status Donatur</Label>
                             <Input
                                 id="edit_role"
                                 value={data.role}
@@ -411,7 +411,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="edit_content">Isi Testimoni / Ulasan *</Label>
+                            <Label htmlFor="edit_content" className="text-gray-700 dark:text-gray-200">Isi Testimoni / Ulasan *</Label>
                             <Textarea
                                 id="edit_content"
                                 rows={4}
@@ -424,12 +424,12 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
 
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <Label htmlFor="edit_rating">Bintang Rating (1 - 5)</Label>
+                                <Label htmlFor="edit_rating" className="text-gray-700 dark:text-gray-200">Bintang Rating (1 - 5)</Label>
                                 <select
                                     id="edit_rating"
                                     value={data.rating}
                                     onChange={(e) => setData('rating', parseInt(e.target.value) || 5)}
-                                    className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                    className="w-full h-9 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
                                 >
                                     <option value={5}>⭐⭐⭐⭐⭐ (5 Bintang)</option>
                                     <option value={4}>⭐⭐⭐⭐ (4 Bintang)</option>
@@ -438,7 +438,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                             </div>
 
                             <div>
-                                <Label htmlFor="edit_sort_order">Nomor Urut Tampil</Label>
+                                <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-200">Nomor Urut Tampil</Label>
                                 <Input
                                     id="edit_sort_order"
                                     type="number"
@@ -449,7 +449,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="edit_avatar">Foto Avatar (Ganti bila perlu)</Label>
+                            <Label htmlFor="edit_avatar" className="text-gray-700 dark:text-gray-200">Foto Avatar (Ganti bila perlu)</Label>
                             <Input
                                 id="edit_avatar"
                                 type="file"
@@ -465,7 +465,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                                 checked={data.is_active}
                                 onCheckedChange={(checked) => setData('is_active', !!checked)}
                             />
-                            <Label htmlFor="edit_is_active" className="text-sm font-medium cursor-pointer">
+                            <Label htmlFor="edit_is_active" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                                 Tampilkan testimoni ini di halaman utama
                             </Label>
                         </div>
