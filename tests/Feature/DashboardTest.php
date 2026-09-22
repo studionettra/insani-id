@@ -228,3 +228,15 @@ test('donor user receives personalized donorStats and is not flagged as staff', 
         ->has('donorStats.recentDonations', 3)
     );
 });
+
+test('admin user accessing /admin redirects to dashboard', function () {
+    Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'web']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('Administrator');
+
+    $response = $this->actingAs($admin)
+        ->get('/admin');
+
+    $response->assertRedirect(route('dashboard'));
+});

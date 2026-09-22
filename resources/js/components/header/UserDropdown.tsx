@@ -1,133 +1,324 @@
 import { Link, usePage, router } from "@inertiajs/react";
-import { useState } from "react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { 
+  Shield, 
+  Briefcase, 
+  Sparkles, 
+  UserCheck, 
+  Globe, 
+  ExternalLink, 
+  LayoutGrid, 
+  KeyRound, 
+  LogOut, 
+  ChevronDown, 
+  Check 
+} from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+
+type SupportedLocale = {
+  name: string;
+  url: string;
+};
+
+const FLAGS: Record<string, string> = {
+  id: "https://flagcdn.com/w40/id.png",
+  en: "https://flagcdn.com/w40/gb.png",
+  ar: "https://flagcdn.com/w40/sa.png",
+};
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { auth } = usePage().props as any;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { auth, locale, supportedLocales } = usePage().props as any;
   const user = auth?.user;
 
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
+  const currentLang = locale || "id";
 
-  function closeDropdown() {
+  const availableLocales: Record<string, SupportedLocale> =
+    supportedLocales && Object.keys(supportedLocales).length > 0
+      ? supportedLocales
+      : {
+          id: { name: "Bahasa Indonesia", url: "/id" },
+          en: { name: "English", url: "/en" },
+          ar: { name: "العربية", url: "/ar" },
+        };
+
+  // Close on click outside or escape
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const changeLanguage = (targetUrl: string) => {
     setIsOpen(false);
-  }
+    if (targetUrl) {
+      router.visit(targetUrl, {
+        preserveScroll: true,
+      });
+    }
+  };
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
-    closeDropdown();
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('logged_out', 'true');
+    setIsOpen(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("logged_out", "true");
     }
-    router.post('/logout', {}, {
+    router.post("/logout", {}, {
       onFinish: () => {
         router.clearHistory();
-        window.location.replace('/login');
+        window.location.replace("/login");
       },
     });
   };
 
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
+  };
+
+  // Role detection
+  const roles: string[] = user?.roles || [];
+  const isSuperadmin = roles.includes("Administrator");
+  const isCampaigner = roles.some((r: string) => r.includes("Campaigner"));
+  const isFundraiser = roles.includes("Fundraiser");
+  const isStaff =
+    isSuperadmin ||
+    roles.some((r: string) =>
+      [
+        "Program Officer",
+        "Verifikator",
+        "Keuangan",
+        "Customer Service",
+        "Content Editor",
+      ].includes(r)
+    );
+
+  const renderRoleBadge = () => {
+    if (isSuperadmin) {
+      return (
+        <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 rounded-md border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60">
+          <Shield className="w-2.5 h-2.5" /> Superadmin
+        </span>
+      );
+    }
+    if (isStaff) {
+      return (
+        <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-blue-700 bg-blue-50 rounded-md border border-blue-200/60 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60">
+          <Shield className="w-2.5 h-2.5" /> {roles[0] || "Staff"}
+        </span>
+      );
+    }
+    if (isCampaigner) {
+      return (
+        <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 rounded-md border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60">
+          <Briefcase className="w-2.5 h-2.5" /> Campaigner
+        </span>
+      );
+    }
+    if (isFundraiser) {
+      return (
+        <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-teal-700 bg-teal-50 rounded-md border border-teal-200/60 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60">
+          <Sparkles className="w-2.5 h-2.5" /> Fundraiser
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-zinc-700 bg-zinc-100 rounded-md border border-zinc-200/60 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700">
+        <UserCheck className="w-2.5 h-2.5" /> Donatur
+      </span>
+    );
+  };
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
+      {/* Trigger Button */}
       <button
-        onClick={toggleDropdown}
-        className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2.5 py-1 px-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-brand-100 flex items-center justify-center text-brand-600 font-bold uppercase">
+        <span className="overflow-hidden rounded-full h-9 w-9 bg-brand-50 text-brand-700 border border-brand-200/60 dark:bg-brand-950/50 dark:text-brand-300 dark:border-brand-800/60 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
           {user?.avatar ? (
-            <img src={user.avatar} alt="User" className="w-full h-full object-cover" />
+            <img
+              src={user.avatar}
+              alt={user.name || "User"}
+              className="w-full h-full object-cover"
+            />
           ) : (
-            user?.name?.charAt(0) || 'U'
+            getInitials(user?.name)
           )}
         </span>
 
-        <span className="block mr-1 font-medium text-theme-sm">{user?.name || 'User'}</span>
-        <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          width="18"
-          height="20"
-          viewBox="0 0 18 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M4.3125 8.65625L9 13.3437L13.6875 8.65625"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
-      <Dropdown
-        isOpen={isOpen}
-        onClose={closeDropdown}
-        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
-      >
-        <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-            {user?.name}
+        <div className="hidden sm:flex flex-col text-left">
+          <span className="text-xs font-bold text-gray-800 dark:text-gray-200 truncate max-w-[130px] leading-tight">
+            {user?.name || "User"}
           </span>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
-            {user?.email}
+          <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
+            {isSuperadmin ? "Superadmin" : roles[0] || "Akun"}
           </span>
         </div>
 
-        <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
-          <li>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
+            isOpen ? "rotate-180 text-brand-600 dark:text-brand-400" : ""
+          }`}
+        />
+      </button>
+
+      {/* Dropdown Card Body */}
+      {isOpen && (
+        <div
+          className="absolute right-0 mt-2 w-72 rounded-2xl border border-gray-200 bg-white p-2.5 shadow-xl dark:border-gray-800 dark:bg-gray-900 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+        >
+          {/* Header Profil Card */}
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-zinc-50/90 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-700/60 mb-2">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user?.name || "User"}
+                className="w-10 h-10 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300 flex items-center justify-center text-xs font-bold shrink-0 border border-brand-200 dark:border-brand-800">
+                {getInitials(user?.name)}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                {user?.name || "Pengguna"}
+              </div>
+              <div className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                {user?.email || ""}
+              </div>
+              {renderRoleBadge()}
+            </div>
+          </div>
+
+          {/* Quick Actions / Navigation Links */}
+          <div className="space-y-0.5">
+            {/* Shortcut: Lihat Website Publik */}
+            <Link
+              href="/"
+              target="_blank"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-50/60 dark:hover:bg-brand-950/40 transition-colors group"
+            >
+              <Globe className="w-4 h-4 text-zinc-400 group-hover:text-brand-600 dark:text-zinc-500 dark:group-hover:text-brand-400 shrink-0" />
+              <span className="flex-1">Lihat Website Publik</span>
+              <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
+
+            {/* Shortcut: Dashboard Utama */}
+            <Link
+              href="/dashboard"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-50/60 dark:hover:bg-brand-950/40 transition-colors group"
+            >
+              <LayoutGrid className="w-4 h-4 text-zinc-400 group-hover:text-brand-600 dark:text-zinc-500 dark:group-hover:text-brand-400 shrink-0" />
+              <span>Dashboard Utama</span>
+            </Link>
+          </div>
+
+          <div className="my-1.5 border-t border-zinc-100 dark:border-zinc-800" />
+
+          {/* Account Settings Links */}
+          <div className="space-y-0.5">
             <Link
               href="/settings/profile"
-              onClick={closeDropdown}
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-50/60 dark:hover:bg-brand-950/40 transition-colors group"
             >
-              <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M12 3.5C7.30558 3.5 3.5 7.30558 3.5 12C3.5 14.1526 4.3002 16.1184 5.61936 17.616C6.17279 15.3096 8.24852 13.5955 10.7246 13.5955H13.2746C15.7509 13.5955 17.8268 15.31 18.38 17.6167C19.6996 16.119 20.5 14.153 20.5 12C20.5 7.30558 16.6944 3.5 12 3.5ZM17.0246 18.8566V18.8455C17.0246 16.7744 15.3457 15.0955 13.2746 15.0955H10.7246C8.65354 15.0955 6.97461 16.7744 6.97461 18.8455V18.856C8.38223 19.8895 10.1198 20.5 12 20.5C13.8798 20.5 15.6171 19.8898 17.0246 18.8566ZM2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12ZM11.9991 7.25C10.8847 7.25 9.98126 8.15342 9.98126 9.26784C9.98126 10.3823 10.8847 11.2857 11.9991 11.2857C13.1135 11.2857 14.0169 10.3823 14.0169 9.26784C14.0169 8.15342 13.1135 7.25 11.9991 7.25ZM8.48126 9.26784C8.48126 7.32499 10.0563 5.75 11.9991 5.75C13.9419 5.75 15.5169 7.32499 15.5169 9.26784C15.5169 11.2107 13.9419 12.7857 11.9991 12.7857C10.0563 12.7857 8.48126 11.2107 8.48126 9.26784Z"
-                  fill=""
-                />
-              </svg>
-              Pengaturan Akun
+              <UserCheck className="w-4 h-4 text-zinc-400 group-hover:text-brand-600 dark:text-zinc-500 dark:group-hover:text-brand-400 shrink-0" />
+              <span>Pengaturan Profil</span>
             </Link>
-          </li>
-        </ul>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex w-full items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-        >
-          <svg
-            className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+
+            <Link
+              href="/settings/security"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-brand-700 dark:hover:text-brand-400 hover:bg-brand-50/60 dark:hover:bg-brand-950/40 transition-colors group"
+            >
+              <KeyRound className="w-4 h-4 text-zinc-400 group-hover:text-brand-600 dark:text-zinc-500 dark:group-hover:text-brand-400 shrink-0" />
+              <span>Keamanan & Sandi</span>
+            </Link>
+          </div>
+
+          <div className="my-1.5 border-t border-zinc-100 dark:border-zinc-800" />
+
+          {/* Language Switcher */}
+          <div className="px-1 py-1">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">
+              PILIHAN BAHASA
+            </span>
+            <div className="space-y-0.5">
+              {Object.entries(availableLocales).map(([code, item]) => {
+                const isActive = currentLang === code;
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => changeLanguage(item.url)}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
+                      isActive
+                        ? "font-semibold text-brand-700 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={FLAGS[code] || FLAGS.id}
+                        alt={code}
+                        className="w-4 h-4 rounded-xs object-cover border border-zinc-200 dark:border-zinc-700"
+                      />
+                      <span>{item.name}</span>
+                    </div>
+                    {isActive && (
+                      <Check className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="my-1.5 border-t border-zinc-100 dark:border-zinc-800" />
+
+          {/* Logout Action */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/80 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300 transition-colors cursor-pointer"
           >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M15.1007 19.247C14.6865 19.247 14.3507 18.9112 14.3507 18.497L14.3507 14.245H12.8507V18.497C12.8507 19.7396 13.8581 20.747 15.1007 20.747H18.5007C19.7434 20.747 20.7507 19.7396 20.7507 18.497L20.7507 5.49609C20.7507 4.25345 19.7433 3.24609 18.5007 3.24609H15.1007C13.8581 3.24609 12.8507 4.25345 12.8507 5.49609V9.74501L14.3507 9.74501V5.49609C14.3507 5.08188 14.6865 4.74609 15.1007 4.74609L18.5007 4.74609C18.9149 4.74609 19.2507 5.08188 19.2507 5.49609L19.2507 18.497C19.2507 18.9112 18.9149 19.247 18.5007 19.247H15.1007ZM3.25073 11.9984C3.25073 12.2144 3.34204 12.4091 3.48817 12.546L8.09483 17.1556C8.38763 17.4485 8.86251 17.4487 9.15549 17.1559C9.44848 16.8631 9.44863 16.3882 9.15583 16.0952L5.81116 12.7484L16.0007 12.7484C16.4149 12.7484 16.7507 12.4127 16.7507 11.9984C16.7507 11.5842 16.4149 11.2484 16.0007 11.2484L5.81528 11.2484L9.15585 7.90554C9.44864 7.61255 9.44847 7.13767 9.15547 6.84488C8.86248 6.55209 8.3876 6.55226 8.09481 6.84525L3.52309 11.4202C3.35673 11.5577 3.25073 11.7657 3.25073 11.9984Z"
-              fill=""
-            />
-          </svg>
-          Keluar
-        </button>
-      </Dropdown>
+            <LogOut className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" />
+            <span>Keluar (Log out)</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

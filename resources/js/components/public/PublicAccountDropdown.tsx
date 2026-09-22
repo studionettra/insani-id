@@ -303,7 +303,7 @@ export default function PublicAccountDropdown({
                     <div className="space-y-1">
                         {isAdmin ? (
                             <Link
-                                href="/admin"
+                                href="/dashboard"
                                 onClick={() => setIsOpen(false)}
                                 className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-zinc-800 hover:text-brand-700 hover:bg-brand-50/50 transition-colors"
                             >
@@ -331,7 +331,7 @@ export default function PublicAccountDropdown({
                         </Link>
 
                         <Link
-                            href="/profile"
+                            href="/settings/profile"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-zinc-800 hover:text-brand-700 hover:bg-brand-50/50 transition-colors"
                         >
