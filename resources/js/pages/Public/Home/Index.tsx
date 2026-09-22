@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Star, Quote } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { renderStatIcon } from '@/components/ui/icon-picker';
 import useTranslation from '@/hooks/use-translation';
 
-export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs }: any) {
+export default function HomeIndex({ banners, stats, partners, focusPrograms, programs, blogs, testimonials = [] }: any) {
     const { t, locale, isRtl } = useTranslation();
     const reduce = useReducedMotion();
     
@@ -416,6 +416,69 @@ return;
                                 ))}
                             </div>
                         )}
+                    </div>
+                </section>
+            )}
+
+            {/* Testimonials Section */}
+            {testimonials && testimonials.length > 0 && (
+                <section className="py-24 bg-zinc-50/70 border-t border-zinc-100 relative overflow-hidden">
+                    <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                        <FadeIn className="text-center max-w-2xl mx-auto mb-16">
+                            <span className="text-xs font-bold uppercase tracking-wider text-brand-600 mb-2 block">
+                                {t('Cerita Kebaikan')}
+                            </span>
+                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-950 mb-4">
+                                {t('Kata Para Donatur & Mitra')}
+                            </h2>
+                            <p className="text-zinc-600 text-base">
+                                {t('Pengalaman nyata dan kebahagiaan mereka yang telah berkolaborasi dalam gerakan kemanusiaan bersama Insani Indonesia.')}
+                            </p>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {testimonials.map((item: any, idx: number) => (
+                                <FadeIn 
+                                    key={item.id} 
+                                    delay={idx * 0.1} 
+                                    className="bg-white rounded-3xl p-8 border border-zinc-100 shadow-sm flex flex-col justify-between hover:shadow-md hover:border-brand-100 transition-all duration-300 relative group"
+                                >
+                                    <div className="absolute top-6 right-6 text-zinc-100 group-hover:text-brand-50 transition-colors pointer-events-none">
+                                        <Quote className="w-10 h-10 -scale-x-100 opacity-60" />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-1 text-amber-400 mb-5">
+                                            {[...Array(item.rating || 5)].map((_, i) => (
+                                                <Star key={i} className="w-4 h-4 fill-current" />
+                                            ))}
+                                        </div>
+                                        <p className="text-zinc-700 text-base leading-relaxed italic mb-8">
+                                            "{item.content}"
+                                        </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-3.5 pt-5 border-t border-zinc-100 relative z-10">
+                                        {item.avatar_url ? (
+                                            <img 
+                                                src={item.avatar_url} 
+                                                alt={item.name} 
+                                                className="w-12 h-12 rounded-full object-cover border border-zinc-200" 
+                                            />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full bg-brand-50 text-brand-600 font-bold flex items-center justify-center text-sm border border-brand-100 shrink-0">
+                                                {item.name ? item.name.charAt(0).toUpperCase() : 'D'}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <h4 className="font-bold text-sm text-zinc-950">{item.name}</h4>
+                                            {item.role && (
+                                                <p className="text-xs text-zinc-500 font-medium">{item.role}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </FadeIn>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}

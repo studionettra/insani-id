@@ -9,6 +9,7 @@ use App\Models\HomepageBanner;
 use App\Models\ImpactStat;
 use App\Models\Partner;
 use App\Models\Program;
+use App\Models\Testimonial;
 
 class HomeController extends Controller
 {
@@ -41,6 +42,11 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
+        $testimonials = Testimonial::where('is_active', true)
+            ->orderBy('sort_order')
+            ->take(6)
+            ->get();
+
         return inertia('Public/Home/Index', [
             'banners' => $banners,
             'stats' => $stats,
@@ -48,6 +54,7 @@ class HomeController extends Controller
             'focusPrograms' => $focusPrograms,
             'programs' => $latestPrograms,
             'blogs' => $latestBlogs,
+            'testimonials' => $testimonials,
         ]);
     }
 }

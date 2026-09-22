@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\AnalyticsCollectorController;
@@ -200,6 +201,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
 
         Route::middleware('permission:manage_banners')->group(function () {
             Route::resource('homepage-banners', HomepageBannerController::class)->except(['show', 'create', 'edit']);
+            Route::resource('testimonials', TestimonialController::class)->except(['show', 'create', 'edit']);
         });
 
         Route::middleware('permission:manage_contact_messages')->group(function () {
