@@ -26,6 +26,7 @@ class RoleSeeder extends Seeder
                 'category.view',
                 'manage_pages', 'manage_faqs', 'manage_management',
                 'manage_partners', 'manage_impact_stats', 'manage_banners',
+                'manage_legal_documents',
             ],
 
             'Verifikator' => [

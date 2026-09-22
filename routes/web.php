@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FundraiserController as AdminFundraiserController;
 use App\Http\Controllers\Admin\HomepageBannerController;
 use App\Http\Controllers\Admin\ImpactStatController;
+use App\Http\Controllers\Admin\LegalDocumentController;
 use App\Http\Controllers\Admin\ManagementMemberController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
@@ -182,6 +183,10 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
 
         Route::middleware('permission:manage_management')->group(function () {
             Route::resource('management-members', ManagementMemberController::class)->except(['show', 'create', 'edit']);
+        });
+
+        Route::middleware('permission:manage_legal_documents|manage_pages')->group(function () {
+            Route::resource('legal-documents', LegalDocumentController::class)->except(['show', 'create', 'edit']);
         });
 
         Route::middleware('permission:manage_partners')->group(function () {
