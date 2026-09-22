@@ -12,16 +12,23 @@ class FaqController extends Controller
     {
         $faqs = Faq::query()
             ->when(request('search'), function ($query, $search) {
-                $query->where('question', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('question', 'like', "%{$search}%")
+                        ->orWhere('keywords', 'like', "%{$search}%")
+                        ->orWhere('category', 'like', "%{$search}%");
+                });
+            })
+            ->when(request('category'), function ($query, $category) {
+                $query->where('category', $category);
             })
             ->orderBy('sort_order')
             ->latest()
-            ->paginate(10)
+            ->paginate(15)
             ->withQueryString();
 
         return inertia('Admin/Faqs/Index', [
             'faqs' => $faqs,
-            'filters' => request()->only(['search']),
+            'filters' => request()->only(['search', 'category']),
         ]);
     }
 
@@ -36,12 +43,15 @@ class FaqController extends Controller
             'answer_html.id' => 'required|string',
             'answer_html.en' => 'nullable|string',
             'answer_html.ar' => 'nullable|string',
+            'category' => 'required|string|max:50',
+            'keywords' => 'nullable|string|max:500',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ]);
 
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
+        $validated['category'] = $validated['category'] ?? 'umum';
 
         Faq::create($validated);
 
@@ -59,6 +69,8 @@ class FaqController extends Controller
             'answer_html.id' => 'required|string',
             'answer_html.en' => 'nullable|string',
             'answer_html.ar' => 'nullable|string',
+            'category' => 'required|string|max:50',
+            'keywords' => 'nullable|string|max:500',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ]);

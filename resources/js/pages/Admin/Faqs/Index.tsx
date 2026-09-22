@@ -26,6 +26,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function FaqsIndex({ faqs, filters }: any) {
     const [search, setSearch] = useState(filters.search || '');
+    const [categoryFilter, setCategoryFilter] = useState(filters.category || '');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingFaq, setEditingFaq] = useState<any>(null);
@@ -33,6 +34,8 @@ export default function FaqsIndex({ faqs, filters }: any) {
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         question: { id: '', en: '', ar: '' },
         answer_html: { id: '', en: '', ar: '' },
+        category: 'umum',
+        keywords: '',
         is_active: true,
         sort_order: 0,
     });
@@ -41,13 +44,30 @@ export default function FaqsIndex({ faqs, filters }: any) {
         e.preventDefault();
         router.get(
             '/admin/faqs',
-            { search },
+            { search, category: categoryFilter || undefined },
+            { preserveState: true, preserveScroll: true }
+        );
+    };
+
+    const handleCategoryFilter = (cat: string) => {
+        setCategoryFilter(cat);
+        router.get(
+            '/admin/faqs',
+            { search, category: cat || undefined },
             { preserveState: true, preserveScroll: true }
         );
     };
 
     const openCreateModal = () => {
         reset();
+        setData({
+            question: { id: '', en: '', ar: '' },
+            answer_html: { id: '', en: '', ar: '' },
+            category: 'umum',
+            keywords: '',
+            is_active: true,
+            sort_order: (faqs.data?.length || 0) + 1,
+        });
         clearErrors();
         setIsCreateModalOpen(true);
     };
@@ -56,15 +76,17 @@ export default function FaqsIndex({ faqs, filters }: any) {
         setEditingFaq(faq);
         setData({
             question: { 
-                id: faq.question_translations?.id || '', 
-                en: faq.question_translations?.en || '', 
-                ar: faq.question_translations?.ar || '' 
+                id: faq.question_translations?.id || (typeof faq.question === 'object' ? faq.question?.id : faq.question) || '', 
+                en: faq.question_translations?.en || (typeof faq.question === 'object' ? faq.question?.en : '') || '', 
+                ar: faq.question_translations?.ar || (typeof faq.question === 'object' ? faq.question?.ar : '') || '' 
             },
             answer_html: { 
-                id: faq.answer_html_translations?.id || '', 
-                en: faq.answer_html_translations?.en || '', 
-                ar: faq.answer_html_translations?.ar || '' 
+                id: faq.answer_html_translations?.id || (typeof faq.answer_html === 'object' ? faq.answer_html?.id : faq.answer_html) || '', 
+                en: faq.answer_html_translations?.en || (typeof faq.answer_html === 'object' ? faq.answer_html?.en : '') || '', 
+                ar: faq.answer_html_translations?.ar || (typeof faq.answer_html === 'object' ? faq.answer_html?.ar : '') || '' 
             },
+            category: faq.category || 'umum',
+            keywords: faq.keywords || '',
             is_active: faq.is_active,
             sort_order: faq.sort_order,
         });
@@ -124,13 +146,28 @@ return;
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => handleCategoryFilter(e.target.value)}
+                            className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                        >
+                            <option value="">Semua Kategori</option>
+                            <option value="lembaga">Lembaga (/tentang-kami)</option>
+                            <option value="kontak">Kontak (/kontak)</option>
+                            <option value="donatur">Donatur</option>
+                            <option value="campaigner">Campaigner</option>
+                            <option value="fundraiser">Fundraiser</option>
+                            <option value="keamanan">Legalitas & Keamanan</option>
+                            <option value="umum">Umum</option>
+                        </select>
+
                         <form onSubmit={handleSearch} className="relative">
                             <Search className="text-muted-foreground absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2" />
                             <Input
                                 type="search"
-                                placeholder="Cari pertanyaan..."
-                                className="w-full pl-8 sm:w-[250px]"
+                                placeholder="Cari pertanyaan / kata kunci..."
+                                className="w-full pl-8 sm:w-[220px]"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -142,11 +179,12 @@ return;
                     </div>
                 </div>
 
-                <div className="rounded-md border bg-white overflow-x-auto overflow-x-auto">
+                <div className="rounded-md border bg-white overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableCell className="font-medium">Pertanyaan (ID)</TableCell>
+                                <TableCell className="font-medium">Pertanyaan</TableCell>
+                                <TableCell className="font-medium">Kategori</TableCell>
                                 <TableCell className="font-medium text-center">Urutan</TableCell>
                                 <TableCell className="font-medium">Status</TableCell>
                                 <TableCell className="text-right font-medium">Aksi</TableCell>
@@ -155,7 +193,7 @@ return;
                         <TableBody>
                             {faqs.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                                         Tidak ada data FAQ.
                                     </TableCell>
                                 </TableRow>
@@ -163,12 +201,37 @@ return;
                                 faqs.data.map((faq: any) => (
                                     <TableRow key={faq.id}>
                                         <TableCell>
-                                            <div className="font-medium">{faq.question_translations?.id || faq.question}</div>
+                                            <div className="font-medium text-slate-900">{faq.question_translations?.id || faq.question}</div>
                                             <div className="text-xs text-muted-foreground truncate max-w-md">
                                                 {faq.answer_html_translations?.id?.replace(/<[^>]+>/g, '').substring(0, 100)}...
                                             </div>
+                                            {faq.keywords && (
+                                                <div className="text-[11px] text-slate-400 mt-0.5">
+                                                    Keywords: {faq.keywords}
+                                                </div>
+                                            )}
                                         </TableCell>
-                                        <TableCell className="text-center">{faq.sort_order}</TableCell>
+                                        <TableCell>
+                                            {(() => {
+                                                switch (faq.category) {
+                                                    case 'lembaga':
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">Lembaga</span>;
+                                                    case 'kontak':
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Kontak</span>;
+                                                    case 'donatur':
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">Donatur</span>;
+                                                    case 'campaigner':
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">Campaigner</span>;
+                                                    case 'fundraiser':
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Fundraiser</span>;
+                                                    case 'keamanan':
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">Keamanan</span>;
+                                                    default:
+                                                        return <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">Umum</span>;
+                                                }
+                                            })()}
+                                        </TableCell>
+                                        <TableCell className="text-center font-mono text-sm">{faq.sort_order}</TableCell>
                                         <TableCell>
                                             {faq.is_active ? (
                                                 <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">
@@ -281,6 +344,25 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
+                                    <Label htmlFor="category">Kategori FAQ *</Label>
+                                    <select
+                                        id="category"
+                                        value={data.category}
+                                        onChange={(e) => setData('category', e.target.value)}
+                                        className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                        required
+                                    >
+                                        <option value="lembaga">Profil Lembaga (Ditampilkan di /tentang-kami)</option>
+                                        <option value="kontak">Layanan & Kontak (Ditampilkan di /kontak)</option>
+                                        <option value="donatur">Donatur (Tamu & Akun)</option>
+                                        <option value="campaigner">Campaigner (Penggalang Dana)</option>
+                                        <option value="fundraiser">Fundraiser (Relawan Kampanye)</option>
+                                        <option value="keamanan">Legalitas & Keamanan</option>
+                                        <option value="umum">Umum</option>
+                                    </select>
+                                    {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+                                </div>
+                                <div className="grid gap-2">
                                     <Label htmlFor="sort_order">Urutan (Sort Order)</Label>
                                     <Input
                                         id="sort_order"
@@ -289,6 +371,17 @@ return;
                                         onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
                                     />
                                 </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="keywords">Kata Kunci Pencarian (Keywords)</Label>
+                                <Input
+                                    id="keywords"
+                                    value={data.keywords}
+                                    onChange={(e) => setData('keywords', e.target.value)}
+                                    placeholder="Contoh: cara donasi, transfer bank, qris, refund"
+                                />
+                                <p className="text-xs text-slate-400">Pisahkan dengan koma untuk mempermudah pencarian donatur.</p>
                             </div>
                             
                             <div className="flex flex-col gap-3 mt-2">
@@ -391,6 +484,25 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
+                                    <Label htmlFor="edit_category">Kategori FAQ *</Label>
+                                    <select
+                                        id="edit_category"
+                                        value={data.category}
+                                        onChange={(e) => setData('category', e.target.value)}
+                                        className="w-full h-9 rounded-md border border-slate-200 bg-white px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-1 focus:ring-insani-blue"
+                                        required
+                                    >
+                                        <option value="lembaga">Profil Lembaga (Ditampilkan di /tentang-kami)</option>
+                                        <option value="kontak">Layanan & Kontak (Ditampilkan di /kontak)</option>
+                                        <option value="donatur">Donatur (Tamu & Akun)</option>
+                                        <option value="campaigner">Campaigner (Penggalang Dana)</option>
+                                        <option value="fundraiser">Fundraiser (Relawan Kampanye)</option>
+                                        <option value="keamanan">Legalitas & Keamanan</option>
+                                        <option value="umum">Umum</option>
+                                    </select>
+                                    {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+                                </div>
+                                <div className="grid gap-2">
                                     <Label htmlFor="edit_sort_order">Urutan (Sort Order)</Label>
                                     <Input
                                         id="edit_sort_order"
@@ -399,6 +511,17 @@ return;
                                         onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
                                     />
                                 </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit_keywords">Kata Kunci Pencarian (Keywords)</Label>
+                                <Input
+                                    id="edit_keywords"
+                                    value={data.keywords}
+                                    onChange={(e) => setData('keywords', e.target.value)}
+                                    placeholder="Contoh: cara donasi, transfer bank, qris, refund"
+                                />
+                                <p className="text-xs text-slate-400">Pisahkan dengan koma untuk mempermudah pencarian donatur.</p>
                             </div>
                             
                             <div className="flex flex-col gap-3 mt-2">
