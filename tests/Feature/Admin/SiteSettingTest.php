@@ -108,3 +108,24 @@ it('allows administrator to update google adsense and ads.txt settings', functio
     expect(AppSetting::get('adsense_slot_article_bottom'))->toBe('444555666');
     expect(AppSetting::get('ads_txt_content'))->toBe('google.com, pub-9998887776665554, DIRECT, f08c47fec0942fa0');
 });
+
+it('allows administrator to update foundation legal and sk kemenkumham settings', function () {
+    actingAs($this->admin)
+        ->post(route('admin.site-settings.update'), [
+            'legal_foundation_name' => 'Yayasan Insani Sejahtera Abadi',
+            'legal_sk_kemenkumham' => 'AHU-0009999.AH.01.04.Tahun 2026',
+            'legal_sk_label' => 'SK Kemenkumham RI Baru',
+            'legal_operational_permit' => 'KEMENSOS/PUB/2026/01',
+            'legal_npwp' => '12.345.678.9-012.000',
+            'show_sk_in_footer' => '1',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect(AppSetting::get('legal_foundation_name'))->toBe('Yayasan Insani Sejahtera Abadi');
+    expect(AppSetting::get('legal_sk_kemenkumham'))->toBe('AHU-0009999.AH.01.04.Tahun 2026');
+    expect(AppSetting::get('legal_sk_label'))->toBe('SK Kemenkumham RI Baru');
+    expect(AppSetting::get('legal_operational_permit'))->toBe('KEMENSOS/PUB/2026/01');
+    expect(AppSetting::get('legal_npwp'))->toBe('12.345.678.9-012.000');
+    expect(AppSetting::get('show_sk_in_footer'))->toBe('1');
+});

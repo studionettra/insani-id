@@ -5,6 +5,8 @@
     $gaId = (!$isAdminOrDashboard && empty($gtmId)) ? \App\Models\AppSetting::get('google_analytics_id') : null;
     $metaPixelId = (!$isAdminOrDashboard && empty($gtmId)) ? \App\Models\AppSetting::get('meta_pixel_id') : null;
     $tiktokPixelId = (!$isAdminOrDashboard && empty($gtmId)) ? \App\Models\AppSetting::get('tiktok_pixel_id') : null;
+    $siteFavicon = \App\Models\AppSetting::get('site_favicon');
+    $faviconUrl = $siteFavicon ? asset('storage/' . $siteFavicon) : asset('favicon-insani.svg');
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}"
     @class(['dark' => $isAdminOrDashboard && ($appearance ?? 'system') == 'dark'])>
@@ -99,7 +101,7 @@
         }
     </style>
 
-    <link rel="icon" href="/favicon-insani.svg" type="image/svg+xml">
+    <link rel="icon" href="{{ $faviconUrl }}">
 
     @fonts
 
