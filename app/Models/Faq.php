@@ -28,4 +28,25 @@ class Faq extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    protected $appends = [
+        'question_translations',
+        'answer_translations',
+        'answer_html_translations',
+    ];
+
+    public function getQuestionTranslationsAttribute(): array
+    {
+        return $this->getTranslations('question');
+    }
+
+    public function getAnswerTranslationsAttribute(): array
+    {
+        return $this->getTranslations('answer_html');
+    }
+
+    public function getAnswerHtmlTranslationsAttribute(): array
+    {
+        return $this->getTranslations('answer_html');
+    }
 }
