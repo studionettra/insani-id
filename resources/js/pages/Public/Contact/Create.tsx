@@ -8,46 +8,33 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
 
-const staticFaqs = [
-    {
-        id: 1,
-        question: "Apa itu Insani Indonesia?",
-        answer: "Insani Indonesia atau Yayasan Peduli Insani Indonesia merupakan Lembaga yang bergerak dalam bidang sosial dan kemanusiaan. Insani lahir dari semangat cita-cita kemerdekaan Indonesia yang ingin memajukan kesejahteraan umum, mencerdaskan kehidupan bangsa serta mewujudkan ketertiban dunia yang berdasarkan kemerdekaan, perdamaian abadi, dan keadilan sosial.\n\nInsani diinisiasi oleh sekelompok anak muda yang prihatin akan tiada berkahirnya krisis kemanusian di dunia. Merekapun bertekad turut berkontribusi dalam mengentaskan dunia dari krisis kemanusiaan.\n\nTanggal 13 Februari 2019 merupakan hari bersejarah dimana Insani secara resmi didirikan. Sebagai Lembaga yang terhitung masih muda serta dimotori oleh sekelompok anak muda, Insani memposisikan dirinya sebagai wadah bagi siapapun putra bangsa yang bertekad serta berkomitmen untuk terus menebarkan kebaikan."
-    },
-    {
-        id: 2,
-        question: "Bagaimana cara berdonasi di INSANI?",
-        answer: (
-            <div className="space-y-4">
-                <p>Berdonasi di INSANI sangatlah mudah. Kami menyediakan beberapa cara berdonasi berikut:</p>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="font-semibold text-slate-800">Bank Syariah Indonesia (451)</p>
-                    <p className="font-mono text-insani-blue text-lg my-1">7132195026</p>
-                    <p className="text-sm text-slate-500">A.n Insani Indonesia</p>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="font-semibold text-slate-800">Bank Rakyat Indonesia (002)</p>
-                    <p className="font-mono text-insani-blue text-lg my-1">034501001366304</p>
-                    <p className="text-sm text-slate-500">A.n Insani Indonesia</p>
-                </div>
-                <p>
-                    Kemudian kirimkan foto/screenshot bukti transfer ke WhatsApp INSANI di <a href="https://wa.me/62895373388880" target="_blank" rel="noopener noreferrer" className="text-insani-blue hover:underline">0895-3733-88880</a> atau dengan cara menghubungi kami langsung di 0895-3733-88880 atau (021) 27871199.
-                </p>
-                <p>
-                    Anda juga dapat berdonasi via website dengan berbagai metode yang tersedia, cukup klik tautan berikut: <Link href="/galang-dana" className="text-insani-blue hover:underline font-medium">https://insani.id/galang-dana</Link>
-                </p>
-                <p>
-                    Donasi via Gopay/Ovo/DANA/LinkAja/ShopeePay/Qris, caranya cukup scan QR Code berikut melalui aplikasi e-wallet Anda.
-                </p>
-            </div>
-        )
-    }
-];
-
-export default function ContactCreate() {
-    const { flash } = usePage().props as any;
+export default function ContactCreate({ faqs = [] }: any) {
+    const { flash, siteSettings, locale } = usePage().props as any;
     const [isSuccess, setIsSuccess] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+    const formatWaUrl = (raw: string | undefined, defaultNum: string) => {
+        const num = raw || defaultNum;
+        const clean = num.replace(/[^0-9]/g, '');
+        return `https://wa.me/${clean.startsWith('0') ? '62' + clean.slice(1) : clean}`;
+    };
+
+    const waDonor = siteSettings?.contact_donor_support_wa || siteSettings?.contact_whatsapp || '081319456675';
+    const waDonorUrl = formatWaUrl(waDonor, '081319456675');
+    const waConfirm = siteSettings?.contact_donation_confirm_wa || '0895373388880';
+    const waConfirmUrl = formatWaUrl(waConfirm, '0895373388880');
+    const waPartner = siteSettings?.contact_partnership_wa || '082124837496';
+    const waPartnerUrl = formatWaUrl(waPartner, '082124837496');
+
+    const phoneOffice = siteSettings?.contact_phone || '(021) 38820199';
+    const emailMain = siteSettings?.contact_email || 'sapa@insani.id';
+    const emailFinance = siteSettings?.contact_finance_email || 'financial@insani.id';
+    const addressOffice = siteSettings?.contact_address || 'Jln. Moh Kahfi 1 No 90A, Jagakarsa, Jakarta Selatan';
+    const operatingHours = siteSettings?.contact_operating_hours || "Senin - Jum'at | 10:00 - 18.00 WIB";
+    const holidayNote = siteSettings?.contact_holiday_note || 'Tutup Pada Tanggal Merah & Cuti Bersama';
+    const mapsEmbedUrl = siteSettings?.contact_maps_url?.includes('embed') 
+        ? siteSettings.contact_maps_url 
+        : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.6219083994824!2d106.8128105!3d-6.313297899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ef82a08035fd%3A0x222843cf2a071b1b!2sInsani%20Indonesia!5e0!3m2!1sid!2sid!4v1784360269332!5m2!1sid!2sid";
     
     // Cloudflare Turnstile Sitekey
     const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
@@ -168,7 +155,7 @@ export default function ContactCreate() {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <a href="https://wa.me/6281319456675" target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
+                        <a href={waDonorUrl} target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 text-insani-blue flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-insani-blue group-hover:text-white transition-all">
                                 <UserPlus className="w-8 h-8" />
                             </div>
@@ -176,7 +163,7 @@ export default function ContactCreate() {
                             <p className="text-gray-500 text-sm">Informasi & Konsultasi</p>
                         </a>
                         
-                        <a href="https://wa.me/62895373388880" target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
+                        <a href={waConfirmUrl} target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
                             <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
                                 <Wallet className="w-8 h-8" />
                             </div>
@@ -184,7 +171,7 @@ export default function ContactCreate() {
                             <p className="text-gray-500 text-sm">Verifikasi & Validasi</p>
                         </a>
 
-                        <a href="https://wa.me/6282124837496" target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
+                        <a href={waPartnerUrl} target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
                             <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
                                 <Handshake className="w-8 h-8" />
                             </div>
@@ -212,9 +199,18 @@ export default function ContactCreate() {
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-3">Dukungan Donatur</h3>
                                     <ul className="space-y-2 text-gray-600">
-                                        <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-insani-blue" /> 0813-1945-6675</li>
-                                        <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-insani-blue" /> (021) 38820199</li>
-                                        <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-insani-blue" /> sapa@insani.id</li>
+                                        <li className="flex items-center gap-2">
+                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <a href={waDonorUrl} target="_blank" rel="noopener noreferrer" className="hover:text-insani-blue">{waDonor}</a>
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <span>{phoneOffice}</span>
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-insani-blue" /> 
+                                            <a href={`mailto:${emailMain}`} className="hover:text-insani-blue">{emailMain}</a>
+                                        </li>
                                     </ul>
                                 </div>
                                 
@@ -223,9 +219,14 @@ export default function ContactCreate() {
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-3">Konfirmasi Donasi</h3>
                                     <ul className="space-y-2 text-gray-600">
-                                        <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-insani-blue" /> 0895-3733-88880</li>
-                                        <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-insani-blue" /> 0821-2399-8593</li>
-                                        <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-insani-blue" /> financial@insani.id</li>
+                                        <li className="flex items-center gap-2">
+                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <a href={waConfirmUrl} target="_blank" rel="noopener noreferrer" className="hover:text-insani-blue">{waConfirm}</a>
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-insani-blue" /> 
+                                            <a href={`mailto:${emailFinance}`} className="hover:text-insani-blue">{emailFinance}</a>
+                                        </li>
                                     </ul>
                                 </div>
                                 
@@ -234,8 +235,14 @@ export default function ContactCreate() {
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-3">Kemitraan Lembaga & Program</h3>
                                     <ul className="space-y-2 text-gray-600">
-                                        <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-insani-blue" /> 0821-2483-7496</li>
-                                        <li className="flex items-center gap-2"><Mail className="w-4 h-4 text-insani-blue" /> sapa@insani.id</li>
+                                        <li className="flex items-center gap-2">
+                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <a href={waPartnerUrl} target="_blank" rel="noopener noreferrer" className="hover:text-insani-blue">{waPartner}</a>
+                                        </li>
+                                        <li className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-insani-blue" /> 
+                                            <a href={`mailto:${emailMain}`} className="hover:text-insani-blue">{emailMain}</a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
@@ -343,7 +350,7 @@ export default function ContactCreate() {
                         {/* Map */}
                         <div className="rounded-3xl overflow-hidden shadow-lg border border-slate-200 h-[400px]">
                             <iframe 
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.6219083994824!2d106.8128105!3d-6.313297899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ef82a08035fd%3A0x222843cf2a071b1b!2sInsani%20Indonesia!5e0!3m2!1sid!2sid!4v1784360269332!5m2!1sid!2sid" 
+                                src={mapsEmbedUrl} 
                                 width="100%" 
                                 height="100%" 
                                 style={{ border: 0 }} 
@@ -359,9 +366,9 @@ export default function ContactCreate() {
                             
                             <h3 className="text-2xl font-bold text-gray-900 mb-4">Alamat & Jam Kerja</h3>
                             <div className="space-y-2 text-gray-600 text-lg leading-relaxed mb-8">
-                                <p>Jln. Moh Kahfi 1 No 90A</p>
-                                <p>Senin - Jum'at | 10:00 - 18.00 WIB</p>
-                                <p>Tutup Pada Tanggal Merah & Cuti Bersama</p>
+                                <p>{addressOffice}</p>
+                                <p>{operatingHours}</p>
+                                <p>{holidayNote}</p>
                             </div>
 
                             <div className="bg-insani-blue/10 rounded-2xl p-6 border border-insani-blue/20">
@@ -373,56 +380,78 @@ export default function ContactCreate() {
                 </div>
             </section>
 
-            {/* FAQ Singkat */}
-            <section className="py-20 md:py-24 bg-white">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-gray-900">FAQ Singkat</h2>
-                    </div>
+            {/* FAQ Layanan & Kontak */}
+            {faqs && faqs.length > 0 && (
+                <section className="py-20 md:py-24 bg-white border-t border-slate-100">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-3">Tanya Jawab Layanan & Kontak</h2>
+                            <p className="text-slate-600 text-base max-w-xl mx-auto">
+                                Pertanyaan umum seputar waktu operasional, respon pesan, konfirmasi donasi manual, dan prosedur audiensi kantor.
+                            </p>
+                        </div>
 
-                    <div className="space-y-4">
-                        {staticFaqs.map((faq, index) => (
-                            <motion.div 
-                                key={faq.id}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                className={`bg-white rounded-2xl border ${openFaq === index ? 'border-insani-blue/30 shadow-md' : 'border-slate-200'} overflow-hidden transition-all duration-300`}
+                        <div className="space-y-4">
+                            {faqs.map((faq: any, index: number) => {
+                                const question = faq.question_translations?.[locale] || (typeof faq.question === 'object' ? faq.question?.[locale] || faq.question?.id : faq.question);
+                                const answer = faq.answer_translations?.[locale] || (typeof faq.answer_html === 'object' ? faq.answer_html?.[locale] || faq.answer_html?.id : (faq.answer_html || faq.answer));
+
+                                return (
+                                    <motion.div 
+                                        key={faq.id || index}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className={`bg-white rounded-2xl border ${openFaq === index ? 'border-insani-blue/30 shadow-md ring-1 ring-insani-blue/20' : 'border-slate-200'} overflow-hidden transition-all duration-300`}
+                                    >
+                                        <button
+                                            onClick={() => toggleFaq(index)}
+                                            className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none"
+                                            aria-expanded={openFaq === index}
+                                        >
+                                            <h3 className={`text-lg md:text-xl font-bold ${openFaq === index ? 'text-insani-blue' : 'text-slate-800'}`}>
+                                                {question}
+                                            </h3>
+                                            <div className={`ml-4 shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${openFaq === index ? 'bg-insani-blue/10 text-insani-blue' : 'bg-slate-50 text-slate-400'}`}>
+                                                {openFaq === index ? (
+                                                    <ChevronUp className="w-5 h-5" />
+                                                ) : (
+                                                    <ChevronDown className="w-5 h-5" />
+                                                )}
+                                            </div>
+                                        </button>
+                                        
+                                        <motion.div
+                                            initial={false}
+                                            animate={{ 
+                                                height: openFaq === index ? 'auto' : 0,
+                                                opacity: openFaq === index ? 1 : 0
+                                            }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div 
+                                                className="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4 prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5"
+                                                dangerouslySetInnerHTML={{ __html: answer }}
+                                            />
+                                        </motion.div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="mt-12 text-center">
+                            <p className="text-sm text-slate-500 mb-3">Butuh bantuan seputar cara donasi, pendaftaran kampanye, atau verifikasi akun?</p>
+                            <Link 
+                                href="/pusat-bantuan"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition-all"
                             >
-                                <button
-                                    onClick={() => toggleFaq(index)}
-                                    className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none"
-                                >
-                                    <h3 className={`text-lg md:text-xl font-bold ${openFaq === index ? 'text-insani-blue' : 'text-slate-800'}`}>
-                                        {faq.question}
-                                    </h3>
-                                    <div className={`ml-4 shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${openFaq === index ? 'bg-insani-blue/10 text-insani-blue' : 'bg-slate-50 text-slate-400'}`}>
-                                        {openFaq === index ? (
-                                            <ChevronUp className="w-5 h-5" />
-                                        ) : (
-                                            <ChevronDown className="w-5 h-5" />
-                                        )}
-                                    </div>
-                                </button>
-                                
-                                <motion.div
-                                    initial={false}
-                                    animate={{ 
-                                        height: openFaq === index ? 'auto' : 0,
-                                        opacity: openFaq === index ? 1 : 0
-                                    }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="px-6 pb-6 text-slate-600 whitespace-pre-line leading-relaxed border-t border-slate-100 pt-4">
-                                        {faq.answer}
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        ))}
+                                Kunjungi Pusat Bantuan & FAQ Lengkap &rarr;
+                            </Link>
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
         </PublicLayout>
     );

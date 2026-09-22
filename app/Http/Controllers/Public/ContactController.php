@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Mail\ContactMessageNotification;
 use App\Models\ContactMessage;
+use App\Models\Faq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +15,23 @@ class ContactController extends Controller
 {
     public function create()
     {
-        return inertia('Public/Contact/Create');
+        $faqs = Faq::where('is_active', true)
+            ->where('category', 'kontak')
+            ->orderBy('sort_order')
+            ->take(4)
+            ->get();
+
+        if ($faqs->isEmpty()) {
+            $faqs = Faq::where('is_active', true)
+                ->whereIn('category', ['umum', 'donatur'])
+                ->orderBy('sort_order')
+                ->take(3)
+                ->get();
+        }
+
+        return inertia('Public/Contact/Create', [
+            'faqs' => $faqs,
+        ]);
     }
 
     public function store(Request $request)

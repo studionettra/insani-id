@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faq;
 use App\Models\Page;
 use Inertia\Response;
 
@@ -16,6 +17,7 @@ class PageController extends Controller
 
         return inertia('Public/Page/Show', [
             'page' => [
+                'slug' => $page->slug,
                 'title' => $page->title,
                 'content_html' => $page->content_html,
                 'meta_title' => $page->meta_title,
@@ -42,6 +44,30 @@ class PageController extends Controller
 
     public function pusatBantuan(): Response
     {
-        return $this->show('pusat-bantuan');
+        $page = Page::where('slug', 'pusat-bantuan')->first();
+        $locale = app()->getLocale();
+
+        $faqs = Faq::where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($faq) => [
+                'id' => (string) $faq->id,
+                'category' => $faq->category ?: 'umum',
+                'question' => $faq->getTranslation('question', $locale),
+                'answer' => $faq->getTranslation('answer_html', $locale),
+                'keywords' => array_values(array_filter(array_map('trim', explode(',', (string) $faq->keywords)))),
+            ]);
+
+        return inertia('Public/Page/Show', [
+            'page' => [
+                'slug' => 'pusat-bantuan',
+                'title' => $page?->title ?? 'Pusat Bantuan & Panduan Donatur',
+                'content_html' => $page?->content_html ?? '',
+                'meta_title' => $page?->meta_title ?? 'Pusat Bantuan & FAQ - Insani Indonesia',
+                'meta_description' => $page?->meta_description ?? 'Pusat bantuan resmi dan tanya jawab seputar donasi, kampanye, dan legalitas di Insani Indonesia.',
+                'attachment_url' => null,
+            ],
+            'faqs' => $faqs,
+        ]);
     }
 }

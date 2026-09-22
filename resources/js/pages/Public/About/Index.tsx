@@ -1,30 +1,42 @@
 import { Head, usePage, Link } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, FileText, ExternalLink, ShieldCheck, Scale, Building2, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, ExternalLink, ShieldCheck, Scale, Building2, MapPin, Award, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
-const staticFaqs = [
-    {
-        id: 1,
-        question: "Apa itu Insani Indonesia?",
-        answer: "Insani Indonesia atau Yayasan Peduli Insani Indonesia merupakan Lembaga yang bergerak dalam bidang sosial dan kemanusiaan. Insani lahir dari semangat cita-cita kemerdekaan Indonesia yang ingin memajukan kesejahteraan umum, mencerdaskan kehidupan bangsa serta mewujudkan ketertiban dunia yang berdasarkan kemerdekaan, perdamaian abadi, dan keadilan sosial.\n\nInsani diinisiasi oleh sekelompok anak muda yang prihatin akan tiada berkahirnya krisis kemanusian di dunia. Merekapun bertekad turut berkontribusi dalam mengentaskan dunia dari krisis kemanusiaan.\n\nTanggal 13 Februari 2019 merupakan hari bersejarah dimana Insani secara resmi didirikan. Sebagai Lembaga yang terhitung masih muda serta dimotori oleh sekelompok anak muda, Insani memposisikan dirinya sebagai wadah bagi siapapun putra bangsa yang bertekad serta berkomitmen untuk terus menebarkan kebaikan."
-    },
-    {
-        id: 2,
-        question: "Apakah Insani Indonesia Memiliki Badan Hukum?",
-        answer: "Insani Indonesia telah terdaftar di Kementerian Hukum dan Hak Asasi Manusia dengan Surat Keputusan Menteri Hukum dan Hak Asasi Manusia Republik Indonesia No. SK-KUMHAM : AHU-0002557.AH.01.04.Tahun 2019."
-    },
-    {
-        id: 3,
-        question: "Dimana Saja Bantuan Insani Indonesia di Salurkan?",
-        answer: "Insani menyalurkan bantuan ke seluruh Indonesia dan juga luar negeri khususnya negara yang mengalami krisis.\n\nSaat ini Insani telah menyalurkan bantuan ke negara Palestina, Suriah, Yaman, dan untuk Indonesia ke daerah Jabodetabek, Banten, Jawa Tengah, Jawa Timur, Sumatera, Kalimantan, Sulawesi, dan Bali."
-    }
-];
 
-export default function AboutIndex({ faqs, aboutPage }: any) {
-    const { locale } = usePage().props as any;
+export default function AboutIndex({ management = [], faqs = [], aboutPage, legalDocuments = [] }: any) {
+    const { locale, siteSettings } = usePage().props as any;
     const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+    const defaultVision = "Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan yang universal.";
+    const visionText = siteSettings?.about_vision || defaultVision;
+
+    const defaultMissions = [
+        "Menggalang kepedulian masyarakat untuk turut serta dalam program pengentasan krisis kemanusiaan.",
+        "Memberikan bantuan tepat sasaran dan terukur melalui kolaborasi dengan berbagai mitra terpercaya.",
+        "Mengedukasi masyarakat mengenai isu-isu kemanusiaan di dalam dan luar negeri."
+    ];
+    const missions: string[] = siteSettings?.about_mission
+        ? siteSettings.about_mission.split('\n').map((m: string) => m.trim()).filter(Boolean)
+        : defaultMissions;
+
+    const defaultValues = [
+        { title: "Integritas", desc: "Transparan dan akuntabel dalam pengelolaan amanah donatur." },
+        { title: "Kolaborasi", desc: "Bersinergi dengan semua pihak untuk dampak yang lebih luas." },
+        { title: "Empati", desc: "Bergerak dari panggilan hati nurani untuk meringankan beban sesama." }
+    ];
+    const values = siteSettings?.about_values
+        ? siteSettings.about_values.split('\n').map((line: string) => {
+            const parts = line.split(':');
+            if (parts.length >= 2) {
+                return { title: parts[0].trim(), desc: parts.slice(1).join(':').trim() };
+            }
+            return { title: line.trim(), desc: '' };
+        }).filter((v: any) => v.title)
+        : defaultValues;
+
+    const displayedFaqs = faqs || [];
 
     const toggleFaq = (index: number) => {
         if (openFaq === index) {
@@ -34,48 +46,72 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
         }
     };
 
-    const legalDocuments = [
+    const getDocIcon = (type: string) => {
+        switch (type) {
+            case 'shield':
+                return <ShieldCheck className="w-6 h-6 text-insani-blue" />;
+            case 'scale':
+                return <Scale className="w-6 h-6 text-insani-blue" />;
+            case 'building':
+                return <Building2 className="w-6 h-6 text-insani-blue" />;
+            case 'map-pin':
+                return <MapPin className="w-6 h-6 text-insani-blue" />;
+            case 'award':
+                return <Award className="w-6 h-6 text-insani-blue" />;
+            default:
+                return <FileText className="w-6 h-6 text-insani-blue" />;
+        }
+    };
+
+    const activeDocuments = (legalDocuments && legalDocuments.length > 0) ? legalDocuments : [
         {
             id: 1,
             title: "Akta Pendirian",
             url: "https://drive.google.com/file/d/1npzpQZGq1MuGERZ9H8EdxmdV0vzgkIze/view",
-            icon: <Scale className="w-6 h-6 text-insani-blue" />,
-            image: "/images/about/Logo-Notaris-HD.webp"
+            icon_type: "scale",
+            publisher_logo: "/images/about/Logo-Notaris-HD.webp",
+            issuer_name: "Notaris"
         },
         {
             id: 2,
             title: "Akta Perubahan",
             url: "https://drive.google.com/file/d/1SJP9zp-gMofWmQcCHwMCyfjj8Y_v-k7F/view",
-            icon: <Scale className="w-6 h-6 text-insani-blue" />,
-            image: "/images/about/Logo-Notaris-HD.webp"
+            icon_type: "scale",
+            publisher_logo: "/images/about/Logo-Notaris-HD.webp",
+            issuer_name: "Notaris"
         },
         {
             id: 3,
             title: "SK Kemenkumham Pendirian",
+            document_number: "AHU-0002557.AH.01.04.Tahun 2019",
             url: "https://drive.google.com/file/d/1_7BOWiP9SK-Me0GE178RAqx3g82_-5jh/view",
-            icon: <ShieldCheck className="w-6 h-6 text-insani-blue" />,
-            image: "/images/about/Logo-Kumham.webp"
+            icon_type: "shield",
+            publisher_logo: "/images/about/Logo-Kumham.webp",
+            issuer_name: "Kemenkumham RI"
         },
         {
             id: 4,
             title: "SK Kemenkumham Perubahan",
             url: "https://drive.google.com/file/d/1qH6vEQBTO3ofYd0hY-8RSk090uR7I04C/view",
-            icon: <ShieldCheck className="w-6 h-6 text-insani-blue" />,
-            image: "/images/about/Logo-Kumham.webp"
+            icon_type: "shield",
+            publisher_logo: "/images/about/Logo-Kumham.webp",
+            issuer_name: "Kemenkumham RI"
         },
         {
             id: 5,
             title: "Surat Tanda Daftar Yayasan & Izin Kegiatan",
             url: "https://drive.google.com/file/d/1qftGsDO7gkN3u_MgnWuLsHmpsHFAsyfa/view",
-            icon: <Building2 className="w-6 h-6 text-insani-blue" />,
-            image: "/images/about/logo-Pmeprov-DKI.webp"
+            icon_type: "building",
+            publisher_logo: "/images/about/logo-Pmeprov-DKI.webp",
+            issuer_name: "Pemprov DKI Jakarta"
         },
         {
             id: 6,
             title: "Surat Keterangan Domisili",
             url: "https://drive.google.com/file/d/1ebtt5z05du7B-EqYCbEddzDTwT8HY5wE/view",
-            icon: <MapPin className="w-6 h-6 text-insani-blue" />,
-            image: "/images/about/logo-Pmeprov-DKI.webp"
+            icon_type: "map-pin",
+            publisher_logo: "/images/about/logo-Pmeprov-DKI.webp",
+            issuer_name: "Pemprov DKI Jakarta"
         }
     ];
 
@@ -156,7 +192,7 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
                                         Visi
                                     </h3>
                                     <p className="text-slate-700 leading-relaxed text-lg">
-                                        Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan yang universal.
+                                        {visionText}
                                     </p>
                                 </div>
                                 
@@ -168,18 +204,12 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
                                         Misi
                                     </h3>
                                     <ul className="space-y-4 text-slate-700">
-                                        <li className="flex items-start gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-insani-blue mt-2.5 flex-shrink-0"></div>
-                                            <p>Menggalang kepedulian masyarakat untuk turut serta dalam program pengentasan krisis kemanusiaan.</p>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-insani-blue mt-2.5 flex-shrink-0"></div>
-                                            <p>Memberikan bantuan tepat sasaran dan terukur melalui kolaborasi dengan berbagai mitra terpercaya.</p>
-                                        </li>
-                                        <li className="flex items-start gap-3">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-insani-blue mt-2.5 flex-shrink-0"></div>
-                                            <p>Mengedukasi masyarakat mengenai isu-isu kemanusiaan di dalam dan luar negeri.</p>
-                                        </li>
+                                        {missions.map((mission: string, idx: number) => (
+                                            <li key={idx} className="flex items-start gap-3">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-insani-blue mt-2.5 flex-shrink-0"></div>
+                                                <p>{mission}</p>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                             </div>
@@ -199,18 +229,12 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
                                 <div>
                                     <h3 className="text-2xl font-bold mb-8">Nilai-Nilai<br/>Perjuangan</h3>
                                     <div className="space-y-6">
-                                        <div className="border-l-2 border-insani-blue/50 pl-5 hover:border-insani-blue transition-colors">
-                                            <h4 className="font-semibold text-lg mb-1">Integritas</h4>
-                                            <p className="text-slate-300 text-sm">Transparan dan akuntabel dalam pengelolaan amanah donatur.</p>
-                                        </div>
-                                        <div className="border-l-2 border-insani-blue/50 pl-5 hover:border-insani-blue transition-colors">
-                                            <h4 className="font-semibold text-lg mb-1">Kolaborasi</h4>
-                                            <p className="text-slate-300 text-sm">Bersinergi dengan semua pihak untuk dampak yang lebih luas.</p>
-                                        </div>
-                                        <div className="border-l-2 border-insani-blue/50 pl-5 hover:border-insani-blue transition-colors">
-                                            <h4 className="font-semibold text-lg mb-1">Empati</h4>
-                                            <p className="text-slate-300 text-sm">Bergerak dari panggilan hati nurani untuk meringankan beban sesama.</p>
-                                        </div>
+                                        {values.map((val: any, idx: number) => (
+                                            <div key={idx} className="border-l-2 border-insani-blue/50 pl-5 hover:border-insani-blue transition-colors">
+                                                <h4 className="font-semibold text-lg mb-1">{val.title}</h4>
+                                                {val.desc && <p className="text-slate-300 text-sm">{val.desc}</p>}
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -219,6 +243,68 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
                     </div>
                 </div>
             </section>
+
+            {/* 2.5 Dewan Pengurus Yayasan */}
+            {management && management.length > 0 && (
+                <section id="pengurus" className="py-24 bg-white border-t border-slate-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-insani-blue/10 text-insani-blue mb-4">
+                                <Users className="w-3.5 h-3.5" />
+                                Kepengurusan Lembaga
+                            </span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+                                Dewan Pengurus Yayasan
+                            </h2>
+                            <p className="text-slate-600 text-lg">
+                                Para pegiat kemanusiaan dan profesional yang berdedikasi mengemban amanah, mengawal tata kelola, dan memajukan program kebaikan Insani Indonesia.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {management.map((member: any, index: number) => (
+                                <motion.div
+                                    key={member.id || index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.4, delay: index * 0.08 }}
+                                    className="group bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 hover:border-insani-blue/30 hover:shadow-lg transition-all duration-300 flex flex-col"
+                                >
+                                    <div className="aspect-[4/5] w-full overflow-hidden bg-slate-200 relative">
+                                        {member.photo_url ? (
+                                            <img
+                                                src={member.photo_url}
+                                                alt={member.name}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400">
+                                                <Users className="w-16 h-16 mb-2 opacity-50" />
+                                                <span className="text-xs font-medium uppercase tracking-wider">Insani</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    </div>
+                                    <div className="p-6 flex-1 flex flex-col">
+                                        <h3 className="font-bold text-lg text-slate-900 group-hover:text-insani-blue transition-colors">
+                                            {member.name}
+                                        </h3>
+                                        <p className="text-xs font-semibold text-insani-blue uppercase tracking-wider mt-1 mb-3">
+                                            {member.position}
+                                        </p>
+                                        {member.bio && (
+                                            <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 mt-auto">
+                                                {member.bio}
+                                            </p>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* 3. Legalitas & Kredibilitas */}
             <section id="legalitas" className="py-24 bg-slate-50 border-t border-slate-200">
@@ -233,113 +319,138 @@ export default function AboutIndex({ faqs, aboutPage }: any) {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {legalDocuments.map((doc, index) => (
-                            <motion.a 
-                                href={doc.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                key={doc.id}
-                                initial={{ opacity: 0, y: 15 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-50px" }}
-                                transition={{ duration: 0.4, delay: index * 0.05 }}
-                                className="group flex flex-col bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-xl hover:border-insani-blue/30 transition-all duration-300 relative overflow-hidden"
-                            >
-                                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-slate-50 to-transparent -z-0 rounded-bl-3xl group-hover:from-insani-blue/5 transition-colors"></div>
-                                
-                                <div className="flex justify-between items-start mb-6 relative z-10">
-                                    <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-insani-blue/10 group-hover:border-insani-blue/20 transition-colors">
-                                        {doc.icon}
+                        {activeDocuments.map((doc: any, index: number) => {
+                            const docUrl = doc.file_url || doc.view_url || doc.external_url || doc.url || '#';
+                            const docTitle = doc.title_translations?.[locale] || (typeof doc.title === 'object' ? doc.title?.[locale] || doc.title?.id : doc.title);
+                            const docLogo = doc.publisher_logo || doc.image;
+                            const docIcon = doc.icon || getDocIcon(doc.icon_type);
+
+                            return (
+                                <motion.a 
+                                    href={docUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    key={doc.id || index}
+                                    initial={{ opacity: 0, y: 15 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: "-50px" }}
+                                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                                    className="group flex flex-col bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-xl hover:border-insani-blue/30 transition-all duration-300 relative overflow-hidden"
+                                >
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-slate-50 to-transparent -z-0 rounded-bl-3xl group-hover:from-insani-blue/5 transition-colors"></div>
+                                    
+                                    <div className="flex justify-between items-start mb-6 relative z-10">
+                                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-insani-blue/10 group-hover:border-insani-blue/20 transition-colors">
+                                            {docIcon}
+                                        </div>
+                                        {docLogo && (
+                                            <img src={docLogo} alt={docTitle} className="h-10 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0" />
+                                        )}
                                     </div>
-                                    {doc.image && (
-                                        <img src={doc.image} alt={doc.title} className="h-10 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0" />
-                                    )}
-                                </div>
-                                
-                                <div className="mt-auto relative z-10">
-                                    <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-insani-blue transition-colors line-clamp-2">
-                                        {doc.title}
-                                    </h3>
-                                    <div className="flex items-center text-sm font-medium text-insani-blue mt-4 opacity-80 group-hover:opacity-100">
-                                        Lihat Dokumen
-                                        <ExternalLink className="w-4 h-4 ml-1.5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                    
+                                    <div className="mt-auto relative z-10">
+                                        {doc.document_number && (
+                                            <div className="inline-block text-[11px] font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mb-2">
+                                                {doc.document_number}
+                                            </div>
+                                        )}
+                                        <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-insani-blue transition-colors line-clamp-2">
+                                            {docTitle}
+                                        </h3>
+                                        {doc.issuer_name && (
+                                            <div className="text-xs text-slate-500 font-medium mb-3">
+                                                {doc.issuer_name}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center text-sm font-medium text-insani-blue mt-3 opacity-80 group-hover:opacity-100">
+                                            Lihat Dokumen
+                                            <ExternalLink className="w-4 h-4 ml-1.5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                        </div>
                                     </div>
-                                </div>
-                            </motion.a>
-                        ))}
+                                </motion.a>
+                            );
+                        })}
                     </div>
                 </div>
             </section>
 
-            {/* 4. FAQ Section Baru (Statis dari faq-insani.md) */}
-            <section id="faq" className="py-24 bg-slate-50 border-t border-slate-200">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <motion.h2 
-                            initial={{ opacity: 0, y: 15 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight"
-                        >
-                            Tanya Jawab (FAQ)
-                        </motion.h2>
-                        <motion.p 
-                            initial={{ opacity: 0, y: 15 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.1 }}
-                            className="text-slate-600 text-lg max-w-2xl mx-auto"
-                        >
-                            Pelajari lebih lanjut tentang profil Insani Indonesia, program-program kami, serta bagaimana Anda dapat berkolaborasi bersama kami.
-                        </motion.p>
-                    </div>
-                    
-                    <div className="space-y-4">
-                        {staticFaqs.map((faq: any, index: number) => (
-                            <motion.div 
-                                key={faq.id} 
-                                initial={{ opacity: 0, y: 10 }}
+            {/* 4. FAQ Section Profil Yayasan */}
+            {displayedFaqs && displayedFaqs.length > 0 && (
+                <section id="faq" className="py-24 bg-slate-50 border-t border-slate-200">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-16">
+                            <motion.h2 
+                                initial={{ opacity: 0, y: 15 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
-                                transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
-                                className={`rounded-2xl transition-all duration-300 ${openFaq === index ? 'bg-white shadow-md ring-1 ring-insani-blue/20 transform scale-[1.01]' : 'bg-white shadow-sm hover:shadow-md border border-slate-100 hover:border-slate-200'}`}
+                                className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight"
                             >
-                                <button 
-                                    className="w-full px-6 py-5 flex justify-between items-center text-left focus:outline-none"
-                                    onClick={() => toggleFaq(index)}
-                                    aria-expanded={openFaq === index}
-                                >
-                                    <span className={`font-semibold pr-8 text-lg ${openFaq === index ? 'text-insani-blue' : 'text-slate-900'}`}>
-                                        {faq.question}
-                                    </span>
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${openFaq === index ? 'bg-insani-blue text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                                        <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} />
-                                    </div>
-                                </button>
-                                
-                                <div 
-                                    className={`grid transition-all duration-300 ease-in-out ${openFaq === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
-                                >
-                                    <div className="overflow-hidden">
-                                        <div className="px-6 pb-6 pt-2 text-slate-600 leading-relaxed text-base whitespace-pre-wrap">
-                                            {faq.answer}
+                                Tanya Jawab Seputar Lembaga
+                            </motion.h2>
+                            <motion.p 
+                                initial={{ opacity: 0, y: 15 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.1 }}
+                                className="text-slate-600 text-lg max-w-2xl mx-auto"
+                            >
+                                Informasi esensial mengenai profil, legalitas hukum, transparansi, serta tata kelola amanah di Insani Indonesia.
+                            </motion.p>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            {displayedFaqs.map((faq: any, index: number) => {
+                                const question = faq.question_translations?.[locale] || (typeof faq.question === 'object' ? faq.question?.[locale] || faq.question?.id : faq.question);
+                                const answer = faq.answer_translations?.[locale] || (typeof faq.answer_html === 'object' ? faq.answer_html?.[locale] || faq.answer_html?.id : (faq.answer_html || faq.answer));
+
+                                return (
+                                    <motion.div 
+                                        key={faq.id || index} 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
+                                        className={`rounded-2xl transition-all duration-300 ${openFaq === index ? 'bg-white shadow-md ring-1 ring-insani-blue/20 transform scale-[1.01]' : 'bg-white shadow-sm hover:shadow-md border border-slate-100 hover:border-slate-200'}`}
+                                    >
+                                        <button 
+                                            className="w-full px-6 py-5 flex justify-between items-center text-left focus:outline-none"
+                                            onClick={() => toggleFaq(index)}
+                                            aria-expanded={openFaq === index}
+                                        >
+                                            <span className={`font-semibold pr-8 text-lg ${openFaq === index ? 'text-insani-blue' : 'text-slate-900'}`}>
+                                                {question}
+                                            </span>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-300 ${openFaq === index ? 'bg-insani-blue text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                                                <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} />
+                                            </div>
+                                        </button>
+                                        
+                                        <div 
+                                            className={`grid transition-all duration-300 ease-in-out ${openFaq === index ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+                                        >
+                                            <div className="overflow-hidden">
+                                                <div 
+                                                    className="px-6 pb-6 pt-2 text-slate-600 leading-relaxed text-base prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2"
+                                                    dangerouslySetInnerHTML={{ __html: answer }}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                        
+                        <div className="mt-12 text-center">
+                            <Link href="/pusat-bantuan">
+                                <Button size="lg" className="bg-insani-blue hover:bg-insani-blue/90 text-white rounded-full px-8 h-12 font-semibold shadow-sm transition-transform hover:scale-105">
+                                    Lihat Seluruh FAQ di Pusat Bantuan
+                                    <ExternalLink className="ml-2 w-4 h-4" />
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
-                    
-                    <div className="mt-12 text-center">
-                        <Link href="/pusat-bantuan">
-                            <Button size="lg" className="bg-insani-blue hover:bg-insani-blue/90 text-white rounded-full px-8 h-12 font-semibold shadow-sm transition-transform hover:scale-105">
-                                Selengkapnya di Pusat Bantuan
-                                <ExternalLink className="ml-2 w-4 h-4" />
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </section>
+                </section>
+            )}
 
         </PublicLayout>
     );
