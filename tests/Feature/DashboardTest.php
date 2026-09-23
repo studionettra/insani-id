@@ -240,3 +240,49 @@ test('admin user accessing /admin redirects to dashboard', function () {
 
     $response->assertRedirect(route('dashboard'));
 });
+
+test('staff user receives enhanced analytics and operational widgets', function () {
+    Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'web']);
+
+    $admin = User::factory()->create();
+    $admin->assignRole('Administrator');
+
+    $category = Category::create([
+        'name' => 'Kesehatan',
+        'slug' => 'kesehatan',
+        'platform_fee_percent' => 5,
+    ]);
+
+    $urgentProgram = Program::factory()->create([
+        'category_id' => $category->id,
+        'status' => 'published',
+        'target_amount' => 10000000,
+        'collected_amount' => 2000000,
+        'deadline' => now()->addDays(5),
+    ]);
+
+    Donation::factory()->create([
+        'program_id' => $urgentProgram->id,
+        'amount' => 500000,
+        'status' => 'paid',
+        'channel' => 'online',
+        'paid_at' => now(),
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->where('userRoleInfo.isStaff', true)
+        ->has('stats.averageDonation')
+        ->has('stats.paymentSuccessRate')
+        ->has('stats.pendingContactMessages')
+        ->has('analyticsData.paymentMethods')
+        ->has('analyticsData.categoryDonations')
+        ->has('analyticsData.recentTransactions')
+        ->has('analyticsData.urgentPrograms', 1)
+        ->where('analyticsData.urgentPrograms.0.id', $urgentProgram->id)
+    );
+});
