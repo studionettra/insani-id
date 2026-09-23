@@ -6,6 +6,9 @@ use App\Mail\DonationSuccessNotification;
 use App\Mail\NewDonationNotification;
 use App\Models\Donation;
 use App\Models\NotificationLog;
+use App\Models\User;
+use App\Notifications\DonationConfirmedNotification;
+use App\Notifications\DonationReceivedNotification;
 use App\Services\NotificationGatewayService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +17,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class SendDonationPaidNotification implements ShouldQueue
 {
@@ -34,7 +38,7 @@ class SendDonationPaidNotification implements ShouldQueue
      */
     public function handle(NotificationGatewayService $waService): void
     {
-        $donation = $this->donation->loadMissing(['program.creator', 'program.campaignerProfile']);
+        $donation = $this->donation->loadMissing(['program.creator', 'program.campaignerProfile', 'donor']);
 
         // 1. Send Email to Donor
         if ($donation->donor_email) {
@@ -88,6 +92,23 @@ class SendDonationPaidNotification implements ShouldQueue
             } catch (\Exception $e) {
                 Log::error('Failed to send new donation alert whatsapp to campaigner: '.$e->getMessage());
             }
+        }
+
+        // 4. Send Database Notification to Finance, Admin, & Campaigner
+        $staffRecipients = rescue(fn () => User::permission('donation.view')->get(), collect(), false);
+        if ($staffRecipients->isEmpty()) {
+            $staffRecipients = rescue(fn () => User::role('Administrator')->get(), collect(), false);
+        }
+        if ($creator && $donation->program && $donation->program->campaigner_type !== 'internal') {
+            $staffRecipients->push($creator);
+        }
+        if ($staffRecipients->isNotEmpty()) {
+            Notification::send($staffRecipients->unique('id'), new DonationReceivedNotification($donation));
+        }
+
+        // 5. Send Database Notification to Registered Donor (if logged in during donation)
+        if ($donation->donor_user_id && $donation->donor) {
+            rescue(fn () => $donation->donor->notify(new DonationConfirmedNotification($donation)));
         }
     }
 }
