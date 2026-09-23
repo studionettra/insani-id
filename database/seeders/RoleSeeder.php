@@ -40,6 +40,7 @@ class RoleSeeder extends Seeder
                 'disbursement.view', 'disbursement.create', 'disbursement.approve',
                 'donation.view', 'donation.confirm-manual',
                 'report.view',
+                'manage_financial_reports',
             ],
 
             'Customer Service' => [

@@ -33,8 +33,9 @@ class PermissionSeeder extends Seeder
 
             // CMS Content Management
             'manage_pages', 'manage_faqs', 'manage_management',
-            'manage_partners', 'manage_impact_stats', 'manage_banners',
+            'manage_partners', 'manage_impact_stats', 'manage_banners', 'manage_popups',
             'manage_contact_messages', 'manage_blog', 'manage_legal_documents',
+            'manage_financial_reports',
         ];
 
         foreach ($permissions as $permission) {
