@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
+use App\Models\FinancialReport;
 use App\Models\LegalDocument;
 use App\Models\ManagementMember;
 use App\Models\Page;
@@ -43,12 +44,17 @@ class AboutController extends Controller
         });
         $aboutPage = Page::where('slug', 'tentang-kami')->where('is_active', true)->first();
         $legalDocuments = LegalDocument::where('is_active', true)->orderBy('sort_order')->get();
+        $financialReports = FinancialReport::where('is_active', true)
+            ->orderByDesc('report_year')
+            ->orderBy('sort_order')
+            ->get();
 
         return inertia('Public/About/Index', [
             'management' => $management,
             'faqs' => $faqs,
             'aboutPage' => $aboutPage,
             'legalDocuments' => $legalDocuments,
+            'financialReports' => $financialReports,
         ]);
     }
 }

@@ -22,7 +22,27 @@ import {
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
-export default function ManagementIndex({ members, filters }: any) {
+const getLocalizedText = (value: any): string => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object') {
+        return value.id || value.en || value.ar || Object.values(value).find((v) => typeof v === 'string') || '';
+    }
+    return String(value);
+};
+
+const formatPaginationLabel = (label: string): string => {
+    if (!label) return '';
+    if (label === 'pagination.previous' || label.toLowerCase().includes('previous')) {
+        return '&laquo; Sebelumnya';
+    }
+    if (label === 'pagination.next' || label.toLowerCase().includes('next')) {
+        return 'Berikutnya &raquo;';
+    }
+    return label;
+};
+
+export default function ManagementIndex({ members = { data: [] }, filters = {} }: any) {
     const [search, setSearch] = useState(filters.search || '');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -55,17 +75,18 @@ export default function ManagementIndex({ members, filters }: any) {
 
     const openEditModal = (member: any) => {
         setEditingMember(member);
+        const posTranslations = member.position_translations || (typeof member.position === 'object' ? member.position : null);
         setData({
             _method: 'put',
-            name: member.name,
+            name: member.name || '',
             position: { 
-                id: member.position_translations?.id || '', 
-                en: member.position_translations?.en || '', 
-                ar: member.position_translations?.ar || '' 
+                id: posTranslations?.id || (typeof member.position === 'string' ? member.position : ''), 
+                en: posTranslations?.en || '', 
+                ar: posTranslations?.ar || '' 
             },
             image_url: null,
-            is_active: member.is_active,
-            sort_order: member.sort_order,
+            is_active: member.is_active ?? true,
+            sort_order: member.sort_order ?? 0,
         });
         clearErrors();
         setIsEditModalOpen(true);
@@ -175,7 +196,7 @@ return;
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-gray-600 dark:text-gray-300">
-                                            {member.position_translations?.id || member.position}
+                                            {getLocalizedText(member.position_translations || member.position)}
                                         </TableCell>
                                         <TableCell className="text-center text-gray-600 dark:text-gray-300">{member.sort_order}</TableCell>
                                         <TableCell>
@@ -214,6 +235,28 @@ return;
                         </TableBody>
                     </Table>
                 </div>
+
+                {/* Pagination */}
+                {members.links && members.links.length > 3 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-800 pt-4">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Menampilkan <span className="font-semibold text-gray-900 dark:text-white">{members.from || 0}</span> sampai <span className="font-semibold text-gray-900 dark:text-white">{members.to || 0}</span> dari <span className="font-semibold text-gray-900 dark:text-white">{members.total || 0}</span> anggota
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                            {members.links.map((link: any, i: number) => (
+                                <Button
+                                    key={i}
+                                    variant={link.active ? "default" : "outline"}
+                                    size="sm"
+                                    disabled={!link.url}
+                                    onClick={() => link.url && router.visit(link.url)}
+                                    dangerouslySetInnerHTML={{ __html: formatPaginationLabel(link.label) }}
+                                    className={link.active ? "bg-[#1A56DB] text-white" : "border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Modal Tambah */}
@@ -272,7 +315,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -369,7 +412,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"
@@ -409,7 +452,7 @@ return;
                 open={!!memberToDelete}
                 onOpenChange={(open) => !open && setMemberToDelete(null)}
                 title="Hapus Anggota Manajemen"
-                description={`Apakah Anda yakin ingin menghapus anggota manajemen "${memberToDelete?.name}" (${memberToDelete?.role_title})? Tindakan ini tidak dapat dibatalkan.`}
+                description={`Apakah Anda yakin ingin menghapus anggota manajemen "${memberToDelete?.name}" (${getLocalizedText(memberToDelete?.position_translations || memberToDelete?.position)})? Tindakan ini tidak dapat dibatalkan.`}
                 variant="danger"
                 loading={isDeleting}
                 onConfirm={handleDeleteMember}

@@ -31,10 +31,22 @@ class ManagementMember extends Model
 
     protected $appends = [
         'image_url',
+        'position_translations',
+        'bio_translations',
     ];
 
     public function getImageUrlAttribute(): ?string
     {
         return $this->photo_url;
+    }
+
+    public function getPositionTranslationsAttribute(): array
+    {
+        return $this->getTranslations('position');
+    }
+
+    public function getBioTranslationsAttribute(): array
+    {
+        return $this->getTranslations('bio');
     }
 }

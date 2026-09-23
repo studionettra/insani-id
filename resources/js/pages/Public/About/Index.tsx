@@ -1,11 +1,26 @@
 import { Head, usePage, Link } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, FileText, ExternalLink, ShieldCheck, Scale, Building2, MapPin, Award, Users } from 'lucide-react';
+import { 
+    ChevronDown, 
+    ChevronUp, 
+    FileText, 
+    ExternalLink, 
+    ShieldCheck, 
+    Scale, 
+    Building2, 
+    MapPin, 
+    Award, 
+    Users,
+    Download,
+    Eye,
+    FileSpreadsheet
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
+import { getLocalizedValue } from '@/lib/utils';
 
-export default function AboutIndex({ management = [], faqs = [], aboutPage, legalDocuments = [] }: any) {
+export default function AboutIndex({ management = [], faqs = [], aboutPage, legalDocuments = [], financialReports = [] }: any) {
     const { locale, siteSettings } = usePage().props as any;
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -117,7 +132,6 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
 
     return (
         <PublicLayout title="Tentang Kami">
-            <Head title="Tentang Kami | Insani Indonesia" />
 
             {/* 1. Hero Section (Split Layout) */}
             <section className="relative pt-32 pb-20 overflow-hidden bg-slate-50">
@@ -272,9 +286,9 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                     className="group bg-slate-50 rounded-2xl overflow-hidden border border-slate-200 hover:border-insani-blue/30 hover:shadow-lg transition-all duration-300 flex flex-col"
                                 >
                                     <div className="aspect-[4/5] w-full overflow-hidden bg-slate-200 relative">
-                                        {member.photo_url ? (
+                                        {(member.photo_url || member.image_url) ? (
                                             <img
-                                                src={member.photo_url}
+                                                src={(member.photo_url || member.image_url).startsWith('http') || (member.photo_url || member.image_url).startsWith('/') ? (member.photo_url || member.image_url) : `/storage/${member.photo_url || member.image_url}`}
                                                 alt={member.name}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             />
@@ -291,11 +305,11 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                             {member.name}
                                         </h3>
                                         <p className="text-xs font-semibold text-insani-blue uppercase tracking-wider mt-1 mb-3">
-                                            {member.position}
+                                            {getLocalizedValue(member.position_translations || member.position, locale)}
                                         </p>
-                                        {member.bio && (
+                                        {(member.bio_translations || member.bio) && (
                                             <p className="text-slate-600 text-sm leading-relaxed line-clamp-3 mt-auto">
-                                                {member.bio}
+                                                {getLocalizedValue(member.bio_translations || member.bio, locale)}
                                             </p>
                                         )}
                                     </div>
@@ -373,6 +387,157 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                     </div>
                 </div>
             </section>
+
+            {/* 3.5. Laporan Keuangan & Akuntabilitas Yayasan (Annual Report) */}
+            {financialReports && financialReports.length > 0 && (
+                <section id="laporan-keuangan" className="py-24 bg-white border-t border-slate-200 relative overflow-hidden">
+                    {/* Subtle background ambient gradient */}
+                    <div className="absolute top-0 right-1/4 w-96 h-96 bg-insani-blue/5 rounded-full blur-3xl pointer-events-none -z-0"></div>
+                    <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none -z-0"></div>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 mb-4">
+                                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                                Transparansi & Akuntabilitas Publik
+                            </span>
+                            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+                                Laporan Keuangan & Annual Report
+                            </h2>
+                            <p className="text-slate-600 text-lg leading-relaxed">
+                                Sebagai wujud pertanggungjawaban amanah donatur dan kepatuhan hukum, seluruh laporan tahunan dan kinerja keuangan Insani Indonesia dipublikasikan secara terbuka dan dapat diunduh bebas oleh publik.
+                            </p>
+                        </div>
+
+                        {/* Daftar Kartu Annual Report */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {financialReports.map((report: any, index: number) => {
+                                const title = report.title_translations?.[locale] || (typeof report.title === 'object' ? report.title?.[locale] || report.title?.id : report.title);
+                                const summary = report.summary_translations?.[locale] || (typeof report.summary === 'object' ? report.summary?.[locale] || report.summary?.id : report.summary);
+                                const downloadUrl = `/laporan-keuangan/${report.slug}/unduh`;
+                                const viewUrl = report.view_url || '#';
+
+                                return (
+                                    <motion.div
+                                        key={report.id || index}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true, margin: "-50px" }}
+                                        transition={{ duration: 0.4, delay: index * 0.08 }}
+                                        className="bg-slate-50/90 hover:bg-white rounded-3xl p-6 border border-slate-200/90 hover:border-insani-blue/40 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group relative"
+                                    >
+                                        {/* Cover Image / Mockup Top */}
+                                        <div className="relative mb-5 rounded-2xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 aspect-[16/10] flex items-center justify-center border border-slate-200/60 group-hover:border-insani-blue/20 transition-colors">
+                                            {report.cover_url ? (
+                                                <img 
+                                                    src={report.cover_url} 
+                                                    alt={title} 
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="text-center p-6 flex flex-col items-center justify-center">
+                                                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-insani-blue mb-2.5">
+                                                        <FileSpreadsheet className="w-6 h-6" />
+                                                    </div>
+                                                    <span className="text-xs font-mono font-bold tracking-wider text-slate-400 uppercase">
+                                                        Insani Report
+                                                    </span>
+                                                    <span className="text-xl font-black text-slate-800 tracking-tight">
+                                                        {report.report_year}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Badge Tahun Floating */}
+                                            <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-900/80 backdrop-blur-md text-white shadow-sm">
+                                                    Tahun {report.report_year}
+                                                </span>
+                                            </div>
+
+                                            {/* Badge Audit WTP Floating */}
+                                            {report.audit_status && (
+                                                <div className="absolute top-3 right-3">
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600/90 backdrop-blur-md text-white shadow-sm">
+                                                        <ShieldCheck className="w-3.5 h-3.5" />
+                                                        {report.audit_status}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Konten Utama */}
+                                        <div className="flex-1 flex flex-col">
+                                            {report.auditor_name && (
+                                                <div className="text-xs font-medium text-slate-500 mb-1.5 flex items-center gap-1.5">
+                                                    <Building2 className="w-3.5 h-3.5 text-insani-blue/70 shrink-0" />
+                                                    <span className="truncate">{report.auditor_name}</span>
+                                                </div>
+                                            )}
+
+                                            <h3 className="font-bold text-lg text-slate-900 group-hover:text-insani-blue transition-colors line-clamp-2 mb-2">
+                                                {title}
+                                            </h3>
+
+                                            {summary && (
+                                                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed line-clamp-3 mb-4">
+                                                    {summary}
+                                                </p>
+                                            )}
+
+                                            {/* Sorotan Finansial jika ada */}
+                                            {(report.formatted_revenue || report.formatted_disbursement) && (
+                                                <div className="grid grid-cols-2 gap-2 p-3 bg-white rounded-xl border border-slate-100 mb-5 text-xs">
+                                                    {report.formatted_revenue && (
+                                                        <div>
+                                                            <span className="text-[10px] text-slate-400 block font-medium">Dana Terhimpun</span>
+                                                            <span className="font-bold text-slate-800">{report.formatted_revenue}</span>
+                                                        </div>
+                                                    )}
+                                                    {report.formatted_disbursement && (
+                                                        <div>
+                                                            <span className="text-[10px] text-emerald-600 block font-medium">Realisasi Salur</span>
+                                                            <span className="font-bold text-emerald-700">{report.formatted_disbursement}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Action Buttons */}
+                                            <div className="mt-auto pt-4 border-t border-slate-200/80 flex items-center justify-between gap-3">
+                                                {viewUrl !== '#' ? (
+                                                    <a
+                                                        href={viewUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-insani-blue transition-colors py-2"
+                                                    >
+                                                        <Eye className="w-3.5 h-3.5" />
+                                                        Baca Online
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-xs text-slate-400">Arsip Resmi</span>
+                                                )}
+
+                                                <a
+                                                    href={downloadUrl}
+                                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-insani-blue text-white hover:bg-insani-blue/90 shadow-sm hover:shadow transition-all active:scale-95 ml-auto"
+                                                >
+                                                    <Download className="w-3.5 h-3.5" />
+                                                    <span>Unduh PDF</span>
+                                                    {report.formatted_file_size && (
+                                                        <span className="opacity-80 text-[10px]">({report.formatted_file_size})</span>
+                                                    )}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* 4. FAQ Section Profil Yayasan */}
             {displayedFaqs && displayedFaqs.length > 0 && (

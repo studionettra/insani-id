@@ -13,8 +13,12 @@ class ManagementMemberController extends Controller
     {
         $members = ManagementMember::query()
             ->when(request('search'), function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('position', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('position->id', 'like', "%{$search}%")
+                        ->orWhere('position->en', 'like', "%{$search}%")
+                        ->orWhere('position->ar', 'like', "%{$search}%");
+                });
             })
             ->orderBy('sort_order')
             ->latest()
