@@ -167,7 +167,7 @@ export default function AkunProgramCreate({ categories }: Props) {
                                 <div className="border-t pt-6 flex justify-end">
                                     <Button type="submit" disabled={processing} className="bg-blue-600 hover:bg-blue-700">
                                         <Save className="mr-2 h-4 w-4" />
-                                        Ajukan Program (Verifikasi)
+                                        Ajukan Program
                                     </Button>
                                 </div>
                             </form>

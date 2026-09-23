@@ -117,7 +117,6 @@ export default function DonationLookup({ search = '', donations }: Props) {
 
     return (
         <PublicLayout title="Cek Status & Riwayat Donasi">
-            <Head title="Cek Status & Riwayat Donasi - Insani Indonesia" />
 
             <div className="bg-gradient-to-b from-blue-50/60 via-slate-50/30 to-white min-h-[calc(100vh-200px)] py-10 md:py-16">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6">

@@ -26,7 +26,7 @@ const UpdateCard = ({ update }: { update: any }) => {
                         <h3 className="font-bold text-lg mb-1 truncate text-slate-900 dark:text-white">{update.title}</h3>
                         <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">
                             {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: id })}
-                            {!update.is_published && ' • (Draft)'}
+                            {!update.is_published && ' • (Draf)'}
                         </p>
                         <div className="relative">
                             <div 

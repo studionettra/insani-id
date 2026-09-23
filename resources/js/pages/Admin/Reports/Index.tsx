@@ -186,12 +186,12 @@ export default function ReportIndex({ stats, channelAttributions = [] }: Props) 
                             <Table>
                                 <TableHeader>
                                     <TableRow className="bg-gray-50/50 dark:bg-gray-800/50 text-xs">
-                                        <TableHead className="font-semibold">Kanal (Source)</TableHead>
-                                        <TableHead className="font-semibold">Media (Medium)</TableHead>
-                                        <TableHead className="font-semibold">Nama Kampanye (Campaign)</TableHead>
+                                        <TableHead className="font-semibold">Kanal</TableHead>
+                                        <TableHead className="font-semibold">Media</TableHead>
+                                        <TableHead className="font-semibold">Nama Kampanye</TableHead>
                                         <TableHead className="font-semibold text-right">Donasi Sukses</TableHead>
                                         <TableHead className="font-semibold text-right">Total Perolehan</TableHead>
-                                        <TableHead className="font-semibold text-right">Rata-rata (AOV)</TableHead>
+                                        <TableHead className="font-semibold text-right">Rata-rata Donasi</TableHead>
                                         <TableHead className="font-semibold text-right">Tertinggi</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -240,7 +240,7 @@ export default function ReportIndex({ stats, channelAttributions = [] }: Props) 
                         <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
                             <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
                                 <h3 className="font-semibold text-gray-900 dark:text-white">Ekspor Laporan Donasi</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unduh data seluruh donasi yang berstatus lunas (Paid) lengkap dengan parameter UTM.</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Unduh data seluruh donasi yang berstatus lunas lengkap dengan parameter UTM.</p>
                             </div>
                             <div className="p-6 space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

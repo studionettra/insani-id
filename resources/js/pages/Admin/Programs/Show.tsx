@@ -306,7 +306,7 @@ export default function ProgramShow({ program }: Props) {
 
                                 {program.campaigner_type === 'internal' ? (
                                     <div>
-                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Nama Staff (Internal)</p>
+                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Nama Staf Internal</p>
                                         <p className="font-medium text-gray-900">{program.creator?.name}</p>
                                     </div>
                                 ) : (

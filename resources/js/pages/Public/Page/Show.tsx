@@ -22,10 +22,14 @@ export default function Show({ page, faqs }: PageProps) {
     const isCaraDonasi = page.slug === 'cara-donasi';
     const isLegalPage = page.slug === 'syarat-ketentuan' || page.slug === 'kebijakan-privasi';
 
+    const rawTitle = page.meta_title || page.title || '';
+    const cleanTitle = typeof rawTitle === 'string'
+        ? rawTitle.replace(/\s*[-|]\s*Insani Indonesia$/i, '').trim()
+        : rawTitle;
+
     return (
-        <PublicLayout>
+        <PublicLayout title={cleanTitle}>
             <Head>
-                <title>{page.meta_title || page.title}</title>
                 {page.meta_description && (
                     <meta name="description" content={page.meta_description} />
                 )}

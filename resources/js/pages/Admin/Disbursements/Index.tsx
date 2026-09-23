@@ -34,7 +34,7 @@ export default function Index({ disbursements, filters }: any) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Penyaluran Dana (Disbursement)</h1>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Penyaluran Dana</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola permohonan pencairan dana dari campaigner.</p>
                     </div>
                 </div>

@@ -153,7 +153,7 @@ return;
                         <TableHeader className="bg-gray-50/70 dark:bg-gray-800/50">
                             <TableRow className="border-gray-200 dark:border-gray-800">
                                 <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Kategori</TableCell>
-                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Judul (Label)</TableCell>
+                                <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Label Judul</TableCell>
                                 <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Nilai</TableCell>
                                 <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400 text-center">Urutan</TableCell>
                                 <TableCell className="font-semibold text-xs text-gray-500 dark:text-gray-400">Status</TableCell>
@@ -293,7 +293,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -402,7 +402,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"

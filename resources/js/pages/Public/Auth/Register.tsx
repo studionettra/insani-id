@@ -46,7 +46,7 @@ export default function Register({ passwordRules }: Props) {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <Head title="Daftar - Insani Indonesia" />
+            <Head title="Daftar Akun" />
 
             {/* Kiri: Form Register */}
             <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">

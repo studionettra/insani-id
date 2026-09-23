@@ -20,7 +20,7 @@ export default function ConfirmPassword() {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <Head title="Konfirmasi Password - Insani Indonesia" />
+            <Head title="Konfirmasi Password" />
 
             {/* Kiri: Form Konfirmasi */}
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">

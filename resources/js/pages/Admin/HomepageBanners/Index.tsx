@@ -282,7 +282,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-200">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-200">Urutan Tampil</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -381,7 +381,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-200">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-200">Urutan Tampil</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"

@@ -50,7 +50,6 @@ export default function ProgramListing({ programs, categories, filters }: Props)
 
     return (
         <PublicLayout title={t('Program Donasi')}>
-            <Head title={t('Program Donasi')} />
 
             <div className="bg-white">
                 {/* Hero Section */}

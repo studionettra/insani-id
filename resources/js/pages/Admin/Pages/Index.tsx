@@ -46,7 +46,7 @@ export default function PagesIndex({ pages, filters }: any) {
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Halaman (Pages)</h2>
+                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Halaman Statis</h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             Kelola halaman statis seperti Tentang Kami, Syarat & Ketentuan, dll.
                         </p>

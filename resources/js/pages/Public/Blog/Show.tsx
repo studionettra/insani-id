@@ -74,7 +74,6 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
     return (
         <PublicLayout title={blogTitle}>
             <Head>
-                <title>{`${blogTitle} - Insani Indonesia`}</title>
                 <meta name="description" content={cleanExcerpt} />
                 <link rel="canonical" href={baseShareUrl} />
 

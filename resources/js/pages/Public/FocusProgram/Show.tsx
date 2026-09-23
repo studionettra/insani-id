@@ -56,7 +56,6 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
     return (
         <PublicLayout title={`${pillarTitle} - ${t('Fokus Program')}`}>
             <Head>
-                <title>{`${pillarTitle} - ${t('Fokus Program')} - Insani Indonesia`}</title>
                 <meta name="description" content={cleanDesc} />
                 <meta property="og:title" content={`${pillarTitle} - ${t('Fokus Program')} - Insani Indonesia`} />
                 <meta property="og:description" content={cleanDesc} />
@@ -98,7 +97,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                         <FadeIn delay={0.1}>
                             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-insani-turquoise text-xs font-semibold uppercase tracking-wider mb-5 border border-white/15">
                                 <Sparkles className="w-3.5 h-3.5" />
-                                <span>{t('Pilar Kebaikan')}</span>
+                                <span>{t('Fokus Program')}</span>
                             </div>
                         </FadeIn>
 
@@ -162,7 +161,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                     </div>
 
                                     <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-[1.15] mb-6">
-                                        {realityTitle || t('Mengapa Pilar Ini Sangat Krusial?')}
+                                        {realityTitle || t('Mengapa Fokus Ini Sangat Krusial?')}
                                     </h2>
 
                                     <p className="text-slate-600 text-base md:text-lg leading-relaxed whitespace-pre-line mb-6">
@@ -333,7 +332,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                 {t('Program Donasi Terkait')}
                             </h2>
                             <p className="text-slate-600 text-base mt-2 max-w-xl">
-                                {t('Pilih kampanye bantuan di bawah pilar ini dan salurkan kebaikan Anda sekarang.')}
+                                {t('Pilih kampanye bantuan di bawah fokus ini dan salurkan kebaikan Anda sekarang.')}
                             </p>
                         </div>
                         {programs.length > 0 && (
@@ -410,7 +409,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                     ) : (
                         <div className="p-12 text-center bg-slate-50 rounded-3xl border border-slate-200">
                             <p className="text-slate-600 text-base mb-4">
-                                {t('Saat ini belum ada kampanye spesifik yang terbit di bawah pilar ini.')}
+                                {t('Saat ini belum ada kampanye spesifik yang terbit di bawah fokus ini.')}
                             </p>
                             <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white rounded-full">
                                 <Link href="/program">{t('Jelajahi Program Lainnya')}</Link>
@@ -427,7 +426,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                         <FadeIn className="mb-10">
                             <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                                 <Layers className="w-4 h-4" />
-                                <span>{t('Eksplorasi Pilar Lain')}</span>
+                                <span>{t('Eksplorasi Fokus Lain')}</span>
                             </div>
                             <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
                                 {t('Fokus Program Lainnya')}

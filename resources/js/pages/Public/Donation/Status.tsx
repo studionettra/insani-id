@@ -67,7 +67,7 @@ export default function Status({ donation }: any) {
         if (latestPayment?.payment_method === 'ewallet') return 'E-Wallet';
         if (latestPayment?.payment_method === 'bank_transfer_manual') return 'Transfer Bank Manual';
 
-        return donation.channel === 'online' ? 'Online Payment (Xendit)' : 'Transfer Manual';
+        return donation.channel === 'online' ? 'Pembayaran Online' : 'Transfer Manual';
     };
 
     const getStatusInfo = (status: string, channel: string) => {
@@ -130,8 +130,7 @@ export default function Status({ donation }: any) {
     };
 
     return (
-        <PublicLayout>
-            <Head title={`Status Donasi ${donation.donation_code}`} />
+        <PublicLayout title={`Status Donasi ${donation.donation_code}`}>
 
             <div className="bg-slate-50 min-h-screen py-8 md:py-12 print:hidden">
                 <div className="container mx-auto px-4 max-w-2xl">

@@ -189,7 +189,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     };
 
     const campaignerName = program.campaigner_type === 'internal'
-        ? 'Insani Indonesia (Official)'
+        ? 'Insani Indonesia'
         : (program.campaignerProfile?.type === 'lembaga'
             ? program.campaignerProfile.institution_name
             : program.creator?.name);
@@ -286,7 +286,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                         <div className="flex items-center justify-between text-sm text-slate-500 mt-1">
                             <span>{t('Terkumpul')}</span>
                             <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-600">
-                                {t('Donasi Fleksibel (Tanpa Target)', 'Donasi Fleksibel')}
+                                {t('Donasi Fleksibel')}
                             </span>
                         </div>
                     </div>
@@ -316,7 +316,6 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     return (
         <PublicLayout title={programTitle} hideFooter={false} hideMobileNav={true} hideTopNav={false}>
             <Head>
-                <title>{`${programTitle} - ${t('Program Kebaikan Insani', 'Program Kebaikan Insani')}`}</title>
                 <meta name="description" content={metaDescription} />
                 <link rel="canonical" href={baseProgramUrl} />
 
@@ -840,7 +839,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                             className="w-full mt-1 text-xs text-slate-600 border-slate-200 hover:bg-slate-50"
                         >
                             <ExternalLink className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
-                            {t('Opsi Berbagi Lainnya (Sistem)', 'Opsi Berbagi Lainnya')}
+                            {t('Opsi Berbagi Lainnya')}
                         </Button>
                     )}
                 </DialogContent>

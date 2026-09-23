@@ -25,7 +25,7 @@ export default function Login({ status }: { status?: string }) {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <Head title="Login - Insani Indonesia" />
+            <Head title="Login" />
 
             {/* Kiri: Form Login */}
             <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32 lg:py-0">

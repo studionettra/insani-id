@@ -15,7 +15,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <Head title="Verifikasi Email - Insani Indonesia" />
+            <Head title="Verifikasi Email" />
 
             {/* Kiri: Form Verifikasi */}
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
@@ -60,7 +60,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                             as="button"
                             className="font-semibold text-brand-600 hover:text-brand-500 hover:underline"
                         >
-                            Keluar dari akun (Log out)
+                            Keluar dari Akun
                         </Link>
                     </div>
                 </div>

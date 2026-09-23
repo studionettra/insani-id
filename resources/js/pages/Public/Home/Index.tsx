@@ -38,7 +38,7 @@ return;
     };
 
     return (
-        <PublicLayout title={t('Beranda')}>
+        <PublicLayout>
             
             {/* 1. Hero Banners Section */}
             <section className="relative w-full h-[85dvh] min-h-[600px] overflow-hidden bg-zinc-50">
@@ -177,7 +177,7 @@ return;
                                 {t('Fokus Program')}
                             </h2>
                             <p className="text-lg text-zinc-600 leading-relaxed">
-                                {t('Pilar kebaikan yang kami salurkan untuk memberdayakan dan membangkitkan harapan umat di berbagai aspek kehidupan.')}
+                                {t('Fokus program kebaikan yang kami dedikasikan untuk memberdayakan dan membangkitkan harapan umat di berbagai aspek kehidupan.')}
                             </p>
                         </FadeIn>
                         

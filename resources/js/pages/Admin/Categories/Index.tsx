@@ -352,7 +352,7 @@ return;
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="pillar_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Pilar (Opsional)</Label>
+                                <Label htmlFor="pillar_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Cover Fokus Program (Opsional)</Label>
                                 <Input
                                     id="pillar_image"
                                     type="file"
@@ -379,7 +379,7 @@ return;
                                     {errors.platform_fee_percent && <p className="text-xs text-red-500">{errors.platform_fee_percent}</p>}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="sort_order" className="text-sm font-medium text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-sm font-medium text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -421,7 +421,7 @@ return;
                                         className="border-gray-300 dark:border-gray-600 text-[#1A56DB] focus:ring-[#1A56DB]"
                                     />
                                     <label htmlFor="is_focus_program" className="text-sm font-medium text-gray-700 dark:text-gray-300 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Pilar (Fokus Program)
+                                        Fokus Program (Aktifkan Halaman Khusus)
                                     </label>
                                 </div>
                             </div>
@@ -513,7 +513,7 @@ return;
                             )}
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="edit_pillar_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Cover Pilar (Opsional)</Label>
+                                <Label htmlFor="edit_pillar_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Cover Fokus Program (Opsional)</Label>
                                 <Input
                                     id="edit_pillar_image"
                                     type="file"
@@ -521,7 +521,7 @@ return;
                                     onChange={(e) => setData('pillar_image', e.target.files ? e.target.files[0] : null)}
                                     className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] cursor-pointer file:text-[#1A56DB]"
                                 />
-                                {editingCategory?.pillar_image && <p className="text-xs text-gray-500 dark:text-gray-400">Sudah ada gambar cover pilar. Biarkan kosong jika tidak ingin mengubah.</p>}
+                                {editingCategory?.pillar_image && <p className="text-xs text-gray-500 dark:text-gray-400">Sudah ada gambar cover fokus program. Biarkan kosong jika tidak ingin mengubah.</p>}
                                 {errors.pillar_image && <p className="text-xs text-red-500">{errors.pillar_image}</p>}
                             </div>
 
@@ -543,7 +543,7 @@ return;
                                             {errors.platform_fee_percent && <p className="text-xs text-red-500">{errors.platform_fee_percent}</p>}
                                         </div>
                                         <div className="space-y-1.5">
-                                            <Label htmlFor="edit_sort_order" className="text-sm font-medium text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                            <Label htmlFor="edit_sort_order" className="text-sm font-medium text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                             <Input
                                                 id="edit_sort_order"
                                                 type="number"
@@ -590,7 +590,7 @@ return;
                                         className="border-gray-300 dark:border-gray-600 text-[#1A56DB] focus:ring-[#1A56DB]"
                                     />
                                     <label htmlFor="edit_is_focus_program" className="text-sm font-semibold text-brand-600 dark:text-brand-400 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Pilar (Fokus Program) - Aktifkan Halaman Landing Dedikasi
+                                        Fokus Program - Aktifkan Halaman Landing Khusus
                                     </label>
                                 </div>
                             </div>

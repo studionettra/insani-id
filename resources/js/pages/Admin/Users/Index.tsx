@@ -310,7 +310,7 @@ export default function UsersIndex({ users, roles, filters }: any) {
                                     htmlFor="role"
                                     className="text-sm font-medium text-gray-700 dark:text-gray-200"
                                 >
-                                    Peran (Role)
+                                    Peran
                                 </Label>
                                 <Select
                                     value={data.role}
@@ -476,7 +476,7 @@ export default function UsersIndex({ users, roles, filters }: any) {
                                     htmlFor="edit-role"
                                     className="text-sm font-medium text-gray-700 dark:text-gray-200"
                                 >
-                                    Peran (Role)
+                                    Peran
                                 </Label>
                                 <Select
                                     value={data.role}

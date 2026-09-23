@@ -157,12 +157,12 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
 
     return (
         <>
-            <Head title="Manajemen FAQ" />
+            <Head title="Manajemen Tanya Jawab" />
             
             <div className="flex flex-col gap-6 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">FAQ (Tanya Jawab)</h2>
+                        <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Tanya Jawab</h2>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             Kelola pertanyaan yang sering diajukan di website.
                         </p>
@@ -413,15 +413,15 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                                         <option value="lembaga">Profil Lembaga (Ditampilkan di /tentang-kami)</option>
                                         <option value="kontak">Layanan & Kontak (Ditampilkan di /kontak)</option>
                                         <option value="donatur">Donatur (Tamu & Akun)</option>
-                                        <option value="campaigner">Campaigner (Penggalang Dana)</option>
-                                        <option value="fundraiser">Fundraiser (Relawan Kampanye)</option>
+                                        <option value="campaigner">Penggalang Dana</option>
+                                        <option value="fundraiser">Relawan Kampanye</option>
                                         <option value="keamanan">Legalitas & Keamanan</option>
                                         <option value="umum">Umum</option>
                                     </select>
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -433,7 +433,7 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="keywords" className="text-gray-700 dark:text-gray-300">Kata Kunci Pencarian (Keywords)</Label>
+                                <Label htmlFor="keywords" className="text-gray-700 dark:text-gray-300">Kata Kunci Pencarian</Label>
                                 <Input
                                     id="keywords"
                                     value={data.keywords}
@@ -563,15 +563,15 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                                         <option value="lembaga">Profil Lembaga (Ditampilkan di /tentang-kami)</option>
                                         <option value="kontak">Layanan & Kontak (Ditampilkan di /kontak)</option>
                                         <option value="donatur">Donatur (Tamu & Akun)</option>
-                                        <option value="campaigner">Campaigner (Penggalang Dana)</option>
-                                        <option value="fundraiser">Fundraiser (Relawan Kampanye)</option>
+                                        <option value="campaigner">Penggalang Dana</option>
+                                        <option value="fundraiser">Relawan Kampanye</option>
                                         <option value="keamanan">Legalitas & Keamanan</option>
                                         <option value="umum">Umum</option>
                                     </select>
                                     {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan (Sort Order)</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"
@@ -583,7 +583,7 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_keywords" className="text-gray-700 dark:text-gray-300">Kata Kunci Pencarian (Keywords)</Label>
+                                <Label htmlFor="edit_keywords" className="text-gray-700 dark:text-gray-300">Kata Kunci Pencarian</Label>
                                 <Input
                                     id="edit_keywords"
                                     value={data.keywords}

@@ -19,13 +19,13 @@ export default function FocusProgramIndex({ pillars }: any) {
                     <FadeIn>
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-insani-turquoise text-xs font-semibold mb-6 border border-white/10">
                             <Sparkles className="w-3.5 h-3.5" />
-                            <span>{t('Pilar Kebaikan Berkelanjutan')}</span>
+                            <span>{t('Fokus Kebaikan Berkelanjutan')}</span>
                         </div>
                         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
                             {t('Fokus Program')}
                         </h1>
                         <p className="text-lg md:text-xl text-blue-100/90 max-w-3xl mx-auto leading-relaxed font-normal">
-                            {t('Pilar kebaikan utama yang kami dedikasikan untuk memberdayakan, melindungi, dan membangkitkan harapan umat di berbagai dimensi kehidupan.')}
+                            {t('Fokus program utama yang kami dedikasikan untuk memberdayakan, melindungi, dan membangkitkan harapan umat di berbagai dimensi kehidupan.')}
                         </p>
                     </FadeIn>
                 </div>
@@ -39,7 +39,7 @@ export default function FocusProgramIndex({ pillars }: any) {
                             {pillars.map((cat: any, index: number) => {
                                 const catName = t(getLocalizedValue(cat.name_translations || cat.name, locale));
                                 const catDesc = t(getLocalizedValue(cat.description_translations || cat.description, locale)) || 
-                                    t(`Dedikasi kebaikan berkelanjutan untuk program bantuan dan pemberdayaan dalam pilar ${catName}.`);
+                                    t(`Dedikasi kebaikan berkelanjutan untuk program bantuan dan pemberdayaan dalam fokus ${catName}.`);
 
                                 return (
                                     <FadeIn key={cat.id} delay={index * 0.1}>
@@ -62,7 +62,7 @@ export default function FocusProgramIndex({ pillars }: any) {
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
                                                 <div className="absolute bottom-5 left-6 right-6">
                                                     <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold uppercase tracking-wider mb-2">
-                                                        {t('Pilar')}
+                                                        {t('Fokus Program')}
                                                     </span>
                                                     <h2 className="text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-brand-300 transition-colors">
                                                         {catName}

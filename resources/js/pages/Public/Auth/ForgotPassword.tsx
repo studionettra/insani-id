@@ -22,7 +22,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <Head title="Lupa Password - Insani Indonesia" />
+            <Head title="Lupa Password" />
 
             {/* Kiri: Form Lupa Password */}
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">

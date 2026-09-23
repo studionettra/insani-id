@@ -144,7 +144,7 @@ export default function ProgramCreate({ categories }: Props) {
                     <form onSubmit={handleSubmit} className="p-6 space-y-6">
                         <Alert className="bg-blue-50/50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border-blue-200/60 dark:border-blue-900 mb-6">
                             <AlertDescription>
-                                Program yang dibuat oleh Admin/Program Officer akan langsung berstatus <strong>Aktif (Published)</strong> tanpa melalui antrian verifikasi.
+                                Program yang dibuat oleh Admin/Program Officer akan langsung berstatus <strong>Aktif</strong> tanpa melalui antrian verifikasi.
                             </AlertDescription>
                         </Alert>
 
@@ -233,7 +233,7 @@ export default function ProgramCreate({ categories }: Props) {
                                     onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
                                     className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB]"
                                 />
-                                <p className="text-[11px] text-gray-500 dark:text-gray-400">Kosongkan jika program tidak memiliki batas waktu (infinity).</p>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400">Kosongkan jika program tidak memiliki batas waktu.</p>
                                 {errors.deadline && <p className="mt-1 text-xs text-red-500">{errors.deadline}</p>}
                             </div>
 
