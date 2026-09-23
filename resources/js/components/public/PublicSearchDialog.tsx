@@ -289,7 +289,7 @@ export default function PublicSearchDialog() {
                                                             {t('Fokus Program')}
                                                         </div>
                                                         <div className="text-[11px] text-zinc-400">
-                                                            {t('Pilar program utama')}
+                                                            {t('Fokus program utama')}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -361,7 +361,7 @@ export default function PublicSearchDialog() {
                                                                             {focus.name}
                                                                         </div>
                                                                         <div className="text-[11px] text-zinc-500">
-                                                                            {t('Lihat Pilar Dampak')}
+                                                                            {t('Lihat Fokus Program')}
                                                                         </div>
                                                                     </div>
                                                                 </div>

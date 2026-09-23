@@ -216,7 +216,7 @@ export default function PublicAccountDropdown({
                             className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-zinc-700 hover:text-brand-700 hover:bg-brand-50/50 transition-colors"
                         >
                             <HelpCircle className="w-4 h-4 text-zinc-400" />
-                            <span>{t('Pusat Bantuan (FAQ)')}</span>
+                            <span>{t('Pusat Bantuan')}</span>
                         </Link>
                     </div>
 
@@ -225,7 +225,7 @@ export default function PublicAccountDropdown({
                     {/* Language Selection */}
                     <div className="px-1 pt-0.5">
                         <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                            LANGUAGE
+                            {t('Pilihan Bahasa')}
                         </span>
                         <div className="space-y-1">
                             {Object.entries(availableLocales).map(([code, item]) => {
@@ -356,7 +356,7 @@ export default function PublicAccountDropdown({
                     {/* Language Switcher Section */}
                     <div className="px-1">
                         <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                            LANGUAGE
+                            {t('Pilihan Bahasa')}
                         </span>
                         <div className="space-y-0.5">
                             {Object.entries(availableLocales).map(([code, item]) => {
@@ -396,7 +396,7 @@ export default function PublicAccountDropdown({
                         className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
                     >
                         <LogOut className="w-4 h-4 text-rose-500" />
-                        <span>{t('Keluar (Log out)')}</span>
+                        <span>{t('Keluar')}</span>
                     </button>
                 </>
             )}

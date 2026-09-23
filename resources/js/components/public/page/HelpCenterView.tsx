@@ -54,7 +54,7 @@ const FAQ_DATA: FaqItem[] = [
     {
         id: 'donasi-guest',
         category: 'donatur',
-        question: 'Apakah saya bisa berdonasi tanpa mendaftar akun terlebih dahulu (Guest Donatur)?',
+        question: 'Apakah saya bisa berdonasi tanpa mendaftar akun terlebih dahulu?',
         keywords: ['guest', 'tanpa akun', 'tanpa login', 'tamu', 'langsung donasi'],
         answer: (
             <div className="space-y-2 text-slate-600">
@@ -86,7 +86,7 @@ const FAQ_DATA: FaqItem[] = [
                 <ul className="list-disc pl-5 space-y-1.5">
                     <li>Kunjungi halaman <Link href="/cek-donasi" className="text-insani-blue font-semibold hover:underline">Cek Status Donasi</Link>.</li>
                     <li>Masukkan kode donasi atau alamat email Anda.</li>
-                    <li>Jika donasi telah berstatus <strong>Lunas (Paid)</strong>, Anda dapat langsung mengunduh dan mencetak <strong>Kuitansi Resmi Elektronik (E-Receipt)</strong> resmi ber-QR Code validasi keabsahan yayasan.</li>
+                    <li>Jika donasi telah berstatus <strong>Lunas</strong>, Anda dapat langsung mengunduh dan mencetak <strong>Kuitansi Resmi Elektronik</strong> resmi ber-QR Code validasi keabsahan yayasan.</li>
                 </ul>
             </div>
         )
@@ -133,7 +133,7 @@ const FAQ_DATA: FaqItem[] = [
                     <li>Memantau akumulasi total donasi kebaikan yang telah Anda salurkan di dasbor pribadi.</li>
                     <li>Mengunduh kembali seluruh arsip kuitansi resmi kapan saja (sangat berguna untuk pelaporan zakat atau pajak).</li>
                     <li>Mendapatkan notifikasi laporan penyaluran (<em>Kabar Terbaru</em>) langsung dari program yang Anda dukung.</li>
-                    <li>Dapat langsung mendaftar sebagai <strong>Fundraiser (Relawan Kampanye)</strong> untuk melipatgandakan dampak kebaikan.</li>
+                    <li>Dapat langsung mendaftar sebagai <strong>Relawan Kampanye</strong> untuk melipatgandakan dampak kebaikan.</li>
                 </ul>
             </div>
         )
@@ -204,10 +204,10 @@ const FAQ_DATA: FaqItem[] = [
             <div className="space-y-2 text-slate-600">
                 <p>Alur penerbitan program donasi terdiri dari 4 langkah:</p>
                 <ol className="list-decimal pl-5 space-y-1.5">
-                    <li><strong>Buat Program (Draft):</strong> Setelah akun KYC terverifikasi, klik "Buat Program", isi data kampanye, target donasi, batas waktu, foto utama, dan narasi cerita.</li>
-                    <li><strong>Kirim untuk Kurasi (Pending Review):</strong> Program masuk ke tim kurator Insani Indonesia untuk pengecekan kelayakan dan kepatuhan hukum.</li>
-                    <li><strong>Persetujuan (Approved):</strong> Jika dokumen dan cerita valid, admin akan menyetujui program.</li>
-                    <li><strong>Tayang (Published):</strong> Program mulai aktif menerima donasi dari publik luas.</li>
+                    <li><strong>Buat Draf Program:</strong> Setelah akun KYC terverifikasi, klik "Buat Program", isi data kampanye, target donasi, batas waktu, foto utama, dan narasi cerita.</li>
+                    <li><strong>Kirim untuk Kurasi:</strong> Program masuk ke tim kurator Insani Indonesia untuk pengecekan kelayakan dan kepatuhan hukum.</li>
+                    <li><strong>Persetujuan Admin:</strong> Jika dokumen dan cerita valid, admin akan menyetujui program.</li>
+                    <li><strong>Program Tayang:</strong> Program mulai aktif menerima donasi dari publik luas.</li>
                 </ol>
             </div>
         )
@@ -215,7 +215,7 @@ const FAQ_DATA: FaqItem[] = [
     {
         id: 'mekanisme-disbursement',
         category: 'campaigner',
-        question: 'Bagaimana mekanisme dan syarat pencairan dana (Disbursement)?',
+        question: 'Bagaimana mekanisme dan syarat pencairan dana?',
         keywords: ['pencairan dana', 'disbursement', 'tarik dana', 'syarat pencairan', 'minimal pencairan'],
         answer: (
             <div className="space-y-2 text-slate-600">
@@ -368,7 +368,7 @@ const FAQ_DATA: FaqItem[] = [
     {
         id: 'kebijakan-refund',
         category: 'keamanan',
-        question: 'Apakah donasi yang sudah dibayarkan dapat dibatalkan atau dikembalikan (Refund)?',
+        question: 'Apakah donasi yang sudah dibayarkan dapat dibatalkan atau dikembalikan?',
         keywords: ['refund', 'batal donasi', 'tarik uang donasi', 'pengembalian dana'],
         answer: (
             <div className="space-y-2 text-slate-600">
@@ -382,8 +382,8 @@ const FAQ_DATA: FaqItem[] = [
 const CATEGORIES = [
     { key: 'all', label: 'Semua Topik', icon: Sparkles },
     { key: 'donatur', label: 'Donatur & Pembayaran', icon: Heart },
-    { key: 'campaigner', label: 'Campaigner (Penggalang)', icon: Rocket },
-    { key: 'fundraiser', label: 'Fundraiser (Relawan)', icon: Users },
+    { key: 'campaigner', label: 'Penggalang Dana', icon: Rocket },
+    { key: 'fundraiser', label: 'Relawan Fundraiser', icon: Users },
     { key: 'keamanan', label: 'Legalitas & Keamanan', icon: ShieldCheck },
     { key: 'lembaga', label: 'Profil & Lembaga', icon: Building2 },
     { key: 'kontak', label: 'Layanan & Kontak', icon: Phone },

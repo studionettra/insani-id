@@ -7,10 +7,18 @@ import SettingsLayout from '@/layouts/settings/layout';
 import TailAdminLayout from '@/layouts/TailAdmin/AppLayout';
 import { trackPageView } from '@/lib/analytics';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'Insani Indonesia';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: (title) => {
+        if (!title) {
+            return appName;
+        }
+        if (title.toLowerCase().includes(appName.toLowerCase())) {
+            return title;
+        }
+        return `${title} - ${appName}`;
+    },
     layout: (name) => {
         switch (true) {
             case name.startsWith('Public/Akun/') || name.startsWith('Public/CampaignerRegistration/'):

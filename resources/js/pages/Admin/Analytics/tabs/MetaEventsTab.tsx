@@ -161,7 +161,7 @@ export default function MetaEventsTab({ data }: Props) {
                     <div className="flex items-center gap-2">
                         <Activity className="w-4 h-4 text-emerald-600" />
                         <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
-                            Log Peristiwa Terkini (Event Activity Log)
+                            Log Peristiwa Terkini
                         </h3>
                     </div>
                     <span className="text-xs text-gray-400">50 Peristiwa Terbaru</span>
@@ -177,7 +177,7 @@ export default function MetaEventsTab({ data }: Props) {
                             <thead>
                                 <tr className="border-b border-gray-100 dark:border-gray-700 text-gray-400">
                                     <th className="pb-2.5 font-medium">Waktu</th>
-                                    <th className="pb-2.5 font-medium">Peristiwa (Event)</th>
+                                    <th className="pb-2.5 font-medium">Peristiwa</th>
                                     <th className="pb-2.5 font-medium">Halaman / URL</th>
                                     <th className="pb-2.5 font-medium">Parameter Kunci</th>
                                     <th className="pb-2.5 font-medium">Status Meta</th>
