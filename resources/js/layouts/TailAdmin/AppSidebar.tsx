@@ -20,7 +20,8 @@ import {
   FileSpreadsheet,
   BadgeHelp,
   MessageSquareQuote,
-  Sparkles
+  Sparkles,
+  Bell,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -39,6 +40,7 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: SubNavItem[];
+  badge?: React.ReactNode;
 };
 
 type NavGroup = {
@@ -54,6 +56,7 @@ const AppSidebar: React.FC = () => {
   const permissions: string[] = auth?.user?.permissions || [];
   const roles: string[] = auth?.user?.roles || [];
   const isSuperadmin: boolean = roles.includes('Administrator');
+  const unreadCount: number = (props as any)?.notifications?.unread_count ?? 0;
 
   const navGroups: NavGroup[] = [
     {
@@ -64,6 +67,23 @@ const AppSidebar: React.FC = () => {
           icon: <GridIcon className="w-5 h-5" />,
           name: "Dashboard",
           path: "/dashboard",
+        },
+        {
+          icon: (
+            <span className="relative inline-flex items-center justify-center">
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && !isExpanded && !isMobileOpen && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-brand-500 ring-2 ring-white dark:ring-gray-900" />
+              )}
+            </span>
+          ),
+          name: "Notifikasi",
+          path: "/notifications",
+          badge: unreadCount > 0 ? (
+            <span className="ml-auto inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-brand-500 text-white shadow-xs min-w-[18px]">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          ) : null,
         },
         ...((permissions.includes('report.view') || isSuperadmin) ? [{
           icon: <Activity className="w-5 h-5" />,
@@ -179,6 +199,11 @@ const AppSidebar: React.FC = () => {
           name: "Testimoni Donatur",
           path: "/admin/testimonials",
         }] : []),
+        ...((permissions.includes('manage_popups') || permissions.includes('manage_banners') || isSuperadmin) ? [{
+          icon: <Megaphone className="w-5 h-5" />,
+          name: "Pesan Pop-up",
+          path: "/admin/popup-messages",
+        }] : []),
         ...((permissions.includes('manage_pages') || isSuperadmin) ? [{
           icon: <BookOpen className="w-5 h-5" />,
           name: "Halaman Statis",
@@ -186,7 +211,7 @@ const AppSidebar: React.FC = () => {
         }] : []),
         ...((permissions.includes('manage_faqs') || isSuperadmin) ? [{
           icon: <BadgeHelp className="w-5 h-5" />,
-          name: "Tanya Jawab (FAQ)",
+          name: "Tanya Jawab",
           path: "/admin/faqs",
         }] : []),
         ...(() => {
@@ -198,6 +223,10 @@ const AppSidebar: React.FC = () => {
             ...((permissions.includes('manage_legal_documents') || permissions.includes('manage_pages') || isSuperadmin) ? [{
               name: "Dokumen Legalitas",
               path: "/admin/legal-documents",
+            }] : []),
+            ...((permissions.includes('manage_financial_reports') || permissions.includes('report.view') || isSuperadmin) ? [{
+              name: "Laporan Keuangan",
+              path: "/admin/financial-reports",
             }] : []),
             ...((permissions.includes('manage_partners') || isSuperadmin) ? [{
               name: "Mitra Kerja Sama",
@@ -351,6 +380,7 @@ const AppSidebar: React.FC = () => {
                   {(isExpanded || isMobileOpen) && (
                     <span className="menu-item-text">{nav.name}</span>
                   )}
+                  {(isExpanded || isMobileOpen) && nav.badge}
                 </Link>
               )
             )}

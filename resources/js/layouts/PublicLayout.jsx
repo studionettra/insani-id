@@ -3,11 +3,12 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { Home, Heart, PlusCircle, User, Compass, HandHeart, MapPin, Phone, Mail, Clock, ShieldCheck, QrCode, Megaphone } from 'lucide-react';
 import PublicSearchDialog from '@/components/public/PublicSearchDialog';
 import PublicAccountDropdown from '@/components/public/PublicAccountDropdown';
+import EventPopupModal from '@/components/public/EventPopupModal';
 import { FlashMessages } from '@/components/flash-messages';
 import useTranslation from '@/hooks/use-translation';
 
 export default function PublicLayout({ children, title = '', hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
-    const { auth, siteSettings } = usePage().props;
+    const { auth, siteSettings, activePopup } = usePage().props;
     const { t, locale, isRtl } = useTranslation();
     const { url } = usePage();
     const isActive = (path) => path === '/' ? url === '/' : url.startsWith(path);
@@ -19,7 +20,11 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
     const userAccountUrl = auth?.user ? '/dashboard' : '/login';
 
-    const pageTitle = title ? `${title} - Insani Indonesia` : 'Insani Indonesia - Platform Galang Dana dan Donasi Online';
+    const defaultHomeTitle = '';
+    const pageTitle = (!title || title === 'Beranda') ? defaultHomeTitle : title;
+    const ogTitle = pageTitle 
+        ? (pageTitle.toLowerCase().includes('insani indonesia') ? pageTitle : `${pageTitle} - Insani Indonesia`)
+        : 'Insani Indonesia';
     const pageDescription = 'Platform Galang Dana dan Donasi Online Insani Indonesia. Bersama menebar kebaikan dan kepedulian.';
     const currentUrl = typeof window !== 'undefined' ? window.location.href : 'https://insani.id';
     const logoUrl = siteSettings?.site_logo 
@@ -46,17 +51,17 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col font-outfit" dir={isRtl ? 'rtl' : 'ltr'}>
             <FlashMessages />
-            <Head>
-                <title>{pageTitle}</title>
+            <EventPopupModal popup={activePopup} />
+            <Head title={pageTitle}>
                 <meta name="description" content={pageDescription} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content={currentUrl} />
-                <meta property="og:title" content={pageTitle} />
+                <meta property="og:title" content={ogTitle} />
                 <meta property="og:description" content={pageDescription} />
                 <meta property="og:image" content={logoUrl} />
                 <meta property="og:site_name" content="Insani Indonesia" />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={pageTitle} />
+                <meta name="twitter:title" content={ogTitle} />
                 <meta name="twitter:description" content={pageDescription} />
                 <meta name="twitter:image" content={logoUrl} />
             </Head>
@@ -236,7 +241,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 </li>
                                 <li>
                                     <Link href="/fokus-program" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Fokus & Pilar Garapan')}</span>
+                                        <span>{t('Fokus Program')}</span>
                                     </Link>
                                 </li>
                                 <li>
@@ -252,6 +257,11 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 <li>
                                     <Link href="/berita" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Kabar Penyaluran & Berita')}</span>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/tentang-kami#laporan-keuangan" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Laporan Keuangan Yayasan')}</span>
                                     </Link>
                                 </li>
                             </ul>

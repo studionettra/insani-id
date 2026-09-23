@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Activity, BookOpen, FileCheck, FolderGit2, LayoutGrid, Sparkles, Users } from 'lucide-react';
+import { Activity, BookOpen, FileCheck, FileText, FolderGit2, LayoutGrid, Sparkles, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -115,6 +115,11 @@ export function AppSidebar() {
             title: 'Dokumen Legalitas',
             href: '/admin/legal-documents',
             icon: FileCheck,
+        }] : []),
+        ...(permissions.includes('manage_financial_reports') || permissions.includes('report.view') ? [{
+            title: 'Laporan Keuangan',
+            href: '/admin/financial-reports',
+            icon: FileText,
         }] : []),
         ...(permissions.includes('manage_partners') ? [{
             title: 'Mitra Kerja Sama',
