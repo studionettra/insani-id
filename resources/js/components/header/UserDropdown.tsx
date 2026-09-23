@@ -13,6 +13,7 @@ import {
   Check 
 } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
+import useTranslation from "@/hooks/use-translation";
 
 type SupportedLocale = {
   name: string;
@@ -26,6 +27,7 @@ const FLAGS: Record<string, string> = {
 };
 
 export default function UserDropdown() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { auth, locale, supportedLocales } = usePage().props as any;
@@ -273,7 +275,7 @@ export default function UserDropdown() {
           {/* Language Switcher */}
           <div className="px-1 py-1">
             <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">
-              PILIHAN BAHASA
+              {t('Pilihan Bahasa')}
             </span>
             <div className="space-y-0.5">
               {Object.entries(availableLocales).map(([code, item]) => {
@@ -315,7 +317,7 @@ export default function UserDropdown() {
             className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/80 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300 transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" />
-            <span>Keluar (Log out)</span>
+            <span>{t('Keluar')}</span>
           </button>
         </div>
       )}
