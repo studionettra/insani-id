@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Program;
+use App\Notifications\ProgramStatusUpdatedNotification;
 use App\Services\TranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -231,6 +232,12 @@ class ProgramController extends Controller
         }
 
         $program->save();
+
+        if ($program->creator) {
+            rescue(fn () => $program->creator->notify(
+                new ProgramStatusUpdatedNotification($program, $request->status, $request->rejection_notes)
+            ));
+        }
 
         return redirect()->back()->with('success', 'Status program berhasil diperbarui.');
     }

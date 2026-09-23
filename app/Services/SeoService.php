@@ -142,7 +142,7 @@ class SeoService
             ];
 
             return [
-                'title' => "{$title} - {$siteName}",
+                'title' => str_contains($title, $siteName) ? $title : "{$title} - {$siteName}",
                 'description' => $description,
                 'image' => $image,
                 'url' => $currentUrl,
@@ -244,7 +244,7 @@ class SeoService
             ];
 
             return [
-                'title' => "{$title} - {$siteName}",
+                'title' => str_contains($title, $siteName) ? $title : "{$title} - {$siteName}",
                 'description' => $description,
                 'image' => $image,
                 'url' => $currentUrl,
@@ -314,7 +314,7 @@ class SeoService
             ];
 
             return [
-                'title' => "{$title} - Fokus Program - {$siteName}",
+                'title' => str_contains($title, $siteName) ? $title : "{$title} - Fokus Program - {$siteName}",
                 'description' => $description,
                 'image' => $image,
                 'url' => $currentUrl,
@@ -336,7 +336,7 @@ class SeoService
             $image = ! empty($attachment) ? $attachment : $defaultImage;
 
             return [
-                'title' => "{$title} - {$siteName}",
+                'title' => str_contains($title, $siteName) ? $title : "{$title} - {$siteName}",
                 'description' => Str::limit($description, 160),
                 'image' => $image,
                 'url' => $currentUrl,
@@ -355,7 +355,7 @@ class SeoService
 
         // 5. Known Public Pages mapping
         $customTitles = [
-            'Public/Home/Index' => "Platform Galang Dana & Donasi Online - {$siteName}",
+            'Public/Home/Index' => $siteName,
             'Public/About/Index' => "Tentang Kami - {$siteName}",
             'Public/FocusProgram/Index' => "Fokus Program Kebaikan - {$siteName}",
             'Public/Contact/Create' => "Hubungi Kami - {$siteName}",

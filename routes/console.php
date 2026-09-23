@@ -2,6 +2,7 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -13,6 +14,14 @@ Schedule::command('disbursements:send-update-reminders')->dailyAt('09:00');
 Schedule::command('donations:expire-stale --hours=48')->dailyAt('02:00');
 Schedule::command('backup:run --only-db')->dailyAt('01:00');
 Schedule::command('backup:clean')->dailyAt('01:30');
+
+// Prune read notifications older than 60 days to keep shared hosting database lean
+Schedule::call(function () {
+    DB::table('notifications')
+        ->whereNotNull('read_at')
+        ->where('read_at', '<', now()->subDays(60))
+        ->delete();
+})->dailyAt('03:30')->name('notifications:prune-read');
 
 // Drain queue jobs every minute for Hostinger shared hosting without Supervisor daemon
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=2')

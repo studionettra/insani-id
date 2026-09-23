@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Mail\ContactMessageNotification;
 use App\Models\ContactMessage;
 use App\Models\Faq;
+use App\Models\User;
+use App\Notifications\ContactMessageReceivedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class ContactController extends Controller
 {
@@ -70,6 +73,15 @@ class ContactController extends Controller
             Mail::to($adminEmail)->queue(new ContactMessageNotification($message));
         } catch (\Exception $e) {
             Log::error('Gagal mengirim email notifikasi kontak: '.$e->getMessage());
+        }
+
+        // Database Notification for CS / Admin
+        $recipients = rescue(fn () => User::permission('manage_contact_messages')->get(), collect(), false);
+        if ($recipients->isEmpty()) {
+            $recipients = rescue(fn () => User::role('Administrator')->get(), collect(), false);
+        }
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients, new ContactMessageReceivedNotification($message));
         }
 
         return back()->with('success', 'Terima kasih, pesan Anda telah berhasil dikirim. Kami akan segera menghubungi Anda.');

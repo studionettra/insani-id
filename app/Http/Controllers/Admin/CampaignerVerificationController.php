@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\CampaignerVerificationNotification;
 use App\Models\CampaignerProfile;
 use App\Models\VerificationDocument;
+use App\Notifications\CampaignerStatusUpdatedNotification;
 use App\Services\NotificationGatewayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +84,12 @@ class CampaignerVerificationController extends Controller
                 Mail::to($campaigner->user->email)->send(
                     new CampaignerVerificationNotification($campaigner, $validated['status'], $notes)
                 );
+            }
+
+            if ($campaigner->user) {
+                rescue(fn () => $campaigner->user->notify(
+                    new CampaignerStatusUpdatedNotification($campaigner, $validated['status'], $notes)
+                ));
             }
         } catch (\Exception $e) {
             Log::error('Failed sending campaigner verification notification: '.$e->getMessage());

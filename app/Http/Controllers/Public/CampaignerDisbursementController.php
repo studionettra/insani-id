@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDisbursementRequest;
 use App\Models\Program;
+use App\Models\User;
+use App\Notifications\DisbursementRequestedNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -66,7 +69,7 @@ class CampaignerDisbursementController extends Controller
 
         $platformFeePercent = $program->category->platform_fee_percent ?? 0;
 
-        DB::transaction(function () use ($program, $request, $profile, $platformFeePercent) {
+        $disbursement = DB::transaction(function () use ($program, $request, $profile, $platformFeePercent) {
             $lockedProgram = Program::whereKey($program->id)->lockForUpdate()->firstOrFail();
             $totalCollected = $lockedProgram->donations()->where('status', 'paid')->sum('amount');
             $totalDisbursed = $lockedProgram->disbursements()->whereIn('status', ['pending', 'approved', 'transferred'])->sum('requested_amount');
@@ -83,7 +86,7 @@ class CampaignerDisbursementController extends Controller
             $platformFeeAmount = $requestedAmount * ($platformFeePercent / 100);
             $nettAmount = $requestedAmount - $platformFeeAmount;
 
-            $lockedProgram->disbursements()->create([
+            return $lockedProgram->disbursements()->create([
                 'requested_amount' => $requestedAmount,
                 'bank_name' => $profile->bank_name,
                 'bank_account_number' => $profile->bank_account_number,
@@ -94,6 +97,14 @@ class CampaignerDisbursementController extends Controller
                 'notes' => $request->input('notes'),
             ]);
         });
+
+        $recipients = rescue(fn () => User::permission('disbursement.approve')->get(), collect(), false);
+        if ($recipients->isEmpty()) {
+            $recipients = rescue(fn () => User::role('Administrator')->get(), collect(), false);
+        }
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients, new DisbursementRequestedNotification($disbursement));
+        }
 
         return redirect()->route('akun.programs.disbursements.index', $program->id)->with('success', 'Pengajuan pencairan dana berhasil dibuat.');
     }

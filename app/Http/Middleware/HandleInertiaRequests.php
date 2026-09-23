@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\AppSetting;
 use App\Models\BankAccount;
+use App\Models\PopupMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -48,6 +49,16 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $request->user()->getRoleNames(),
                 ]) : null,
             ],
+            'notifications' => $request->user() ? [
+                'unread_count' => $request->user()->unreadNotifications()->count(),
+                'recent' => $request->user()->notifications()->take(6)->get()->map(fn ($n) => [
+                    'id' => $n->id,
+                    'data' => $n->data,
+                    'read_at' => $n->read_at?->toISOString(),
+                    'created_at' => $n->created_at->diffForHumans(),
+                    'created_at_iso' => $n->created_at->toISOString(),
+                ])->values(),
+            ] : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => app()->getLocale(),
             'supportedLocales' => (function () {
@@ -86,6 +97,9 @@ class HandleInertiaRequests extends Middleware
             }),
             'bankAccounts' => Cache::remember('bank_accounts_public', 3600, function () {
                 return BankAccount::where('is_active', true)->orderBy('sort_order')->get();
+            }),
+            'activePopup' => Cache::remember('active_event_popup', 300, function () {
+                return PopupMessage::query()->active()->latest('id')->first();
             }),
         ];
     }

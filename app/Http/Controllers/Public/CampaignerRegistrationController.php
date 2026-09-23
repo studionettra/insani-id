@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\CampaignerProfile;
+use App\Models\User;
 use App\Models\VerificationDocument;
+use App\Notifications\CampaignerRegisteredNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class CampaignerRegistrationController extends Controller
@@ -51,7 +54,7 @@ class CampaignerRegistrationController extends Controller
             return back()->withErrors(['bank_account_name' => 'Untuk lembaga, nama rekening tidak boleh sama dengan nama pribadi.']);
         }
 
-        DB::transaction(function () use ($validated, $request, $user) {
+        $profile = DB::transaction(function () use ($validated, $request, $user) {
             $profile = CampaignerProfile::create([
                 'user_id' => $user->id,
                 'type' => $validated['type'],
@@ -87,7 +90,17 @@ class CampaignerRegistrationController extends Controller
                     ]);
                 }
             }
+
+            return $profile;
         });
+
+        $recipients = rescue(fn () => User::permission('campaigner.verify')->get(), collect(), false);
+        if ($recipients->isEmpty()) {
+            $recipients = rescue(fn () => User::role('Administrator')->get(), collect(), false);
+        }
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients, new CampaignerRegisteredNotification($profile));
+        }
 
         return redirect()->route('campaigner.status')->with('success', 'Pendaftaran berhasil. Silakan tunggu proses verifikasi dari tim kami.');
     }

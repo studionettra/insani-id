@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateDisbursementStatusRequest;
 use App\Models\Disbursement;
+use App\Notifications\DisbursementStatusUpdatedNotification;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -72,6 +73,14 @@ class DisbursementController extends Controller
         }
 
         $disbursement->save();
+
+        $disbursement->loadMissing(['program.creator', 'program.campaignerProfile.user']);
+        $recipient = $disbursement->program?->creator ?? $disbursement->program?->campaignerProfile?->user;
+        if ($recipient) {
+            rescue(fn () => $recipient->notify(
+                new DisbursementStatusUpdatedNotification($disbursement)
+            ));
+        }
 
         return back()->with('success', 'Status pencairan berhasil diubah.');
     }

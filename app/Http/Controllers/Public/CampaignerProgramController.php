@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Program;
+use App\Models\User;
+use App\Notifications\ProgramSubmittedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -84,6 +87,14 @@ class CampaignerProgramController extends Controller
         // Eksternal program goes to pending_verification
         $program->status = 'pending_verification';
         $program->save();
+
+        $recipients = rescue(fn () => User::permission('program.publish')->get(), collect(), false);
+        if ($recipients->isEmpty()) {
+            $recipients = rescue(fn () => User::role(['Administrator', 'Program Officer', 'Verifikator'])->get(), collect(), false);
+        }
+        if ($recipients->isNotEmpty()) {
+            Notification::send($recipients->unique('id'), new ProgramSubmittedNotification($program));
+        }
 
         return redirect()->route('akun.programs.index')->with('success', 'Program berhasil diajukan dan sedang menunggu verifikasi tim kami.');
     }

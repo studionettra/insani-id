@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DisbursementController;
 use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\FinancialReportController as AdminFinancialReportController;
 use App\Http\Controllers\Admin\FundraiserController as AdminFundraiserController;
 use App\Http\Controllers\Admin\HomepageBannerController;
 use App\Http\Controllers\Admin\ImpactStatController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Admin\LegalDocumentController;
 use App\Http\Controllers\Admin\ManagementMemberController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
+use App\Http\Controllers\Admin\PopupMessageController;
 use App\Http\Controllers\Admin\ProgramController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SiteSettingController;
@@ -25,6 +27,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\AnalyticsCollectorController;
 use App\Http\Controllers\Api\ImageUploadController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Public\AboutController;
 use App\Http\Controllers\Public\BlogController;
 use App\Http\Controllers\Public\CampaignerDisbursementController;
@@ -36,6 +39,7 @@ use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\DonationController;
 use App\Http\Controllers\Public\DonationReceiptController;
 use App\Http\Controllers\Public\DonorDonationController;
+use App\Http\Controllers\Public\FinancialReportController as PublicFinancialReportController;
 use App\Http\Controllers\Public\FocusProgramController;
 use App\Http\Controllers\Public\FundraiserController;
 use App\Http\Controllers\Public\HomeController;
@@ -68,6 +72,8 @@ Route::group([
 
     // Public Pages
     Route::get('/tentang-kami', [AboutController::class, 'index'])->name('about.index');
+    Route::get('/laporan-keuangan', [PublicFinancialReportController::class, 'index'])->name('financial-reports.index');
+    Route::get('/laporan-keuangan/{financial_report:slug}/unduh', [PublicFinancialReportController::class, 'download'])->name('financial-reports.download');
     Route::get('/fokus-program', [FocusProgramController::class, 'index'])->name('focus.index');
     Route::get('/fokus-program/{category:slug}', [FocusProgramController::class, 'show'])->name('focus.show');
     Route::get('/berita', [BlogController::class, 'index'])->name('blog.index');
@@ -153,6 +159,18 @@ Route::post('/analytics/heartbeat', [AnalyticsCollectorController::class, 'heart
 Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Notifications
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/{id}/go', [NotificationController::class, 'readAndRedirect'])->name('go');
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::patch('/{id}/unread', [NotificationController::class, 'markAsUnread'])->name('unread');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::post('/bulk-action', [NotificationController::class, 'bulkAction'])->name('bulk-action');
+        Route::delete('/clear-read', [NotificationController::class, 'clearRead'])->name('clear-read');
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    });
+
     // Campaigner Registration
     Route::get('/campaigner/register', [CampaignerRegistrationController::class, 'create'])->name('campaigner.register');
     Route::post('/campaigner/register', [CampaignerRegistrationController::class, 'store'])->name('campaigner.register.store');
@@ -192,6 +210,10 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::resource('legal-documents', LegalDocumentController::class)->except(['show', 'create', 'edit']);
         });
 
+        Route::middleware('permission:manage_financial_reports|report.view')->group(function () {
+            Route::resource('financial-reports', AdminFinancialReportController::class)->except(['show', 'create', 'edit']);
+        });
+
         Route::middleware('permission:manage_partners')->group(function () {
             Route::resource('partners', PartnerController::class)->except(['show', 'create', 'edit']);
         });
@@ -203,6 +225,11 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('permission:manage_banners')->group(function () {
             Route::resource('homepage-banners', HomepageBannerController::class)->except(['show', 'create', 'edit']);
             Route::resource('testimonials', TestimonialController::class)->except(['show', 'create', 'edit']);
+        });
+
+        Route::middleware('permission:manage_popups|manage_banners')->group(function () {
+            Route::patch('popup-messages/{popup_message}/toggle-active', [PopupMessageController::class, 'toggleActive'])->name('popup-messages.toggle-active');
+            Route::resource('popup-messages', PopupMessageController::class)->except(['show', 'create', 'edit']);
         });
 
         Route::middleware('permission:manage_contact_messages')->group(function () {
