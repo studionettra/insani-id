@@ -30,7 +30,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     <img 
                         src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-20 w-auto mb-3 object-contain" 
+                        className="h-10 w-auto mb-4 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">

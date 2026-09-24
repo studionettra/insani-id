@@ -45,10 +45,17 @@ export default function DonationReceiptModal({ receipt, onClose }: Props) {
     const [paperSize, setPaperSize] = useState<'A5' | 'A4'>('A5');
 
     const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
-    const skNumber = siteSettings?.legal_sk_kemenkumham || 'AHU-0007222.AH.01.12.TAHUN 2024';
-    const skLabel = siteSettings?.legal_sk_label || 'SK Menkumham';
-    const operationalPermit = siteSettings?.legal_operational_permit || 'NOMOR 1/F.3.1/31.74.09.1001.24.K-2/4/TM.17.02/e/2025';
+    const skNumber = siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019';
+    const skLabel = siteSettings?.legal_sk_label || 'SK Kemenkumham RI';
+    const operationalPermit = siteSettings?.legal_operational_permit || '';
+    const legalNpwp = siteSettings?.legal_npwp || '';
     const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+    const contactPhone = siteSettings?.contact_phone || '(021) 27871199';
+    const contactWa = siteSettings?.contact_donor_support_wa || siteSettings?.contact_whatsapp || '081319456675';
+    const contactEmail = siteSettings?.contact_email || 'sapa@insani.id';
+    const contactAddress = siteSettings?.contact_address || 'Jln. Moh Kahfi 1 No 90A, Jagakarsa, Jakarta Selatan';
+    const operatingHours = siteSettings?.contact_operating_hours || "Senin - Jum'at | 10:00 - 18.00 WIB";
+    const holidayNote = siteSettings?.contact_holiday_note || 'Tutup Pada Tanggal Merah & Cuti Bersama';
 
     useEffect(() => {
         if (!receipt) return;
@@ -260,6 +267,11 @@ export default function DonationReceiptModal({ receipt, onClose }: Props) {
                                                 <span className="font-semibold text-slate-700 dark:text-slate-300 print:text-slate-800">Izin Kegiatan:</span> {operationalPermit}
                                             </p>
                                         )}
+                                        {legalNpwp && (
+                                            <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400 print:text-slate-700 leading-tight print:text-[9.5px]">
+                                                <span className="font-semibold text-slate-700 dark:text-slate-300 print:text-slate-800">NPWP:</span> {legalNpwp}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -377,9 +389,9 @@ export default function DonationReceiptModal({ receipt, onClose }: Props) {
                                     Dukungan Donatur
                                 </h3>
                                 <ul className="space-y-0.5 text-slate-600 dark:text-slate-400 print:text-slate-700 print:text-[9.5px]">
-                                    <li><strong>WhatsApp / Telp:</strong> 0813-1945-6675</li>
-                                    <li><strong>Telepon Kantor:</strong> (021) 38820199</li>
-                                    <li><strong>Email Layanan:</strong> sapa@insani.id</li>
+                                    <li><strong>WhatsApp / Telp:</strong> {contactWa}</li>
+                                    <li><strong>Telepon Kantor:</strong> {contactPhone}</li>
+                                    <li><strong>Email Layanan:</strong> {contactEmail}</li>
                                 </ul>
                             </div>
 
@@ -390,21 +402,23 @@ export default function DonationReceiptModal({ receipt, onClose }: Props) {
                                     Alamat & Jam Kerja
                                 </h3>
                                 <p className="text-slate-600 dark:text-slate-400 print:text-slate-700 print:text-[9.5px]">
-                                    <strong>Alamat:</strong> Jln. Moh Kahfi 1 No 90A
+                                    <strong>Alamat:</strong> {contactAddress}
                                 </p>
                                 <p className="text-slate-600 dark:text-slate-400 print:text-slate-700 print:text-[9.5px]">
-                                    <strong>Operasional:</strong> Senin - Jum'at | 10:00 - 18.00 WIB
+                                    <strong>Operasional:</strong> {operatingHours}
                                 </p>
-                                <p className="text-[10px] text-amber-700 dark:text-amber-400 print:text-slate-600 font-medium print:text-[8.5px]">
-                                    * Tutup Pada Tanggal Merah & Cuti Bersama
-                                </p>
+                                {holidayNote && (
+                                    <p className="text-[10px] text-amber-700 dark:text-amber-400 print:text-slate-600 font-medium print:text-[8.5px]">
+                                        * {holidayNote}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
                         {/* Klausul Pengesahan Elektronik & Stempel Sah */}
                         <div className="pt-2 border-t border-dashed border-slate-200 dark:border-slate-800 print:border-slate-300 flex flex-col sm:flex-row items-center justify-between gap-2 print:flex-row print:justify-between">
                             <p className="text-[10px] print:text-[9px] text-slate-500 dark:text-slate-400 print:text-slate-600 text-center sm:text-left print:text-left max-w-sm">
-                                Dokumen ini diterbitkan secara elektronik oleh sistem <strong>Yayasan Peduli Insani Indonesia</strong> dan sah tanpa tanda tangan basah.
+                                Dokumen ini diterbitkan secara elektronik oleh sistem <strong>{foundationName}</strong> dan sah tanpa tanda tangan basah.
                             </p>
                             <div className="shrink-0 flex items-center gap-2.5">
                                 {siteSettings?.receipt_stamp_image && (

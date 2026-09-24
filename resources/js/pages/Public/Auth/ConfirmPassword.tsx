@@ -1,4 +1,5 @@
 import { useForm, Head, usePage } from '@inertiajs/react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { ArrowRight, Lock, LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ export default function ConfirmPassword() {
 
     const { data, setData, post, processing, errors } = useForm({
         password: '',
+        'cf-turnstile-response': '',
     });
 
     const submit = (e: React.FormEvent) => {
@@ -28,7 +30,7 @@ export default function ConfirmPassword() {
                     <img 
                         src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-20 w-auto mb-3 object-contain" 
+                        className="h-10 w-auto mb-4 object-contain" 
                     />
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
@@ -59,6 +61,17 @@ export default function ConfirmPassword() {
                                 />
                             </div>
                             <InputError message={errors.password} />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Turnstile 
+                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
+                                onSuccess={(token) => setData('cf-turnstile-response', token)}
+                                options={{
+                                    theme: 'light',
+                                }}
+                            />
+                            <InputError message={errors['cf-turnstile-response']} />
                         </div>
 
                         <Button

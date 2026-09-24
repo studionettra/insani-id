@@ -4,10 +4,12 @@ import { Head, usePage } from '@inertiajs/react';
 export default function SeoHead({ 
     title, 
     description = 'Insani Indonesia - Lembaga filantropi terpercaya untuk berbagi dan memberdayakan sesama.', 
-    image = '/images/logo/logo-landscape-color.png',
+    image,
 }) {
-    const { supportedLocales, locale } = usePage().props;
-    const fullTitle = title ? `${title} - Insani Indonesia` : 'Insani Indonesia';
+    const { supportedLocales, locale, siteSettings } = usePage().props;
+    const resolvedImage = image || (siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png');
+    const siteName = siteSettings?.site_name || 'Insani Indonesia';
+    const fullTitle = title ? `${title} - ${siteName}` : siteName;
     
     // Get current URL from supportedLocales if available, else fallback
     const currentUrl = supportedLocales && supportedLocales[locale] ? supportedLocales[locale].url : (typeof window !== 'undefined' ? window.location.href : '');
@@ -31,14 +33,14 @@ export default function SeoHead({
             <meta property="og:url" content={currentUrl} />
             <meta property="og:title" content={fullTitle} />
             <meta property="og:description" content={description} />
-            <meta property="og:image" content={image} />
+            <meta property="og:image" content={resolvedImage} />
 
             {/* Twitter */}
             <meta property="twitter:card" content="summary_large_image" />
             <meta property="twitter:url" content={currentUrl} />
             <meta property="twitter:title" content={fullTitle} />
             <meta property="twitter:description" content={description} />
-            <meta property="twitter:image" content={image} />
+            <meta property="twitter:image" content={resolvedImage} />
         </Head>
     );
 }

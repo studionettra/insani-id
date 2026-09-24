@@ -1,4 +1,4 @@
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useState, useTransition } from "react";
 import {
   Bell,
@@ -53,6 +53,7 @@ export default function NotificationsIndex({
   filters,
   stats,
 }: NotificationsIndexProps) {
+  const { siteSettings } = usePage<{ siteSettings?: Record<string, string> }>().props;
   const [search, setSearch] = useState(filters.search || "");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [, startTransition] = useTransition();
@@ -72,7 +73,9 @@ export default function NotificationsIndex({
       if (perm === "granted") {
         new Notification("Notifikasi Desktop Diaktifkan", {
           body: "Anda akan menerima pemberitahuan aktivitas penting Insani-ID secara langsung.",
-          icon: "/images/logo/logo-icon.png",
+          icon: siteSettings?.site_favicon
+            ? `/storage/${siteSettings.site_favicon}`
+            : "/favicon-insani.svg",
         });
       }
     }

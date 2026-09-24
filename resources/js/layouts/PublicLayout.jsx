@@ -94,14 +94,14 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
             {/* Header (Desktop & Mobile) */}
             {!hideTopNav && (
             <header className="sticky top-0 z-[100] bg-white/80 backdrop-blur-md border-b border-gray-200/60 shadow-sm transition-all duration-300 print:hidden">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+                    <div className="flex justify-between h-16 md:h-[68px]">
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center gap-2 group">
                                 <img
                                     src={siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : "/images/logo/logo-landscape-color.png"}
                                     alt="Insani Indonesia Logo"
-                                    className="h-10 md:h-12 w-auto object-contain shrink-0 transition-transform group-hover:scale-105"
+                                    className="h-[30px] sm:h-8 md:h-[34px] lg:h-9 w-auto object-contain shrink-0 transition-transform group-hover:scale-105"
                                     onError={(e) => {
                                         // Fallback if logo not found
                                         e.target.src = "/images/logo/logo-landscape-color.png";
@@ -149,21 +149,21 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
             {/* Footer */}
             {!hideFooter && (
-            <footer className="relative bg-gradient-to-b from-[#0B1528] via-insani-darkblue to-slate-950 text-white mt-auto overflow-hidden print:hidden border-t border-slate-800/80">
+            <footer className="relative bg-gradient-to-b from-insani-darkblue via-[#043c8a] to-[#032d67] text-white mt-auto overflow-hidden print:hidden border-t border-white/10">
                 {/* Background ambient glow */}
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
-                <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none transform translate-x-1/3 -translate-y-1/3"></div>
-                <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none transform -translate-x-1/3 translate-y-1/3"></div>
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-300/30 to-transparent"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/20 rounded-full blur-3xl pointer-events-none transform translate-x-1/3 -translate-y-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-insani-blue/20 rounded-full blur-3xl pointer-events-none transform -translate-x-1/3 translate-y-1/3"></div>
                 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-28 md:py-16 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
                         {/* Kolom 1: Profil Lembaga & Kontak (lg:col-span-4) */}
-                        <div className="lg:col-span-4 space-y-5">
+                        <div className="lg:col-span-4 space-y-4">
                             <Link href="/" className="inline-block">
                                 <img 
                                     src={siteSettings?.site_logo_white ? `/storage/${siteSettings.site_logo_white}` : (siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : "/images/logo/logo-landscape-white.png")} 
                                     alt="Insani Indonesia" 
-                                    className="h-12 md:h-14 w-auto object-contain hover:opacity-95 transition-opacity"
+                                    className="h-8 sm:h-[34px] md:h-9 lg:h-10 w-auto object-contain hover:opacity-95 transition-opacity block"
                                     onError={(e) => {
                                         e.target.src = "/images/logo/logo-landscape-white.png";
                                     }}
@@ -176,20 +176,24 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             {/* Alamat & Kontak Resmi */}
                             <div className="space-y-2.5 text-xs text-slate-300 pt-1">
                                 <div className="flex items-start gap-2.5">
-                                    <MapPin className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                                    <MapPin className="w-4 h-4 text-blue-300 shrink-0 mt-0.5" />
                                     <span className="leading-relaxed">
-                                        {siteSettings?.contact_address || "Jl. Kebaikan No. 1, Jakarta Selatan, DKI Jakarta"}
+                                        {siteSettings?.contact_address || "Jln. Moh Kahfi 1 No 90A, Jagakarsa, Jakarta Selatan"}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2.5">
-                                    <Phone className="w-4 h-4 text-cyan-400 shrink-0" />
+                                    <Phone className="w-4 h-4 text-blue-300 shrink-0" />
                                     <span>{siteSettings?.contact_phone || "(021) 27871199"}</span>
                                 </div>
                                 <div className="flex items-center gap-2.5">
-                                    <Mail className="w-4 h-4 text-cyan-400 shrink-0" />
-                                    <a href={`mailto:${siteSettings?.contact_email || "sapa@insani.id"}`} className="hover:text-cyan-300 transition-colors">
+                                    <Mail className="w-4 h-4 text-blue-300 shrink-0" />
+                                    <a href={`mailto:${siteSettings?.contact_email || "sapa@insani.id"}`} className="hover:text-blue-300 transition-colors">
                                         {siteSettings?.contact_email || "sapa@insani.id"}
                                     </a>
+                                </div>
+                                <div className="flex items-center gap-2.5">
+                                    <Clock className="w-4 h-4 text-blue-300 shrink-0" />
+                                    <span>{siteSettings?.contact_operating_hours || "Senin - Jum'at | 10:00 - 18.00 WIB"}</span>
                                 </div>
                             </div>
 
@@ -229,38 +233,38 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                         {/* Kolom 2: Program & Kebaikan (lg:col-span-3) */}
                         <div className="lg:col-span-3 space-y-4">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-300 flex items-center gap-2">
                                 <Heart className="w-3.5 h-3.5" />
                                 <span>{t('Program & Kebaikan')}</span>
                             </h3>
                             <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
                                 <li>
-                                    <Link href="/program" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Katalog Program Donasi')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/fokus-program" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/fokus-program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Fokus Program')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/buat-program" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/buat-program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Daftar Jadi Campaigner')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/pusat-bantuan" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/pusat-bantuan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Program Relawan Fundraiser')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/berita" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/berita" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Kabar Penyaluran & Berita')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tentang-kami#laporan-keuangan" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/tentang-kami#laporan-keuangan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Laporan Keuangan Yayasan')}</span>
                                     </Link>
                                 </li>
@@ -269,33 +273,33 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                         {/* Kolom 3: Layanan Donatur (lg:col-span-2) */}
                         <div className="lg:col-span-2 space-y-4">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-300 flex items-center gap-2">
                                 <Compass className="w-3.5 h-3.5" />
                                 <span>{t('Layanan Donatur')}</span>
                             </h3>
                             <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
                                 <li>
-                                    <Link href="/cek-donasi" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/cek-donasi" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Cek Status Donasi')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/cara-donasi" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/cara-donasi" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Panduan Cara Donasi')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/pusat-bantuan" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/pusat-bantuan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Pusat Bantuan & FAQ')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Konfirmasi Transfer Manual')}</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <Link href="/kontak" className="hover:text-cyan-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                    <Link href="/kontak" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Hubungi Layanan CS')}</span>
                                     </Link>
                                 </li>
@@ -304,7 +308,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                         {/* Kolom 4: QRIS Cepat & Kebijakan (lg:col-span-3) */}
                         <div className="lg:col-span-3 space-y-4">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-blue-300 flex items-center gap-2">
                                 <QrCode className="w-3.5 h-3.5" />
                                 <span>{t('Donasi Cepat QRIS')}</span>
                             </h3>
@@ -325,10 +329,10 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
 
                             {/* Legal compliance links */}
                             <div className="pt-1 flex flex-col space-y-1.5 text-xs text-slate-400">
-                                <Link href="/syarat-ketentuan" className="hover:text-cyan-300 transition-colors">
+                                <Link href="/syarat-ketentuan" className="hover:text-blue-300 transition-colors">
                                     &bull; {t('Syarat & Ketentuan')}
                                 </Link>
-                                <Link href="/kebijakan-privasi" className="hover:text-cyan-300 transition-colors">
+                                <Link href="/kebijakan-privasi" className="hover:text-blue-300 transition-colors">
                                     &bull; {t('Kebijakan Privasi')}
                                 </Link>
                             </div>
@@ -342,7 +346,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                         </p>
                         {siteSettings?.show_sk_in_footer !== '0' && (
                             <div className="flex items-center gap-1.5 text-slate-400">
-                                <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+                                <ShieldCheck className="w-4 h-4 text-blue-300 shrink-0" />
                                 <span>
                                     {siteSettings?.legal_sk_label || 'SK Kemenkumham RI'}: <strong>{siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
                                 </span>

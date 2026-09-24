@@ -28,7 +28,10 @@ export function useNotificationSound() {
 }
 
 export function useNotificationAlerts(pollInterval = 30000) {
-  const { notifications } = usePage().props;
+  const { notifications, siteSettings } = usePage<{
+    notifications?: { recent?: AppNotification[]; unread_count?: number };
+    siteSettings?: Record<string, string>;
+  }>().props;
   const { soundEnabled, toggleSound, playTestChime } = useNotificationSound();
 
   // Unconditionally poll notifications prop in background
@@ -81,7 +84,9 @@ export function useNotificationAlerts(pollInterval = 30000) {
         try {
           const desktopNotif = new Notification(latest.data.title, {
             body: latest.data.message,
-            icon: '/images/logo/logo-icon.png',
+            icon: siteSettings?.site_favicon
+              ? `/storage/${siteSettings.site_favicon}`
+              : '/favicon-insani.svg',
           });
           desktopNotif.onclick = () => {
             window.focus();

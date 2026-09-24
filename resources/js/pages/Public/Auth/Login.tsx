@@ -33,7 +33,7 @@ export default function Login({ status }: { status?: string }) {
                     <img 
                         src={siteLogo} 
                         alt="Logo Insani" 
-                        className="h-20 w-auto mb-3 object-contain" 
+                        className="h-10 w-auto mb-4 object-contain" 
                     />
                     
                     <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
