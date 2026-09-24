@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AppSetting;
 use Illuminate\Support\Str;
 
 class SeoService
@@ -27,7 +28,8 @@ class SeoService
         $siteName = 'Insani Indonesia';
         $currentUrl = url()->current();
         $defaultDescription = 'Platform Galang Dana dan Donasi Online Insani Indonesia. Bersama menebar kebaikan dan kepedulian untuk sesama.';
-        $defaultImage = asset('images/logo/logo-landscape-color.png');
+        $customLogo = AppSetting::get('site_logo');
+        $defaultImage = ! empty($customLogo) ? asset('storage/'.$customLogo) : asset('images/logo/logo-landscape-color.png');
 
         $organizationSchema = [
             '@type' => 'NGO',

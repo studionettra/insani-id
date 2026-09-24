@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kwitansi Donasi Resmi - {{ $donation->donation_code }}</title>
-    <link rel="icon" href="/favicon-insani.svg" type="image/svg+xml">
+    <link rel="icon" href="{{ !empty($settings['site_favicon']) ? asset('storage/' . $settings['site_favicon']) : asset('favicon-insani.svg') }}" type="image/svg+xml">
     <style>
         * {
             box-sizing: border-box;
@@ -249,8 +249,12 @@
         <div class="receipt-card">
             <div class="receipt-header">
                 <div class="receipt-brand">
-                    @if(!empty($settings['site_logo']))
+                    @if(!empty($settings['site_logo_white']))
+                        <img src="{{ asset('storage/' . $settings['site_logo_white']) }}" alt="{{ $settings['site_name'] ?? 'Insani Indonesia' }}" style="max-height: 42px; width: auto; margin-bottom: 6px; display: block;">
+                    @elseif(!empty($settings['site_logo']))
                         <img src="{{ asset('storage/' . $settings['site_logo']) }}" alt="{{ $settings['site_name'] ?? 'Insani Indonesia' }}" style="max-height: 42px; width: auto; margin-bottom: 6px; display: block;">
+                    @elseif(file_exists(public_path('images/logo/logo-landscape-white.png')))
+                        <img src="{{ asset('images/logo/logo-landscape-white.png') }}" alt="{{ $settings['site_name'] ?? 'Insani Indonesia' }}" style="max-height: 42px; width: auto; margin-bottom: 6px; display: block;">
                     @else
                         <h1>{{ $settings['site_name'] ?? 'Insani Indonesia' }}</h1>
                     @endif
@@ -335,7 +339,16 @@
                     </div>
 
                     <div class="signature-section" style="position: relative; min-width: 190px;">
-                        <p style="font-size: 11px; margin-bottom: 4px; color: #475569;">{{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}</p>
+                        <p style="font-size: 11px; margin-bottom: 4px; color: #475569; font-weight: 600;">{{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}</p>
+                        @if(!empty($settings['legal_sk_kemenkumham']))
+                            <p style="font-size: 9.5px; color: #64748b; margin-bottom: 2px;">{{ $settings['legal_sk_label'] ?? 'SK Kemenkumham' }}: {{ $settings['legal_sk_kemenkumham'] }}</p>
+                        @endif
+                        @if(!empty($settings['legal_operational_permit']))
+                            <p style="font-size: 9.5px; color: #64748b; margin-bottom: 2px;">Izin Kegiatan: {{ $settings['legal_operational_permit'] }}</p>
+                        @endif
+                        @if(!empty($settings['legal_npwp']))
+                            <p style="font-size: 9.5px; color: #64748b; margin-bottom: 2px;">NPWP: {{ $settings['legal_npwp'] }}</p>
+                        @endif
                         
                         <div style="position: relative; height: 75px; margin: 4px 0; display: flex; align-items: center; justify-content: flex-end;">
                             @if(!empty($settings['receipt_stamp_image']))
@@ -353,6 +366,11 @@
                             {{ $settings['receipt_signatory_title'] ?? 'Bagian Keuangan & Donasi' }}
                         </p>
                     </div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 14px; border-top: 1px dashed #e2e8f0; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div>Dokumen ini diterbitkan secara elektronik oleh sistem resmi {{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }} dan sah tanpa tanda tangan basah.</div>
+                    <div>Layanan Donatur: {{ $settings['contact_donor_support_wa'] ?? $settings['contact_whatsapp'] ?? '081319456675' }} &bull; {{ $settings['contact_email'] ?? 'sapa@insani.id' }}</div>
                 </div>
             </div>
         </div>
