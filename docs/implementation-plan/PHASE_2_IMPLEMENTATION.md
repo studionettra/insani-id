@@ -1,3 +1,7 @@
+
+
+<!-- MERGED FROM 02_phase_2_master_data_plan.md -->
+
 # Implementation Plan: Phase 2 (i18n, Layout & Master Data)
 
 Tujuan fase ini adalah menyelesaikan sisa modul fondasi (i18n, Layout, SEO) sekaligus merampungkan Master Data (Pengguna dan Kategori Donasi) sebagai prasyarat pembuatan Program Galang Dana di fase berikutnya.
@@ -60,3 +64,28 @@ Modul 2.2: Kategori Donasi (Bencana, Kesehatan, Yatim, dll).
 - Menjalankan `php artisan migrate` untuk memastikan tabel `categories` terbuat dengan baik.
 - Login sebagai **Administrator** dan memastikan halaman `/admin/users` dan `/admin/categories` bisa diakses dan form CRUD bekerja dengan lancar.
 - Memastikan halaman `/login` atau publik dapat diakses dengan prefix `/ar/login` dan merender tata letak dari kanan-ke-kiri (RTL).
+
+
+<!-- MERGED FROM 02_phase_2_task.md -->
+
+# Task Checklist: Phase 2 (i18n, Layout, Master Data)
+
+- `[/]` 1. **Internationalization (i18n)**
+  - `[ ]` Install `mcamara/laravel-localization` & `spatie/laravel-translatable`.
+  - `[ ]` Configure fallback locale (`id`) and middleware.
+- `[ ]` 2. **Layout & Color Palette**
+  - `[ ]` Update `tailwind.config.js` with Insani colors (`#00D1B4`, `#0080FF`).
+  - `[ ]` Create `resources/js/Layouts/AdminLayout.jsx` (wrapping TailAdmin).
+  - `[ ]` Create `resources/js/Layouts/PublicLayout.jsx` (mobile-first).
+  - `[ ]` Create `resources/js/Components/SeoHead.jsx`.
+- `[ ]` 3. **User Management**
+  - `[ ]` Create `UserController.php` with CRUD logic.
+  - `[ ]` Create `resources/js/Pages/Admin/Users/Index.jsx`.
+- `[ ]` 4. **Category Management**
+  - `[ ]` Create migration for `categories`.
+  - `[ ]` Create `Category.php` model with `HasTranslations`.
+  - `[ ]` Create `CategoryController.php` with CRUD logic.
+  - `[ ]` Create `resources/js/Pages/Admin/Categories/Index.jsx`.
+- `[ ]` 5. **Verification**
+  - `[ ]` Migrate database.
+  - `[ ]` Test Admin pages and Public layout rendering.
