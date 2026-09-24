@@ -314,7 +314,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     );
 
     return (
-        <PublicLayout title={programTitle} hideFooter={false} hideMobileNav={true} hideTopNav={false}>
+        <PublicLayout title={programTitle} hideFooter={true} hideMobileNav={true} hideTopNav={false}>
             <Head>
                 <meta name="description" content={metaDescription} />
                 <link rel="canonical" href={baseProgramUrl} />

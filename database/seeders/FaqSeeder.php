@@ -37,7 +37,7 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => 'Bagaimana cara mengecek status donasi dan mengunduh kuitansi resmi jika saya donatur tamu?',
-                'answer_html' => '<p>Setiap transaksi donasi akan memiliki <strong>Kode Donasi Unik</strong> (contoh: <code>INS-2026xxxxxx</code>) yang dikirimkan ke email atau layar sukses donasi Anda:</p><ul><li>Kunjungi halaman <strong>Cek Status Donasi</strong> (/cek-donasi).</li><li>Masukkan kode donasi atau alamat email Anda.</li><li>Jika donasi telah berstatus <strong>Lunas (Paid)</strong>, Anda dapat langsung mengunduh dan mencetak <strong>Kuitansi Resmi Elektronik (E-Receipt)</strong> resmi ber-QR Code validasi keabsahan yayasan.</li></ul>',
+                'answer_html' => '<p>Setiap transaksi donasi akan memiliki <strong>Kode Donasi Unik</strong> (contoh: <code>DON-XXXXXXXXXX</code>) yang dikirimkan ke email atau layar sukses donasi Anda:</p><ul><li>Kunjungi halaman <strong>Cek Status Donasi</strong> (/cek-donasi).</li><li>Masukkan kode donasi atau alamat email Anda.</li><li>Jika donasi telah berstatus <strong>Lunas (Paid)</strong>, Anda dapat langsung mengunduh dan mencetak <strong>Kuitansi Resmi Elektronik (E-Receipt)</strong> resmi ber-QR Code validasi keabsahan yayasan.</li></ul>',
                 'category' => 'donatur',
                 'keywords' => 'cek status, kuitansi, receipt, kode donasi, bukti donasi, download kuitansi',
                 'sort_order' => 4,

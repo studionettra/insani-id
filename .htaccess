@@ -1,0 +1,7 @@
+# Root .htaccess for Hostinger shared hosting
+# Redirects all requests to public/ subdirectory
+# Only needed if document root points to project root instead of public/
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

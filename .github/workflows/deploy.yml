@@ -1,9 +1,10 @@
 name: Deploy to Hostinger
 
 on:
-  push:
-    branches:
-      - main # Ubah ke branch production Anda
+  # push:
+  #   branches:
+  #     - main # Auto-deploy dinonaktifkan sementara untuk QA
+  workflow_dispatch: # Mengizinkan trigger manual dari tab Actions di GitHub
 
 jobs:
   deploy:

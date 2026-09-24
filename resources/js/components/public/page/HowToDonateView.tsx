@@ -215,7 +215,7 @@ export default function HowToDonateView() {
                                     Lacak Transaksi Anda Kapan Saja
                                 </p>
                                 <p className="text-xs text-slate-600 mt-0.5">
-                                    Cukup masukkan Kode Donasi (contoh: <code>INS-2026xxxxxx</code>) atau alamat email Anda di halaman pelacakan.
+                                    Cukup masukkan Kode Donasi (contoh: <code>DON-XXXXXXXXXX</code>) atau alamat email Anda di halaman pelacakan.
                                 </p>
                             </div>
                         </div>

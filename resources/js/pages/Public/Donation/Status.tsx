@@ -18,10 +18,12 @@ import { toast } from 'sonner';
 import DonationReceiptModal from '@/components/donation/DonationReceiptModal';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/PublicLayout';
+import useTranslation from '@/hooks/use-translation';
 import { trackDonationSuccess } from '@/lib/analytics';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default function Status({ donation }: any) {
+    const { t } = useTranslation();
     const { auth, siteSettings, bankAccounts } = usePage().props as any;
     const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
     const [isChecking, setIsChecking] = useState(false);
@@ -171,16 +173,16 @@ export default function Status({ donation }: any) {
                             {/* Action Buttons when Pending Online */}
                             {donation.channel === 'online' && donation.status === 'pending' && (
                                 <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-3">
-                                    <div className="flex flex-col sm:flex-row gap-2.5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         {latestPayment?.checkout_url && (
                                             <a 
                                                 href={latestPayment.checkout_url} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
-                                                className="flex-1 inline-flex items-center justify-center gap-2 bg-insani-blue hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow-xs transition-all"
+                                                className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 bg-insani-blue hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-4 rounded-xl shadow-xs transition-all text-sm"
                                             >
                                                 <span>Lanjutkan Pembayaran</span>
-                                                <ExternalLink className="w-4 h-4" />
+                                                <ExternalLink className="w-4 h-4 shrink-0" />
                                             </a>
                                         )}
                                         <Button
@@ -188,9 +190,9 @@ export default function Status({ donation }: any) {
                                             onClick={handleCheckStatus}
                                             disabled={isChecking}
                                             variant="outline"
-                                            className="flex-1 h-12 rounded-xl border-blue-200 bg-white hover:bg-blue-50 text-insani-blue font-semibold gap-2"
+                                            className="w-full min-h-[48px] py-3 px-4 rounded-xl border-blue-200 bg-white hover:bg-blue-50 text-insani-blue font-semibold gap-2 text-sm"
                                         >
-                                            <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
+                                            <RefreshCw className={`w-4 h-4 shrink-0 ${isChecking ? 'animate-spin' : ''}`} />
                                             <span>{isChecking ? 'Memeriksa...' : 'Cek Status Pembayaran'}</span>
                                         </Button>
                                     </div>
@@ -232,24 +234,29 @@ export default function Status({ donation }: any) {
 
                             {/* Action Button: Official Receipt when Paid */}
                             {donation.status === 'paid' && (
-                                <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
-                                    <Button 
-                                        type="button"
-                                        onClick={() => setShowReceipt(true)}
-                                        className="flex-1 h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all"
-                                    >
-                                        <Printer className="w-4 h-4" />
-                                        <span>Lihat Kuitansi</span>
-                                    </Button>
-                                    <a
-                                        href={`/donasi/kwitansi/${donation.donation_code}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex-1 h-12 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-xs transition-all"
-                                    >
-                                        <ExternalLink className="w-4 h-4" />
-                                        <span>Cetak PDF Resmi</span>
-                                    </a>
+                                <div className="pt-3 sm:pt-4 space-y-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <Button 
+                                            type="button"
+                                            onClick={() => setShowReceipt(true)}
+                                            className="w-full min-h-[50px] py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-sm sm:text-base font-semibold flex items-center justify-center gap-2.5 shadow-xs hover:shadow-md transition-all active:scale-[0.99]"
+                                        >
+                                            <Printer className="w-5 h-5 shrink-0" />
+                                            <span>{t('Lihat Kuitansi')}</span>
+                                        </Button>
+                                        <a
+                                            href={`/donasi/kwitansi/${donation.donation_code}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full min-h-[50px] py-3.5 px-4 bg-white hover:bg-emerald-50 active:bg-emerald-100/60 text-emerald-700 border-2 border-emerald-300 hover:border-emerald-400 rounded-xl text-sm sm:text-base font-semibold flex items-center justify-center gap-2.5 shadow-2xs hover:shadow-xs transition-all active:scale-[0.99]"
+                                        >
+                                            <ExternalLink className="w-5 h-5 shrink-0" />
+                                            <span>{t('Cetak PDF Resmi')}</span>
+                                        </a>
+                                    </div>
+                                    <p className="text-center text-xs text-slate-400 pt-1">
+                                        {t('Kuitansi elektronik resmi ber-QR Code validasi keabsahan yayasan')}
+                                    </p>
                                 </div>
                             )}
 
@@ -338,8 +345,8 @@ export default function Status({ donation }: any) {
                             {/* Back to Program button */}
                             <div className="pt-4">
                                 <Link href={`/program/${donation.program?.slug || ''}`} className="w-full block">
-                                    <Button className="w-full h-12 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-sm font-semibold">
-                                        Kembali ke Halaman Program
+                                    <Button className="w-full min-h-[50px] py-3.5 bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white rounded-xl text-sm sm:text-base font-semibold shadow-xs hover:shadow-md transition-all active:scale-[0.99]">
+                                        {t('Kembali ke Halaman Program')}
                                     </Button>
                                 </Link>
                             </div>

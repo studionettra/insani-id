@@ -82,7 +82,7 @@ const FAQ_DATA: FaqItem[] = [
         keywords: ['cek status', 'kuitansi', 'receipt', 'kode donasi', 'bukti donasi', 'download kuitansi'],
         answer: (
             <div className="space-y-3 text-slate-600">
-                <p>Setiap transaksi donasi akan memiliki <strong>Kode Donasi Unik</strong> (contoh: <code>INS-2026xxxxxx</code>) yang dikirimkan ke email atau layar sukses donasi Anda:</p>
+                <p>Setiap transaksi donasi akan memiliki <strong>Kode Donasi Unik</strong> (contoh: <code>DON-XXXXXXXXXX</code>) yang dikirimkan ke email atau layar sukses donasi Anda:</p>
                 <ul className="list-disc pl-5 space-y-1.5">
                     <li>Kunjungi halaman <Link href="/cek-donasi" className="text-insani-blue font-semibold hover:underline">Cek Status Donasi</Link>.</li>
                     <li>Masukkan kode donasi atau alamat email Anda.</li>
@@ -496,6 +496,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
     const contactEmail = siteSettings?.contact_email || 'sapa@insani.id';
     const legalSkNumber = siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.2019';
     const legalSkLabel = siteSettings?.legal_sk_label || 'SK Kemenkumham';
+    const operatingHours = siteSettings?.contact_operating_hours || "Senin - Jum'at | 10:00 - 18.00 WIB";
 
     const activeFaqList: FaqItem[] = useMemo(() => {
         if (faqs && faqs.length > 0) {
@@ -809,8 +810,8 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         <div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-cyan-300 text-xs font-semibold mb-3">
-                                <Clock className="w-3.5 h-3.5" />
-                                <span>Jam Kerja: Senin - Jumat, 09:00 - 17:00 WIB</span>
+                                <Clock className="w-3.5 h-3.5 shrink-0" />
+                                <span>Jam Kerja: {operatingHours}</span>
                             </div>
                             <h2 className="text-xl sm:text-2xl font-bold mb-2">
                                 Masih membutuhkan bantuan lebih lanjut?
