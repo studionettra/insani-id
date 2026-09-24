@@ -286,3 +286,57 @@ test('staff user receives enhanced analytics and operational widgets', function 
         ->where('analyticsData.urgentPrograms.0.id', $urgentProgram->id)
     );
 });
+
+test('keuangan user receives role info and financial queue metrics', function () {
+    Role::firstOrCreate(['name' => 'Keuangan', 'guard_name' => 'web']);
+
+    $financeUser = User::factory()->create();
+    $financeUser->assignRole('Keuangan');
+
+    $category = Category::create([
+        'name' => 'Kemanusiaan',
+        'slug' => 'kemanusiaan',
+        'platform_fee_percent' => 5,
+    ]);
+
+    $program = Program::factory()->create([
+        'category_id' => $category->id,
+        'status' => 'published',
+        'target_amount' => 5000000,
+    ]);
+
+    // Create 1 pending manual/offline donation
+    Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 250000,
+        'channel' => 'offline',
+        'status' => 'pending',
+    ]);
+
+    // Create 1 pending disbursement
+    Disbursement::create([
+        'program_id' => $program->id,
+        'requested_amount' => 1000000,
+        'bank_name' => 'BCA',
+        'bank_account_number' => '1234567890',
+        'bank_account_name' => 'Yayasan Insani',
+        'platform_fee_percent' => 5,
+        'platform_fee_amount' => 50000,
+        'nett_amount' => 950000,
+        'status' => 'pending',
+    ]);
+
+    $response = $this->actingAs($financeUser)
+        ->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->where('userRoleInfo.isKeuangan', true)
+        ->where('userRoleInfo.isAdministrator', false)
+        ->where('userRoleInfo.isStaff', true)
+        ->where('stats.pendingOfflineDonations', 1)
+        ->where('stats.pendingDisbursementsCount', 1)
+        ->where('stats.pendingDisbursements', 1000000)
+    );
+});

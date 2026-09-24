@@ -50,7 +50,12 @@ class DashboardController extends Controller
         $pendingCampaigners = CampaignerProfile::where('verification_status', 'pending')->count();
         $totalDonors = Donation::where('status', 'paid')->distinct('donor_email')->count('donor_email');
         $totalDisbursed = (float) Disbursement::where('status', 'transferred')->sum('requested_amount');
+        $disbursedThisMonth = (float) Disbursement::where('status', 'transferred')
+            ->whereMonth('transferred_at', Carbon::now()->month)
+            ->whereYear('transferred_at', Carbon::now()->year)
+            ->sum('requested_amount');
         $pendingDisbursements = (float) Disbursement::where('status', 'pending')->sum('requested_amount');
+        $pendingDisbursementsCount = Disbursement::where('status', 'pending')->count();
         $pendingOfflineDonations = Donation::where('channel', 'offline')->where('status', 'pending')->count();
 
         // Donor Specific Data
@@ -416,7 +421,9 @@ class DashboardController extends Controller
                 'pendingCampaigners' => $pendingCampaigners,
                 'totalDonors' => $totalDonors,
                 'totalDisbursed' => $totalDisbursed,
+                'disbursedThisMonth' => $disbursedThisMonth,
                 'pendingDisbursements' => $pendingDisbursements,
+                'pendingDisbursementsCount' => $pendingDisbursementsCount,
                 'pendingOfflineDonations' => $pendingOfflineDonations,
                 'averageDonation' => $averageDonation ?? 0,
                 'paymentSuccessRate' => $paymentSuccessRate ?? 0,

@@ -7,8 +7,10 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Requests\CustomLoginRequest;
 use App\Http\Requests\CustomSendPasswordResetLinkRequest;
 use App\Http\Responses\LogoutResponse;
+use App\Rules\TurnstileRule;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -49,6 +51,15 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
+        Fortify::confirmPasswordsUsing(function ($user, ?string $password = null) {
+            request()->validate([
+                'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
+            ], [
+                'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).',
+            ]);
+
+            return Hash::check((string) $password, $user->password);
+        });
     }
 
     /**

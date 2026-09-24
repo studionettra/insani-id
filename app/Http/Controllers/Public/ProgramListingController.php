@@ -60,7 +60,7 @@ class ProgramListingController extends Controller
                 $query->where('is_published', true)->latest();
             },
             'comments' => function ($query) {
-                $query->where('is_hidden', false)->latest();
+                $query->with('donation:id,amount')->where('is_hidden', false)->latest();
             },
         ])
             ->where('slug', $slug)
