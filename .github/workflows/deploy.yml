@@ -1,0 +1,64 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main # Ubah ke branch production Anda
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json, libxml, pdo, phar
+          coverage: none
+
+      - name: 📦 Install Composer Dependencies
+        run: composer install --optimize-autoloader --no-dev --no-interaction --prefer-dist
+
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm install
+
+      - name: 🏗️ Build Frontend Assets
+        run: npm run build
+
+      - name: 📂 Sync Files to Hostinger via rsync
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          # Mengecualikan folder dan file yang tidak perlu diupload / jangan dioverwrite
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/app/public/, /storage/logs/"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.HOSTINGER_HOST }}
+          REMOTE_USER: ${{ secrets.HOSTINGER_USERNAME }}
+          REMOTE_PORT: ${{ secrets.HOSTINGER_PORT }}
+          # TARGET disesuaikan dengan folder laravel_app Anda di Hostinger
+          TARGET: "/home/${{ secrets.HOSTINGER_USERNAME }}/domains/domainanda.com/laravel_app/"
+
+      - name: 🚀 Execute Artisan Commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_HOST }}
+          username: ${{ secrets.HOSTINGER_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: ${{ secrets.HOSTINGER_PORT }}
+          script: |
+            cd /home/${{ secrets.HOSTINGER_USERNAME }}/domains/domainanda.com/laravel_app
+            php artisan down
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan optimize
+            php artisan up
