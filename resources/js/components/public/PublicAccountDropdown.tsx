@@ -496,9 +496,8 @@ export default function PublicAccountDropdown({
                         </span>
                     </div>
                 ) : (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center">
                         <User className="w-4 h-4 text-zinc-500 group-hover:text-brand-600 transition-colors" />
-                        <span className="text-zinc-800 font-medium">{t('Akun')}</span>
                     </div>
                 )}
                 <ChevronDown

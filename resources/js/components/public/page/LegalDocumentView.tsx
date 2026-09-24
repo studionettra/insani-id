@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { 
     ShieldCheck, 
     Printer, 
@@ -25,6 +25,8 @@ interface TocItem {
 }
 
 export default function LegalDocumentView({ title, contentHtml, attachmentUrl }: LegalDocumentViewProps) {
+    const { siteSettings } = usePage().props as any;
+    const contactEmail = siteSettings?.contact_email || 'sapa@insani.id';
     const [activeSection, setActiveSection] = useState<string>('');
 
     // Process HTML to inject unique IDs into <h2> headings for smooth anchor linking
@@ -94,20 +96,22 @@ export default function LegalDocumentView({ title, contentHtml, attachmentUrl }:
     return (
         <div className="min-h-screen bg-slate-50/70 pb-20">
             {/* HERO HEADER */}
-            <div className="bg-gradient-to-br from-slate-900 via-insani-darkblue to-brand-950 text-white py-12 md:py-16 px-4 print:hidden">
-                <div className="container mx-auto max-w-5xl">
-                    <nav className="flex items-center gap-2 text-xs md:text-sm text-cyan-300 font-medium mb-4">
+            <div className="relative bg-insani-darkblue text-white py-12 md:py-16 px-4 print:hidden overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                <div className="container mx-auto max-w-5xl relative z-10">
+                    <nav className="flex items-center gap-2 text-xs md:text-sm text-blue-200 font-medium mb-4">
                         <Link href="/" className="hover:underline text-slate-300">Beranda</Link>
                         <span>/</span>
                         <Link href="/pusat-bantuan" className="hover:underline text-slate-300">Pusat Bantuan</Link>
                         <span>/</span>
-                        <span>{title}</span>
+                        <span className="text-white">{title}</span>
                     </nav>
 
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 text-xs font-semibold mb-3">
-                                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-blue-200 text-xs font-semibold mb-3 backdrop-blur-md">
+                                <ShieldCheck className="w-3.5 h-3.5 text-blue-300" />
                                 <span>Dokumen Hukum Resmi Terverifikasi</span>
                             </div>
                             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
@@ -212,7 +216,7 @@ export default function LegalDocumentView({ title, contentHtml, attachmentUrl }:
                         {/* SUPPORT NOTICE FOOTER */}
                         <div className="mt-6 bg-slate-100/80 rounded-2xl p-5 border border-slate-200 text-xs sm:text-sm text-slate-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
                             <p>
-                                Pertanyaan mengenai ketentuan hukum dan privasi? Hubungi tim legal kami di <strong className="text-slate-800">sapa@insani.id</strong>.
+                                Pertanyaan mengenai ketentuan hukum dan privasi? Hubungi tim legal kami di <strong className="text-slate-800">{contactEmail}</strong>.
                             </p>
                             <Link
                                 href="/kontak"

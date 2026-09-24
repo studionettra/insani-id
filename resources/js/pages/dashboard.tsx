@@ -15,10 +15,18 @@ import {
     Receipt,
     UserCheck,
     ArrowRight,
+    ChevronRight,
     Coins,
     Activity,
     MessageSquare,
-    ExternalLink
+    ExternalLink,
+    CreditCard,
+    FileSpreadsheet,
+    Building2,
+    Landmark,
+    WalletCards,
+    ShieldCheck,
+    FileCheck
 } from 'lucide-react';
 import React from 'react';
 import CategoryDonationChart from '@/components/analytics/CategoryDonationChart';
@@ -41,7 +49,9 @@ interface Props {
         pendingCampaigners: number;
         totalDonors: number;
         totalDisbursed: number;
+        disbursedThisMonth?: number;
         pendingDisbursements: number;
+        pendingDisbursementsCount?: number;
         pendingOfflineDonations: number;
         averageDonation?: number;
         paymentSuccessRate?: number;
@@ -268,21 +278,36 @@ export default function Dashboard({
     userRoleInfo 
 }: Props) {
     const { auth } = usePage().props as any;
+    const permissions: string[] = auth?.user?.permissions || [];
     const isDonor = userRoleInfo?.isDonor;
     const isCampaigner = userRoleInfo?.isCampaigner && !userRoleInfo?.isAdministrator;
-    const isStaff = userRoleInfo?.isStaff ?? (userRoleInfo?.isAdministrator || userRoleInfo?.isProgramOfficer || userRoleInfo?.isVerifikator || userRoleInfo?.isKeuangan);
+    const isKeuangan = userRoleInfo?.isKeuangan;
+    const isAdministrator = userRoleInfo?.isAdministrator;
+    const isProgramOfficer = userRoleInfo?.isProgramOfficer;
+    const isVerifikator = userRoleInfo?.isVerifikator;
+    const isStaff = userRoleInfo?.isStaff ?? (isAdministrator || isProgramOfficer || isVerifikator || isKeuangan);
+    const hasFinanceAccess = isKeuangan || isAdministrator || permissions.includes('donation.view') || permissions.includes('disbursement.view');
+    const canViewAdminPrograms = isAdministrator || isProgramOfficer || permissions.includes('program.view');
 
     let createProgramUrl = '/buat-program';
 
-    if (userRoleInfo?.isAdministrator || userRoleInfo?.isProgramOfficer) {
+    if (isAdministrator || isProgramOfficer) {
         createProgramUrl = '/admin/programs/create';
     } else if (isCampaigner) {
         createProgramUrl = '/akun/programs/create';
     }
 
+    const hasQueueItems = isStaff && (
+        ((isAdministrator || (!isKeuangan && permissions.includes('donation.confirm-manual'))) && stats.pendingOfflineDonations > 0) ||
+        ((isAdministrator || isKeuangan || permissions.includes('disbursement.approve')) && (stats.pendingDisbursementsCount ?? 0) > 0) ||
+        ((isAdministrator || isVerifikator || permissions.includes('campaigner.verify')) && stats.pendingCampaigners > 0) ||
+        ((isAdministrator || isProgramOfficer || permissions.includes('program.view')) && stats.pendingPrograms > 0) ||
+        ((isAdministrator || permissions.includes('manage_contact_messages')) && (stats.pendingContactMessages ?? 0) > 0)
+    );
+
     return (
         <>
-            <Head title={isDonor ? "Dashboard Donatur" : (isCampaigner ? "Dashboard Penggalang Dana" : "Dashboard")} />
+            <Head title={isDonor ? "Dashboard Donatur" : (isCampaigner ? "Dashboard Penggalang Dana" : (isKeuangan && !isAdministrator ? "Dashboard Keuangan" : "Dashboard"))} />
             
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-hidden rounded-xl p-4 lg:p-6">
                 
@@ -292,11 +317,17 @@ export default function Dashboard({
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                             {isDonor 
                                 ? 'Dashboard Donatur' 
-                                : (isCampaigner ? 'Dashboard Penggalang Dana' : 'Ringkasan Platform Insani')}
+                                : isCampaigner 
+                                    ? 'Dashboard Penggalang Dana' 
+                                    : isKeuangan && !isAdministrator
+                                        ? 'Dashboard Divisi Keuangan'
+                                        : 'Ringkasan Platform Insani'}
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             {isDonor ? (
                                 <>Selamat datang kembali, <span className="font-semibold text-gray-700 dark:text-gray-200">{auth?.user?.name}</span>. Terima kasih atas kepedulian dan jejak kebaikan yang Anda tebarkan.</>
+                            ) : isKeuangan && !isAdministrator ? (
+                                <>Selamat datang kembali, <span className="font-semibold text-gray-700 dark:text-gray-200">{auth?.user?.name}</span>. Pantau arus mutasi donasi, verifikasi transfer, dan persetujuan penyaluran dana.</>
                             ) : (
                                 <>Selamat datang kembali, <span className="font-semibold text-gray-700 dark:text-gray-200">{auth?.user?.name}</span>. Pantau aktivitas kebaikan hari ini.</>
                             )}
@@ -318,6 +349,26 @@ export default function Dashboard({
                                     </Link>
                                 </Button>
                             </>
+                        ) : isKeuangan && !isAdministrator ? (
+                            <>
+                                <Button asChild variant="outline" className="h-10 px-4 rounded-xl border-gray-200 dark:border-gray-800 text-xs sm:text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <Link href="/admin/reports">
+                                        <FileSpreadsheet className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" />
+                                        Rekap Transaksi
+                                    </Link>
+                                </Button>
+                                <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white shadow-sm h-10 px-5 rounded-xl hover:-translate-y-[1px] transition-all text-xs sm:text-sm">
+                                    <Link href="/admin/donations?status=pending">
+                                        <CreditCard className="w-4 h-4 mr-2" />
+                                        Konfirmasi Donasi
+                                        {stats.pendingOfflineDonations > 0 && (
+                                            <span className="ml-2 px-1.5 py-0.5 text-[11px] bg-white text-brand-700 font-bold rounded-full shadow-xs">
+                                                {stats.pendingOfflineDonations}
+                                            </span>
+                                        )}
+                                    </Link>
+                                </Button>
+                            </>
                         ) : (
                             <Button asChild className="bg-brand-600 hover:bg-brand-700 text-white shadow-sm h-10 px-5 rounded-xl hover:-translate-y-[1px] transition-all">
                                 <Link href={createProgramUrl}>
@@ -330,9 +381,30 @@ export default function Dashboard({
                 </div>
 
                 {/* Queue Notifications / Action Cards for Staff Only */}
-                {isStaff && (stats.pendingCampaigners > 0 || stats.pendingPrograms > 0 || stats.pendingDisbursements > 0 || (stats.pendingContactMessages ?? 0) > 0) && (
+                {Boolean(hasQueueItems) && (
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        {stats.pendingCampaigners > 0 && (
+                        {/* Donasi Manual: For CS & Admin (Role Keuangan already has prominent header action) */}
+                        {(isAdministrator || (!isKeuangan && permissions.includes('donation.confirm-manual'))) && stats.pendingOfflineDonations > 0 && (
+                            <Link href="/admin/donations?status=pending" className="flex items-center justify-between p-3.5 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-900 hover:bg-amber-100/70 dark:bg-amber-950/40 dark:border-amber-900/60 dark:text-amber-300 dark:hover:bg-amber-950/60 transition-colors">
+                                <div className="flex items-center gap-2.5">
+                                    <CreditCard className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                                    <span className="text-xs font-semibold">{stats.pendingOfflineDonations} Donasi Manual Butuh Verifikasi</span>
+                                </div>
+                                <ArrowUpRight className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                            </Link>
+                        )}
+                        {/* Penyaluran Dana: For Keuangan & Admin */}
+                        {(isAdministrator || isKeuangan || permissions.includes('disbursement.approve')) && (stats.pendingDisbursementsCount ?? 0) > 0 && (
+                            <Link href="/admin/disbursements" className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl text-emerald-900 hover:bg-emerald-100/70 dark:bg-emerald-950/40 dark:border-emerald-900/60 dark:text-emerald-300 dark:hover:bg-emerald-950/60 transition-colors">
+                                <div className="flex items-center gap-2.5">
+                                    <WalletCards className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                    <span className="text-xs font-semibold">{stats.pendingDisbursementsCount} Pencairan Dana Menunggu Persetujuan</span>
+                                </div>
+                                <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                            </Link>
+                        )}
+                        {/* Campaigner: For Verifikator & Admin */}
+                        {(isAdministrator || isVerifikator || permissions.includes('campaigner.verify')) && stats.pendingCampaigners > 0 && (
                             <Link href="/admin/campaigners" className="flex items-center justify-between p-3.5 bg-amber-50 border border-amber-200/80 rounded-xl text-amber-900 hover:bg-amber-100/70 dark:bg-amber-950/40 dark:border-amber-900/60 dark:text-amber-300 dark:hover:bg-amber-950/60 transition-colors">
                                 <div className="flex items-center gap-2.5">
                                     <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
@@ -341,7 +413,8 @@ export default function Dashboard({
                                 <ArrowUpRight className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                             </Link>
                         )}
-                        {stats.pendingPrograms > 0 && (
+                        {/* Program: For Program Officer & Admin */}
+                        {(isAdministrator || isProgramOfficer || permissions.includes('program.view')) && stats.pendingPrograms > 0 && (
                             <Link href="/admin/programs" className="flex items-center justify-between p-3.5 bg-blue-50 border border-blue-200/80 rounded-xl text-blue-900 hover:bg-blue-100/70 dark:bg-blue-950/40 dark:border-blue-900/60 dark:text-blue-300 dark:hover:bg-blue-950/60 transition-colors">
                                 <div className="flex items-center gap-2.5">
                                     <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
@@ -350,16 +423,8 @@ export default function Dashboard({
                                 <ArrowUpRight className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             </Link>
                         )}
-                        {stats.pendingDisbursements > 0 && (
-                            <Link href="/admin/disbursements" className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200/80 rounded-xl text-emerald-900 hover:bg-emerald-100/70 dark:bg-emerald-950/40 dark:border-emerald-900/60 dark:text-emerald-300 dark:hover:bg-emerald-950/60 transition-colors">
-                                <div className="flex items-center gap-2.5">
-                                    <Wallet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                                    <span className="text-xs font-semibold">Pencairan Dana Menunggu Persetujuan</span>
-                                </div>
-                                <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                            </Link>
-                        )}
-                        {(stats.pendingContactMessages ?? 0) > 0 && (
+                        {/* Pesan Kontak: For Customer Service & Admin */}
+                        {(isAdministrator || permissions.includes('manage_contact_messages')) && (stats.pendingContactMessages ?? 0) > 0 && (
                             <Link href="/admin/contact-messages" className="flex items-center justify-between p-3.5 bg-purple-50 border border-purple-200/80 rounded-xl text-purple-900 hover:bg-purple-100/70 dark:bg-purple-950/40 dark:border-purple-900/60 dark:text-purple-300 dark:hover:bg-purple-950/60 transition-colors">
                                 <div className="flex items-center gap-2.5">
                                     <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
@@ -633,7 +698,7 @@ export default function Dashboard({
                                     {formatCurrency(stats.totalDisbursed)}
                                 </div>
                                 <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 truncate">
-                                    {formatCurrency(stats.pendingDisbursements)} pending
+                                    {formatCurrency(stats.pendingDisbursements)} {stats.pendingDisbursementsCount ? `(${stats.pendingDisbursementsCount} pending)` : 'pending'}
                                 </div>
                             </div>
 
@@ -675,6 +740,216 @@ export default function Dashboard({
                         </>
                     )}
                 </div>
+
+                {/* Dedicated Financial Shortcuts for Keuangan / Staff with Finance Access */}
+                {Boolean(hasFinanceAccess) && (
+                    <div className="flex flex-col rounded-2xl border border-gray-200/90 bg-gradient-to-br from-white via-gray-50/50 to-emerald-50/20 dark:border-gray-800 dark:from-gray-900 dark:via-gray-900 dark:to-emerald-950/10 p-5 shadow-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800/80">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 shrink-0">
+                                    <WalletCards className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
+                                            Pintasan Operasional Keuangan
+                                        </h2>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/50">
+                                            Akses Cepat
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        Alur kerja prioritas: konfirmasi donasi transfer manual, persetujuan penyaluran dana, dan pembukuan laporan.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 self-start sm:self-auto">
+                                <Button asChild variant="outline" size="sm" className="h-8 px-3 text-xs font-semibold rounded-lg border-gray-200 dark:border-gray-700">
+                                    <Link href="/admin/reports">
+                                        <FileSpreadsheet className="w-3.5 h-3.5 mr-1.5 text-indigo-600 dark:text-indigo-400" />
+                                        Ekspor Excel
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+                            {/* 1. Konfirmasi Donasi Manual */}
+                            <Link 
+                                href="/admin/donations?status=pending" 
+                                className="group relative flex flex-col justify-between p-4 rounded-xl border border-gray-200/80 bg-white hover:border-amber-300 hover:shadow-xs dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-amber-700/60 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 group-hover:scale-105 transition-transform">
+                                            <CreditCard className="h-4.5 w-4.5" />
+                                        </div>
+                                        {stats.pendingOfflineDonations > 0 ? (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500 text-white shadow-xs animate-pulse">
+                                                {stats.pendingOfflineDonations} Verifikasi
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                                Semua Lunas
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                        Konfirmasi Donasi Masuk
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                                        Validasi struk transfer manual, cek mutasi bank rekening giro, dan setujui donasi.
+                                    </p>
+                                </div>
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                    <span>Buka Manajemen Donasi</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </Link>
+
+                            {/* 2. Persetujuan Penyaluran Dana */}
+                            <Link 
+                                href="/admin/disbursements" 
+                                className="group relative flex flex-col justify-between p-4 rounded-xl border border-gray-200/80 bg-white hover:border-emerald-300 hover:shadow-xs dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-emerald-700/60 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 group-hover:scale-105 transition-transform">
+                                            <WalletCards className="h-4.5 w-4.5" />
+                                        </div>
+                                        {(stats.pendingDisbursementsCount ?? 0) > 0 ? (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-600 text-white shadow-xs">
+                                                {stats.pendingDisbursementsCount} Menunggu ACC
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                                Tidak Ada Antrean
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        Penyaluran & Pencairan Dana
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                                        Persetujuan permohonan pencairan program donasi dan upload bukti transfer penyaluran.
+                                    </p>
+                                </div>
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                    <span>Review Pengajuan Dana</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </Link>
+
+                            {/* 3. Laporan & Ekspor Transaksi */}
+                            <Link 
+                                href="/admin/reports" 
+                                className="group relative flex flex-col justify-between p-4 rounded-xl border border-gray-200/80 bg-white hover:border-indigo-300 hover:shadow-xs dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-indigo-700/60 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 group-hover:scale-105 transition-transform">
+                                            <FileSpreadsheet className="h-4.5 w-4.5" />
+                                        </div>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50">
+                                            Ekspor CSV/XLS
+                                        </span>
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        Rekapitulasi & Ekspor Laporan
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                                        Unduh rekapitulasi transaksi donasi, pencairan dana, dan pembukuan mutasi per rentang tanggal.
+                                    </p>
+                                </div>
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                                    <span>Buka Pusat Laporan</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </Link>
+
+                            {/* 4. Publikasi Laporan Keuangan WTP */}
+                            <Link 
+                                href="/admin/financial-reports" 
+                                className="group relative flex flex-col justify-between p-4 rounded-xl border border-gray-200/80 bg-white hover:border-blue-300 hover:shadow-xs dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-blue-700/60 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 group-hover:scale-105 transition-transform">
+                                            <Building2 className="h-4.5 w-4.5" />
+                                        </div>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/50">
+                                            Transparansi WTP
+                                        </span>
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        Publikasi Laporan Audit
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                                        Kelola publikasi Annual Report dan dokumen audit keuangan akuntan publik untuk donatur.
+                                    </p>
+                                </div>
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400">
+                                    <span>Kelola Laporan Publik</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </Link>
+
+                            {/* 5. Rekening Bank Yayasan */}
+                            <Link 
+                                href="/admin/bank-accounts" 
+                                className="group relative flex flex-col justify-between p-4 rounded-xl border border-gray-200/80 bg-white hover:border-teal-300 hover:shadow-xs dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-teal-700/60 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-950/60 dark:text-teal-400 group-hover:scale-105 transition-transform">
+                                            <Landmark className="h-4.5 w-4.5" />
+                                        </div>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-400 border border-teal-200/60 dark:border-teal-800/50">
+                                            Giro Resmi
+                                        </span>
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                                        Rekening Bank Yayasan
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                                        Kelola daftar rekening bank penerima donasi transfer manual, QRIS statis, dan rekening operasional.
+                                    </p>
+                                </div>
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-teal-600 dark:text-teal-400">
+                                    <span>Kelola Rekening Bank</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </Link>
+
+                            {/* 6. Analitik Arus Kas & Saluran */}
+                            <Link 
+                                href="/admin/analytics" 
+                                className="group relative flex flex-col justify-between p-4 rounded-xl border border-gray-200/80 bg-white hover:border-purple-300 hover:shadow-xs dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-purple-700/60 transition-all hover:-translate-y-0.5"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 group-hover:scale-105 transition-transform">
+                                            <Activity className="h-4.5 w-4.5" />
+                                        </div>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-400 border border-purple-200/60 dark:border-purple-800/50">
+                                            Real-time
+                                        </span>
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                        Analitik Saluran & Transaksi
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
+                                        Statistik metode pembayaran (QRIS, VA, Transfer Manual), tingkat kesuksesan, dan tren konversi.
+                                    </p>
+                                </div>
+                                <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-purple-600 dark:text-purple-400">
+                                    <span>Lihat Analitik Keuangan</span>
+                                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
+                )}
 
                 {/* Staff & Admin Interactive Analytics Section */}
                 {Boolean(isStaff && analyticsData) && (
@@ -718,121 +993,228 @@ export default function Dashboard({
                     {/* Left Column (2/3) */}
                     <div className="lg:col-span-2 flex flex-col gap-6">
                         {isDonor ? (
-                            // Donor: Recent Personal Donations Table
-                            <div className="flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden shadow-xs">
-                                <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
-                                    <div>
-                                        <h2 className="text-base font-bold text-gray-900 dark:text-white">
-                                            Riwayat Donasi Terbaru
-                                        </h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                            Daftar donasi dan kontribusi kebaikan yang pernah Anda salurkan.
-                                        </p>
+                            <>
+                                {/* Donor: Recent Personal Donations Table */}
+                                <div className="flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden shadow-xs">
+                                    <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+                                        <div>
+                                            <h2 className="text-base font-bold text-gray-900 dark:text-white">
+                                                Riwayat Donasi Terbaru
+                                            </h2>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Daftar donasi dan kontribusi kebaikan yang pernah Anda salurkan.
+                                            </p>
+                                        </div>
+                                        <Button asChild variant="ghost" size="sm" className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold text-xs">
+                                            <Link href="/akun/donasi-saya">
+                                                Lihat Semua Donasi
+                                            </Link>
+                                        </Button>
                                     </div>
-                                    <Button asChild variant="ghost" size="sm" className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold text-xs">
-                                        <Link href="/akun/donasi-saya">
-                                            Lihat Semua Donasi
-                                        </Link>
-                                    </Button>
-                                </div>
-                                <div className="p-0 overflow-x-auto custom-scrollbar">
-                                    <table className="w-full text-sm text-left">
-                                        <thead className="bg-gray-50/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">
-                                            <tr>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Program</th>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Tanggal</th>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Nominal</th>
-                                                <th className="px-5 py-3.5 whitespace-nowrap">Status</th>
-                                                <th className="px-5 py-3.5 text-right whitespace-nowrap">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                                            {(donorStats?.recentDonations || []).length > 0 ? (
-                                                donorStats?.recentDonations.map((donation: any) => {
-                                                    const programTitle = getProgramTitle(donation.program?.title);
-                                                    const totalAmount = Number(donation.amount) + Number(donation.unique_code || 0);
+                                    <div className="p-0 overflow-x-auto custom-scrollbar">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="bg-gray-50/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">
+                                                <tr>
+                                                    <th className="px-5 py-3.5 whitespace-nowrap">Program</th>
+                                                    <th className="px-5 py-3.5 whitespace-nowrap">Tanggal</th>
+                                                    <th className="px-5 py-3.5 whitespace-nowrap">Nominal</th>
+                                                    <th className="px-5 py-3.5 whitespace-nowrap">Status</th>
+                                                    <th className="px-5 py-3.5 text-right whitespace-nowrap">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                                {(donorStats?.recentDonations || []).length > 0 ? (
+                                                    donorStats?.recentDonations.map((donation: any) => {
+                                                        const programTitle = getProgramTitle(donation.program?.title);
+                                                        const totalAmount = Number(donation.amount) + Number(donation.unique_code || 0);
 
-                                                    return (
-                                                        <tr key={donation.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/50 transition-colors">
-                                                            <td className="px-5 py-4">
-                                                                <div className="flex items-center gap-3">
-                                                                    {donation.program?.cover_image ? (
-                                                                        <img 
-                                                                            src={donation.program.cover_image.startsWith('http') ? donation.program.cover_image : `/storage/${donation.program.cover_image}`} 
-                                                                            alt={programTitle} 
-                                                                            className="w-14 h-10 rounded-lg aspect-video object-cover border border-gray-200/80 dark:border-gray-700/80 shrink-0 shadow-2xs"
-                                                                        />
-                                                                    ) : (
-                                                                        <div className="w-14 h-10 rounded-lg aspect-video bg-brand-50 dark:bg-brand-950/50 border border-brand-100 dark:border-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
-                                                                            <Heart className="w-4 h-4" />
-                                                                        </div>
-                                                                    )}
-                                                                    <div className="min-w-0 flex-1">
-                                                                        <Link 
-                                                                            href={`/program/${donation.program?.slug || ''}`}
-                                                                            className="font-semibold text-gray-900 dark:text-white text-sm hover:text-brand-600 transition-colors line-clamp-1" 
-                                                                            title={programTitle}
-                                                                        >
-                                                                            {programTitle}
-                                                                        </Link>
-                                                                        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                                                                            <span className="font-medium text-gray-600 dark:text-gray-300">{getCategoryName(donation.program?.category)}</span>
-                                                                            <span className="text-gray-300 dark:text-gray-700">•</span>
-                                                                            <span className="font-mono text-[11px] text-gray-400 dark:text-gray-500">{donation.donation_code}</span>
+                                                        return (
+                                                            <tr key={donation.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/50 transition-colors">
+                                                                <td className="px-5 py-4">
+                                                                    <div className="flex items-center gap-3">
+                                                                        {donation.program?.cover_image ? (
+                                                                            <img 
+                                                                                src={donation.program.cover_image.startsWith('http') ? donation.program.cover_image : `/storage/${donation.program.cover_image}`} 
+                                                                                alt={programTitle} 
+                                                                                className="w-14 h-10 rounded-lg aspect-video object-cover border border-gray-200/80 dark:border-gray-700/80 shrink-0 shadow-2xs"
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-14 h-10 rounded-lg aspect-video bg-brand-50 dark:bg-brand-950/50 border border-brand-100 dark:border-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                                                                                <Heart className="w-4 h-4" />
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <Link 
+                                                                                href={`/program/${donation.program?.slug || ''}`}
+                                                                                className="font-semibold text-gray-900 dark:text-white text-sm hover:text-brand-600 transition-colors line-clamp-1" 
+                                                                                title={programTitle}
+                                                                            >
+                                                                                {programTitle}
+                                                                            </Link>
+                                                                            <div className="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                                                                <span className="font-medium text-gray-600 dark:text-gray-300">{getCategoryName(donation.program?.category)}</span>
+                                                                                <span className="text-gray-300 dark:text-gray-700">•</span>
+                                                                                <span className="font-mono text-[11px] text-gray-400 dark:text-gray-500">{donation.donation_code}</span>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-5 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
-                                                                {formatDate(donation.paid_at || donation.created_at)}
-                                                            </td>
-                                                            <td className="px-5 py-4 whitespace-nowrap font-bold text-gray-900 dark:text-white text-sm">
-                                                                {formatCurrency(totalAmount)}
-                                                            </td>
-                                                            <td className="px-5 py-4 whitespace-nowrap">
-                                                                {renderStatusBadge(donation.status)}
-                                                            </td>
-                                                            <td className="px-5 py-4 text-right whitespace-nowrap">
-                                                                <Button 
-                                                                    asChild 
-                                                                    size="sm" 
-                                                                    variant={donation.status === 'pending' ? 'default' : 'outline'}
-                                                                    className={`rounded-lg h-8 px-3 text-xs font-semibold ${
-                                                                        donation.status === 'pending' 
-                                                                            ? 'bg-amber-600 hover:bg-amber-700 text-white' 
-                                                                            : 'border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800'
-                                                                    }`}
-                                                                >
-                                                                    <Link href={`/donasi/status/${donation.donation_code}`}>
-                                                                        {donation.status === 'pending' ? 'Bayar' : 'Detail'}
-                                                                    </Link>
-                                                                </Button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={5} className="px-5 py-12 text-center">
-                                                        <div className="w-12 h-12 rounded-full bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-3">
-                                                            <Heart className="w-6 h-6" />
-                                                        </div>
-                                                        <h3 className="font-bold text-gray-900 dark:text-white text-sm">Belum Ada Riwayat Donasi</h3>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
-                                                            Kebaikan kecil Anda membawa harapan besar. Mari mulai langkah kebaikan pertama hari ini.
-                                                        </p>
-                                                        <Button asChild className="mt-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl h-9 px-4 text-xs font-semibold">
-                                                            <Link href="/program">
-                                                                Mulai Donasi Sekarang
-                                                            </Link>
-                                                        </Button>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
+                                                                </td>
+                                                                <td className="px-5 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300">
+                                                                    {formatDate(donation.paid_at || donation.created_at)}
+                                                                </td>
+                                                                <td className="px-5 py-4 whitespace-nowrap font-bold text-gray-900 dark:text-white text-sm">
+                                                                    {formatCurrency(totalAmount)}
+                                                                </td>
+                                                                <td className="px-5 py-4 whitespace-nowrap">
+                                                                    {renderStatusBadge(donation.status)}
+                                                                </td>
+                                                                <td className="px-5 py-4 text-right whitespace-nowrap">
+                                                                    <Button 
+                                                                        asChild 
+                                                                        size="sm" 
+                                                                        variant={donation.status === 'pending' ? 'default' : 'outline'}
+                                                                        className={`rounded-lg h-8 px-3 text-xs font-semibold ${
+                                                                            donation.status === 'pending' 
+                                                                                ? 'bg-amber-600 hover:bg-amber-700 text-white' 
+                                                                                : 'border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800'
+                                                                        }`}
+                                                                    >
+                                                                        <Link href={`/donasi/status/${donation.donation_code}`}>
+                                                                            {donation.status === 'pending' ? 'Bayar' : 'Detail'}
+                                                                        </Link>
+                                                                    </Button>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={5} className="px-5 py-12 text-center">
+                                                            <div className="w-12 h-12 rounded-full bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-3">
+                                                                <Heart className="w-6 h-6" />
+                                                            </div>
+                                                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">Belum Ada Riwayat Donasi</h3>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
+                                                                Kebaikan kecil Anda membawa harapan besar. Mari mulai langkah kebaikan pertama hari ini.
+                                                            </p>
+                                                            <Button asChild className="mt-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl h-9 px-4 text-xs font-semibold">
+                                                                <Link href="/program">
+                                                                    Mulai Donasi Sekarang
+                                                                </Link>
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            </div>
+
+                                {/* Dua Skema Tawaran Keterlibatan: Fundraiser & Campaigner */}
+                                <div className="flex flex-col gap-3.5">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 px-1">
+                                        <div>
+                                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                                                Tingkatkan Peran Kebaikan Anda
+                                            </h3>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Selain berdonasi, Anda dapat melipatgandakan dampak manfaat melalui dua pilihan peran di bawah ini.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Card 1: Fundraiser (Instan & Mudah) atau Widget Fundraiser Aktif */}
+                                        {fundraiserStats && fundraiserStats.count > 0 ? (
+                                            <div className="relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/80 via-teal-50/30 to-white dark:border-emerald-800/60 dark:from-emerald-950/30 dark:via-gray-900 dark:to-gray-900 p-5 shadow-xs flex flex-col justify-between group">
+                                                <div>
+                                                    <div className="flex items-center justify-between gap-2 mb-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                                                            <Sparkles className="w-5 h-5" />
+                                                        </div>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                                                            Relawan Aktif
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Fundraiser Saya</h4>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        Aktivitas referral kebaikan Anda yang sedang berjalan.
+                                                    </p>
+                                                    <div className="grid grid-cols-2 gap-2.5 mt-3.5 pt-3 border-t border-emerald-100 dark:border-emerald-900/40">
+                                                        <div className="bg-white/80 dark:bg-gray-800/60 p-2.5 rounded-xl border border-emerald-100/60 dark:border-emerald-900/30">
+                                                            <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Terkumpul</span>
+                                                            <span className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400 mt-0.5 block truncate">{formatCurrency(fundraiserStats.totalCollected)}</span>
+                                                        </div>
+                                                        <div className="bg-white/80 dark:bg-gray-800/60 p-2.5 rounded-xl border border-emerald-100/60 dark:border-emerald-900/30">
+                                                            <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider block">Donatur Diajak</span>
+                                                            <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mt-0.5 block">{fundraiserStats.totalDonors} orang</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-4 pt-1">
+                                                    <Button asChild size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs">
+                                                        <Link href="/akun/fundraiser" className="inline-flex items-center justify-center gap-1.5">
+                                                            Kelola Tautan & Donatur
+                                                            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/80 via-teal-50/30 to-white dark:border-emerald-800/60 dark:from-emerald-950/30 dark:via-gray-900 dark:to-gray-900 p-5 shadow-xs flex flex-col justify-between group">
+                                                <div>
+                                                    <div className="flex items-center justify-between gap-2 mb-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                                                            <Sparkles className="w-5 h-5" />
+                                                        </div>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100/90 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                                                            Instan & Mudah
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Bantu Sebarkan Kebaikan</h4>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5 leading-relaxed">
+                                                        Pilih program aktif, dapatkan tautan referral khusus Anda, dan ajak keluarga serta kerabat berdonasi tanpa syarat rumit.
+                                                    </p>
+                                                </div>
+                                                <div className="mt-5">
+                                                    <Button asChild size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-xs">
+                                                        <Link href="/program" className="inline-flex items-center justify-center gap-1.5">
+                                                            Mulai Jadi Fundraiser
+                                                            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Card 2: Campaigner (Penggalang Dana Resmi) */}
+                                        <div className="relative overflow-hidden rounded-2xl border border-blue-200/80 bg-gradient-to-br from-blue-50/80 via-indigo-50/30 to-white dark:border-blue-800/60 dark:from-blue-950/30 dark:via-gray-900 dark:to-gray-900 p-5 shadow-xs flex flex-col justify-between group">
+                                            <div>
+                                                <div className="flex items-center justify-between gap-2 mb-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-xs">
+                                                        <Target className="w-5 h-5" />
+                                                    </div>
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100/90 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
+                                                        Verifikasi KYC
+                                                    </span>
+                                                </div>
+                                                <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Punya Inisiatif Sendiri?</h4>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1.5 leading-relaxed">
+                                                    Memiliki yayasan sosial atau program kemanusiaan? Ajukan verifikasi identitas resmi untuk membuat penggalangan dana di platform Insani.
+                                                </p>
+                                            </div>
+                                            <div className="mt-5">
+                                                <Button asChild size="sm" className="w-full bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-semibold shadow-xs">
+                                                    <Link href="/campaigner/register" className="inline-flex items-center justify-center gap-1.5">
+                                                        Daftar Jadi Campaigner
+                                                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                                                    </Link>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
                         ) : isStaff ? (
                             // Staff / Administrator: Recent Verified Transactions in Left Column
                             Boolean(analyticsData?.recentTransactions) && (
@@ -868,7 +1250,7 @@ export default function Dashboard({
                                         </thead>
                                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                             {(campaignerStats?.myPrograms || []).length > 0 ? (
-                                                campaignerStats.myPrograms.map((program: any) => {
+                                                campaignerStats?.myPrograms?.map((program: any) => {
                                                     const hasTarget = Boolean(program?.target_amount && parseFloat(program.target_amount) > 0);
                                                     const progTitle = getProgramTitle(program?.title);
 
@@ -995,22 +1377,37 @@ export default function Dashboard({
                                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Navigasi dan aktivitas akun Anda.</p>
                                     </div>
                                     <div className="p-5 flex flex-col gap-2.5">
-                                        <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
-                                            <Link href="/program">
-                                                <Compass className="w-4 h-4 mr-2.5 text-brand-600 dark:text-brand-400" />
-                                                Jelajah Program Kebaikan
+                                        <Button asChild variant="outline" className="group justify-between h-11 px-3.5 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:bg-gray-800 transition-all">
+                                            <Link href="/program" className="flex items-center justify-between w-full">
+                                                <div className="flex items-center">
+                                                    <div className="w-7 h-7 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center mr-2.5">
+                                                        <Compass className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span>Jelajah Program Kebaikan</span>
+                                                </div>
+                                                <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 group-hover:translate-x-0.5 transition-all" />
                                             </Link>
                                         </Button>
-                                        <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
-                                            <Link href="/akun/donasi-saya">
-                                                <Receipt className="w-4 h-4 mr-2.5 text-emerald-600 dark:text-emerald-400" />
-                                                Riwayat Donasi & Kuitansi
+                                        <Button asChild variant="outline" className="group justify-between h-11 px-3.5 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:bg-gray-800 transition-all">
+                                            <Link href="/akun/donasi-saya" className="flex items-center justify-between w-full">
+                                                <div className="flex items-center">
+                                                    <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mr-2.5">
+                                                        <Receipt className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span>Riwayat Donasi & Kuitansi</span>
+                                                </div>
+                                                <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 group-hover:translate-x-0.5 transition-all" />
                                             </Link>
                                         </Button>
-                                        <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
-                                            <Link href="/settings/profile">
-                                                <UserCheck className="w-4 h-4 mr-2.5 text-blue-600 dark:text-blue-400" />
-                                                Pengaturan Profil Saya
+                                        <Button asChild variant="outline" className="group justify-between h-11 px-3.5 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 hover:border-gray-300 dark:hover:bg-gray-800 transition-all">
+                                            <Link href="/settings/profile" className="flex items-center justify-between w-full">
+                                                <div className="flex items-center">
+                                                    <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mr-2.5">
+                                                        <UserCheck className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <span>Pengaturan Profil Saya</span>
+                                                </div>
+                                                <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 group-hover:translate-x-0.5 transition-all" />
                                             </Link>
                                         </Button>
                                     </div>
@@ -1048,7 +1445,7 @@ export default function Dashboard({
                                                         <div className="min-w-0 flex-1 flex flex-col justify-between">
                                                             <Link 
                                                                 href={`/program/${rec.slug}`} 
-                                                                className="text-xs font-semibold text-gray-900 dark:text-white hover:text-brand-600 line-clamp-1"
+                                                                className="text-xs font-semibold text-gray-900 dark:text-white hover:text-brand-600 line-clamp-1" 
                                                                 title={recTitle}
                                                             >
                                                                 {recTitle}
@@ -1072,91 +1469,6 @@ export default function Dashboard({
                                         </div>
                                     </div>
                                 )}
-
-                                {/* Aktivitas Fundraiser Saya jika ada */}
-                                {fundraiserStats && fundraiserStats.count > 0 && (
-                                    <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-white dark:border-emerald-900/40 dark:from-emerald-950/20 dark:to-gray-900 p-5 shadow-xs">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-                                                <Sparkles className="w-4 h-4" />
-                                            </div>
-                                            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100/70 dark:bg-emerald-900/40 px-2 py-0.5 rounded-full">
-                                                Relawan Aktif
-                                            </span>
-                                        </div>
-                                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Fundraiser Saya</h3>
-                                        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-emerald-100 dark:border-emerald-900/30">
-                                            <div>
-                                                <span className="text-[10px] text-gray-400 uppercase font-bold block">Terkumpul</span>
-                                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(fundraiserStats.totalCollected)}</span>
-                                            </div>
-                                            <div>
-                                                <span className="text-[10px] text-gray-400 uppercase font-bold block">Donatur Diajak</span>
-                                                <span className="text-xs font-bold text-gray-800 dark:text-gray-200">{fundraiserStats.totalDonors} orang</span>
-                                            </div>
-                                        </div>
-                                        <div className="mt-3.5 pt-2">
-                                            <Link 
-                                                href="/akun/fundraiser" 
-                                                className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 gap-1"
-                                            >
-                                                Kelola Tautan & Donatur
-                                                <ArrowRight className="w-3.5 h-3.5" />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Dua Skema Tawaran Keterlibatan */}
-                                <div className="space-y-3">
-                                    {/* Skema A: Fundraiser (Instan & Mudah) */}
-                                    {(!fundraiserStats || fundraiserStats.count === 0) && (
-                                        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/70 via-teal-50/30 to-white dark:border-emerald-900/40 dark:from-emerald-950/20 dark:to-gray-900 p-5 shadow-xs">
-                                            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center mb-3 shadow-xs">
-                                                <Sparkles className="w-4 h-4" />
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Bantu Sebarkan Kebaikan</h3>
-                                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">Instan</span>
-                                            </div>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
-                                                Pilih program aktif, dapatkan tautan referral khusus Anda, dan ajak keluarga serta kerabat berdonasi tanpa syarat rumit.
-                                            </p>
-                                            <div className="mt-3.5">
-                                                <Link 
-                                                    href="/program" 
-                                                    className="inline-flex items-center text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 gap-1"
-                                                >
-                                                    Mulai Jadi Fundraiser
-                                                    <ArrowRight className="w-3.5 h-3.5" />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Skema B: Campaigner (Penggalang Dana Resmi) */}
-                                    <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white dark:border-blue-900/40 dark:from-blue-950/20 dark:to-gray-900 p-5 shadow-xs">
-                                        <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center mb-3 shadow-xs">
-                                            <Target className="w-4 h-4" />
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Punya Inisiatif Sendiri?</h3>
-                                            <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-1.5 py-0.2 rounded">Verifikasi KYC</span>
-                                        </div>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
-                                            Memiliki yayasan sosial atau program kemanusiaan? Ajukan verifikasi identitas untuk membuat penggalangan dana resmi di Insani.
-                                        </p>
-                                        <div className="mt-3.5">
-                                            <Link 
-                                                href="/campaigner/register" 
-                                                className="inline-flex items-center text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 gap-1"
-                                            >
-                                                Daftar Jadi Campaigner
-                                                <ArrowRight className="w-3.5 h-3.5" />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
                             </>
                         ) : (
                             // Campaigner / Admin Quick Access
@@ -1171,12 +1483,73 @@ export default function Dashboard({
                                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Menu pintas navigasi manajemen.</p>
                                     </div>
                                 <div className="p-5 flex flex-col gap-3">
+                                    {isKeuangan && !isAdministrator && (
+                                        <>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/donations" className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center">
+                                                        <CreditCard className="w-4 h-4 mr-2.5 text-amber-600 dark:text-amber-400" />
+                                                        <span>Konfirmasi Donasi Masuk</span>
+                                                    </div>
+                                                    {stats.pendingOfflineDonations > 0 && (
+                                                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">
+                                                            {stats.pendingOfflineDonations}
+                                                        </span>
+                                                    )}
+                                                </Link>
+                                            </Button>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/disbursements" className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center">
+                                                        <WalletCards className="w-4 h-4 mr-2.5 text-emerald-600 dark:text-emerald-400" />
+                                                        <span>Penyaluran & Pencairan</span>
+                                                    </div>
+                                                    {(stats.pendingDisbursementsCount ?? 0) > 0 && (
+                                                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                                            {stats.pendingDisbursementsCount}
+                                                        </span>
+                                                    )}
+                                                </Link>
+                                            </Button>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/reports">
+                                                    <FileSpreadsheet className="w-4 h-4 mr-2.5 text-indigo-600 dark:text-indigo-400" />
+                                                    Laporan & Ekspor Transaksi
+                                                </Link>
+                                            </Button>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/financial-reports">
+                                                    <Building2 className="w-4 h-4 mr-2.5 text-blue-600 dark:text-blue-400" />
+                                                    Publikasi Laporan Audit WTP
+                                                </Link>
+                                            </Button>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/bank-accounts">
+                                                    <Landmark className="w-4 h-4 mr-2.5 text-teal-600 dark:text-teal-400" />
+                                                    Rekening Bank Yayasan
+                                                </Link>
+                                            </Button>
+                                            <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
+                                                <Link href="/admin/analytics">
+                                                    <Activity className="w-4 h-4 mr-2.5 text-purple-600 dark:text-purple-400" />
+                                                    Analitik Saluran & Transaksi
+                                                </Link>
+                                            </Button>
+                                        </>
+                                    )}
                                     {userRoleInfo?.isAdministrator && (
                                         <>
                                             <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
-                                                <Link href="/admin/donations">
-                                                    <Wallet className="w-4 h-4 mr-2.5 text-brand-600 dark:text-brand-400" />
-                                                    Manajemen Donasi & Konfirmasi
+                                                <Link href="/admin/donations" className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center">
+                                                        <CreditCard className="w-4 h-4 mr-2.5 text-brand-600 dark:text-brand-400" />
+                                                        <span>Manajemen Donasi & Konfirmasi</span>
+                                                    </div>
+                                                    {stats.pendingOfflineDonations > 0 && (
+                                                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">
+                                                            {stats.pendingOfflineDonations}
+                                                        </span>
+                                                    )}
                                                 </Link>
                                             </Button>
                                             <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
@@ -1192,9 +1565,16 @@ export default function Dashboard({
                                                 </Link>
                                             </Button>
                                             <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
-                                                <Link href="/admin/disbursements">
-                                                    <Heart className="w-4 h-4 mr-2.5 text-emerald-600 dark:text-emerald-400" />
-                                                    Penyaluran & Pencairan Dana
+                                                <Link href="/admin/disbursements" className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center">
+                                                        <Heart className="w-4 h-4 mr-2.5 text-emerald-600 dark:text-emerald-400" />
+                                                        <span>Penyaluran & Pencairan Dana</span>
+                                                    </div>
+                                                    {(stats.pendingDisbursementsCount ?? 0) > 0 && (
+                                                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+                                                            {stats.pendingDisbursementsCount}
+                                                        </span>
+                                                    )}
                                                 </Link>
                                             </Button>
                                             <Button asChild variant="outline" className="justify-start h-11 rounded-xl text-xs font-semibold border-gray-200 dark:border-gray-800 dark:text-gray-200 dark:hover:bg-gray-800">
@@ -1251,7 +1631,7 @@ export default function Dashboard({
                                 </div>
                             </div>
                             <Button asChild variant="ghost" size="sm" className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold text-xs gap-1.5 self-start sm:self-auto">
-                                <Link href="/admin/programs">
+                                <Link href={canViewAdminPrograms ? "/admin/programs" : "/program"}>
                                     Lihat Semua Program
                                     <ArrowRight className="w-3.5 h-3.5" />
                                 </Link>
@@ -1278,7 +1658,7 @@ export default function Dashboard({
                                                 <tr key={program.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/50 transition-colors">
                                                     <td className="px-5 py-4">
                                                         <div className="flex items-center gap-3.5">
-                                                            <Link href={`/admin/programs/${program.id}`} className="shrink-0 group">
+                                                            <Link href={canViewAdminPrograms ? `/admin/programs/${program.id}` : `/program/${program.slug}`} className="shrink-0 group">
                                                                 {program.cover_image ? (
                                                                     <img 
                                                                         src={program.cover_image.startsWith('http') ? program.cover_image : `/storage/${program.cover_image}`} 
@@ -1293,7 +1673,7 @@ export default function Dashboard({
                                                             </Link>
                                                             <div className="min-w-0 flex-1">
                                                                 <Link 
-                                                                    href={`/admin/programs/${program.id}`}
+                                                                    href={canViewAdminPrograms ? `/admin/programs/${program.id}` : `/program/${program.slug}`}
                                                                     className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm line-clamp-2 leading-snug hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                                                                     title={title}
                                                                 >
@@ -1362,11 +1742,19 @@ export default function Dashboard({
                                                                     Lihat
                                                                 </Link>
                                                             </Button>
-                                                            <Button asChild size="sm" className="rounded-lg h-8 px-3 text-xs font-semibold bg-[#1A56DB] hover:bg-[#1e40af] text-white shadow-2xs">
-                                                                <Link href={`/admin/programs/${program.id}`}>
-                                                                    Kelola
-                                                                </Link>
-                                                            </Button>
+                                                            {canViewAdminPrograms ? (
+                                                                <Button asChild size="sm" className="rounded-lg h-8 px-3 text-xs font-semibold bg-[#1A56DB] hover:bg-[#1e40af] text-white shadow-2xs">
+                                                                    <Link href={`/admin/programs/${program.id}`}>
+                                                                        Kelola
+                                                                    </Link>
+                                                                </Button>
+                                                            ) : (
+                                                                <Button asChild size="sm" className="rounded-lg h-8 px-3 text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-2xs">
+                                                                    <Link href={`/program/${program.slug}`}>
+                                                                        Detail
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>

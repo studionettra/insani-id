@@ -153,13 +153,65 @@ const FAQ_DATA: FaqItem[] = [
         )
     },
     {
+        id: 'apa-itu-kyc',
+        category: 'campaigner',
+        question: 'Apa itu KYC dan mengapa saya perlu melakukannya sebelum bisa menggalang dana?',
+        keywords: ['kyc', 'know your customer', 'apa itu kyc', 'verifikasi identitas', 'kenapa kyc', 'wajib kyc'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p><strong>KYC</strong> adalah singkatan dari <strong>Know Your Customer</strong> (Kenali Pelanggan Anda), yaitu proses verifikasi identitas yang wajib dijalani oleh calon campaigner sebelum diizinkan membuat program penggalangan dana dan menerima pencairan dana.</p>
+                <p>KYC diterapkan oleh Insani Indonesia karena beberapa alasan penting:</p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                    <li><strong>Melindungi Donatur:</strong> Memastikan setiap program digalang oleh individu atau lembaga yang identitasnya sudah terverifikasi nyata, bukan fiktif.</li>
+                    <li><strong>Kepatuhan Hukum:</strong> Proses ini diwajibkan oleh regulasi perbankan dan pemerintah (PPATK) untuk mencegah penyalahgunaan dana.</li>
+                    <li><strong>Keamanan Pencairan Dana:</strong> Dana donasi hanya dapat dicairkan ke rekening bank atas nama yang sudah lolos verifikasi KYC, sehingga amanah donatur terjaga.</li>
+                </ul>
+                <p className="text-xs bg-amber-50 border border-amber-100 rounded-xl p-3 text-amber-700">
+                    <strong>Catatan:</strong> KYC hanya berlaku untuk Campaigner. Jika Anda hanya ingin membantu menyebarkan program orang lain tanpa membuat program sendiri, Anda cukup mendaftar akun biasa dan langsung bisa menjadi <strong>Fundraiser</strong> tanpa KYC.
+                </p>
+            </div>
+        )
+    },
+    {
+        id: 'beda-campaigner-fundraiser',
+        category: 'campaigner',
+        question: 'Apa perbedaan antara Campaigner dan Fundraiser?',
+        keywords: ['beda campaigner fundraiser', 'campaigner vs fundraiser', 'perbedaan peran', 'fundraiser campaigner'],
+        answer: (
+            <div className="space-y-3 text-slate-600">
+                <p>Keduanya adalah pilar gerakan kebaikan di Insani Indonesia, namun memiliki peran yang berbeda:</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <p className="font-bold text-slate-800 mb-2 flex items-center gap-1.5">🚀 Campaigner</p>
+                        <ul className="list-disc pl-4 text-xs space-y-1 text-slate-600">
+                            <li><strong>Membuat & mengelola</strong> program penggalangan dana sendiri.</li>
+                            <li>Wajib melewati proses <strong>verifikasi KYC</strong> (upload dokumen identitas).</li>
+                            <li>Bertanggung jawab atas <strong>penyaluran dana</strong> ke penerima manfaat.</li>
+                            <li>Wajib posting <strong>Kabar Terbaru</strong> sebagai laporan pertanggungjawaban.</li>
+                        </ul>
+                    </div>
+                    <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                        <p className="font-bold text-slate-800 mb-2 flex items-center gap-1.5">✨ Fundraiser</p>
+                        <ul className="list-disc pl-4 text-xs space-y-1 text-slate-600">
+                            <li><strong>Membantu menyebarkan</strong> program milik campaigner lain.</li>
+                            <li><strong>Tidak perlu KYC</strong> — cukup daftar akun biasa.</li>
+                            <li>Membuat <strong>tautan referral unik</strong> untuk dilacak kontribusinya.</li>
+                            <li>Pantau statistik donasi yang berhasil dihimpun lewat dasbor pribadi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        )
+    },
+    {
         id: 'syarat-kyc-campaigner',
         category: 'campaigner',
         question: 'Apa perbedaan syarat verifikasi Campaigner Individu vs Lembaga/Yayasan (KYC)?',
         keywords: ['kyc', 'verifikasi', 'syarat campaigner', 'dokumen kyc', 'ktp', 'sk kemenkumham', 'npwp'],
         answer: (
             <div className="space-y-3 text-slate-600">
-                <p>Untuk melindungi donatur dari potensi penipuan, seluruh calon campaigner wajib lolos verifikasi identitas (KYC) di halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>:</p>
+                <p><strong>KYC (Know Your Customer)</strong> adalah proses verifikasi identitas standar perbankan dan industri keuangan digital untuk memastikan keaslian data calon campaigner sebelum diizinkan membuat program dan menerima dana donasi.</p>
+                <p>Seluruh calon campaigner wajib lolos KYC di halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>. Dokumen yang dibutuhkan berbeda berdasarkan tipe campaigner:</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <p className="font-bold text-slate-800 mb-1">Campaigner Individu:</p>
@@ -199,15 +251,16 @@ const FAQ_DATA: FaqItem[] = [
         id: 'alur-buat-program',
         category: 'campaigner',
         question: 'Bagaimana alur pengajuan program baru hingga tayang di website?',
-        keywords: ['buat program', 'alur kurasi', 'pending review', 'published', 'approval'],
+        keywords: ['buat program', 'alur kurasi', 'pending review', 'published', 'approval', 'daftar campaigner', 'dasbor campaigner'],
         answer: (
             <div className="space-y-2 text-slate-600">
-                <p>Alur penerbitan program donasi terdiri dari 4 langkah:</p>
+                <p>Alur penerbitan program donasi terdiri dari 5 langkah:</p>
                 <ol className="list-decimal pl-5 space-y-1.5">
-                    <li><strong>Buat Draf Program:</strong> Setelah akun KYC terverifikasi, klik "Buat Program", isi data kampanye, target donasi, batas waktu, foto utama, dan narasi cerita.</li>
-                    <li><strong>Kirim untuk Kurasi:</strong> Program masuk ke tim kurator Insani Indonesia untuk pengecekan kelayakan dan kepatuhan hukum.</li>
-                    <li><strong>Persetujuan Admin:</strong> Jika dokumen dan cerita valid, admin akan menyetujui program.</li>
-                    <li><strong>Program Tayang:</strong> Program mulai aktif menerima donasi dari publik luas.</li>
+                    <li><strong>Daftar & Verifikasi KYC:</strong> Kunjungi halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>, lengkapi formulir KYC (data diri, rekening bank, dan dokumen pendukung), lalu kirimkan untuk ditinjau tim kami.</li>
+                    <li><strong>Persetujuan KYC:</strong> Tim Insani Indonesia memverifikasi dokumen dalam 1–2 hari kerja. Notifikasi hasil dikirim via email.</li>
+                    <li><strong>Buat Draf Program:</strong> Setelah KYC disetujui, Anda dapat membuat program baru dari dasbor akun — isi data kampanye, target donasi, batas waktu, foto utama, dan narasi cerita.</li>
+                    <li><strong>Kurasi oleh Tim:</strong> Program diperiksa oleh tim kurator Insani Indonesia untuk kepatuhan konten dan kelayakan penyaluran.</li>
+                    <li><strong>Program Tayang:</strong> Setelah disetujui admin, program mulai aktif menerima donasi dari publik luas.</li>
                 </ol>
             </div>
         )
@@ -256,6 +309,23 @@ const FAQ_DATA: FaqItem[] = [
             </div>
         )
     },
+    {
+        id: 'apa-itu-kabar-terbaru',
+        category: 'campaigner',
+        question: 'Apa itu fitur "Kabar Terbaru" dan di mana bisa dilihat?',
+        keywords: ['kabar terbaru', 'tab kabar', 'update program', 'laporan penyaluran', 'notifikasi donatur'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p><strong>Kabar Terbaru</strong> adalah fitur laporan perkembangan program yang wajib diposting oleh Campaigner secara berkala sebagai bentuk pertanggungjawaban kepada para donatur.</p>
+                <p>Sebagai donatur atau pengunjung, Anda dapat melihat semua laporan ini di tab <strong>"Kabar"</strong> pada halaman detail setiap program. Tab ini menampilkan semua pembaruan yang telah diunggah campaigner, mulai dari foto penyaluran, narasi kegiatan, hingga dokumentasi penerima manfaat.</p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                    <li>Setiap kali campaigner memposting kabar baru, seluruh donatur program tersebut akan mendapat <strong>notifikasi email otomatis</strong>.</li>
+                    <li>Kabar Terbaru adalah indikator utama transparansi dan akuntabilitas sebuah program.</li>
+                    <li>Program yang tidak memiliki kabar terbaru setelah menerima donasi dapat dilaporkan ke tim Insani Indonesia.</li>
+                </ul>
+            </div>
+        )
+    },
 
     // ==================== FUNDRAISER ====================
     {
@@ -285,15 +355,20 @@ const FAQ_DATA: FaqItem[] = [
         id: 'cara-daftar-fundraiser',
         category: 'fundraiser',
         question: 'Bagaimana cara mendaftar dan menyebarkan program sebagai Fundraiser?',
-        keywords: ['cara jadi fundraiser', 'buat link referral', 'bagikan program', 'ref code'],
+        keywords: ['cara jadi fundraiser', 'buat link referral', 'bagikan program', 'ref code', 'gabung fundraiser', 'pesan ajakan', 'target pribadi'],
         answer: (
             <div className="space-y-2 text-slate-600">
                 <ol className="list-decimal pl-5 space-y-1.5">
                     <li>Buka halaman program donasi di katalog <Link href="/program" className="text-insani-blue font-semibold hover:underline">Program Insani</Link>.</li>
-                    <li>Pastikan Anda sudah login, lalu klik tombol <strong>"Jadi Fundraiser"</strong>.</li>
-                    <li>Tentukan target donasi yang ingin Anda bantu himpun serta tuliskan pesan ajakan kebaikan Anda.</li>
-                    <li>Sistem akan membuat <strong>Link Referral Khusus</strong> (contoh: <code>https://insani.id/program/bantu-yatim?ref=nama-anda-1234</code>).</li>
-                    <li>Bagikan link tersebut ke WhatsApp, Instagram, Telegram, atau media sosial lainnya.</li>
+                    <li>Pastikan Anda sudah login, lalu klik tombol <strong>"Gabung Jadi Fundraiser"</strong> (ada di tab Fundraiser atau di sidebar kanan halaman program).</li>
+                    <li>Isi dua informasi opsional pada formulir yang muncul:
+                        <ul className="list-disc pl-5 mt-1 space-y-1 text-xs">
+                            <li><strong>Target Pribadi (opsional):</strong> Nominal donasi yang ingin Anda bantu kumpulkan dari jaringan Anda.</li>
+                            <li><strong>Pesan Ajakan (opsional):</strong> Tulis kalimat motivasi personal yang akan ditampilkan di banner referral Anda kepada calon donatur.</li>
+                        </ul>
+                    </li>
+                    <li>Sistem akan membuat <strong>Tautan Referral Unik</strong> khusus Anda (contoh: <code>insani.id/program/bantu-yatim?ref=kode-anda</code>).</li>
+                    <li>Salin tautan tersebut dan bagikan ke WhatsApp, Instagram, Telegram, atau media sosial lainnya untuk mengajak kebaikan.</li>
                 </ol>
             </div>
         )
@@ -306,6 +381,25 @@ const FAQ_DATA: FaqItem[] = [
         answer: (
             <div className="space-y-2 text-slate-600">
                 <p>Setiap donasi yang masuk melalui tautan referral Anda akan terlacak otomatis secara <em>real-time</em>. Anda dapat memantau total dana terkumpul, jumlah donatur yang tergerak, serta daftar kampanye aktif melalui halaman <Link href="/akun/fundraiser" className="text-insani-blue font-semibold hover:underline">Dasbor Fundraiser Saya</Link>.</p>
+                <p>Di dasbor tersebut, setiap program yang Anda dukung ditampilkan lengkap dengan tautan referral, tombol salin tautan, tombol bagikan ke WhatsApp, serta metrik: total terkumpul, jumlah donatur, dan target pribadi (jika Anda mengisinya).</p>
+            </div>
+        )
+    },
+    {
+        id: 'fundraiser-referral-banner',
+        category: 'fundraiser',
+        question: 'Apa yang terjadi ketika seseorang membuka tautan referral saya?',
+        keywords: ['link referral', 'banner referral', 'tautan fundraiser', 'ref', 'pengajak'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Ketika seseorang membuka tautan referral Anda (yang mengandung kode unik <code>?ref=kode-anda</code>), halaman program donasi yang dituju akan secara otomatis menampilkan sebuah <strong>banner khusus</strong> di bagian atas.</p>
+                <p>Banner tersebut memuat:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                    <li>Badge <em>"Relawan Fundraiser"</em> berwarna hijau.</li>
+                    <li>Nama Anda sebagai orang yang mengajak berdonasi.</li>
+                    <li>Pesan ajakan personal yang Anda tulis saat mendaftar fundraiser (jika ada).</li>
+                </ul>
+                <p>Fitur ini dirancang untuk membangun kepercayaan donatur — mereka tahu siapa yang mengajak mereka dan merasa lebih terhubung secara personal dengan gerakan kebaikan tersebut.</p>
             </div>
         )
     },
@@ -316,8 +410,8 @@ const FAQ_DATA: FaqItem[] = [
         keywords: ['komisi', 'gaji', 'insentif', 'uang fundraiser', 'sukarela'],
         answer: (
             <div className="space-y-2 text-slate-600">
-                <p>Program Fundraiser di Insani Indonesia adalah <strong>gerakan kerelawanan sosial murni (non-profit)</strong>. 100% dana yang terkumpul disalurkan untuk program sosial yang Anda bantu.</p>
-                <p>Insani Indonesia memberikan apresiasi dalam bentuk lencana relawan profil serta sertifikat digital apresiasi kebaikan di dasbor akun Anda.</p>
+                <p>Program Fundraiser di Insani Indonesia adalah <strong>gerakan kerelawanan sosial murni (non-profit)</strong>. 100% dana yang terkumpul melalui tautan referral Anda akan disalurkan sepenuhnya untuk program sosial yang Anda bantu — tidak ada potongan komisi.</p>
+                <p>Imbalan terbesar menjadi Fundraiser adalah kontribusi nyata: Anda dapat melihat langsung di dasbor seberapa besar dampak yang berhasil Anda gerakan — total donasi terhimpun dan berapa banyak orang yang Anda ajak untuk berbuat kebaikan.</p>
             </div>
         )
     },
@@ -395,9 +489,13 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
     const [activeCategory, setActiveCategory] = useState<string>('all');
     const [openItem, setOpenItem] = useState<string | null>('cara-donasi');
 
-    const whatsappNumber = siteSettings?.contact_whatsapp || '081319456675';
+    const whatsappNumber = siteSettings?.contact_donor_support_wa || siteSettings?.contact_whatsapp || '081319456675';
     const whatsappClean = whatsappNumber.replace(/[^0-9]/g, '');
     const whatsappUrl = `https://wa.me/${whatsappClean.startsWith('0') ? '62' + whatsappClean.slice(1) : whatsappClean}`;
+    const contactPhone = siteSettings?.contact_phone || '(021) 27871199';
+    const contactEmail = siteSettings?.contact_email || 'sapa@insani.id';
+    const legalSkNumber = siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.2019';
+    const legalSkLabel = siteSettings?.legal_sk_label || 'SK Kemenkumham';
 
     const activeFaqList: FaqItem[] = useMemo(() => {
         if (faqs && faqs.length > 0) {
@@ -449,21 +547,22 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
     return (
         <div className="min-h-screen bg-slate-50/60 pb-20">
             {/* HERO SEARCH SECTION */}
-            <div className="relative bg-gradient-to-br from-slate-900 via-insani-darkblue to-brand-950 text-white py-16 md:py-24 px-4 overflow-hidden">
+            <div className="relative bg-insani-darkblue text-white py-16 md:py-24 px-4 overflow-hidden">
                 {/* Decorative background glow */}
-                <div className="absolute -top-24 -left-24 w-96 h-96 bg-brand-500/20 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute -top-24 -left-24 w-96 h-96 bg-insani-blue/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-insani-blue/15 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="relative container mx-auto max-w-4xl text-center">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs md:text-sm font-medium text-cyan-300 mb-6">
-                        <HelpCircle className="w-4 h-4" />
+                <div className="relative container mx-auto max-w-4xl text-center z-10">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs md:text-sm font-medium text-blue-200 mb-6">
+                        <HelpCircle className="w-4 h-4 text-blue-300" />
                         <span>Pusat Bantuan & Panduan Pengguna</span>
                     </div>
 
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
                         Ada yang bisa kami bantu?
                     </h1>
-                    <p className="text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-8">
+                    <p className="text-blue-100/90 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
                         Temukan jawaban cepat seputar donasi, tata cara verifikasi penggalang dana, program relawan fundraiser, hingga keamanan sistem Insani Indonesia.
                     </p>
 
@@ -581,8 +680,8 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                         const Icon = cat.icon;
                         const isActive = activeCategory === cat.key;
                         const count = cat.key === 'all' 
-                            ? FAQ_DATA.length 
-                            : FAQ_DATA.filter(f => f.category === cat.key).length;
+                            ? activeFaqList.length 
+                            : activeFaqList.filter(f => f.category === cat.key).length;
 
                         return (
                             <button
@@ -744,15 +843,15 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                     <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm text-blue-200">
                         <div className="flex items-center gap-2.5">
                             <Phone className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span>Telepon: (021) 27871199</span>
+                            <span>Telepon: {contactPhone}</span>
                         </div>
                         <div className="flex items-center gap-2.5">
                             <Mail className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span>Email: sapa@insani.id</span>
+                            <span>Email: {contactEmail}</span>
                         </div>
                         <div className="flex items-center gap-2.5">
                             <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
-                            <span>SK Kemenkumham: AHU-0002557.AH.01.04.2019</span>
+                            <span>{legalSkLabel}: {legalSkNumber}</span>
                         </div>
                     </div>
                 </div>

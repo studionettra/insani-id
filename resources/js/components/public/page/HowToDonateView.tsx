@@ -18,7 +18,8 @@ export default function HowToDonateView() {
     const { siteSettings, bankAccounts } = usePage().props as any;
     const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
 
-    const whatsappNumber = siteSettings?.contact_whatsapp || '081319456675';
+    const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
+    const whatsappNumber = siteSettings?.contact_donor_support_wa || siteSettings?.contact_whatsapp || '081319456675';
     const whatsappClean = whatsappNumber.replace(/[^0-9]/g, '');
     const whatsappUrl = `https://wa.me/${whatsappClean.startsWith('0') ? '62' + whatsappClean.slice(1) : whatsappClean}`;
 
@@ -31,20 +32,22 @@ export default function HowToDonateView() {
     return (
         <div className="min-h-screen bg-slate-50/60 pb-20">
             {/* HERO HEADER */}
-            <div className="bg-gradient-to-br from-slate-900 via-insani-darkblue to-brand-950 text-white py-14 md:py-20 px-4">
-                <div className="container mx-auto max-w-4xl text-center">
-                    <nav className="flex items-center justify-center gap-2 text-xs md:text-sm text-cyan-300 font-medium mb-4">
+            <div className="relative bg-insani-darkblue text-white py-14 md:py-20 px-4 overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                <div className="container mx-auto max-w-4xl text-center relative z-10">
+                    <nav className="flex items-center justify-center gap-2 text-xs md:text-sm text-blue-200 font-medium mb-4">
                         <Link href="/" className="hover:underline text-slate-300">Beranda</Link>
                         <span>/</span>
                         <Link href="/pusat-bantuan" className="hover:underline text-slate-300">Pusat Bantuan</Link>
                         <span>/</span>
-                        <span>Cara Berdonasi</span>
+                        <span className="text-white">Cara Berdonasi</span>
                     </nav>
 
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
                         Panduan Cara Berdonasi
                     </h1>
-                    <p className="text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
+                    <p className="text-blue-100/90 text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
                         Salurkan niat baik Anda dengan mudah, transparan, dan terkonfirmasi otomatis melalui platform Insani Indonesia.
                     </p>
                 </div>
@@ -113,7 +116,7 @@ export default function HowToDonateView() {
                         <span>Transfer Manual ke Rekening Giro Yayasan</span>
                     </h2>
                     <p className="text-sm text-slate-600 mb-6">
-                        Jika Anda lebih nyaman berdonasi lewat transfer ATM atau internet banking langsung ke rekening giro resmi Yayasan Peduli Insani Indonesia:
+                        Jika Anda lebih nyaman berdonasi lewat transfer ATM atau internet banking langsung ke rekening giro resmi {foundationName}:
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
