@@ -133,7 +133,7 @@ export default function Status({ donation }: any) {
     };
 
     return (
-        <PublicLayout title={`Status Donasi ${donation.donation_code}`}>
+        <PublicLayout title={`Status Donasi ${donation.donation_code}`} hideFooter>
 
             <div className="bg-slate-50 min-h-screen py-8 md:py-12 print:hidden">
                 <div className="container mx-auto px-4 max-w-2xl">
@@ -235,25 +235,14 @@ export default function Status({ donation }: any) {
                             {/* Action Button: Official Receipt when Paid */}
                             {donation.status === 'paid' && (
                                 <div className="pt-3 sm:pt-4 space-y-2">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <Button 
-                                            type="button"
-                                            onClick={() => setShowReceipt(true)}
-                                            className="w-full min-h-[50px] py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-sm sm:text-base font-semibold flex items-center justify-center gap-2.5 shadow-xs hover:shadow-md transition-all active:scale-[0.99]"
-                                        >
-                                            <Printer className="w-5 h-5 shrink-0" />
-                                            <span>{t('Lihat Kuitansi')}</span>
-                                        </Button>
-                                        <a
-                                            href={`/donasi/kwitansi/${donation.donation_code}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="w-full min-h-[50px] py-3.5 px-4 bg-white hover:bg-emerald-50 active:bg-emerald-100/60 text-emerald-700 border-2 border-emerald-300 hover:border-emerald-400 rounded-xl text-sm sm:text-base font-semibold flex items-center justify-center gap-2.5 shadow-2xs hover:shadow-xs transition-all active:scale-[0.99]"
-                                        >
-                                            <ExternalLink className="w-5 h-5 shrink-0" />
-                                            <span>{t('Cetak PDF Resmi')}</span>
-                                        </a>
-                                    </div>
+                                    <Button 
+                                        type="button"
+                                        onClick={() => setShowReceipt(true)}
+                                        className="w-full min-h-[50px] py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl text-sm sm:text-base font-semibold flex items-center justify-center gap-2.5 shadow-xs hover:shadow-md transition-all active:scale-[0.99]"
+                                    >
+                                        <Printer className="w-5 h-5 shrink-0" />
+                                        <span>{t('Lihat / Cetak Kuitansi Resmi')}</span>
+                                    </Button>
                                     <p className="text-center text-xs text-slate-400 pt-1">
                                         {t('Kuitansi elektronik resmi ber-QR Code validasi keabsahan yayasan')}
                                     </p>

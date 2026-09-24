@@ -274,7 +274,7 @@ return null;
     const manualChannels = channels.filter(c => c.category === 'manual');
 
     return (
-        <PublicLayout title={`Donasi untuk ${title}`}>
+        <PublicLayout title={`Donasi untuk ${title}`} hideFooter>
 
             <div className="bg-slate-50 min-h-screen py-8 md:py-12">
                 <div className="container mx-auto px-4 max-w-4xl">

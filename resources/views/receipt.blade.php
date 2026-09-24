@@ -13,6 +13,11 @@
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
 
+        @if(request()->has('hide_back_btn'))
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+        @endif
+
         body {
             background-color: #f1f5f9;
             color: #1e293b;
@@ -227,6 +232,11 @@
         }
 
         @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
             body {
                 background: none;
                 padding: 0;
@@ -382,9 +392,11 @@
                 </svg>
                 Cetak / Simpan PDF
             </button>
+            @if(!request()->has('hide_back_btn'))
             <a href="{{ route('donation.status', ['donationCode' => $donation->donation_code]) }}" class="btn btn-outline">
                 Kembali ke Status Donasi
             </a>
+            @endif
         </div>
     </div>
 </body>
