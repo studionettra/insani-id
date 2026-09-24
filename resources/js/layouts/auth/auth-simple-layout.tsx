@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
@@ -8,6 +8,12 @@ export default function AuthSimpleLayout({
     title,
     description,
 }: AuthLayoutProps) {
+    const { siteSettings } = usePage<{ siteSettings?: Record<string, string> }>().props;
+    const logoSrc = siteSettings?.site_logo 
+        ? `/storage/${siteSettings.site_logo}` 
+        : '/images/logo/logo-portrait-color.png';
+    const siteName = siteSettings?.site_name || 'Insani Indonesia';
+
     return (
         <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
             <div className="w-full max-w-sm">
@@ -18,7 +24,7 @@ export default function AuthSimpleLayout({
                             className="flex flex-col items-center gap-2 font-medium"
                         >
                             <div className="mb-4 flex items-center justify-center">
-                                <img src="/images/logo/logo-portrait-color.png" alt="Insani Indonesia" className="h-24 w-auto object-contain" />
+                                <img src={logoSrc} alt={siteName} className="h-24 w-auto object-contain" />
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>
