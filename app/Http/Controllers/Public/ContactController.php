@@ -56,7 +56,7 @@ class ContactController extends Controller
         ]);
 
         if (! $response->json('success')) {
-            return back()->withErrors(['cf-turnstile-response' => 'Verifikasi keamanan gagal.']);
+            return back()->withErrors(['cf-turnstile-response' => __('Verifikasi keamanan gagal.')]);
         }
 
         $message = ContactMessage::create([
@@ -84,6 +84,6 @@ class ContactController extends Controller
             Notification::send($recipients, new ContactMessageReceivedNotification($message));
         }
 
-        return back()->with('success', 'Terima kasih, pesan Anda telah berhasil dikirim. Kami akan segera menghubungi Anda.');
+        return back()->with('success', __('Terima kasih, pesan Anda telah berhasil dikirim. Kami akan segera menghubungi Anda.'));
     }
 }

@@ -214,29 +214,61 @@ class FaqSeeder extends Seeder
 
             // ==================== KONTAK (LAYANAN & NARAHUBUNG) ====================
             [
-                'question' => 'Berapa lama estimasi waktu respon layanan customer service Insani Indonesia?',
-                'answer_html' => '<p>Layanan komunikasi dan customer service kami merespons pesan WhatsApp dan email pada jam operasional kantor: <strong>Senin s.d. Jum\'at, pukul 10.00 – 18.00 WIB</strong>.</p><p>Pesan yang masuk pada jam kerja umumnya dibalas dalam waktu <strong>15–30 menit</strong>. Pesan yang dikirimkan di luar jam kerja, tanggal merah, atau hari libur nasional akan direspons pada hari kerja berikutnya.</p>',
+                'question' => [
+                    'id' => 'Berapa lama estimasi waktu respon layanan customer service Insani Indonesia?',
+                    'en' => 'How long is the estimated response time for Insani Indonesia customer service?',
+                    'ar' => 'ما هو الوقت المتوقع للرد على استفسارات خدمة العملاء في إنساني إندونيسيا؟',
+                ],
+                'answer_html' => [
+                    'id' => '<p>Layanan komunikasi dan customer service kami merespons pesan WhatsApp dan email pada jam operasional kantor: <strong>Senin s.d. Jum\'at, pukul 10.00 – 18.00 WIB</strong>.</p><p>Pesan yang masuk pada jam kerja umumnya dibalas dalam waktu <strong>15–30 menit</strong>. Pesan yang dikirimkan di luar jam kerja, tanggal merah, atau hari libur nasional akan direspons pada hari kerja berikutnya.</p>',
+                    'en' => '<p>Our communication and customer service team responds to WhatsApp messages and emails during office hours: <strong>Monday to Friday, 10:00 – 18:00 WIB</strong>.</p><p>Messages received during business hours are generally replied to within <strong>15–30 minutes</strong>. Messages sent outside office hours, on public holidays, or collective leave will be answered on the next business day.</p>',
+                    'ar' => '<p>يقوم فريق التواصل وخدمة العملاء بالرد على رسائل الواتساب والبريد الإلكتروني خلال ساعات العمل الرسمية: <strong>من الإثنين إلى الجمعة، 10:00 – 18:00 بتوقيت إندونيسيا</strong>.</p><p>عادةً ما يتم الرد على الرسائل الواردة خلال ساعات العمل خلال <strong>15–30 دقيقة</strong>. أما الرسائل المرسلة خارج أوقات العمل أو في العطلات الرسمية فسيتم الرد عليها في يوم العمل التالي.</p>',
+                ],
                 'category' => 'kontak',
                 'keywords' => 'respon cs, jam kerja, respon whatsapp, waktu operasional, hari libur',
                 'sort_order' => 1,
             ],
             [
-                'question' => 'Bagaimana cara mengonfirmasi donasi jika saya transfer melalui rekening bank manual?',
-                'answer_html' => '<p>Jika Anda memilih metode <strong>Transfer Manual Bank (BSI / BRI)</strong> saat berdonasi, silakan kirimkan foto atau screenshot bukti mutasi transfer ke nomor WhatsApp <strong>Konfirmasi Donasi</strong> kami dengan mencantumkan <strong>Kode Donasi</strong> Anda. Tim admin keuangan kami akan segera memverifikasi dan mengubah status donasi menjadi <em>Lunas</em> sehingga kuitansi resmi Anda terbit.</p>',
+                'question' => [
+                    'id' => 'Bagaimana cara mengonfirmasi donasi jika saya transfer melalui rekening bank manual?',
+                    'en' => 'How do I confirm my donation if I transfer via manual bank transfer?',
+                    'ar' => 'كيف يمكنني تأكيد التبرع في حال التحويل المصرفي اليدوي؟',
+                ],
+                'answer_html' => [
+                    'id' => '<p>Jika Anda memilih metode <strong>Transfer Manual Bank (BSI / BRI)</strong> saat berdonasi, silakan kirimkan foto atau screenshot bukti mutasi transfer ke nomor WhatsApp <strong>Konfirmasi Donasi</strong> kami dengan mencantumkan <strong>Kode Donasi</strong> Anda. Tim admin keuangan kami akan segera memverifikasi dan mengubah status donasi menjadi <em>Lunas</em> sehingga kuitansi resmi Anda terbit.</p>',
+                    'en' => '<p>If you choose the <strong>Manual Bank Transfer (BSI / BRI)</strong> method when donating, please send a photo or screenshot of your transfer proof to our <strong>Donation Confirmation</strong> WhatsApp number along with your <strong>Donation Code</strong>. Our finance admin team will promptly verify and update the donation status to <em>Paid</em> so your official electronic receipt can be issued.</p>',
+                    'ar' => '<p>إذا اخترت طريقة <strong>التحويل البنكي اليدوي (BSI / BRI)</strong> عند التبرع، يُرجى إرسال صورة أو لقطة شاشة لإشعار التحويل إلى رقم واتساب <strong>تأكيد التبرع</strong> مع إرفاق <strong>رمز التبرع</strong> الخاص بك. سيقوم فريق الإدارة المالية بالتحقق وتحديث حالة التبرع إلى <em>مدفوع</em> حتى يتم إصدار إيصالك الرسمي.</p>',
+                ],
                 'category' => 'kontak',
                 'keywords' => 'konfirmasi donasi, transfer manual, bukti transfer, whatsapp finance, verifikasi donasi',
                 'sort_order' => 2,
             ],
             [
-                'question' => 'Apakah kami dapat berkunjung atau beraudiensi langsung ke kantor yayasan?',
-                'answer_html' => '<p><strong>Tentu, kami menyambut hangat silaturahmi Anda.</strong></p><p>Untuk memastikan tim pimpinan atau divisi terkait berada di tempat, mohon untuk mengajukan janji temu (audiensi) terlebih dahulu minimal <strong>2 hari kerja sebelum jadwal kunjungan</strong> dengan menghubungi narahubung kami atau mengirimkan surat permohonan ke alamat email kantor.</p>',
+                'question' => [
+                    'id' => 'Apakah kami dapat berkunjung atau beraudiensi langsung ke kantor yayasan?',
+                    'en' => 'Can we visit or have a direct audience at the foundation office?',
+                    'ar' => 'هل يمكننا زيارة مقر المؤسسة أو عقد جلسة تواصل مباشرة؟',
+                ],
+                'answer_html' => [
+                    'id' => '<p><strong>Tentu, kami menyambut hangat silaturahmi Anda.</strong></p><p>Untuk memastikan tim pimpinan atau divisi terkait berada di tempat, mohon untuk mengajukan janji temu (audiensi) terlebih dahulu minimal <strong>2 hari kerja sebelum jadwal kunjungan</strong> dengan menghubungi narahubung kami atau mengirimkan surat permohonan ke alamat email kantor.</p>',
+                    'en' => '<p><strong>Certainly, we warmly welcome your visit.</strong></p><p>To ensure that the leadership team or relevant department is available, please request an appointment at least <strong>2 business days prior to your visit</strong> by contacting our liaison or sending a request letter to our office email address.</p>',
+                    'ar' => '<p><strong>بالتأكيد، نرحب بزيارتكم الكريمة بكل سرور.</strong></p><p>لضمان تواجد فريق الإدارة أو القسم المعني، يُرجى تحديد موعد مسبق قبل <strong>يومي عمل على الأقل من موعد الزيارة</strong> من خلال التواصل مع مسؤول الاتصال أو إرسال طلب إلى البريد الإلكتروني للمكتب.</p>',
+                ],
                 'category' => 'kontak',
                 'keywords' => 'kunjungan kantor, audiensi, janji temu, alamat kantor, silaturahmi',
                 'sort_order' => 3,
             ],
             [
-                'question' => 'Bagaimana prosedur pengajuan proposal kemitraan atau program CSR dengan Insani?',
-                'answer_html' => '<p>Bagi korporasi, komunitas, institusi pendidikan, maupun lembaga sosial yang ingin berkolaborasi dalam program CSR, penyaluran zakat institusi, atau kampanye bersama, Anda dapat mengirimkan surat dan proposal kerjasama ke email <strong>kemitraan resmi kami</strong> atau menghubungi WhatsApp divisi Kemitraan Lembaga. Tim sinergi kami akan menghubungi Anda untuk tahap koordinasi lebih lanjut.</p>',
+                'question' => [
+                    'id' => 'Bagaimana prosedur pengajuan proposal kemitraan atau program CSR dengan Insani?',
+                    'en' => 'What is the procedure for submitting a partnership or CSR program proposal with Insani?',
+                    'ar' => 'ما هي إجراءات تقديم مقترحات الشراكة أو برامج المسؤولية المجتمعية مع إنساني؟',
+                ],
+                'answer_html' => [
+                    'id' => '<p>Bagi korporasi, komunitas, institusi pendidikan, maupun lembaga sosial yang ingin berkolaborasi dalam program CSR, penyaluran zakat institusi, atau kampanye bersama, Anda dapat mengirimkan surat dan proposal kerjasama ke email <strong>kemitraan resmi kami</strong> atau menghubungi WhatsApp divisi Kemitraan Lembaga. Tim sinergi kami akan menghubungi Anda untuk tahap koordinasi lebih lanjut.</p>',
+                    'en' => '<p>For corporations, communities, educational institutions, or social organizations wishing to collaborate on CSR programs, corporate zakat distribution, or joint campaigns, you can send a formal letter and partnership proposal to our <strong>official partnership email</strong> or contact our Institutional Partnership WhatsApp. Our partnership team will contact you for further coordination.</p>',
+                    'ar' => '<p>للشركات، والمجتمعات، والمؤسسات التعليمية، أو المنظمات الأهلية الراغبة في التعاون ضمن برامج المسؤولية المجتمعية (CSR)، أو توجيه زكاة الشركات، أو الحملات المشتركة، يمكنكم إرسال خطاب ومقترح التعاون إلى <strong>بريد الشراكات الرسمي</strong> أو عبر واتساب قسم شراكات المؤسسات. سيتواصل معكم فريقنا للتنسيق والخطوات التالية.</p>',
+                ],
                 'category' => 'kontak',
                 'keywords' => 'csr, kemitraan, proposal, kerjasama korporasi, sponsorship, kolaborasi',
                 'sort_order' => 4,
@@ -244,22 +276,35 @@ class FaqSeeder extends Seeder
         ];
 
         foreach ($faqs as $item) {
-            $existing = Faq::where('question->id', $item['question'])->first();
+            $questionId = is_array($item['question']) ? $item['question']['id'] : $item['question'];
+            $existing = Faq::where('question->id', $questionId)->first();
+
+            $questionData = is_array($item['question']) ? $item['question'] : [
+                'id' => $item['question'],
+                'en' => $item['question'],
+            ];
+
+            $answerData = is_array($item['answer_html']) ? $item['answer_html'] : [
+                'id' => $item['answer_html'],
+                'en' => $item['answer_html'],
+            ];
+
             if (! $existing) {
                 Faq::create([
-                    'question' => ['id' => $item['question'], 'en' => $item['question']],
-                    'answer_html' => ['id' => $item['answer_html'], 'en' => $item['answer_html']],
+                    'question' => $questionData,
+                    'answer_html' => $answerData,
                     'category' => $item['category'],
                     'keywords' => $item['keywords'],
                     'is_active' => true,
                     'sort_order' => $item['sort_order'],
                 ]);
             } else {
-                $existing->update([
-                    'category' => $item['category'],
-                    'keywords' => $item['keywords'],
-                    'sort_order' => $item['sort_order'],
-                ]);
+                $existing->setTranslations('question', $questionData);
+                $existing->setTranslations('answer_html', $answerData);
+                $existing->category = $item['category'];
+                $existing->keywords = $item['keywords'];
+                $existing->sort_order = $item['sort_order'];
+                $existing->save();
             }
         }
     }

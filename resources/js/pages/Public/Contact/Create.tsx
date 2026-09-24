@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
+import useTranslation from '@/hooks/use-translation';
 
 export default function ContactCreate({ faqs = [] }: any) {
-    const { flash, siteSettings, locale } = usePage().props as any;
+    const { t, locale, isRtl } = useTranslation();
+    const { flash, siteSettings } = usePage().props as any;
     const [isSuccess, setIsSuccess] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -30,8 +32,8 @@ export default function ContactCreate({ faqs = [] }: any) {
     const emailMain = siteSettings?.contact_email || 'sapa@insani.id';
     const emailFinance = siteSettings?.contact_finance_email || 'financial@insani.id';
     const addressOffice = siteSettings?.contact_address || 'Jln. Moh Kahfi 1 No 90A, Jagakarsa, Jakarta Selatan';
-    const operatingHours = siteSettings?.contact_operating_hours || "Senin - Jum'at | 10:00 - 18.00 WIB";
-    const holidayNote = siteSettings?.contact_holiday_note || 'Tutup Pada Tanggal Merah & Cuti Bersama';
+    const operatingHours = siteSettings?.contact_operating_hours || t("Senin - Jum'at | 10:00 - 18.00 WIB");
+    const holidayNote = siteSettings?.contact_holiday_note || t('Tutup Pada Tanggal Merah & Cuti Bersama');
     const mapsEmbedUrl = siteSettings?.contact_maps_url?.includes('embed') 
         ? siteSettings.contact_maps_url 
         : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.6219083994824!2d106.8128105!3d-6.313297899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ef82a08035fd%3A0x222843cf2a071b1b!2sInsani%20Indonesia!5e0!3m2!1sid!2sid!4v1784360269332!5m2!1sid!2sid";
@@ -133,24 +135,24 @@ export default function ContactCreate({ faqs = [] }: any) {
     };
 
     return (
-        <PublicLayout title="Hubungi Kami">
+        <PublicLayout title={t('Hubungi Kami')}>
             
             {/* Hero Section */}
-            <div className="bg-insani-darkblue text-white py-16 md:py-24 relative overflow-hidden">
+            <div className="bg-insani-darkblue text-white py-16 md:py-24 relative overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">Kontak</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-6">{t('Kontak')}</h1>
                     <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto">
-                        Hubungi kami sesuai kebutuhan Anda. Kami siap memberikan layanan terbaik demi kebaikan bersama.
+                        {t('Hubungi kami sesuai kebutuhan Anda. Kami siap memberikan layanan terbaik demi kebaikan bersama.')}
                     </p>
                 </div>
             </div>
 
             {/* Sesuai Kebutuhanmu Section */}
-            <section className="py-16 md:py-20 bg-slate-50 border-b border-slate-200/60">
+            <section className="py-16 md:py-20 bg-slate-50 border-b border-slate-200/60" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Hubungi Kami Sesuai Kebutuhanmu</h2>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('Hubungi Kami Sesuai Kebutuhanmu')}</h2>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -158,56 +160,56 @@ export default function ContactCreate({ faqs = [] }: any) {
                             <div className="w-16 h-16 rounded-2xl bg-blue-50 text-insani-blue flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-insani-blue group-hover:text-white transition-all">
                                 <UserPlus className="w-8 h-8" />
                             </div>
-                            <h3 className="font-bold text-gray-900 group-hover:text-insani-blue transition-colors text-xl mb-2">Dukungan Donatur</h3>
-                            <p className="text-gray-500 text-sm">Informasi & Konsultasi</p>
+                            <h3 className="font-bold text-gray-900 group-hover:text-insani-blue transition-colors text-xl mb-2">{t('Dukungan Donatur')}</h3>
+                            <p className="text-gray-500 text-sm">{t('Informasi & Konsultasi')}</p>
                         </a>
                         
                         <a href={waConfirmUrl} target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
                             <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
                                 <Wallet className="w-8 h-8" />
                             </div>
-                            <h3 className="font-bold text-gray-900 group-hover:text-insani-blue transition-colors text-xl mb-2">Konfirmasi Donasi</h3>
-                            <p className="text-gray-500 text-sm">Verifikasi & Validasi</p>
+                            <h3 className="font-bold text-gray-900 group-hover:text-insani-blue transition-colors text-xl mb-2">{t('Konfirmasi Donasi')}</h3>
+                            <p className="text-gray-500 text-sm">{t('Verifikasi & Validasi')}</p>
                         </a>
 
                         <a href={waPartnerUrl} target="_blank" rel="noreferrer" className="group bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(1,112,185,0.15)] hover:border-insani-blue/30 transition-all duration-300">
                             <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
                                 <Handshake className="w-8 h-8" />
                             </div>
-                            <h3 className="font-bold text-gray-900 group-hover:text-insani-blue transition-colors text-xl mb-2">Kemitraan</h3>
-                            <p className="text-gray-500 text-sm">Kelembagaan & Program</p>
+                            <h3 className="font-bold text-gray-900 group-hover:text-insani-blue transition-colors text-xl mb-2">{t('Kemitraan')}</h3>
+                            <p className="text-gray-500 text-sm">{t('Kelembagaan & Program')}</p>
                         </a>
                     </div>
                 </div>
             </section>
 
             {/* Main Contact Area */}
-            <section className="py-16 md:py-24 bg-white relative">
-                <div className="absolute right-0 top-0 w-1/3 h-full bg-slate-50/50 rounded-l-[100px] pointer-events-none hidden lg:block"></div>
+            <section className="py-16 md:py-24 bg-white relative" dir={isRtl ? 'rtl' : 'ltr'}>
+                <div className={`absolute ${isRtl ? 'left-0 rounded-r-[100px]' : 'right-0 rounded-l-[100px]'} top-0 w-1/3 h-full bg-slate-50/50 pointer-events-none hidden lg:block`}></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
                         
                         {/* Hubungi Kami Detail Information */}
                         <div className="pt-8">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4">Hubungi Kami</h2>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('Hubungi Kami')}</h2>
                             <p className="text-gray-600 mb-12 text-lg">
-                                Kami sangat senang berkomunikasi dengan berbagai pihak yang memiliki tujuan untuk kebaikan bersama
+                                {t('Kami sangat senang berkomunikasi dengan berbagai pihak yang memiliki tujuan untuk kebaikan bersama')}
                             </p>
                             
                             <div className="space-y-10">
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Dukungan Donatur</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{t('Dukungan Donatur')}</h3>
                                     <ul className="space-y-2 text-gray-600">
                                         <li className="flex items-center gap-2">
-                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <Phone className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <a href={waDonorUrl} target="_blank" rel="noopener noreferrer" className="hover:text-insani-blue">{waDonor}</a>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <Phone className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <span>{phoneOffice}</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-insani-blue" /> 
+                                            <Mail className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <a href={`mailto:${emailMain}`} className="hover:text-insani-blue">{emailMain}</a>
                                         </li>
                                     </ul>
@@ -216,14 +218,14 @@ export default function ContactCreate({ faqs = [] }: any) {
                                 <div className="h-px w-full bg-slate-100"></div>
                                 
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Konfirmasi Donasi</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{t('Konfirmasi Donasi')}</h3>
                                     <ul className="space-y-2 text-gray-600">
                                         <li className="flex items-center gap-2">
-                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <Phone className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <a href={waConfirmUrl} target="_blank" rel="noopener noreferrer" className="hover:text-insani-blue">{waConfirm}</a>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-insani-blue" /> 
+                                            <Mail className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <a href={`mailto:${emailFinance}`} className="hover:text-insani-blue">{emailFinance}</a>
                                         </li>
                                     </ul>
@@ -232,14 +234,14 @@ export default function ContactCreate({ faqs = [] }: any) {
                                 <div className="h-px w-full bg-slate-100"></div>
                                 
                                 <div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">Kemitraan Lembaga & Program</h3>
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{t('Kemitraan Lembaga & Program')}</h3>
                                     <ul className="space-y-2 text-gray-600">
                                         <li className="flex items-center gap-2">
-                                            <Phone className="w-4 h-4 text-insani-blue" /> 
+                                            <Phone className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <a href={waPartnerUrl} target="_blank" rel="noopener noreferrer" className="hover:text-insani-blue">{waPartner}</a>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-insani-blue" /> 
+                                            <Mail className="w-4 h-4 text-insani-blue shrink-0" /> 
                                             <a href={`mailto:${emailMain}`} className="hover:text-insani-blue">{emailMain}</a>
                                         </li>
                                     </ul>
@@ -250,12 +252,12 @@ export default function ContactCreate({ faqs = [] }: any) {
                         {/* Contact Form */}
                         <div>
                             <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 md:p-10 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-insani-blue/5 rounded-full blur-3xl"></div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-8">Kirim Kami Pesan</h2>
+                                <div className={`absolute top-0 ${isRtl ? 'left-0' : 'right-0'} w-32 h-32 bg-insani-blue/5 rounded-full blur-3xl`}></div>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-8">{t('Kirim Kami Pesan')}</h2>
                                 
                                 {isSuccess && (
                                     <div className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start text-emerald-800">
-                                        <CheckCircle2 className="w-6 h-6 mr-3 shrink-0 text-emerald-500" />
+                                        <CheckCircle2 className={`w-6 h-6 ${isRtl ? 'ml-3' : 'mr-3'} shrink-0 text-emerald-500`} />
                                         <p className="font-medium text-sm leading-relaxed">{flash.success}</p>
                                     </div>
                                 )}
@@ -263,7 +265,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                 <form onSubmit={submit} className="space-y-6 relative z-10">
                                     <div className="space-y-2">
                                         <Input 
-                                            placeholder="Nama Lengkap"
+                                            placeholder={t('Nama Lengkap')}
                                             id="name" 
                                             value={data.name} 
                                             onChange={e => setData('name', e.target.value)} 
@@ -276,7 +278,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                     
                                     <div className="space-y-2">
                                         <Input 
-                                            placeholder="WhatsApp"
+                                            placeholder={t('WhatsApp')}
                                             id="phone" 
                                             type="tel"
                                             value={data.phone} 
@@ -289,7 +291,7 @@ export default function ContactCreate({ faqs = [] }: any) {
 
                                     <div className="space-y-2">
                                         <Input 
-                                            placeholder="Email"
+                                            placeholder={t('Email')}
                                             id="email" 
                                             type="email"
                                             value={data.email} 
@@ -302,17 +304,17 @@ export default function ContactCreate({ faqs = [] }: any) {
                                     </div>
                                     
                                     {/* subject input hide for form visual, but set via message change */}
-                                    <input type="hidden" name="subject" value="Pesan dari Halaman Kontak Website" />
+                                    <input type="hidden" name="subject" value={t('Pesan dari Halaman Kontak Website')} />
 
                                     <div className="space-y-2">
                                         <Textarea 
-                                            placeholder="Pesan Atau Masukan"
+                                            placeholder={t('Pesan Atau Masukan')}
                                             id="message" 
                                             rows={5}
                                             value={data.message} 
                                             onChange={e => {
                                                 setData('message', e.target.value);
-                                                setData('subject', 'Pesan dari Halaman Kontak Website');
+                                                setData('subject', t('Pesan dari Halaman Kontak Website'));
                                             }} 
                                             required 
                                             className="bg-slate-50/50 border-slate-200 focus:border-insani-blue focus:ring-insani-blue/20 resize-none rounded-xl"
@@ -332,7 +334,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                         className="w-full bg-[#3d3d3d] hover:bg-black text-white h-12 text-base font-semibold rounded-lg"
                                         disabled={processing || !data['cf-turnstile-response']}
                                     >
-                                        {processing ? 'Mengirim...' : 'Kirim'}
+                                        {processing ? t('Mengirim...') : t('Kirim')}
                                     </Button>
                                 </form>
                             </div>
@@ -343,7 +345,7 @@ export default function ContactCreate({ faqs = [] }: any) {
             </section>
 
             {/* Kunjungi Kami */}
-            <section className="py-16 md:py-20 bg-slate-50 border-t border-slate-200/60">
+            <section className="py-16 md:py-20 bg-slate-50 border-t border-slate-200/60" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         {/* Map */}
@@ -360,10 +362,10 @@ export default function ContactCreate({ faqs = [] }: any) {
                         </div>
 
                         {/* Address & Hours */}
-                        <div className="lg:pl-8">
-                            <h2 className="text-4xl font-bold text-insani-blue mb-8">Kunjungi Kami</h2>
+                        <div className={`${isRtl ? 'lg:pr-8' : 'lg:pl-8'}`}>
+                            <h2 className="text-4xl font-bold text-insani-blue mb-8">{t('Kunjungi Kami')}</h2>
                             
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Alamat & Jam Kerja</h3>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('Alamat & Jam Kerja')}</h3>
                             <div className="space-y-2 text-gray-600 text-lg leading-relaxed mb-8">
                                 <p>{addressOffice}</p>
                                 <p>{operatingHours}</p>
@@ -371,8 +373,8 @@ export default function ContactCreate({ faqs = [] }: any) {
                             </div>
 
                             <div className="bg-insani-blue/10 rounded-2xl p-6 border border-insani-blue/20">
-                                <h4 className="font-bold text-insani-darkblue text-lg mb-2">Pertemuan Dengan Perjanjian</h4>
-                                <p className="text-insani-darkblue/80">Silahkan menghubungi bagian dukungan donatur / kemitraan untuk perjanjian pertemuan.</p>
+                                <h4 className="font-bold text-insani-darkblue text-lg mb-2">{t('Pertemuan Dengan Perjanjian')}</h4>
+                                <p className="text-insani-darkblue/80">{t('Silahkan menghubungi bagian dukungan donatur / kemitraan untuk perjanjian pertemuan.')}</p>
                             </div>
                         </div>
                     </div>
@@ -381,12 +383,12 @@ export default function ContactCreate({ faqs = [] }: any) {
 
             {/* FAQ Layanan & Kontak */}
             {faqs && faqs.length > 0 && (
-                <section className="py-20 md:py-24 bg-white border-t border-slate-100">
+                <section className="py-20 md:py-24 bg-white border-t border-slate-100" dir={isRtl ? 'rtl' : 'ltr'}>
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-3">Tanya Jawab Layanan & Kontak</h2>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-3">{t('Tanya Jawab Layanan & Kontak')}</h2>
                             <p className="text-slate-600 text-base max-w-xl mx-auto">
-                                Pertanyaan umum seputar waktu operasional, respon pesan, konfirmasi donasi manual, dan prosedur audiensi kantor.
+                                {t('Pertanyaan umum seputar waktu operasional, respon pesan, konfirmasi donasi manual, dan prosedur audiensi kantor.')}
                             </p>
                         </div>
 
@@ -406,13 +408,13 @@ export default function ContactCreate({ faqs = [] }: any) {
                                     >
                                         <button
                                             onClick={() => toggleFaq(index)}
-                                            className="w-full text-left px-6 py-5 flex items-center justify-between focus:outline-none"
+                                            className={`w-full ${isRtl ? 'text-right' : 'text-left'} px-6 py-5 flex items-center justify-between focus:outline-none`}
                                             aria-expanded={openFaq === index}
                                         >
                                             <h3 className={`text-lg md:text-xl font-bold ${openFaq === index ? 'text-insani-blue' : 'text-slate-800'}`}>
                                                 {question}
                                             </h3>
-                                            <div className={`ml-4 shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${openFaq === index ? 'bg-insani-blue/10 text-insani-blue' : 'bg-slate-50 text-slate-400'}`}>
+                                            <div className={`${isRtl ? 'mr-4' : 'ml-4'} shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300 ${openFaq === index ? 'bg-insani-blue/10 text-insani-blue' : 'bg-slate-50 text-slate-400'}`}>
                                                 {openFaq === index ? (
                                                     <ChevronUp className="w-5 h-5" />
                                                 ) : (
@@ -440,12 +442,12 @@ export default function ContactCreate({ faqs = [] }: any) {
                         </div>
 
                         <div className="mt-12 text-center">
-                            <p className="text-sm text-slate-500 mb-3">Butuh bantuan seputar cara donasi, pendaftaran kampanye, atau verifikasi akun?</p>
+                            <p className="text-sm text-slate-500 mb-3">{t('Butuh bantuan seputar cara donasi, pendaftaran kampanye, atau verifikasi akun?')}</p>
                             <Link 
                                 href="/pusat-bantuan"
                                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition-all"
                             >
-                                Kunjungi Pusat Bantuan & FAQ Lengkap &rarr;
+                                {t('Kunjungi Pusat Bantuan & FAQ Lengkap')} {isRtl ? '←' : '→'}
                             </Link>
                         </div>
                     </div>

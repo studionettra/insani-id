@@ -35,6 +35,8 @@ it('loads valid json translation files for all supported locales', function (str
         'Berita',
         'Masuk',
         'Terkumpul',
+        'Kontak',
+        'Hubungi Layanan CS',
     ]);
 })->with(['id', 'en', 'ar']);
 
@@ -50,6 +52,8 @@ it('shares correct english translations via HandleInertiaRequests when locale is
     expect($shared['translations']['Beranda'])->toBe('Home');
     expect($shared['translations']['Donasi'])->toBe('Donate');
     expect($shared['translations']['Tentang Kami'])->toBe('About Us');
+    expect($shared['translations']['Kontak'])->toBe('Contact');
+    expect($shared['translations']['Hubungi Layanan CS'])->toBe('Contact Support');
 });
 
 it('shares correct arabic translations via HandleInertiaRequests when locale is ar', function () {
@@ -64,4 +68,6 @@ it('shares correct arabic translations via HandleInertiaRequests when locale is 
     expect($shared['translations']['Beranda'])->toBe('الرئيسية');
     expect($shared['translations']['Donasi'])->toBe('تبرع');
     expect($shared['translations']['Tentang Kami'])->toBe('من نحن');
+    expect($shared['translations']['Kontak'])->toBe('تواصل معنا');
+    expect($shared['translations']['Hubungi Layanan CS'])->toBe('التواصل مع خدمة العملاء');
 });

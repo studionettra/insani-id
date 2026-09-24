@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Faq;
 use Database\Seeders\FaqSeeder;
 use Database\Seeders\PageSeeder;
 
@@ -64,5 +65,29 @@ it('passes comprehensive categorized faqs on /pusat-bantuan', function () {
 
             return true;
         })
+    );
+});
+
+it('provides english and arabic translations for kontak faqs', function () {
+    $faq = Faq::where('category', 'kontak')->first();
+
+    expect($faq)->not->toBeNull()
+        ->and($faq->question_translations)->toHaveKeys(['id', 'en', 'ar'])
+        ->and($faq->answer_translations)->toHaveKeys(['id', 'en', 'ar'])
+        ->and($faq->question_translations['en'])->not->toBe($faq->question_translations['id'])
+        ->and($faq->question_translations['ar'])->not->toBe($faq->question_translations['id']);
+});
+
+it('loads contact page with kontak faqs and localized translations', function () {
+    app()->setLocale('en');
+
+    $response = $this->get('/kontak');
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Public/Contact/Create')
+        ->has('faqs')
+        ->where('translations.Kontak', 'Contact')
+        ->where('translations.Hubungi Layanan CS', 'Contact Support')
+        ->where('translations.Hubungi Kami Sesuai Kebutuhanmu', 'Contact Us According to Your Needs')
     );
 });
