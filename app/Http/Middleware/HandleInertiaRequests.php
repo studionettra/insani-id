@@ -61,14 +61,21 @@ class HandleInertiaRequests extends Middleware
             ] : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => app()->getLocale(),
-            'supportedLocales' => (function () {
+            'supportedLocales' => (function () use ($request) {
                 if (class_exists(LaravelLocalization::class)) {
                     $locales = LaravelLocalization::getSupportedLocales();
+
+                    // Dashboard/admin/account routes are outside the locale group.
+                    // Generating a localized URL from these paths (e.g. /en/dashboard) would produce a 404.
+                    // Instead, send users to the localized public homepage when switching language.
+                    $isPrivatePage = $request->is('dashboard*', 'admin*', 'akun*', 'settings*', 'notifications*', 'campaigner*');
+                    $referenceUrl = $isPrivatePage ? url('/') : null;
+
                     $urls = [];
                     foreach ($locales as $code => $properties) {
                         $urls[$code] = [
                             'name' => $properties['native'],
-                            'url' => LaravelLocalization::getLocalizedURL($code, null, [], true),
+                            'url' => LaravelLocalization::getLocalizedURL($code, $referenceUrl, [], true),
                         ];
                     }
 
