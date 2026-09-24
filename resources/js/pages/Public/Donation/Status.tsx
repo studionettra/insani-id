@@ -23,6 +23,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default function Status({ donation }: any) {
     const { auth, siteSettings, bankAccounts } = usePage().props as any;
+    const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
     const [isChecking, setIsChecking] = useState(false);
     const [showReceipt, setShowReceipt] = useState(false);
 
@@ -286,7 +287,7 @@ export default function Status({ donation }: any) {
                                     <div>
                                         <h4 className="font-bold text-amber-900 text-base">Instruksi Transfer Manual</h4>
                                         <p className="text-amber-800 mt-1 text-xs sm:text-sm leading-relaxed">
-                                            Silakan transfer tepat sebesar <strong>{formatCurrency(Number(donation.amount))}</strong> ke salah satu rekening resmi Yayasan Peduli Insani Indonesia:
+                                            Silakan transfer tepat sebesar <strong>{formatCurrency(Number(donation.amount))}</strong> ke salah satu rekening resmi {foundationName}:
                                         </p>
                                     </div>
 

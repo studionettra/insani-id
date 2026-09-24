@@ -74,7 +74,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                         className="absolute inset-0 w-full h-full object-cover opacity-35 filter brightness-75 scale-105 transform transition-transform duration-1000" 
                     />
                 ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-insani-darkblue via-slate-900 to-slate-950 opacity-95"></div>
+                    <div className="absolute inset-0 bg-insani-darkblue opacity-95"></div>
                 )}
 
                 {/* Ambient glow overlays */}
@@ -470,8 +470,8 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
             )}
 
             {/* 7. Bottom Quick Donate Call to Action */}
-            <section className="py-20 bg-gradient-to-br from-insani-darkblue to-slate-950 text-white text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(#00a6c0_1px,transparent_1px)] [background-size:20px_20px] opacity-15"></div>
+            <section className="py-20 bg-insani-darkblue text-white text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
                 <div className="max-w-4xl mx-auto px-4 relative z-10">
                     <FadeIn>
                         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">

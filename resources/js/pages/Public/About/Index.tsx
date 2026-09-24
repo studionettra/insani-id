@@ -134,8 +134,10 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
         <PublicLayout title="Tentang Kami">
 
             {/* 1. Hero Section (Split Layout) */}
-            <section className="relative pt-32 pb-20 overflow-hidden bg-slate-50">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
+            <section className="relative py-20 md:py-28 overflow-hidden bg-insani-darkblue text-white">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl pointer-events-none transform -translate-x-1/3 translate-y-1/3"></div>
                 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -145,17 +147,17 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             className="max-w-2xl"
                         >
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-insani-blue/10 text-insani-blue text-sm font-semibold mb-6">
-                                <span className="w-2 h-2 rounded-full bg-insani-blue animate-pulse"></span>
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-blue-200 border border-white/15 text-sm font-semibold mb-6 backdrop-blur-md">
+                                <span className="w-2 h-2 rounded-full bg-blue-300 animate-pulse"></span>
                                 Tentang Kami
                             </div>
-                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1] mb-6">
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-6">
                                 Merajut Kebaikan,<br/>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-insani-blue to-cyan-500">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 via-blue-100 to-white">
                                     Membangun Kemanusiaan
                                 </span>
                             </h1>
-                            <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                            <p className="text-lg text-blue-100/90 mb-8 leading-relaxed font-normal">
                                 Insani Indonesia atau Yayasan Peduli Insani Indonesia merupakan lembaga yang bergerak dalam bidang sosial dan kemanusiaan. Kami lahir dari semangat cita-cita kemerdekaan Indonesia yang ingin memajukan kesejahteraan umum, mencerdaskan kehidupan bangsa, serta mewujudkan ketertiban dunia.
                             </p>
                         </motion.div>
@@ -166,12 +168,12 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                             transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                             className="relative lg:ml-auto"
                         >
-                            <div className="absolute -inset-4 bg-gradient-to-r from-insani-blue/20 to-cyan-400/20 rounded-[2.5rem] blur-2xl opacity-60"></div>
-                            <div className="relative bg-white/40 backdrop-blur-xl border border-white/60 p-4 rounded-[2rem] shadow-2xl">
+                            <div className="absolute -inset-4 bg-gradient-to-r from-blue-400/20 to-insani-blue/20 rounded-[2.5rem] blur-2xl opacity-60"></div>
+                            <div className="relative bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-[2rem] shadow-2xl">
                                 <img 
                                     src="/images/about/Logo-About.webp" 
                                     alt="Tentang Insani Indonesia" 
-                                    className="w-full h-auto rounded-xl max-w-md mx-auto object-contain"
+                                    className="w-full h-auto rounded-xl max-w-md mx-auto object-contain bg-white/80 p-3"
                                 />
                             </div>
                         </motion.div>

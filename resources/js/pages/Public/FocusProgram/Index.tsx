@@ -13,11 +13,12 @@ export default function FocusProgramIndex({ pillars }: any) {
         <PublicLayout title={t('Fokus Program')}>
             
             {/* Hero Section */}
-            <div className="relative bg-gradient-to-br from-insani-darkblue via-slate-900 to-insani-darkblue text-white py-20 md:py-28 overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(#00a6c0_1px,transparent_1px)] [background-size:24px_24px] opacity-15"></div>
+            <div className="relative bg-insani-darkblue text-white py-20 md:py-28 overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
+                <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                     <FadeIn>
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-insani-turquoise text-xs font-semibold mb-6 border border-white/10">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-semibold mb-6 border border-white/10">
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>{t('Fokus Kebaikan Berkelanjutan')}</span>
                         </div>

@@ -53,10 +53,12 @@ export default function ProgramListing({ programs, categories, filters }: Props)
 
             <div className="bg-white">
                 {/* Hero Section */}
-                <div className="bg-insani-blue/5 py-12 md:py-20">
-                    <div className="container mx-auto px-4 max-w-6xl text-center">
-                        <h1 className="text-3xl md:text-5xl font-bold text-slate-800 mb-4">{t('Program Donasi')}</h1>
-                        <p className="text-slate-600 max-w-2xl mx-auto text-lg">
+                <div className="relative bg-insani-darkblue text-white py-16 md:py-20 overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                    <div className="container mx-auto px-4 max-w-6xl text-center relative z-10">
+                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">{t('Program Donasi')}</h1>
+                        <p className="text-blue-100 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
                             {t('Pilih program kebaikan yang ingin Anda dukung hari ini. Setiap donasi Anda membawa harapan baru bagi mereka yang membutuhkan.')}
                         </p>
                     </div>

@@ -542,7 +542,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                                 </form>
                                             </div>
 
-                                            {/* List Komentar */}
+                                            {/* List Komentar & Donatur */}
                                             <div className="space-y-4">
                                                 {(!program.comments || program.comments.length === 0) ? (
                                                     <div className="text-center py-10 text-slate-500">
@@ -550,25 +550,39 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                                     </div>
                                                 ) : (
                                                     program.comments.map((comment: any) => (
-                                                        <div key={comment.id} className="flex gap-4 border-b border-slate-100 pb-5 last:border-0">
-                                                            <div className="w-10 h-10 rounded-full bg-insani-blue/10 flex items-center justify-center text-insani-blue font-bold flex-shrink-0">
+                                                        <div key={comment.id} className="flex gap-3.5 sm:gap-4 border-b border-slate-100 pb-5 last:border-0 items-start">
+                                                            <div className="w-10 h-10 rounded-full bg-insani-blue/10 flex items-center justify-center text-insani-blue font-bold flex-shrink-0 text-sm">
                                                                 {comment.name.charAt(0).toUpperCase()}
                                                             </div>
-                                                            <div>
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="font-bold text-slate-800">{comment.name}</span>
-                                                                    {comment.donation_id && (
-                                                                        <Badge variant="secondary" className="text-[10px] px-2 py-0 h-4 bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200">
-                                                                            {t('Donatur')}
-                                                                        </Badge>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-start justify-between gap-3 mb-1">
+                                                                    <div className="min-w-0">
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <span className="font-bold text-slate-800 text-sm sm:text-base truncate">{comment.name}</span>
+                                                                            {comment.donation_id && (
+                                                                                <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-4.5 bg-amber-50 text-amber-700 hover:bg-amber-50 border border-amber-200/60 font-semibold rounded-full">
+                                                                                    {t('Donatur')}
+                                                                                </Badge>
+                                                                            )}
+                                                                        </div>
+                                                                        <span className="text-xs text-slate-400 block mt-0.5">
+                                                                            {format(new Date(comment.created_at), 'd MMM yyyy', { locale: dateId })}
+                                                                        </span>
+                                                                    </div>
+                                                                    {comment.donation?.amount && (
+                                                                        <div className="text-right flex-shrink-0">
+                                                                            <span className="text-[11px] text-slate-400 block font-normal leading-tight">{t('Berdonasi')}</span>
+                                                                            <span className="font-bold text-sm sm:text-base text-insani-blue tracking-tight">
+                                                                                {formatCurrency(comment.donation.amount)}
+                                                                            </span>
+                                                                        </div>
                                                                     )}
-                                                                    <span className="text-xs text-slate-400 ml-2">
-                                                                        {format(new Date(comment.created_at), 'd MMM yyyy', { locale: dateId })}
-                                                                    </span>
                                                                 </div>
-                                                                <p className="text-slate-600 text-sm leading-relaxed">
-                                                                    {comment.body}
-                                                                </p>
+                                                                {comment.body && (
+                                                                    <p className="text-slate-600 text-sm leading-relaxed mt-1.5 break-words">
+                                                                        {comment.body}
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     ))

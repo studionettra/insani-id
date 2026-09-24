@@ -26,7 +26,7 @@ export default function ContactCreate({ faqs = [] }: any) {
     const waPartner = siteSettings?.contact_partnership_wa || '082124837496';
     const waPartnerUrl = formatWaUrl(waPartner, '082124837496');
 
-    const phoneOffice = siteSettings?.contact_phone || '(021) 38820199';
+    const phoneOffice = siteSettings?.contact_phone || '(021) 27871199';
     const emailMain = siteSettings?.contact_email || 'sapa@insani.id';
     const emailFinance = siteSettings?.contact_finance_email || 'financial@insani.id';
     const addressOffice = siteSettings?.contact_address || 'Jln. Moh Kahfi 1 No 90A, Jagakarsa, Jakarta Selatan';

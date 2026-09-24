@@ -63,23 +63,32 @@ return;
                                 {/* Gradient for CTA contrast */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/20 to-transparent" />
                                 
-                                {banner.cta_link && (
+                                {(banner.title || banner.description || banner.cta_link) && (
                                     <div className="absolute inset-0 flex flex-col justify-end pb-16 md:pb-24">
                                         <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
                                             {banner.title && (
                                                 <FadeIn>
-                                                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 max-w-3xl leading-tight tracking-tight shadow-sm">
+                                                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 md:mb-4 max-w-3xl leading-tight tracking-tight drop-shadow-sm">
                                                         {banner.title}
                                                     </h2>
                                                 </FadeIn>
                                             )}
-                                            <FadeIn delay={0.1}>
-                                                <Button asChild size="lg" className="bg-white text-zinc-950 hover:bg-zinc-100 rounded-full font-semibold px-8 h-12 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
-                                                    <a href={banner.cta_link}>
-                                                        {t('Lihat Selengkapnya', 'Selengkapnya')} <ArrowRight className="ml-2 h-4 w-4 rtl:rotate-180" />
-                                                    </a>
-                                                </Button>
-                                            </FadeIn>
+                                            {banner.description && (
+                                                <FadeIn delay={0.05}>
+                                                    <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-2xl leading-relaxed mb-6 font-normal drop-shadow-sm">
+                                                        {banner.description}
+                                                    </p>
+                                                </FadeIn>
+                                            )}
+                                            {banner.cta_link && (
+                                                <FadeIn delay={0.1}>
+                                                    <Button asChild size="lg" className="bg-white text-zinc-950 hover:bg-zinc-100 rounded-full font-semibold px-8 h-12 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                                        <a href={banner.cta_link}>
+                                                            {t('Lihat Selengkapnya', 'Selengkapnya')} <ArrowRight className="ml-2 h-4 w-4 rtl:rotate-180" />
+                                                        </a>
+                                                    </Button>
+                                                </FadeIn>
+                                            )}
                                         </div>
                                     </div>
                                 )}

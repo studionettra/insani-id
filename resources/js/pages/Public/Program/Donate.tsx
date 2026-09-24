@@ -174,7 +174,8 @@ const DEFAULT_CHANNELS: PaymentChannel[] = [
 ];
 
 export default function Donate({ program, onlinePaymentAvailable = true, paymentChannels }: any) {
-    const { auth, flash } = usePage().props as any;
+    const { auth, flash, siteSettings } = usePage().props as any;
+    const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
 
     const channels: PaymentChannel[] = (paymentChannels && paymentChannels.length > 0) 
         ? paymentChannels 
@@ -588,7 +589,7 @@ selectChannel(manualChannels[0]);
                                             {/* Tab 4: Manual Transfer */}
                                             {activeTab === 'manual' && (
                                                 <div className="space-y-2.5">
-                                                    <p className="text-xs text-slate-500 font-medium mb-2">Transfer ke rekening resmi Yayasan Peduli Insani Indonesia dengan kode unik 3 angka.</p>
+                                                    <p className="text-xs text-slate-500 font-medium mb-2">Transfer ke rekening resmi {foundationName} dengan kode unik 3 angka.</p>
                                                     {manualChannels.map((channel) => {
                                                         const isSelected = data.payment_channel.toUpperCase() === channel.code.toUpperCase();
 
