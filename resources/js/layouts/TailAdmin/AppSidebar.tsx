@@ -57,6 +57,12 @@ const AppSidebar: React.FC = () => {
   const roles: string[] = auth?.user?.roles || [];
   const isSuperadmin: boolean = roles.includes('Administrator');
   const unreadCount: number = (props as any)?.notifications?.unread_count ?? 0;
+  const siteSettings = (props as any)?.siteSettings || {};
+
+  const logoLight = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+  const logoDark = siteSettings?.site_logo_white ? `/storage/${siteSettings.site_logo_white}` : (siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-white.png');
+  const logoIconLight = siteSettings?.site_favicon ? `/storage/${siteSettings.site_favicon}` : '/images/logo/logo-portrait-color.png';
+  const logoIconDark = siteSettings?.site_favicon ? `/storage/${siteSettings.site_favicon}` : '/images/logo/logo-portrait-white.png';
 
   const navGroups: NavGroup[] = [
     {
@@ -456,31 +462,31 @@ const AppSidebar: React.FC = () => {
           !isExpanded ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link href="/" className="flex items-center">
+        <Link href="/dashboard" className="flex items-center">
           {isExpanded || isMobileOpen ? (
             <>
               <img
-                className="dark:hidden h-28 w-auto object-contain -my-3"
-                src="/images/logo/logo-landscape-color.png"
+                className="dark:hidden h-8 w-auto object-contain"
+                src={logoLight}
                 alt="Logo"
               />
               <img
-                className="hidden dark:block h-28 w-auto object-contain -my-3"
-                src="/images/logo/logo-landscape-white.png"
+                className="hidden dark:block h-8 w-auto object-contain"
+                src={logoDark}
                 alt="Logo"
               />
             </>
           ) : (
             <>
               <img
-                src="/images/logo/logo-portrait-color.png"
+                src={logoIconLight}
                 alt="Logo"
-                className="h-11 w-auto object-contain dark:hidden"
+                className="h-8 w-auto object-contain dark:hidden"
               />
               <img
-                src="/images/logo/logo-portrait-white.png"
+                src={logoIconDark}
                 alt="Logo"
-                className="h-11 w-auto object-contain hidden dark:block"
+                className="h-8 w-auto object-contain hidden dark:block"
               />
             </>
           )}
