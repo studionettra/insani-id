@@ -9,40 +9,17 @@ import {
   LayoutGrid, 
   KeyRound, 
   LogOut, 
-  ChevronDown, 
-  Check 
+  ChevronDown 
 } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import useTranslation from "@/hooks/use-translation";
-
-type SupportedLocale = {
-  name: string;
-  url: string;
-};
-
-const FLAGS: Record<string, string> = {
-  id: "https://flagcdn.com/w40/id.png",
-  en: "https://flagcdn.com/w40/gb.png",
-  ar: "https://flagcdn.com/w40/sa.png",
-};
 
 export default function UserDropdown() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { auth, locale, supportedLocales } = usePage().props as any;
+  const { auth } = usePage().props as any;
   const user = auth?.user;
-
-  const currentLang = locale || "id";
-
-  const availableLocales: Record<string, SupportedLocale> =
-    supportedLocales && Object.keys(supportedLocales).length > 0
-      ? supportedLocales
-      : {
-          id: { name: "Bahasa Indonesia", url: "/id" },
-          en: { name: "English", url: "/en" },
-          ar: { name: "العربية", url: "/ar" },
-        };
 
   // Close on click outside or escape
   useEffect(() => {
@@ -69,14 +46,6 @@ export default function UserDropdown() {
     };
   }, []);
 
-  const changeLanguage = (targetUrl: string) => {
-    setIsOpen(false);
-    if (targetUrl) {
-      router.visit(targetUrl, {
-        preserveScroll: true,
-      });
-    }
-  };
 
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -272,43 +241,6 @@ export default function UserDropdown() {
 
           <div className="my-1.5 border-t border-zinc-100 dark:border-zinc-800" />
 
-          {/* Language Switcher */}
-          <div className="px-1 py-1">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500 mb-1.5">
-              {t('Pilihan Bahasa')}
-            </span>
-            <div className="space-y-0.5">
-              {Object.entries(availableLocales).map(([code, item]) => {
-                const isActive = currentLang === code;
-                return (
-                  <button
-                    key={code}
-                    type="button"
-                    onClick={() => changeLanguage(item.url)}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-colors ${
-                      isActive
-                        ? "font-semibold text-brand-700 dark:text-brand-400 bg-brand-50/70 dark:bg-brand-950/50"
-                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <img
-                        src={FLAGS[code] || FLAGS.id}
-                        alt={code}
-                        className="w-4 h-4 rounded-xs object-cover border border-zinc-200 dark:border-zinc-700"
-                      />
-                      <span>{item.name}</span>
-                    </div>
-                    {isActive && (
-                      <Check className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="my-1.5 border-t border-zinc-100 dark:border-zinc-800" />
 
           {/* Logout Action */}
           <button
