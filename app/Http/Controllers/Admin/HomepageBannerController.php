@@ -30,6 +30,7 @@ class HomepageBannerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:200',
             'desktop_image_url' => 'required|image|max:3072',
             'mobile_image_url' => 'nullable|image|max:2048',
             'cta_link' => 'nullable|string|max:255',
@@ -57,6 +58,7 @@ class HomepageBannerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:200',
             'desktop_image_url' => 'nullable|image|max:3072',
             'mobile_image_url' => 'nullable|image|max:2048',
             'cta_link' => 'nullable|string|max:255',

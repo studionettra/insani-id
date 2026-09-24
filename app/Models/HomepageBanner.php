@@ -11,6 +11,7 @@ class HomepageBanner extends Model
 
     protected $fillable = [
         'title',
+        'description',
         'desktop_image_url',
         'mobile_image_url',
         'cta_link',

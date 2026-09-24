@@ -10,20 +10,32 @@ class DonationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Donation::with(['program', 'donor', 'payments']);
+        $baseQuery = Donation::query();
 
         // Filter based on role
         if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga'])) {
-            $query->whereHas('program', function ($q) {
+            $baseQuery->whereHas('program', function ($q) {
                 $q->where('created_by', auth()->id());
             });
         }
+
+        $counts = [
+            'all' => (clone $baseQuery)->count(),
+            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
+            'pending_manual' => (clone $baseQuery)->where('channel', 'offline')->where('status', 'pending')->count(),
+            'paid' => (clone $baseQuery)->where('status', 'paid')->count(),
+            'failed' => (clone $baseQuery)->where('status', 'failed')->count(),
+        ];
+
+        $query = (clone $baseQuery)->with(['program', 'donor', 'payments.confirmedBy']);
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('donation_code', 'like', "%{$search}%")
                     ->orWhere('donor_name', 'like', "%{$search}%")
+                    ->orWhere('donor_email', 'like', "%{$search}%")
+                    ->orWhere('donor_phone', 'like', "%{$search}%")
                     ->orWhereHas('program', function ($sub) use ($search) {
                         $sub->where('title', 'like', "%{$search}%");
                     });
@@ -31,7 +43,15 @@ class DonationController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'pending_manual') {
+                $query->where('channel', 'offline')->where('status', 'pending');
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        if ($request->filled('channel') && $request->status !== 'pending_manual') {
+            $query->where('channel', $request->channel);
         }
 
         if ($request->filled('utm_source')) {
@@ -46,7 +66,8 @@ class DonationController extends Controller
 
         return inertia('Admin/Donation/Index', [
             'donations' => $donations,
-            'filters' => $request->only(['search', 'status', 'utm_source', 'utm_campaign']),
+            'filters' => $request->only(['search', 'status', 'channel', 'utm_source', 'utm_campaign']),
+            'counts' => $counts,
         ]);
     }
 

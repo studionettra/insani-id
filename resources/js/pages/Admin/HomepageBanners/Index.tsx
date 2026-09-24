@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Table,
     TableBody,
@@ -30,6 +31,7 @@ export default function HomepageBannersIndex({ banners, filters }: any) {
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         _method: 'post',
         title: '',
+        description: '',
         desktop_image_url: null as File | null,
         mobile_image_url: null as File | null,
         cta_link: '',
@@ -58,6 +60,7 @@ export default function HomepageBannersIndex({ banners, filters }: any) {
         setData({
             _method: 'put',
             title: banner.title,
+            description: banner.description || '',
             cta_link: banner.cta_link || '',
             desktop_image_url: null,
             mobile_image_url: null,
@@ -180,6 +183,11 @@ return;
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium text-gray-900 dark:text-white">{banner.title}</div>
+                                            {banner.description && (
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5 max-w-sm">
+                                                    {banner.description}
+                                                </p>
+                                            )}
                                             {banner.cta_link && (
                                                 <a href={banner.cta_link} target="_blank" rel="noreferrer" className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
                                                     Link Tautan
@@ -234,14 +242,34 @@ return;
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="title" className="text-gray-700 dark:text-gray-200">Judul Banner (Internal) *</Label>
+                                <Label htmlFor="title" className="text-gray-700 dark:text-gray-200">Judul Banner *</Label>
                                 <Input
                                     id="title"
                                     value={data.title}
                                     onChange={(e) => setData('title', e.target.value)}
+                                    placeholder="Contoh: Gotong Royong Kemanusiaan"
                                     required
                                 />
                                 {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="description" className="text-gray-700 dark:text-gray-200">Deskripsi Singkat (Opsional)</Label>
+                                    <span className={`text-xs ${data.description.length > 180 ? 'text-amber-500 font-medium' : 'text-muted-foreground'}`}>
+                                        {data.description.length}/200 karakter
+                                    </span>
+                                </div>
+                                <Textarea
+                                    id="description"
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value.slice(0, 200))}
+                                    placeholder="Tuliskan deskripsi singkat atau pesan ajakan yang tampil di bawah judul banner..."
+                                    className="resize-none h-20 text-sm"
+                                    maxLength={200}
+                                />
+                                <p className="text-xs text-muted-foreground">Maksimal 200 karakter. Ditampilkan di bawah judul pada banner beranda.</p>
+                                {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                             </div>
 
                             <div className="grid gap-2">
@@ -326,7 +354,7 @@ return;
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_title" className="text-gray-700 dark:text-gray-200">Judul Banner (Internal) *</Label>
+                                <Label htmlFor="edit_title" className="text-gray-700 dark:text-gray-200">Judul Banner *</Label>
                                 <Input
                                     id="edit_title"
                                     value={data.title}
@@ -334,6 +362,25 @@ return;
                                     required
                                 />
                                 {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+                            </div>
+
+                            <div className="grid gap-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="edit_description" className="text-gray-700 dark:text-gray-200">Deskripsi Singkat (Opsional)</Label>
+                                    <span className={`text-xs ${data.description.length > 180 ? 'text-amber-500 font-medium' : 'text-muted-foreground'}`}>
+                                        {data.description.length}/200 karakter
+                                    </span>
+                                </div>
+                                <Textarea
+                                    id="edit_description"
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value.slice(0, 200))}
+                                    placeholder="Tuliskan deskripsi singkat atau pesan ajakan yang tampil di bawah judul banner..."
+                                    className="resize-none h-20 text-sm"
+                                    maxLength={200}
+                                />
+                                <p className="text-xs text-muted-foreground">Maksimal 200 karakter. Ditampilkan di bawah judul pada banner beranda.</p>
+                                {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
                             </div>
 
                             <div className="grid gap-2">

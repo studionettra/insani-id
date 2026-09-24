@@ -67,6 +67,11 @@ class Donation extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function comment()
+    {
+        return $this->hasOne(Comment::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();

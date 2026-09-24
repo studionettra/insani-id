@@ -509,74 +509,84 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                     }
                 }}
             >
-                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold text-slate-900">
-                            {isCreateModalOpen ? 'Tambah Laporan Keuangan Baru' : 'Perbarui Laporan Keuangan'}
-                        </DialogTitle>
-                        <DialogDescription>
-                            Isi detail informasi dokumen tahunan dan berkas laporan pertanggungjawaban publik.
-                        </DialogDescription>
+                <DialogContent className="w-full sm:max-w-4xl max-h-[92vh] overflow-y-auto no-scrollbar p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+                    <DialogHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                                    <Building2 className="w-5 h-5 text-insani-blue" />
+                                    <span>{isCreateModalOpen ? 'Tambah Laporan Keuangan Baru' : 'Perbarui Laporan Keuangan'}</span>
+                                </DialogTitle>
+                                <DialogDescription className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                    Isi detail informasi dokumen tahunan dan berkas laporan pertanggungjawaban publik.
+                                </DialogDescription>
+                            </div>
+
+                            {/* Tab Bahasa Toggle */}
+                            <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl shrink-0 self-start sm:self-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveLangTab('id')}
+                                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                        activeLangTab === 'id' 
+                                            ? 'bg-white dark:bg-slate-900 text-insani-blue shadow-xs font-bold' 
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    Bahasa Indonesia 🇮🇩
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveLangTab('en')}
+                                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                        activeLangTab === 'en' 
+                                            ? 'bg-white dark:bg-slate-900 text-insani-blue shadow-xs font-bold' 
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    English 🇬🇧
+                                </button>
+                            </div>
+                        </div>
                     </DialogHeader>
 
-                    <form onSubmit={isCreateModalOpen ? submitCreate : submitEdit} className="space-y-5 pt-2">
-                        {/* Tab Bahasa */}
-                        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-                            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">Bahasa:</span>
-                            <button
-                                type="button"
-                                onClick={() => setActiveLangTab('id')}
-                                className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
-                                    activeLangTab === 'id' 
-                                        ? 'bg-insani-blue text-white' 
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
-                            >
-                                Bahasa Indonesia 🇮🇩
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setActiveLangTab('en')}
-                                className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
-                                    activeLangTab === 'en' 
-                                        ? 'bg-insani-blue text-white' 
-                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                                }`}
-                            >
-                                English 🇬🇧
-                            </button>
-                        </div>
-
+                    <form onSubmit={isCreateModalOpen ? submitCreate : submitEdit} className="space-y-6 pt-2">
                         {/* Judul Laporan */}
                         {activeLangTab === 'id' ? (
                             <div>
-                                <Label htmlFor="title_id">Judul Laporan (ID) <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="title_id" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Judul Laporan (ID) <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     id="title_id"
                                     value={data.title.id}
                                     onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
                                     placeholder="Contoh: Laporan Tahunan & Akuntabilitas Yayasan 2024"
-                                    className="mt-1.5"
+                                    className="mt-1.5 h-10 text-sm"
                                 />
                                 {errors['title.id'] && <p className="text-xs text-red-500 mt-1">{errors['title.id']}</p>}
                             </div>
                         ) : (
                             <div>
-                                <Label htmlFor="title_en">Judul Laporan (EN)</Label>
+                                <Label htmlFor="title_en" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Judul Laporan (EN)
+                                </Label>
                                 <Input
                                     id="title_en"
                                     value={data.title.en}
                                     onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
                                     placeholder="e.g. Annual & Accountability Report 2024"
-                                    className="mt-1.5"
+                                    className="mt-1.5 h-10 text-sm"
                                 />
                             </div>
                         )}
 
-                        {/* Grid Baris: Tahun, Kategori, Status Audit */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* Grid Baris: Tahun, Kategori, Status Audit, KAP */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <Label htmlFor="report_year">Tahun Buku <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="report_year" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Tahun Buku <span className="text-red-500">*</span>
+                                </Label>
                                 <Input
                                     id="report_year"
                                     type="number"
@@ -584,18 +594,20 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     max="2100"
                                     value={data.report_year}
                                     onChange={(e) => setData('report_year', parseInt(e.target.value) || new Date().getFullYear())}
-                                    className="mt-1.5"
+                                    className="mt-1.5 h-10 text-sm"
                                 />
                                 {errors.report_year && <p className="text-xs text-red-500 mt-1">{errors.report_year}</p>}
                             </div>
 
                             <div>
-                                <Label htmlFor="category">Kategori Laporan <span className="text-red-500">*</span></Label>
+                                <Label htmlFor="category" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Kategori Laporan <span className="text-red-500">*</span>
+                                </Label>
                                 <select
                                     id="category"
                                     value={data.category}
                                     onChange={(e) => setData('category', e.target.value)}
-                                    className="mt-1.5 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-insani-blue/20"
+                                    className="mt-1.5 h-10 w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-insani-blue/20"
                                 >
                                     {CATEGORY_OPTIONS.map((opt) => (
                                         <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -604,65 +616,77 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                             </div>
 
                             <div>
-                                <Label htmlFor="audit_status">Status Opini Audit</Label>
+                                <Label htmlFor="audit_status" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                    Status Opini Audit
+                                </Label>
                                 <Input
                                     id="audit_status"
                                     value={data.audit_status}
                                     onChange={(e) => setData('audit_status', e.target.value)}
                                     placeholder="e.g. WTP / Proses Audit"
-                                    className="mt-1.5"
+                                    className="mt-1.5 h-10 text-sm"
                                 />
                             </div>
-                        </div>
 
-                        {/* Nama Auditor / KAP */}
-                        <div>
-                            <Label htmlFor="auditor_name">Nama Kantor Akuntan Publik (KAP / Auditor)</Label>
-                            <Input
-                                id="auditor_name"
-                                value={data.auditor_name}
-                                onChange={(e) => setData('auditor_name', e.target.value)}
-                                placeholder="e.g. KAP Heliantono & Rekan (BDO / dsb)"
-                                className="mt-1.5"
-                            />
+                            <div>
+                                <Label htmlFor="auditor_name" className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate" title="Nama Kantor Akuntan Publik (KAP)">
+                                    Kantor Akuntan Publik (KAP)
+                                </Label>
+                                <Input
+                                    id="auditor_name"
+                                    value={data.auditor_name}
+                                    onChange={(e) => setData('auditor_name', e.target.value)}
+                                    placeholder="e.g. KAP Heliantono & Rekan"
+                                    className="mt-1.5 h-10 text-sm"
+                                />
+                            </div>
                         </div>
 
                         {/* Ringkasan Eksekutif */}
                         {activeLangTab === 'id' ? (
                             <div>
-                                <Label htmlFor="summary_id">Ringkasan Laporan / Kata Pengantar (ID)</Label>
+                                <Label htmlFor="summary_id" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Ringkasan Laporan / Kata Pengantar Pengurus (ID)
+                                </Label>
                                 <Textarea
                                     id="summary_id"
                                     rows={3}
                                     value={data.summary.id}
                                     onChange={(e) => setData('summary', { ...data.summary, id: e.target.value })}
-                                    placeholder="Tuliskan ringkasan singkat pencapaian atau kata pengantar pengurus..."
-                                    className="mt-1.5"
+                                    placeholder="Tuliskan ringkasan singkat pencapaian atau kata pengantar pengurus yayasan..."
+                                    className="mt-1.5 text-sm"
                                 />
                             </div>
                         ) : (
                             <div>
-                                <Label htmlFor="summary_en">Executive Summary (EN)</Label>
+                                <Label htmlFor="summary_en" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Executive Summary / Foreword (EN)
+                                </Label>
                                 <Textarea
                                     id="summary_en"
                                     rows={3}
                                     value={data.summary.en}
                                     onChange={(e) => setData('summary', { ...data.summary, en: e.target.value })}
                                     placeholder="Brief summary of achievements or executive foreword..."
-                                    className="mt-1.5"
+                                    className="mt-1.5 text-sm"
                                 />
                             </div>
                         )}
 
                         {/* Sorotan Angka Finansial (Opsional) */}
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-3">
-                            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5 text-insani-blue" />
-                                Sorotan Angka Utama (Opsional untuk Ringkasan Cepat)
-                            </span>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-4 sm:p-5 bg-slate-50/90 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Sparkles className="w-4 h-4 text-insani-blue" />
+                                    Sorotan Angka Utama (Opsional untuk Ringkasan Cepat)
+                                </span>
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                    Tampil di kartu ringkasan publik
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <Label htmlFor="total_revenue" className="text-xs">Total Penghimpunan (Rp)</Label>
+                                    <Label htmlFor="total_revenue" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Total Penghimpunan (Rp)</Label>
                                     <Input
                                         id="total_revenue"
                                         type="number"
@@ -670,11 +694,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                         value={data.total_revenue}
                                         onChange={(e) => setData('total_revenue', e.target.value)}
                                         placeholder="Contoh: 4850000000"
-                                        className="mt-1 text-sm bg-white"
+                                        className="mt-1.5 h-10 text-sm bg-white dark:bg-slate-900"
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="total_disbursement" className="text-xs">Total Penyaluran (Rp)</Label>
+                                    <Label htmlFor="total_disbursement" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Total Penyaluran (Rp)</Label>
                                     <Input
                                         id="total_disbursement"
                                         type="number"
@@ -682,11 +706,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                         value={data.total_disbursement}
                                         onChange={(e) => setData('total_disbursement', e.target.value)}
                                         placeholder="Contoh: 4320000000"
-                                        className="mt-1 text-sm bg-white"
+                                        className="mt-1.5 h-10 text-sm bg-white dark:bg-slate-900"
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="beneficiaries_count" className="text-xs">Penerima Manfaat (Jiwa)</Label>
+                                    <Label htmlFor="beneficiaries_count" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Penerima Manfaat (Jiwa)</Label>
                                     <Input
                                         id="beneficiaries_count"
                                         type="number"
@@ -694,7 +718,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                         value={data.beneficiaries_count}
                                         onChange={(e) => setData('beneficiaries_count', e.target.value)}
                                         placeholder="Contoh: 38500"
-                                        className="mt-1 text-sm bg-white"
+                                        className="mt-1.5 h-10 text-sm bg-white dark:bg-slate-900"
                                     />
                                 </div>
                             </div>
@@ -703,8 +727,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                         {/* Upload Berkas PDF & Sampul */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Berkas PDF */}
-                            <div>
-                                <Label htmlFor="file">Berkas PDF Dokumen Laporan (Maks. 25MB)</Label>
+                            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/40 space-y-2">
+                                <Label htmlFor="file" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                                    <span>Berkas PDF Dokumen Laporan</span>
+                                    <span className="text-[11px] font-normal text-slate-500">Maks. 25MB</span>
+                                </Label>
                                 <Input
                                     id="file"
                                     type="file"
@@ -714,19 +741,25 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                             setData('file', e.target.files[0]);
                                         }
                                     }}
-                                    className="mt-1.5"
+                                    className="mt-1.5 h-10 text-xs sm:text-sm cursor-pointer"
                                 />
                                 {errors.file && <p className="text-xs text-red-500 mt-1">{errors.file}</p>}
                                 {isEditModalOpen && editingReport?.file_path && (
-                                    <p className="text-xs text-slate-500 mt-1">
-                                        Berkas saat ini: <a href={editingReport.file_url} target="_blank" rel="noreferrer" className="text-insani-blue underline">Lihat PDF</a>
+                                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                                        <span>Berkas saat ini:</span>
+                                        <a href={editingReport.file_url} target="_blank" rel="noreferrer" className="text-insani-blue underline font-medium inline-flex items-center">
+                                            Lihat Dokumen PDF <ExternalLink className="w-3 h-3 ml-0.5" />
+                                        </a>
                                     </p>
                                 )}
                             </div>
 
                             {/* Cover Sampul Gambar */}
-                            <div>
-                                <Label htmlFor="cover_file">Gambar Sampul Buku (JPG, PNG, WebP)</Label>
+                            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/40 space-y-2">
+                                <Label htmlFor="cover_file" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                                    <span>Gambar Sampul Buku</span>
+                                    <span className="text-[11px] font-normal text-slate-500">JPG, PNG, WebP</span>
+                                </Label>
                                 <Input
                                     id="cover_file"
                                     type="file"
@@ -736,55 +769,65 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                             setData('cover_file', e.target.files[0]);
                                         }
                                     }}
-                                    className="mt-1.5"
+                                    className="mt-1.5 h-10 text-xs sm:text-sm cursor-pointer"
                                 />
                                 {errors.cover_file && <p className="text-xs text-red-500 mt-1">{errors.cover_file}</p>}
                                 {isEditModalOpen && editingReport?.cover_url && (
-                                    <p className="text-xs text-slate-500 mt-1">
-                                        Sampul saat ini: <a href={editingReport.cover_url} target="_blank" rel="noreferrer" className="text-insani-blue underline">Lihat Sampul</a>
+                                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
+                                        <span>Sampul saat ini:</span>
+                                        <a href={editingReport.cover_url} target="_blank" rel="noreferrer" className="text-insani-blue underline font-medium inline-flex items-center">
+                                            Lihat Gambar Sampul <ExternalLink className="w-3 h-3 ml-0.5" />
+                                        </a>
                                     </p>
                                 )}
                             </div>
                         </div>
 
-                        {/* Link Eksternal Cadangan */}
-                        <div>
-                            <Label htmlFor="external_url">Tautan Eksternal Cadangan (Opsional: Google Drive / Cloud Link)</Label>
-                            <Input
-                                id="external_url"
-                                value={data.external_url}
-                                onChange={(e) => setData('external_url', e.target.value)}
-                                placeholder="https://drive.google.com/file/d/..."
-                                className="mt-1.5"
-                            />
-                        </div>
-
-                        {/* Pengaturan Tambahan: Aktif & Urutan */}
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="is_active"
-                                    checked={data.is_active}
-                                    onCheckedChange={(checked) => setData('is_active', !!checked)}
-                                />
-                                <Label htmlFor="is_active" className="text-sm font-normal cursor-pointer">
-                                    Tampilkan laporan ke publik (Aktif)
+                        {/* Link Eksternal Cadangan & Urutan */}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="sm:col-span-2">
+                                <Label htmlFor="external_url" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Tautan Eksternal Cadangan (Opsional: Google Drive / Cloud Link)
                                 </Label>
+                                <Input
+                                    id="external_url"
+                                    value={data.external_url}
+                                    onChange={(e) => setData('external_url', e.target.value)}
+                                    placeholder="https://drive.google.com/file/d/..."
+                                    className="mt-1.5 h-10 text-sm"
+                                />
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                <Label htmlFor="sort_order" className="text-xs text-slate-500">Urutan:</Label>
+                            <div>
+                                <Label htmlFor="sort_order" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Urutan Tampil (Sort Order)
+                                </Label>
                                 <Input
                                     id="sort_order"
                                     type="number"
                                     value={data.sort_order}
                                     onChange={(e) => setData('sort_order', parseInt(e.target.value) || 0)}
-                                    className="w-20 h-8 text-xs"
+                                    className="mt-1.5 h-10 text-sm"
                                 />
                             </div>
                         </div>
 
-                        <DialogFooter className="pt-4 border-t border-slate-100">
+                        {/* Pengaturan Tambahan: Aktif */}
+                        <div className="flex items-center justify-between pt-2 pb-1 border-t border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center space-x-2.5">
+                                <Checkbox
+                                    id="is_active"
+                                    checked={data.is_active}
+                                    onCheckedChange={(checked) => setData('is_active', !!checked)}
+                                    className="data-[state=checked]:bg-insani-blue data-[state=checked]:border-insani-blue"
+                                />
+                                <Label htmlFor="is_active" className="text-sm font-medium text-slate-800 dark:text-slate-200 cursor-pointer">
+                                    Tampilkan laporan ke publik (Status Aktif)
+                                </Label>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
                             <Button 
                                 type="button" 
                                 variant="outline" 
@@ -792,13 +835,14 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     setIsCreateModalOpen(false);
                                     setIsEditModalOpen(false);
                                 }}
+                                className="h-10 px-5 text-sm"
                             >
                                 Batal
                             </Button>
                             <Button 
                                 type="submit" 
                                 disabled={processing}
-                                className="bg-insani-blue hover:bg-insani-blue/90 text-white"
+                                className="bg-insani-blue hover:bg-insani-blue/90 text-white h-10 px-6 text-sm font-semibold shadow-xs"
                             >
                                 {processing ? 'Menyimpan...' : (isCreateModalOpen ? 'Simpan Laporan' : 'Perbarui Laporan')}
                             </Button>
