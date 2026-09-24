@@ -13,7 +13,9 @@ import {
     Megaphone,
     ShieldCheck,
     Globe,
-    ExternalLink
+    ExternalLink,
+    Building2,
+    FileCheck
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -455,122 +457,6 @@ export default function SiteSettingsIndex({ settings }: Props) {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Card: Legalitas Yayasan & SK Kemenkumham */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                                            <ShieldCheck className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Legalitas Yayasan & SK Kemenkumham</h2>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Informasi badan hukum resmi yang ditampilkan pada fat footer dan kwitansi donasi.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Label htmlFor="show_sk_in_footer" className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                            Tampilkan di Footer
-                                        </Label>
-                                        <Switch
-                                            id="show_sk_in_footer"
-                                            checked={data.show_sk_in_footer === '1'}
-                                            onCheckedChange={(checked) => setData('show_sk_in_footer', checked ? '1' : '0')}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="legal_foundation_name">Nama Resmi Badan Hukum Yayasan</Label>
-                                        <Input
-                                            id="legal_foundation_name"
-                                            value={data.legal_foundation_name}
-                                            onChange={(e) => setData('legal_foundation_name', e.target.value)}
-                                            placeholder="cth: Yayasan Peduli Insani Indonesia"
-                                            className="mt-1"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Nama badan hukum resmi yang tercantum pada hak cipta footer dan dokumen tanda terima donasi.</p>
-                                        {errors.legal_foundation_name && <p className="text-xs text-red-500 mt-1">{errors.legal_foundation_name}</p>}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="legal_sk_label">Label SK Footer</Label>
-                                            <Input
-                                                id="legal_sk_label"
-                                                value={data.legal_sk_label}
-                                                onChange={(e) => setData('legal_sk_label', e.target.value)}
-                                                placeholder="cth: SK Kemenkumham RI"
-                                                className="mt-1"
-                                            />
-                                            <p className="text-xs text-gray-400 mt-1">Label pengenal di samping nomor SK (default: <em>SK Kemenkumham RI</em>).</p>
-                                            {errors.legal_sk_label && <p className="text-xs text-red-500 mt-1">{errors.legal_sk_label}</p>}
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="legal_sk_kemenkumham">Nomor SK Kemenkumham RI</Label>
-                                            <Input
-                                                id="legal_sk_kemenkumham"
-                                                value={data.legal_sk_kemenkumham}
-                                                onChange={(e) => setData('legal_sk_kemenkumham', e.target.value)}
-                                                placeholder="cth: AHU-0002557.AH.01.04.Tahun 2019"
-                                                className="mt-1 font-mono text-xs"
-                                            />
-                                            <p className="text-xs text-gray-400 mt-1">Nomor surat keputusan pengesahan pendirian atau perubahan aktif dari Kemenkumham.</p>
-                                            {errors.legal_sk_kemenkumham && <p className="text-xs text-red-500 mt-1">{errors.legal_sk_kemenkumham}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="legal_operational_permit">Izin Operasional / PUB Kemensos (Opsional)</Label>
-                                            <Input
-                                                id="legal_operational_permit"
-                                                value={data.legal_operational_permit}
-                                                onChange={(e) => setData('legal_operational_permit', e.target.value)}
-                                                placeholder="cth: SK Kemensos No. xxx/HUK-PS/2024"
-                                                className="mt-1"
-                                            />
-                                            {errors.legal_operational_permit && <p className="text-xs text-red-500 mt-1">{errors.legal_operational_permit}</p>}
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="legal_npwp">NPWP Lembaga (Opsional)</Label>
-                                            <Input
-                                                id="legal_npwp"
-                                                value={data.legal_npwp}
-                                                onChange={(e) => setData('legal_npwp', e.target.value)}
-                                                placeholder="cth: 00.000.000.0-000.000"
-                                                className="mt-1"
-                                            />
-                                            {errors.legal_npwp && <p className="text-xs text-red-500 mt-1">{errors.legal_npwp}</p>}
-                                        </div>
-                                    </div>
-
-                                    {/* Live Preview Box */}
-                                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/60">
-                                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-2">
-                                            Pratinjau Tampilan Footer Bawah (Live Preview)
-                                        </span>
-                                        <div className="bg-slate-900 text-slate-300 p-4 rounded-xl border border-slate-800 text-xs flex flex-col sm:flex-row justify-between items-center gap-3">
-                                            <p className="text-center sm:text-left text-slate-400">
-                                                &copy; {new Date().getFullYear()} {data.legal_foundation_name || 'Yayasan Peduli Insani Indonesia'}. Hak cipta dilindungi.
-                                            </p>
-                                            {data.show_sk_in_footer === '1' ? (
-                                                <div className="flex items-center gap-1.5 text-slate-300 bg-white/5 px-2.5 py-1 rounded-md border border-white/10">
-                                                    <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                                                    <span>
-                                                        {data.legal_sk_label || 'SK Kemenkumham RI'}: <strong className="text-white font-medium">{data.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-[11px] text-amber-400/80 italic">(Badge SK disembunyikan dari footer)</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Kolom Kanan: Footer & QRIS */}
@@ -678,6 +564,36 @@ export default function SiteSettingsIndex({ settings }: Props) {
                                                         const f = e.target.files?.[0] || null;
                                                         setData('site_logo', f);
                                                         setLogoPreview(f ? URL.createObjectURL(f) : null);
+                                                    }} 
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="site_logo_white" className="text-xs font-semibold">Logo Versi Putih / Dark Mode (Footer & Sidebar)</Label>
+                                        <div className="mt-1.5 flex items-center gap-3">
+                                            {(logoWhitePreview || settings.site_logo_white) && (
+                                                <div className="h-12 w-28 bg-slate-900 rounded-lg p-1.5 flex items-center justify-center border border-slate-800">
+                                                    <img 
+                                                        src={logoWhitePreview || `/storage/${settings.site_logo_white}`} 
+                                                        alt="Logo White Preview" 
+                                                        className="h-full w-auto object-contain" 
+                                                    />
+                                                </div>
+                                            )}
+                                            <label className="flex-1 cursor-pointer">
+                                                <div className="px-3 py-2 text-xs border border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-insani-blue text-center">
+                                                    Pilih file logo putih PNG/SVG...
+                                                </div>
+                                                <input 
+                                                    type="file" 
+                                                    accept="image/png,image/svg+xml,image/webp,image/jpeg" 
+                                                    className="hidden" 
+                                                    onChange={(e) => {
+                                                        const f = e.target.files?.[0] || null;
+                                                        setData('site_logo_white', f);
+                                                        setLogoWhitePreview(f ? URL.createObjectURL(f) : null);
                                                     }} 
                                                 />
                                             </label>
@@ -879,6 +795,244 @@ export default function SiteSettingsIndex({ settings }: Props) {
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Card: Legalitas Yayasan & SK Kemenkumham (Full Width) */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
+                                    <ShieldCheck className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                                            Legalitas Yayasan & SK Kemenkumham
+                                        </h2>
+                                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                                            Kredibilitas & Keabsahan
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        Informasi badan hukum resmi yang ditampilkan pada fat footer website, e-kwitansi, dan tanda terima donasi.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/60 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
+                                <Label htmlFor="show_sk_in_footer" className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                    Tampilkan di Footer Publik
+                                </Label>
+                                <Switch
+                                    id="show_sk_in_footer"
+                                    checked={data.show_sk_in_footer === '1'}
+                                    onCheckedChange={(checked) => setData('show_sk_in_footer', checked ? '1' : '0')}
+                                />
+                                <span className={`text-[11px] font-semibold ${data.show_sk_in_footer === '1' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`}>
+                                    {data.show_sk_in_footer === '1' ? 'Aktif' : 'Nonaktif'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            {/* Kolom Kiri: Form Input Data Legalitas */}
+                            <div className="lg:col-span-7 space-y-4">
+                                <div>
+                                    <div className="flex items-center justify-between mb-1">
+                                        <Label htmlFor="legal_foundation_name" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            Nama Resmi Badan Hukum Yayasan
+                                        </Label>
+                                        <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
+                                            Wajib / Identitas Utama
+                                        </span>
+                                    </div>
+                                    <Input
+                                        id="legal_foundation_name"
+                                        value={data.legal_foundation_name}
+                                        onChange={(e) => setData('legal_foundation_name', e.target.value)}
+                                        placeholder="cth: Yayasan Peduli Insani Indonesia"
+                                        className="mt-1"
+                                    />
+                                    <p className="text-xs text-gray-400 mt-1">Nama badan hukum resmi yang tercantum pada hak cipta footer, e-receipt, dan dokumen tanda terima donasi.</p>
+                                    {errors.legal_foundation_name && <p className="text-xs text-red-500 mt-1">{errors.legal_foundation_name}</p>}
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="legal_sk_label" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            Label SK Footer
+                                        </Label>
+                                        <Input
+                                            id="legal_sk_label"
+                                            value={data.legal_sk_label}
+                                            onChange={(e) => setData('legal_sk_label', e.target.value)}
+                                            placeholder="cth: SK Kemenkumham RI"
+                                            className="mt-1"
+                                        />
+                                        <p className="text-xs text-gray-400 mt-1">Label pengenal di samping nomor SK (default: <em>SK Kemenkumham RI</em>).</p>
+                                        {errors.legal_sk_label && <p className="text-xs text-red-500 mt-1">{errors.legal_sk_label}</p>}
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="legal_sk_kemenkumham" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            Nomor SK Kemenkumham RI
+                                        </Label>
+                                        <Input
+                                            id="legal_sk_kemenkumham"
+                                            value={data.legal_sk_kemenkumham}
+                                            onChange={(e) => setData('legal_sk_kemenkumham', e.target.value)}
+                                            placeholder="cth: AHU-0002557.AH.01.04.Tahun 2019"
+                                            className="mt-1 font-mono text-xs"
+                                        />
+                                        <p className="text-xs text-gray-400 mt-1">Nomor surat keputusan pengesahan pendirian atau perubahan aktif dari Kemenkumham.</p>
+                                        {errors.legal_sk_kemenkumham && <p className="text-xs text-red-500 mt-1">{errors.legal_sk_kemenkumham}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="legal_operational_permit" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            Izin Operasional / PUB Kemensos (Opsional)
+                                        </Label>
+                                        <Input
+                                            id="legal_operational_permit"
+                                            value={data.legal_operational_permit}
+                                            onChange={(e) => setData('legal_operational_permit', e.target.value)}
+                                            placeholder="cth: SK Kemensos No. xxx/HUK-PS/2024"
+                                            className="mt-1"
+                                        />
+                                        <p className="text-xs text-gray-400 mt-1">Nomor izin pengumpulan uang/barang dari Kementerian Sosial atau Dinas Sosial.</p>
+                                        {errors.legal_operational_permit && <p className="text-xs text-red-500 mt-1">{errors.legal_operational_permit}</p>}
+                                    </div>
+
+                                    <div>
+                                        <Label htmlFor="legal_npwp" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            NPWP Lembaga (Opsional)
+                                        </Label>
+                                        <Input
+                                            id="legal_npwp"
+                                            value={data.legal_npwp}
+                                            onChange={(e) => setData('legal_npwp', e.target.value)}
+                                            placeholder="cth: 00.000.000.0-000.000"
+                                            className="mt-1 font-mono text-xs"
+                                        />
+                                        <p className="text-xs text-gray-400 mt-1">Nomor Pokok Wajib Pajak yayasan untuk akuntabilitas perpajakan donasi.</p>
+                                        {errors.legal_npwp && <p className="text-xs text-red-500 mt-1">{errors.legal_npwp}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="pt-2">
+                                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/70 dark:border-slate-800 text-xs">
+                                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                                            <Info className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                            <span>Butuh melampirkan berkas sertifikat, akta notaris, atau SK PDF lengkap?</span>
+                                        </div>
+                                        <a 
+                                            href="/admin/legal-documents" 
+                                            className="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors whitespace-nowrap ml-2"
+                                        >
+                                            Kelola Arsip Dokumen
+                                            <ExternalLink className="w-3.5 h-3.5" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Kolom Kanan: Pratinjau Interaktif & Visualisasi Distribusi */}
+                            <div className="lg:col-span-5 space-y-4">
+                                {/* 1. Pratinjau Live Footer Bawah */}
+                                <div className="p-4 bg-slate-900 dark:bg-slate-950 rounded-xl border border-slate-800 text-slate-300 shadow-inner">
+                                    <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-800/80">
+                                        <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                                            <span className="relative flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                            </span>
+                                            Pratinjau Footer Publik
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded font-mono border border-slate-700/50">
+                                            Live Preview
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="text-xs space-y-3">
+                                        <p className="text-slate-400 text-center sm:text-left leading-relaxed">
+                                            &copy; {new Date().getFullYear()} <span className="text-slate-200 font-medium">{data.legal_foundation_name || 'Yayasan Peduli Insani Indonesia'}</span>. Hak cipta dilindungi.
+                                        </p>
+                                        <div>
+                                            {data.show_sk_in_footer === '1' ? (
+                                                <div className="inline-flex items-center gap-1.5 text-slate-300 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10">
+                                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                                    <span>
+                                                        {data.legal_sk_label || 'SK Kemenkumham RI'}: <strong className="text-white font-medium">{data.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <div className="text-[11px] text-amber-400/90 bg-amber-950/40 border border-amber-800/50 px-2.5 py-1.5 rounded-lg italic">
+                                                    (Badge SK disembunyikan dari footer publik)
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. Pratinjau Tanda Terima & E-Kwitansi Donatur */}
+                                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700/80">
+                                    <div className="flex items-center justify-between gap-2 mb-3">
+                                        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800 dark:text-gray-200">
+                                            <FileCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                            <span>Tampilan pada Kwitansi & E-Receipt</span>
+                                        </div>
+                                        <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                            <CheckCircle2 className="w-3 h-3" /> Sah Terverifikasi
+                                        </span>
+                                    </div>
+
+                                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200/70 dark:border-gray-700 shadow-2xs space-y-2 text-xs">
+                                        <div className="flex justify-between items-start gap-2">
+                                            <span className="text-gray-500 dark:text-gray-400 shrink-0">Nama Badan Hukum:</span>
+                                            <span className="font-semibold text-gray-900 dark:text-white text-right break-words">
+                                                {data.legal_foundation_name || 'Yayasan Peduli Insani Indonesia'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-start gap-2">
+                                            <span className="text-gray-500 dark:text-gray-400 shrink-0">SK Kemenkumham:</span>
+                                            <span className="font-mono text-gray-800 dark:text-gray-200 text-right break-all">
+                                                {data.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}
+                                            </span>
+                                        </div>
+                                        {data.legal_operational_permit && (
+                                            <div className="flex justify-between items-start gap-2">
+                                                <span className="text-gray-500 dark:text-gray-400 shrink-0">Izin PUB/Kemensos:</span>
+                                                <span className="text-gray-800 dark:text-gray-200 text-right break-words">
+                                                    {data.legal_operational_permit}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {data.legal_npwp && (
+                                            <div className="flex justify-between items-start gap-2">
+                                                <span className="text-gray-500 dark:text-gray-400 shrink-0">NPWP:</span>
+                                                <span className="font-mono text-gray-800 dark:text-gray-200 text-right">
+                                                    {data.legal_npwp}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                        <span className="text-[10px] bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
+                                            ✓ Fat Footer Publik
+                                        </span>
+                                        <span className="text-[10px] bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
+                                            ✓ E-Kwitansi Donasi
+                                        </span>
+                                        <span className="text-[10px] bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
+                                            ✓ Cetak PDF Tanda Terima
+                                        </span>
                                     </div>
                                 </div>
                             </div>
