@@ -11,6 +11,8 @@ use App\Models\Program;
 use App\Services\XenditPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Mail\DonationPendingNotification;
+use Illuminate\Support\Facades\Mail;
 
 class DonationController extends Controller
 {
@@ -124,6 +126,9 @@ class DonationController extends Controller
                     'gateway_status' => 'PENDING',
                 ]);
 
+                // Kirim email tagihan pending
+                Mail::to($donation->donor_email)->queue(new DonationPendingNotification($donation));
+
                 return inertia()->location($invoice['invoice_url']);
             } else {
                 // If failed, mark as failed
@@ -145,6 +150,9 @@ class DonationController extends Controller
                 'gateway_reference_id' => $donationCode,
                 'gateway_status' => 'PENDING',
             ]);
+
+            // Kirim email tagihan pending
+            Mail::to($donation->donor_email)->queue(new DonationPendingNotification($donation));
 
             return redirect()->route('donation.status', ['donationCode' => $donationCode]);
         }

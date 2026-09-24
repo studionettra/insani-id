@@ -269,10 +269,10 @@ class XenditPaymentService
                 'mobile_number' => $donation->donor_phone,
             ],
             'customer_notification_preference' => [
-                'invoice_created' => ['whatsapp', 'email'],
-                'invoice_reminder' => ['whatsapp', 'email'],
-                'invoice_paid' => ['whatsapp', 'email'],
-                'invoice_expired' => ['whatsapp', 'email'],
+                'invoice_created' => ['whatsapp'],
+                'invoice_reminder' => ['whatsapp'],
+                'invoice_paid' => ['whatsapp'],
+                'invoice_expired' => ['whatsapp'],
             ],
         ];
 

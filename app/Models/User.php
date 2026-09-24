@@ -86,11 +86,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Donation::class, 'fundraiser_user_id');
     }
 
-    /**
-     * Send the password reset notification.
-     *
-     * @param  string  $token
-     */
     public function sendPasswordResetNotification($token): void
     {
         // Do not send reset email if user is deactivated
@@ -99,5 +94,18 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        // Do not send if user is deactivated
+        if (isset($this->is_active) && ! $this->is_active) {
+            return;
+        }
+
+        $this->notify(new \App\Notifications\VerifyEmailNotification);
     }
 }
