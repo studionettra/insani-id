@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\BankAccountController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\CampaignerVerificationController;
+use App\Http\Controllers\Admin\CampaignSlotRequestController as AdminCampaignSlotRequestController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CommentModerationController;
 use App\Http\Controllers\Admin\ContactMessageController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Public\CampaignerDisbursementController;
 use App\Http\Controllers\Public\CampaignerProgramController;
 use App\Http\Controllers\Public\CampaignerProgramUpdateController;
 use App\Http\Controllers\Public\CampaignerRegistrationController;
+use App\Http\Controllers\Public\CampaignerSlotRequestController;
 use App\Http\Controllers\Public\CommentController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\DonationController;
@@ -251,6 +253,10 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::get('/campaigners/{id}', [CampaignerVerificationController::class, 'show'])->name('campaigners.show');
             Route::get('/campaigners/{id}/documents/{docId}', [CampaignerVerificationController::class, 'viewDocument'])->name('campaigners.document');
             Route::put('/campaigners/{id}/status', [CampaignerVerificationController::class, 'updateStatus'])->name('campaigners.update-status');
+
+            Route::get('/slot-requests', [AdminCampaignSlotRequestController::class, 'index'])->name('slot-requests.index');
+            Route::post('/slot-requests/{slotRequest}/approve', [AdminCampaignSlotRequestController::class, 'approve'])->name('slot-requests.approve');
+            Route::post('/slot-requests/{slotRequest}/reject', [AdminCampaignSlotRequestController::class, 'reject'])->name('slot-requests.reject');
         });
 
         Route::get('/fundraisers', [AdminFundraiserController::class, 'index'])->name('fundraisers.index');
@@ -303,6 +309,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::resource('programs', CampaignerProgramController::class);
             Route::resource('programs.disbursements', CampaignerDisbursementController::class)->only(['index', 'create', 'store']);
             Route::resource('programs.updates', CampaignerProgramUpdateController::class)->only(['index', 'store']);
+            Route::post('slot-requests', [CampaignerSlotRequestController::class, 'store'])->name('slot-requests.store');
         });
 
         // Rich Text Image Upload (for Campaigners & Admins)

@@ -21,13 +21,36 @@ class CampaignerProgramController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+        $profile = $user->campaignerProfile;
+
         $programs = Program::with('category')
-            ->where('created_by', auth()->id())
+            ->where('created_by', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        $quota = null;
+        if ($profile) {
+            $activeCount = $profile->active_programs_count;
+            $maxSlots = $profile->max_campaign_slots ?? ($profile->type === 'lembaga' ? 3 : 1);
+            $pendingRequest = $profile->latestPendingSlotRequest;
+            $quota = [
+                'type' => $profile->type,
+                'active_count' => $activeCount,
+                'max_slots' => $maxSlots,
+                'remaining_slots' => max(0, $maxSlots - $activeCount),
+                'can_create' => $activeCount < $maxSlots,
+                'has_pending_request' => $pendingRequest !== null,
+                'pending_request' => $pendingRequest ? [
+                    'requested_slots' => $pendingRequest->requested_slots,
+                    'created_at' => $pendingRequest->created_at->format('d M Y, H:i'),
+                ] : null,
+            ];
+        }
+
         return Inertia::render('Public/Akun/Program/Index', [
             'programs' => $programs,
+            'quota' => $quota,
         ]);
     }
 
@@ -36,6 +59,14 @@ class CampaignerProgramController extends Controller
      */
     public function create()
     {
+        $profile = auth()->user()->campaignerProfile;
+        if ($profile && ! $profile->hasAvailableSlot()) {
+            return redirect()->route('akun.programs.index')->with(
+                'error',
+                "Batas kuota {$profile->max_campaign_slots} campaign aktif Anda telah tercapai. Selesaikan campaign yang sedang berjalan atau ajukan penambahan slot kuota ke Superadmin."
+            );
+        }
+
         $categories = Category::where('is_active', true)->get();
 
         return Inertia::render('Public/Akun/Program/Create', [
@@ -48,6 +79,14 @@ class CampaignerProgramController extends Controller
      */
     public function store(Request $request)
     {
+        $campaignerProfile = auth()->user()->campaignerProfile;
+
+        if ($campaignerProfile && ! $campaignerProfile->hasAvailableSlot()) {
+            throw ValidationException::withMessages([
+                'title' => "Batas maksimal {$campaignerProfile->max_campaign_slots} campaign aktif Anda telah tercapai. Selesaikan campaign yang sedang berjalan atau ajukan penambahan kuota slot.",
+            ]);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',

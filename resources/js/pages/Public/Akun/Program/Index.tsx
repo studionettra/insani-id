@@ -1,10 +1,18 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Eye, Edit, Trash2, Target } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Target, ArrowUpRight, Clock, Building2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
@@ -20,6 +28,19 @@ interface Program {
     created_at: string;
 }
 
+interface QuotaInfo {
+    type: 'individu' | 'lembaga' | string;
+    active_count: number;
+    max_slots: number;
+    remaining_slots: number;
+    can_create: boolean;
+    has_pending_request?: boolean;
+    pending_request?: {
+        requested_slots: number;
+        created_at: string;
+    } | null;
+}
+
 interface Props {
     programs: {
         data: Program[];
@@ -27,11 +48,40 @@ interface Props {
         last_page: number;
         links: any[];
     };
+    quota?: QuotaInfo | null;
 }
 
-export default function AkunProgramIndex({ programs }: Props) {
+export default function AkunProgramIndex({ programs, quota }: Props) {
     const [programToDelete, setProgramToDelete] = useState<any>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Slot request state
+    const [isSlotModalOpen, setIsSlotModalOpen] = useState(false);
+    const [requestedSlots, setRequestedSlots] = useState(quota ? quota.max_slots + 2 : 5);
+    const [requestReason, setRequestReason] = useState('');
+    const [plannedPrograms, setPlannedPrograms] = useState('');
+    const [isSubmittingSlot, setIsSubmittingSlot] = useState(false);
+
+    const handleSlotRequestSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmittingSlot(true);
+        router.post(
+            '/akun/slot-requests',
+            {
+                requested_slots: requestedSlots,
+                reason: requestReason,
+                planned_programs: plannedPrograms,
+            },
+            {
+                onFinish: () => {
+                    setIsSubmittingSlot(false);
+                    setIsSlotModalOpen(false);
+                    setRequestReason('');
+                    setPlannedPrograms('');
+                },
+            }
+        );
+    };
 
     const handleConfirmDelete = () => {
         if (!programToDelete) return;
@@ -69,18 +119,118 @@ export default function AkunProgramIndex({ programs }: Props) {
 
             <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 w-full">
                 <div>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                         <div>
                             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Program Saya</h1>
                             <p className="text-slate-500 dark:text-gray-400 mt-1">Kelola program penggalangan dana yang Anda buat.</p>
                         </div>
-                        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
-                            <Link href="/akun/programs/create">
-                                <Plus className="mr-2 h-4 w-4" />
-                                Galang Dana Baru
-                            </Link>
-                        </Button>
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                            {quota?.type === 'lembaga' && !quota.has_pending_request && !quota.can_create && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsSlotModalOpen(true)}
+                                    className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 shadow-xs"
+                                >
+                                    <ArrowUpRight className="mr-1.5 h-4 w-4" />
+                                    Ajukan Tambah Slot
+                                </Button>
+                            )}
+                            {quota?.can_create === false ? (
+                                <Button
+                                    disabled
+                                    className="bg-slate-200 text-slate-500 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed shadow-none"
+                                    title="Batas kuota campaign aktif Anda telah tercapai."
+                                >
+                                    Slot Penuh ({quota.active_count}/{quota.max_slots})
+                                </Button>
+                            ) : (
+                                <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
+                                    <Link href="/akun/programs/create">
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Galang Dana Baru
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
                     </div>
+
+                    {/* Kuota Slot Campaign Aktif Banner */}
+                    {quota && (
+                        <div className={`p-4 sm:p-5 rounded-2xl border mb-6 transition-all ${
+                            quota.can_create 
+                                ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/50' 
+                                : 'bg-amber-50/60 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50'
+                        }`}>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400">
+                                            Status Kuota Campaign ({quota.type === 'lembaga' ? 'Mitra Lembaga' : 'Individu'})
+                                        </span>
+                                        {quota.can_create ? (
+                                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border-emerald-200 text-[10px] py-0 font-semibold">
+                                                {quota.remaining_slots} Slot Tersedia
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 text-[10px] py-0 font-semibold">
+                                                Kuota Penuh
+                                            </Badge>
+                                        )}
+                                        {quota.has_pending_request && (
+                                            <Badge variant="outline" className="bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border-purple-200 text-[10px] py-0 font-semibold inline-flex items-center gap-1">
+                                                <Clock className="w-3 h-3 text-purple-600 animate-pulse" />
+                                                Pengajuan {quota.pending_request?.requested_slots} Slot Sedang Ditinjau
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                                        {quota.active_count} dari {quota.max_slots} Slot Campaign Sedang Berjalan
+                                    </h4>
+                                    <p className="text-xs text-slate-600 dark:text-gray-300 leading-relaxed max-w-2xl">
+                                        {quota.type === 'lembaga'
+                                            ? 'Kuota slot dihitung berdasarkan campaign aktif (status Berjalan / Menunggu Verifikasi). Ketika campaign selesai atau ditutup, slot otomatis terbuka kembali.'
+                                            : 'Campaigner individu memiliki batas 1 slot campaign aktif agar fokus dalam pengelolaan donasi dan pelaporan hingga selesai.'}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 shrink-0 self-start sm:self-center">
+                                    {/* Visual Slot Pills */}
+                                    <div className="flex items-center gap-1.5">
+                                        {Array.from({ length: quota.max_slots }).map((_, index) => {
+                                            const isUsed = index < quota.active_count;
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    title={isUsed ? `Slot ${index + 1}: Digunakan` : `Slot ${index + 1}: Tersedia`}
+                                                    className={`h-2.5 w-7 sm:w-9 rounded-full transition-all ${
+                                                        isUsed
+                                                            ? quota.can_create ? 'bg-blue-600 dark:bg-blue-500' : 'bg-amber-500'
+                                                            : 'bg-slate-200 dark:bg-gray-700'
+                                                    }`}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Tombol Ajukan Slot untuk Lembaga */}
+                                    {quota.type === 'lembaga' && !quota.has_pending_request && (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => {
+                                                setRequestedSlots(quota.max_slots + 2);
+                                                setIsSlotModalOpen(true);
+                                            }}
+                                            className="text-xs font-semibold border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-950/50"
+                                        >
+                                            <ArrowUpRight className="w-3.5 h-3.5 mr-1" />
+                                            Ajukan Tambah Slot
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="space-y-6">
                         {programs.data.length > 0 ? (
@@ -205,11 +355,17 @@ export default function AkunProgramIndex({ programs }: Props) {
                                     <p className="text-slate-500 dark:text-gray-400 mb-6 max-w-md">
                                         Anda belum membuat program penggalangan dana apapun. Mulai tebarkan kebaikan dengan membuat program pertama Anda.
                                     </p>
-                                    <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
-                                        <Link href="/akun/programs/create">
-                                            Buat Program Sekarang
-                                        </Link>
-                                    </Button>
+                                    {quota?.can_create === false ? (
+                                        <Button disabled className="bg-slate-200 text-slate-500 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed">
+                                            Batas Kuota Tercapai ({quota.active_count}/{quota.max_slots})
+                                        </Button>
+                                    ) : (
+                                        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+                                            <Link href="/akun/programs/create">
+                                                Buat Program Sekarang
+                                            </Link>
+                                        </Button>
+                                    )}
                                 </CardContent>
                             </Card>
                         )}
@@ -235,6 +391,89 @@ export default function AkunProgramIndex({ programs }: Props) {
                     )}
                 </div>
             </div>
+
+            {/* Modal Ajukan Tambahan Slot Campaign */}
+            <Dialog open={isSlotModalOpen} onOpenChange={setIsSlotModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <form onSubmit={handleSlotRequestSubmit} className="space-y-4">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+                                <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                Pengajuan Tambahan Slot Campaign
+                            </DialogTitle>
+                        </DialogHeader>
+
+                        <div className="space-y-4 text-sm">
+                            <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
+                                Standar kuota aktif untuk mitra lembaga adalah <strong>{quota?.max_slots || 3} slot</strong>. Anda dapat mengajukan kuota yang lebih besar kepada Superadmin dengan menyertakan alasan dan rencana program.
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">
+                                    Jumlah Total Slot yang Diminta <span className="text-red-500">*</span>
+                                </label>
+                                <Input
+                                    type="number"
+                                    min={(quota?.max_slots || 3) + 1}
+                                    max={50}
+                                    value={requestedSlots}
+                                    onChange={(e) => setRequestedSlots(parseInt(e.target.value) || ((quota?.max_slots || 3) + 1))}
+                                    required
+                                    className="font-bold text-base"
+                                />
+                                <p className="text-[11px] text-slate-500 mt-1">
+                                    Kuota saat ini: {quota?.max_slots} slot. Masukkan target total slot yang Anda butuhkan.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">
+                                    Alasan Pengajuan Tambahan Kuota <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    rows={3}
+                                    value={requestReason}
+                                    onChange={(e) => setRequestReason(e.target.value)}
+                                    required
+                                    placeholder="Jelaskan kebutuhan pengajuan slot tambahan untuk lembaga Anda..."
+                                    className="w-full text-sm rounded-md border border-slate-300 dark:border-gray-700 p-2.5 bg-white dark:bg-gray-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">
+                                    Rencana Program yang Akan Dibuka (Opsional)
+                                </label>
+                                <textarea
+                                    rows={2}
+                                    value={plannedPrograms}
+                                    onChange={(e) => setPlannedPrograms(e.target.value)}
+                                    placeholder="Contoh: Program renovasi pesantren di Garut dan bantuan pangan dhuafa."
+                                    className="w-full text-sm rounded-md border border-slate-300 dark:border-gray-700 p-2.5 bg-white dark:bg-gray-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsSlotModalOpen(false)}
+                                disabled={isSubmittingSlot}
+                            >
+                                Batal
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={isSubmittingSlot || !requestReason.trim()}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                                {isSubmittingSlot ? 'Mengirim...' : 'Kirim Pengajuan'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             <ConfirmDialog
                 open={!!programToDelete}
