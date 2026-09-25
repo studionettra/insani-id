@@ -196,6 +196,7 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
         donor_phone: '',
         is_anonymous: false,
         message: '',
+        website_url: '',
         channel: initialCategory,
         payment_method: initialMethod,
         payment_channel: initialChannel,
@@ -710,7 +711,22 @@ selectChannel(manualChannels[0]);
                                             value={data.message}
                                             onChange={e => setData('message', e.target.value)}
                                         />
+                                        <p className="text-xs text-slate-400">Doa kebaikan Anda akan ditampilkan di tab donatur setelah pembayaran berhasil diverifikasi.</p>
                                         {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
+                                    </div>
+
+                                    {/* Honeypot field (hidden from real users, traps automated bots) */}
+                                    <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+                                        <label htmlFor="website_url">Website</label>
+                                        <input
+                                            type="text"
+                                            id="website_url"
+                                            name="website_url"
+                                            tabIndex={-1}
+                                            autoComplete="off"
+                                            value={data.website_url}
+                                            onChange={e => setData('website_url', e.target.value)}
+                                        />
                                     </div>
 
                                     <Button 

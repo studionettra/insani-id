@@ -76,25 +76,18 @@ it('allows campaigner to create program update', function () {
     $response->assertSessionHasNoErrors();
     $this->assertDatabaseHas('program_updates', [
         'program_id' => $this->program->id,
-        'title' => 'Update 1',
+        'title->id' => 'Update 1',
         'is_published' => true,
     ]);
 });
 
-it('allows an authenticated user to submit a comment', function () {
+it('does not allow direct comments without donation', function () {
     $response = $this->actingAs($this->campaigner)
-        ->post(route('programs.comments.store', $this->program->id), [
+        ->post("/programs/{$this->program->id}/comments", [
             'body' => 'Great program!',
         ]);
 
-    $response->assertSessionHasNoErrors();
-    $this->assertDatabaseHas('comments', [
-        'program_id' => $this->program->id,
-        'user_id' => $this->campaigner->id,
-        'name' => $this->campaigner->name,
-        'body' => 'Great program!',
-        'is_hidden' => false,
-    ]);
+    $response->assertNotFound();
 });
 
 it('allows cs to hide a comment', function () {

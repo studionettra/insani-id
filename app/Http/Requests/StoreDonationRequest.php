@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\AppSetting;
+use App\Rules\NoProfanityRule;
+use App\Rules\NoUrlRule;
 use App\Services\XenditPaymentService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,6 +20,31 @@ class StoreDonationRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation (sanitasi HTML dan script).
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'donor_name' => is_string($this->donor_name) ? $this->sanitizeContent($this->donor_name) : $this->donor_name,
+            'message' => is_string($this->message) ? $this->sanitizeContent($this->message) : $this->message,
+        ]);
+    }
+
+    /**
+     * Remove malicious scripts, styles, and html tags from input string.
+     */
+    protected function sanitizeContent(string $value): string
+    {
+        // Hapus blok <script>...</script> dan <style>...</style> beserta isinya
+        $cleaned = preg_replace('/<(script|style)[^>]*?>.*?<\/\1>/si', '', $value);
+
+        // Bersihkan seluruh sisa tag HTML
+        $cleaned = strip_tags($cleaned);
+
+        return trim($cleaned);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -28,11 +55,12 @@ class StoreDonationRequest extends FormRequest
 
         return [
             'amount' => ['required', 'numeric', "min:{$minAmount}"],
-            'donor_name' => ['required', 'string', 'max:255'],
+            'donor_name' => ['required', 'string', 'max:100', new NoUrlRule, new NoProfanityRule],
             'donor_email' => ['required', 'email', 'max:255'],
             'donor_phone' => ['required', 'string', 'max:30'],
             'is_anonymous' => ['nullable', 'boolean'],
-            'message' => ['nullable', 'string', 'max:1000'],
+            'message' => ['nullable', 'string', 'max:1000', new NoUrlRule, new NoProfanityRule],
+            'website_url' => ['nullable', 'prohibited'],
             'channel' => ['required', 'in:online,offline'],
             'payment_method' => ['nullable', 'string', 'in:virtual_account,ewallet,qris,credit_card,bank_transfer_manual'],
             'payment_channel' => ['nullable', 'string', 'max:50'],
@@ -90,6 +118,7 @@ class StoreDonationRequest extends FormRequest
             'channel.required' => 'Metode pembayaran wajib dipilih.',
             'channel.in' => 'Metode pembayaran tidak valid.',
             'payment_method.in' => 'Kategori pembayaran tidak valid.',
+            'website_url.prohibited' => 'Terdeteksi aktivitas mencurigakan. Permintaan tidak dapat diproses.',
         ];
     }
 }

@@ -143,18 +143,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
             : `${typeof window !== 'undefined' ? window.location.origin : ''}/storage/${program.cover_image}`)
         : '/images/default-cover.jpg';
 
-    const commentForm = useForm({
-        name: auth?.user ? auth.user.name : '',
-        body: '',
-    });
 
-    const submitComment = (e: React.FormEvent) => {
-        e.preventDefault();
-        commentForm.post(`/programs/${program.id}/comments`, {
-            preserveScroll: true,
-            onSuccess: () => commentForm.reset('body'),
-        });
-    };
 
     const fundraiserForm = useForm({
         target_amount: '',
@@ -506,47 +495,35 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                     {/* Tab Content: Donatur & Doa */}
                                     {activeTab === 'donatur' && (
                                         <div className="animate-in fade-in slide-in-from-bottom-2">
-                                            {/* Form Komentar */}
-                                            <div className="bg-slate-50 rounded-xl p-5 mb-8 border border-slate-100">
-                                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                                    <MessageCircle className="w-5 h-5 text-insani-blue" />
-                                                    {t('Tulis Dukungan & Doa')}
+                                            {/* Header Donatur & Doa */}
+                                            <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-100">
+                                                <h3 className="font-bold text-slate-800 flex items-center gap-2 text-base sm:text-lg">
+                                                    <Users className="w-5 h-5 text-insani-blue" />
+                                                    {t('Doa & Dukungan Donatur')}
                                                 </h3>
-                                                <form onSubmit={submitComment} className="space-y-4">
-                                                    {!auth?.user && (
-                                                        <div>
-                                                            <Input
-                                                                placeholder={t('Nama Anda')}
-                                                                value={commentForm.data.name}
-                                                                onChange={e => commentForm.setData('name', e.target.value)}
-                                                                required
-                                                                className="bg-white"
-                                                            />
-                                                            {commentForm.errors.name && <p className="text-sm text-destructive mt-1">{commentForm.errors.name}</p>}
-                                                        </div>
-                                                    )}
-                                                    <div>
-                                                        <Textarea
-                                                            placeholder={t('Tulis dukungan, doa, atau komentar positif...')}
-                                                            value={commentForm.data.body}
-                                                            onChange={e => commentForm.setData('body', e.target.value)}
-                                                            required
-                                                            rows={3}
-                                                            className="bg-white"
-                                                        />
-                                                        {commentForm.errors.body && <p className="text-sm text-destructive mt-1">{commentForm.errors.body}</p>}
-                                                    </div>
-                                                    <Button type="submit" disabled={commentForm.processing} className="bg-insani-blue hover:bg-blue-700">
-                                                        {commentForm.processing ? t('Mengirim...') : t('Kirim Doa')}
-                                                    </Button>
-                                                </form>
+                                                <span className="text-xs sm:text-sm font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+                                                    {program.comments ? program.comments.length : 0} {t('Donatur')}
+                                                </span>
                                             </div>
 
                                             {/* List Komentar & Donatur */}
                                             <div className="space-y-4">
                                                 {(!program.comments || program.comments.length === 0) ? (
-                                                    <div className="text-center py-10 text-slate-500">
-                                                        {t('Belum ada donasi atau doa yang masuk.')} {t('Jadilah yang pertama mendoakan atau berdonasi untuk program ini!')}
+                                                    <div className="text-center py-12 px-4 rounded-2xl bg-slate-50 border border-slate-100/80">
+                                                        <Heart className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                                                        <p className="text-slate-600 font-medium text-sm sm:text-base max-w-md mx-auto">
+                                                            {t('Belum ada doa atau donasi yang masuk.')}
+                                                        </p>
+                                                        <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-sm mx-auto">
+                                                            {t('Jadilah orang baik pertama yang berdonasi dan menitipkan doa kebaikan untuk program ini.')}
+                                                        </p>
+                                                        <div className="mt-5">
+                                                            <Link href={`/program/${program.slug}/donasi`}>
+                                                                <Button className="bg-insani-blue hover:bg-blue-700 text-white font-semibold text-sm px-6 py-2.5 rounded-xl shadow-xs">
+                                                                    {t('Donasi Sekarang')}
+                                                                </Button>
+                                                            </Link>
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     program.comments.map((comment: any) => (
