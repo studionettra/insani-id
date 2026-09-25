@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -30,7 +29,7 @@ class DonationPendingNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Tagihan Donasi Anda - ' . config('app.name'),
+            subject: 'Tagihan Donasi Anda - '.config('app.name'),
         );
     }
 

@@ -4,9 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Disbursement;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class DisbursementStatusUpdatedNotification extends Notification
+class DisbursementStatusUpdatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -19,7 +21,70 @@ class DisbursementStatusUpdatedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ! empty($notifiable->email) ? ['database', 'mail'] : ['database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        $programTitle = $this->disbursement->program?->getTranslation('title', 'id')
+            ?: (is_string($this->disbursement->program?->title) ? $this->disbursement->program?->title : 'Program');
+        $amount = $this->disbursement->requested_amount ?? $this->disbursement->amount ?? 0;
+        $formattedAmount = 'Rp '.number_format((float) $amount, 0, ',', '.');
+        $status = $this->disbursement->status;
+
+        $replyToEmail = config('mail.reply_to.address', 'sapa@insani.id');
+        $replyToName = config('mail.reply_to.name', 'Layanan Sahabat Insani');
+
+        $mail = (new MailMessage)->replyTo($replyToEmail, $replyToName);
+        $url = route('akun.programs.disbursements.index', $this->disbursement->program_id);
+
+        if ($status === 'transferred') {
+            return $mail
+                ->subject("[Insani] Alhamdulillah! Dana Pencairan Telah Ditransfer - {$programTitle}")
+                ->greeting('Assalamu’alaikum Warahmatullahi Wabarakatuh, Sahabat Insani.')
+                ->line("Alhamdulillah, permohonan pencairan dana untuk program **\"{$programTitle}\"** telah berhasil ditransfer oleh tim Keuangan Insani Indonesia.")
+                ->line("• **Nominal Ditransfer**: **{$formattedAmount}**")
+                ->line("• **Bank Penerima**: {$this->disbursement->bank_name}")
+                ->line("• **Nomor Rekening**: {$this->disbursement->bank_account_number}")
+                ->line("• **Atas Nama**: {$this->disbursement->bank_account_name}")
+                ->action('Lihat Bukti Transfer & Rincian', $url)
+                ->line('Sebagai bentuk amanah kepada para donatur, kami mohon untuk memposting Kabar Terbaru / Laporan Penyaluran secara berkala setelah dana disalurkan kepada penerima manfaat.')
+                ->salutation("Wassalamu’alaikum Warahmatullahi Wabarakatuh,\n**Tim Insani Indonesia**");
+        }
+
+        if ($status === 'approved') {
+            return $mail
+                ->subject("[Insani] Pengajuan Pencairan Dana Disetujui - {$programTitle}")
+                ->greeting('Assalamu’alaikum Warahmatullahi Wabarakatuh, Sahabat Insani.')
+                ->line("Pengajuan pencairan dana sebesar **{$formattedAmount}** untuk program **\"{$programTitle}\"** telah **disetujui** oleh tim Keuangan Insani.")
+                ->line('Saat ini dana sedang dalam proses antrean transfer ke rekening bank terdaftar Anda. Anda akan menerima notifikasi kembali segera setelah bukti transfer diunggah.')
+                ->action('Pantau Status Pencairan', $url)
+                ->salutation("Wassalamu’alaikum Warahmatullahi Wabarakatuh,\n**Tim Insani Indonesia**");
+        }
+
+        if ($status === 'rejected') {
+            $reason = $this->disbursement->rejection_reason ?: 'Terdapat berkas atau data permohonan yang belum memenuhi ketentuan penyaluran.';
+
+            return $mail
+                ->subject("[Insani] Pemberitahuan Pengajuan Pencairan Dana - {$programTitle}")
+                ->greeting('Assalamu’alaikum Warahmatullahi Wabarakatuh, Sahabat Insani.')
+                ->line("Mohon maaf, pengajuan pencairan dana sebesar **{$formattedAmount}** untuk program **\"{$programTitle}\"** saat ini **belum dapat disetujui**.")
+                ->line("• **Alasan Verifikator**: \"{$reason}\"")
+                ->line('Silakan periksa kembali data pengajuan Anda melalui dashboard dan lakukan perbaikan permohonan bila diperlukan.')
+                ->action('Periksa Detail Pengajuan', $url)
+                ->line('Jika memerlukan klarifikasi lebih lanjut, silakan balas email ini untuk menghubungi tim Keuangan Insani.')
+                ->salutation("Wassalamu’alaikum Warahmatullahi Wabarakatuh,\n**Tim Insani Indonesia**");
+        }
+
+        return $mail
+            ->subject("[Insani] Status Pencairan Dana Diperbarui - {$programTitle}")
+            ->greeting('Assalamu’alaikum Warahmatullahi Wabarakatuh, Sahabat Insani.')
+            ->line("Status permohonan pencairan dana untuk program **\"{$programTitle}\"** telah diperbarui menjadi **{$status}**.")
+            ->action('Lihat Riwayat Pencairan', $url)
+            ->salutation("Wassalamu’alaikum Warahmatullahi Wabarakatuh,\n**Tim Insani Indonesia**");
     }
 
     /**
