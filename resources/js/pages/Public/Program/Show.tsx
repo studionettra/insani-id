@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
+import DOMPurify from 'dompurify';
 import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, Sparkles, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
