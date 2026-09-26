@@ -66,7 +66,7 @@ it('allows admin to create an image_only popup message with flyer image upload',
         ->assertRedirect()
         ->assertSessionHas('success');
 
-    $popup = PopupMessage::where('title', 'Gebyar Peduli Sesama')->first();
+    $popup = PopupMessage::where('title->id', 'Gebyar Peduli Sesama')->first();
     expect($popup)->not->toBeNull();
     expect($popup->display_type)->toBe('image_only');
     expect($popup->delay_seconds)->toBe(2);
@@ -94,7 +94,7 @@ it('allows admin to create a hybrid popup message with title, content, and CTA',
         ->assertRedirect()
         ->assertSessionHas('success');
 
-    $popup = PopupMessage::where('title', 'Kajian Rutin & Santunan Akbar')->first();
+    $popup = PopupMessage::where('title->id', 'Kajian Rutin & Santunan Akbar')->first();
     expect($popup)->not->toBeNull();
     expect($popup->display_type)->toBe('hybrid');
     expect($popup->content)->toContain('Mari hadiri kajian');
@@ -239,4 +239,43 @@ it('correctly filters active popups with schedule dates', function () {
     expect($activePopups)->toHaveCount(1);
     expect($activePopups->first()->id)->toBe($livePopup->id);
     expect($livePopup->is_live)->toBeTrue();
+});
+
+it('allows admin to create a multilingual popup message with ID, EN, and AR', function () {
+    actingAs($this->admin)
+        ->post(route('admin.popup-messages.store'), [
+            'title' => [
+                'id' => 'Panggilan Kemanusiaan Darurat',
+                'en' => 'Emergency Humanitarian Call',
+                'ar' => 'نداء إنساني عاجل',
+            ],
+            'display_type' => 'hybrid',
+            'content' => [
+                'id' => 'Bantu korban bencana dengan menyalurkan bantuan sekarang.',
+                'en' => 'Help disaster victims by channeling aid now.',
+                'ar' => 'ساعد ضحايا الكوارث من خلال تقديم المساعدات الآن.',
+            ],
+            'cta_text' => [
+                'id' => 'Donasi Sekarang',
+                'en' => 'Donate Now',
+                'ar' => 'تبرع الآن',
+            ],
+            'cta_url' => 'https://insani.id/campaigns/darurat',
+            'delay_seconds' => 3,
+            'auto_close_seconds' => 15,
+            'frequency' => 'once_per_day',
+            'target_page' => 'home_only',
+            'is_active' => true,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $popup = PopupMessage::where('title->id', 'Panggilan Kemanusiaan Darurat')->first();
+    expect($popup)->not->toBeNull();
+    expect($popup->getTranslation('title', 'en'))->toBe('Emergency Humanitarian Call');
+    expect($popup->getTranslation('title', 'ar'))->toBe('نداء إنساني عاجل');
+    expect($popup->getTranslation('content', 'en'))->toBe('Help disaster victims by channeling aid now.');
+    expect($popup->getTranslation('content', 'ar'))->toBe('ساعد ضحايا الكوارث من خلال تقديم المساعدات الآن.');
+    expect($popup->getTranslation('cta_text', 'en'))->toBe('Donate Now');
+    expect($popup->getTranslation('cta_text', 'ar'))->toBe('تبرع الآن');
 });

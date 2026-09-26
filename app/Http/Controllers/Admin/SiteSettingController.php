@@ -27,7 +27,7 @@ class SiteSettingController extends Controller
      */
     public function update(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'contact_whatsapp' => 'nullable|string|max:50',
             'contact_phone' => 'nullable|string|max:50',
             'contact_email' => 'nullable|email|max:100',
@@ -39,15 +39,11 @@ class SiteSettingController extends Controller
             'contact_holiday_note' => 'nullable|string|max:255',
             'contact_address' => 'nullable|string|max:500',
             'contact_maps_url' => 'nullable|string|max:500',
-            'about_vision' => 'nullable|string|max:2000',
-            'about_mission' => 'nullable|string|max:3000',
-            'about_values' => 'nullable|string|max:3000',
             'social_facebook' => 'nullable|string|max:255',
             'social_instagram' => 'nullable|string|max:255',
             'social_youtube' => 'nullable|string|max:255',
             'social_x' => 'nullable|string|max:255',
             'social_threads' => 'nullable|string|max:255',
-            'footer_description' => 'nullable|string|max:1000',
             'qris_image' => 'nullable|image|max:3072',
             'google_tag_manager_id' => 'nullable|string|max:50',
             'google_analytics_id' => 'nullable|string|max:50',
@@ -71,13 +67,33 @@ class SiteSettingController extends Controller
             'receipt_signature_image' => 'nullable|image|max:2048',
             'receipt_stamp_image' => 'nullable|image|max:2048',
             'announcement_enabled' => 'nullable|string|in:0,1',
-            'announcement_text' => 'nullable|string|max:500',
             'announcement_link' => 'nullable|string|max:500',
             'announcement_bg_color' => 'nullable|string|max:50',
             'site_logo' => 'nullable|image|max:2048',
             'site_logo_white' => 'nullable|image|max:2048',
             'site_favicon' => 'nullable|mimes:ico,png,svg,jpg,webp|max:1024',
-        ]);
+        ];
+
+        $translatableFields = [
+            'about_vision' => 2000,
+            'about_mission' => 3000,
+            'about_values' => 3000,
+            'footer_description' => 1000,
+            'announcement_text' => 500,
+        ];
+
+        foreach ($translatableFields as $field => $maxLen) {
+            if (is_array($request->input($field))) {
+                $rules[$field] = 'nullable|array';
+                $rules["{$field}.id"] = "nullable|string|max:{$maxLen}";
+                $rules["{$field}.en"] = "nullable|string|max:{$maxLen}";
+                $rules["{$field}.ar"] = "nullable|string|max:{$maxLen}";
+            } else {
+                $rules[$field] = "nullable|string|max:{$maxLen}";
+            }
+        }
+
+        $validated = $request->validate($rules);
 
         $imageFields = [
             'qris_image',
@@ -151,9 +167,13 @@ class SiteSettingController extends Controller
 
         foreach ($textFields as $field) {
             if ($request->has($field)) {
+                $val = $request->input($field);
+                if (array_key_exists($field, $translatableFields) && is_array($val)) {
+                    $val = json_encode($val, JSON_UNESCAPED_UNICODE);
+                }
                 AppSetting::updateOrCreate(
                     ['key' => $field],
-                    ['value' => $request->input($field)]
+                    ['value' => $val]
                 );
             }
         }

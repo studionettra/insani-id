@@ -13,9 +13,13 @@ import {
     MapPin, 
     Award,
     CheckCircle2,
-    XCircle
+    XCircle,
+    Languages
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -60,10 +64,11 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
     const [editingDoc, setEditingDoc] = useState<any>(null);
     const [docToDelete, setDocToDelete] = useState<any>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         _method: 'post',
-        title: { id: '', en: '' },
+        title: { id: '', en: '', ar: '' },
         document_number: '',
         issuer_name: '',
         icon_type: 'file-text',
@@ -71,10 +76,54 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
         publisher_logo_file: null as File | null,
         file: null as File | null,
         external_url: '',
-        description: { id: '', en: '' },
+        description: { id: '', en: '', ar: '' },
         is_active: true,
         sort_order: 0,
     });
+
+    const handleAutoTranslate = async () => {
+        const sourceTitle = data.title.id;
+        const sourceDesc = data.description.id;
+
+        if (!sourceTitle.trim() && !sourceDesc.trim()) {
+            toast.error('Silakan isi Nama Dokumen (ID) terlebih dahulu sebelum menerjemahkan.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const fieldsToTranslate: Record<string, string> = {};
+            if (sourceTitle.trim()) {
+                fieldsToTranslate.title = sourceTitle.trim();
+            }
+            if (sourceDesc.trim()) {
+                fieldsToTranslate.description = sourceDesc.trim();
+            }
+
+            const res = await autoTranslateFields(fieldsToTranslate);
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    title: {
+                        id: prev.title.id,
+                        en: res.title?.en || prev.title.en,
+                        ar: res.title?.ar || prev.title.ar,
+                    },
+                    description: {
+                        id: prev.description.id,
+                        en: res.description?.en || prev.description.en,
+                        ar: res.description?.ar || prev.description.ar,
+                    },
+                }));
+                toast.success('Dokumen legalitas berhasil diterjemahkan ke bahasa Inggris dan Arab.');
+            }
+        } catch (err) {
+            toast.error('Gagal menerjemahkan secara otomatis. Silakan coba lagi.');
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -89,7 +138,7 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
         reset();
         setData({
             _method: 'post',
-            title: { id: '', en: '' },
+            title: { id: '', en: '', ar: '' },
             document_number: '',
             issuer_name: '',
             icon_type: 'file-text',
@@ -97,7 +146,7 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
             publisher_logo_file: null,
             file: null,
             external_url: '',
-            description: { id: '', en: '' },
+            description: { id: '', en: '', ar: '' },
             is_active: true,
             sort_order: (documents.data?.length || 0) + 1,
         });
@@ -110,8 +159,9 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
         setData({
             _method: 'put',
             title: { 
-                id: doc.title_translations?.id || doc.title?.id || doc.title || '', 
-                en: doc.title_translations?.en || doc.title?.en || '' 
+                id: doc.title_translations?.id || doc.title?.id || (typeof doc.title === 'string' ? doc.title : ''), 
+                en: doc.title_translations?.en || doc.title?.en || '',
+                ar: doc.title_translations?.ar || doc.title?.ar || '',
             },
             document_number: doc.document_number || '',
             issuer_name: doc.issuer_name || '',
@@ -121,8 +171,9 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
             file: null,
             external_url: doc.external_url || '',
             description: { 
-                id: doc.description_translations?.id || doc.description?.id || '', 
-                en: doc.description_translations?.en || doc.description?.en || '' 
+                id: doc.description_translations?.id || doc.description?.id || (typeof doc.description === 'string' ? doc.description : ''), 
+                en: doc.description_translations?.en || doc.description?.en || '',
+                ar: doc.description_translations?.ar || doc.description?.ar || '',
             },
             is_active: !!doc.is_active,
             sort_order: doc.sort_order ?? 0,
@@ -246,6 +297,26 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
                                                             {doc.title_translations.en}
                                                         </div>
                                                     )}
+                                                    {/* Language badges */}
+                                                    <div className="flex items-center gap-1.5 mt-1">
+                                                        <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                            ID ✓
+                                                        </span>
+                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
+                                                            doc.title_translations?.en || doc.title?.en
+                                                                ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+                                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
+                                                        }`}>
+                                                            EN {doc.title_translations?.en || doc.title?.en ? '✓' : '—'}
+                                                        </span>
+                                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
+                                                            doc.title_translations?.ar || doc.title?.ar
+                                                                ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                                                                : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
+                                                        }`}>
+                                                            AR {doc.title_translations?.ar || doc.title?.ar ? '✓' : '—'}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TableCell>
@@ -370,29 +441,57 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
                     </DialogHeader>
 
                     <form onSubmit={submitCreate} className="space-y-4 pt-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="title_id" className="text-gray-700 dark:text-gray-300">Nama Dokumen (ID) <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="title_id"
-                                    placeholder="Contoh: Izin PUB (Pengumpulan Uang & Barang)"
-                                    value={data.title.id}
-                                    onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                    required
-                                />
-                                {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
-                            </div>
+                        {/* Translation Status Card */}
+                        <TranslationStatusCard
+                            hasId={Boolean(data.title.id)}
+                            hasEn={Boolean(data.title.en)}
+                            hasAr={Boolean(data.title.ar)}
+                            onTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            compact
+                            description="Terjemahkan nama dan keterangan dokumen legalitas ke bahasa Inggris dan Arab secara otomatis."
+                        />
 
-                            <div className="space-y-2">
-                                <Label htmlFor="title_en" className="text-gray-700 dark:text-gray-300">Nama Dokumen (EN)</Label>
-                                <Input
-                                    id="title_en"
-                                    placeholder="Contoh: Public Fundraising Permit"
-                                    value={data.title.en}
-                                    onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                />
+                        {/* Nama Dokumen Multi-Bahasa */}
+                        <div className="space-y-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                            <Label className="text-gray-700 dark:text-gray-200 font-semibold text-xs flex items-center gap-1.5">
+                                <Languages className="w-3.5 h-3.5 text-insani-blue" />
+                                Nama Dokumen Resmi
+                            </Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">ID (Indonesia) *</span>
+                                    <Input
+                                        id="title_id"
+                                        placeholder="Contoh: Izin PUB Kemensos"
+                                        value={data.title.id}
+                                        onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                        required
+                                    />
+                                    {errors['title.id'] && <p className="text-xs text-red-500 mt-1">{errors['title.id']}</p>}
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">EN (English)</span>
+                                    <Input
+                                        id="title_en"
+                                        placeholder="e.g. Public Fundraising Permit"
+                                        value={data.title.en}
+                                        onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">AR (العربية)</span>
+                                    <Input
+                                        id="title_ar"
+                                        dir="rtl"
+                                        placeholder="مثال: تصريح جمع التبرعات العامة"
+                                        value={data.title.ar}
+                                        onChange={(e) => setData('title', { ...data.title, ar: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -526,16 +625,48 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description_id" className="text-gray-700 dark:text-gray-300">Keterangan Singkat / Catatan (Opsional)</Label>
-                            <Textarea
-                                id="description_id"
-                                placeholder="Contoh: Berlaku hingga 31 Desember 2026 atau catatan pengesahan."
-                                rows={2}
-                                value={data.description.id}
-                                onChange={(e) => setData('description', { ...data.description, id: e.target.value })}
-                                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                            />
+                        {/* Keterangan Multi-Bahasa */}
+                        <div className="space-y-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                            <Label className="text-gray-700 dark:text-gray-200 font-semibold text-xs flex items-center gap-1.5">
+                                <Languages className="w-3.5 h-3.5 text-insani-blue" />
+                                Keterangan Singkat / Catatan (Opsional)
+                            </Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">ID (Indonesia)</span>
+                                    <Textarea
+                                        id="description_id"
+                                        placeholder="Berlaku hingga 31 Desember 2026..."
+                                        rows={2}
+                                        value={data.description.id}
+                                        onChange={(e) => setData('description', { ...data.description, id: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">EN (English)</span>
+                                    <Textarea
+                                        id="description_en"
+                                        placeholder="Valid until December 31, 2026..."
+                                        rows={2}
+                                        value={data.description.en}
+                                        onChange={(e) => setData('description', { ...data.description, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">AR (العربية)</span>
+                                    <Textarea
+                                        id="description_ar"
+                                        dir="rtl"
+                                        placeholder="صالح حتى 31 ديسمبر 2026..."
+                                        rows={2}
+                                        value={data.description.ar}
+                                        onChange={(e) => setData('description', { ...data.description, ar: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex items-center space-x-2 pt-2">
@@ -572,27 +703,54 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
                     </DialogHeader>
 
                     <form onSubmit={submitEdit} className="space-y-4 pt-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="edit_title_id" className="text-gray-700 dark:text-gray-300">Nama Dokumen (ID) <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="edit_title_id"
-                                    value={data.title.id}
-                                    onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                    required
-                                />
-                                {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
-                            </div>
+                        {/* Translation Status Card */}
+                        <TranslationStatusCard
+                            hasId={Boolean(data.title.id)}
+                            hasEn={Boolean(data.title.en)}
+                            hasAr={Boolean(data.title.ar)}
+                            onTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            compact
+                            description="Terjemahkan nama dan keterangan dokumen legalitas ke bahasa Inggris dan Arab secara otomatis."
+                        />
 
-                            <div className="space-y-2">
-                                <Label htmlFor="edit_title_en" className="text-gray-700 dark:text-gray-300">Nama Dokumen (EN)</Label>
-                                <Input
-                                    id="edit_title_en"
-                                    value={data.title.en}
-                                    onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                />
+                        {/* Nama Dokumen Multi-Bahasa */}
+                        <div className="space-y-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                            <Label className="text-gray-700 dark:text-gray-200 font-semibold text-xs flex items-center gap-1.5">
+                                <Languages className="w-3.5 h-3.5 text-insani-blue" />
+                                Nama Dokumen Resmi
+                            </Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">ID (Indonesia) *</span>
+                                    <Input
+                                        id="edit_title_id"
+                                        value={data.title.id}
+                                        onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                        required
+                                    />
+                                    {errors['title.id'] && <p className="text-xs text-red-500 mt-1">{errors['title.id']}</p>}
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">EN (English)</span>
+                                    <Input
+                                        id="edit_title_en"
+                                        value={data.title.en}
+                                        onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">AR (العربية)</span>
+                                    <Input
+                                        id="edit_title_ar"
+                                        dir="rtl"
+                                        value={data.title.ar}
+                                        onChange={(e) => setData('title', { ...data.title, ar: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -723,15 +881,45 @@ export default function LegalDocumentsIndex({ documents, filters }: any) {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="edit_description_id" className="text-gray-700 dark:text-gray-300">Keterangan Singkat / Catatan</Label>
-                            <Textarea
-                                id="edit_description_id"
-                                rows={2}
-                                value={data.description.id}
-                                onChange={(e) => setData('description', { ...data.description, id: e.target.value })}
-                                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                            />
+                        {/* Keterangan Multi-Bahasa */}
+                        <div className="space-y-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                            <Label className="text-gray-700 dark:text-gray-200 font-semibold text-xs flex items-center gap-1.5">
+                                <Languages className="w-3.5 h-3.5 text-insani-blue" />
+                                Keterangan Singkat / Catatan (Opsional)
+                            </Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">ID (Indonesia)</span>
+                                    <Textarea
+                                        id="edit_description_id"
+                                        rows={2}
+                                        value={data.description.id}
+                                        onChange={(e) => setData('description', { ...data.description, id: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">EN (English)</span>
+                                    <Textarea
+                                        id="edit_description_en"
+                                        rows={2}
+                                        value={data.description.en}
+                                        onChange={(e) => setData('description', { ...data.description, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <span className="text-[11px] font-bold text-gray-500 block mb-1">AR (العربية)</span>
+                                    <Textarea
+                                        id="edit_description_ar"
+                                        dir="rtl"
+                                        rows={2}
+                                        value={data.description.ar}
+                                        onChange={(e) => setData('description', { ...data.description, ar: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex items-center space-x-2 pt-2">

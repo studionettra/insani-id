@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class PopupMessage extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     protected $fillable = [
         'title',
@@ -27,6 +28,12 @@ class PopupMessage extends Model
         'is_active',
     ];
 
+    public $translatable = [
+        'title',
+        'content',
+        'cta_text',
+    ];
+
     protected $casts = [
         'open_in_new_tab' => 'boolean',
         'delay_seconds' => 'integer',
@@ -39,6 +46,9 @@ class PopupMessage extends Model
     protected $appends = [
         'image_url',
         'is_live',
+        'title_translations',
+        'content_translations',
+        'cta_text_translations',
     ];
 
     public function getImageUrlAttribute(): ?string
@@ -70,6 +80,39 @@ class PopupMessage extends Model
         }
 
         return true;
+    }
+
+    public function getTitleTranslationsAttribute(): array
+    {
+        return $this->getTranslations('title');
+    }
+
+    public function getContentTranslationsAttribute(): array
+    {
+        return $this->getTranslations('content');
+    }
+
+    public function getCtaTextTranslationsAttribute(): array
+    {
+        return $this->getTranslations('cta_text');
+    }
+
+    /**
+     * Convert model to array using active locale for translatable attributes.
+     */
+    public function toArray(): array
+    {
+        $attributes = parent::toArray();
+
+        foreach ($this->getTranslatableAttributes() as $field) {
+            $translations = $this->getTranslations($field);
+            $locale = app()->getLocale();
+            $fallback = config('app.fallback_locale', 'id');
+
+            $attributes[$field] = $translations[$locale] ?? $translations[$fallback] ?? $translations['id'] ?? (is_array($translations) && count($translations) > 0 ? reset($translations) : '');
+        }
+
+        return $attributes;
     }
 
     /**

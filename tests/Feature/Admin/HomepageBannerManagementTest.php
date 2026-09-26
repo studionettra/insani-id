@@ -54,8 +54,8 @@ it('allows admin to create a homepage banner with description', function () {
         ->assertRedirect();
 
     $this->assertDatabaseHas('homepage_banners', [
-        'title' => 'Program Berbagi Berkah',
-        'description' => 'Salurkan donasi Anda untuk membantu masyarakat pelosok yang membutuhkan.',
+        'title->id' => 'Program Berbagi Berkah',
+        'description->id' => 'Salurkan donasi Anda untuk membantu masyarakat pelosok yang membutuhkan.',
     ]);
 });
 
@@ -110,4 +110,35 @@ it('passes banner description to public homepage props', function () {
             ->where('banners.0.title', 'Inisiatif Kebaikan')
             ->where('banners.0.description', 'Menghubungkan kebaikan hati donatur dengan penerima manfaat di seluruh pelosok.')
         );
+});
+
+it('allows admin to create a multilingual homepage banner with ID, EN, and AR', function () {
+    $file = UploadedFile::fake()->image('banner-multi.jpg', 1920, 800);
+
+    actingAs($this->admin)
+        ->post('/admin/homepage-banners', [
+            'title' => [
+                'id' => 'Berbagi Kebaikan Bersama',
+                'en' => 'Sharing Goodness Together',
+                'ar' => 'تقاسم الخير معا',
+            ],
+            'description' => [
+                'id' => 'Salurkan donasi terbaik Anda untuk membantu sesama.',
+                'en' => 'Distribute your best donation to help others.',
+                'ar' => 'قدم أفضل تبرعاتك لمساعدة الآخرين.',
+            ],
+            'desktop_image_url' => $file,
+            'cta_link' => 'https://insani.id/campaigns',
+            'is_active' => true,
+            'sort_order' => 1,
+        ])
+        ->assertRedirect();
+
+    $banner = HomepageBanner::where('sort_order', 1)->latest('id')->first();
+    expect($banner)->not->toBeNull();
+    expect($banner->getTranslation('title', 'id'))->toBe('Berbagi Kebaikan Bersama');
+    expect($banner->getTranslation('title', 'en'))->toBe('Sharing Goodness Together');
+    expect($banner->getTranslation('title', 'ar'))->toBe('تقاسم الخير معا');
+    expect($banner->getTranslation('description', 'en'))->toBe('Distribute your best donation to help others.');
+    expect($banner->getTranslation('description', 'ar'))->toBe('قدم أفضل تبرعاتك لمساعدة الآخرين.');
 });

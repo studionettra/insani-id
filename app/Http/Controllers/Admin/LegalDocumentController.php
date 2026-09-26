@@ -18,6 +18,7 @@ class LegalDocumentController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('title->id', 'like', "%{$search}%")
                         ->orWhere('title->en', 'like', "%{$search}%")
+                        ->orWhere('title->ar', 'like', "%{$search}%")
                         ->orWhere('document_number', 'like', "%{$search}%")
                         ->orWhere('issuer_name', 'like', "%{$search}%");
                 });
@@ -35,10 +36,18 @@ class LegalDocumentController extends Controller
 
     public function store(Request $request)
     {
+        if (is_string($request->input('title'))) {
+            $request->merge(['title' => ['id' => $request->input('title')]]);
+        }
+        if (is_string($request->input('description'))) {
+            $request->merge(['description' => ['id' => $request->input('description')]]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
+            'title.ar' => 'nullable|string|max:255',
             'document_number' => 'nullable|string|max:255',
             'issuer_name' => 'nullable|string|max:255',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
@@ -49,8 +58,11 @@ class LegalDocumentController extends Controller
             'description' => 'nullable|array',
             'description.id' => 'nullable|string|max:1000',
             'description.en' => 'nullable|string|max:1000',
+            'description.ar' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+        ], [
+            'title.id.required' => 'Nama dokumen dalam Bahasa Indonesia wajib diisi.',
         ]);
 
         if ($request->hasFile('file')) {
@@ -75,10 +87,18 @@ class LegalDocumentController extends Controller
 
     public function update(Request $request, LegalDocument $legal_document)
     {
+        if (is_string($request->input('title'))) {
+            $request->merge(['title' => ['id' => $request->input('title')]]);
+        }
+        if (is_string($request->input('description'))) {
+            $request->merge(['description' => ['id' => $request->input('description')]]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
+            'title.ar' => 'nullable|string|max:255',
             'document_number' => 'nullable|string|max:255',
             'issuer_name' => 'nullable|string|max:255',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp|max:10240',
@@ -89,8 +109,11 @@ class LegalDocumentController extends Controller
             'description' => 'nullable|array',
             'description.id' => 'nullable|string|max:1000',
             'description.en' => 'nullable|string|max:1000',
+            'description.ar' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+        ], [
+            'title.id.required' => 'Nama dokumen dalam Bahasa Indonesia wajib diisi.',
         ]);
 
         if ($request->hasFile('file')) {

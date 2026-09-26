@@ -17,9 +17,13 @@ import {
     Users,
     FileSpreadsheet,
     Building2,
-    Sparkles
+    Sparkles,
+    Languages
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -60,11 +64,12 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
     const [editingReport, setEditingReport] = useState<any>(null);
     const [reportToDelete, setReportToDelete] = useState<any>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [activeLangTab, setActiveLangTab] = useState<'id' | 'en'>('id');
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [activeLangTab, setActiveLangTab] = useState<'id' | 'en' | 'ar'>('id');
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         _method: 'post',
-        title: { id: '', en: '' },
+        title: { id: '', en: '', ar: '' },
         report_year: new Date().getFullYear(),
         category: 'annual_report',
         audit_status: 'WTP (Wajar Tanpa Pengecualian)',
@@ -72,13 +77,57 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
         file: null as File | null,
         cover_file: null as File | null,
         external_url: '',
-        summary: { id: '', en: '' },
+        summary: { id: '', en: '', ar: '' },
         total_revenue: '' as string | number,
         total_disbursement: '' as string | number,
         beneficiaries_count: '' as string | number,
         is_active: true,
         sort_order: 0,
     });
+
+    const handleAutoTranslate = async () => {
+        const sourceTitle = data.title.id;
+        const sourceSummary = data.summary.id;
+
+        if (!sourceTitle.trim() && !sourceSummary.trim()) {
+            toast.error('Silakan isi Judul Laporan (ID) terlebih dahulu sebelum menerjemahkan.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const fieldsToTranslate: Record<string, string> = {};
+            if (sourceTitle.trim()) {
+                fieldsToTranslate.title = sourceTitle.trim();
+            }
+            if (sourceSummary.trim()) {
+                fieldsToTranslate.summary = sourceSummary.trim();
+            }
+
+            const res = await autoTranslateFields(fieldsToTranslate);
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    title: {
+                        id: prev.title.id,
+                        en: res.title?.en || prev.title.en,
+                        ar: res.title?.ar || prev.title.ar,
+                    },
+                    summary: {
+                        id: prev.summary.id,
+                        en: res.summary?.en || prev.summary.en,
+                        ar: res.summary?.ar || prev.summary.ar,
+                    },
+                }));
+                toast.success('Laporan keuangan berhasil diterjemahkan ke bahasa Inggris dan Arab.');
+            }
+        } catch (err) {
+            toast.error('Gagal menerjemahkan secara otomatis. Silakan coba lagi.');
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleFilter = (params: { search?: string; year?: string; category?: string }) => {
         router.get(
@@ -101,7 +150,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
         reset();
         setData({
             _method: 'post',
-            title: { id: '', en: '' },
+            title: { id: '', en: '', ar: '' },
             report_year: new Date().getFullYear(),
             category: 'annual_report',
             audit_status: 'WTP (Wajar Tanpa Pengecualian)',
@@ -109,7 +158,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
             file: null,
             cover_file: null,
             external_url: '',
-            summary: { id: '', en: '' },
+            summary: { id: '', en: '', ar: '' },
             total_revenue: '',
             total_disbursement: '',
             beneficiaries_count: '',
@@ -126,8 +175,9 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
         setData({
             _method: 'put',
             title: { 
-                id: report.title_translations?.id || report.title?.id || report.title || '', 
-                en: report.title_translations?.en || report.title?.en || '' 
+                id: report.title_translations?.id || report.title?.id || (typeof report.title === 'string' ? report.title : ''), 
+                en: report.title_translations?.en || report.title?.en || '',
+                ar: report.title_translations?.ar || report.title?.ar || '',
             },
             report_year: report.report_year || new Date().getFullYear(),
             category: report.category || 'annual_report',
@@ -137,8 +187,9 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
             cover_file: null,
             external_url: report.external_url || '',
             summary: { 
-                id: report.summary_translations?.id || report.summary?.id || report.summary || '', 
-                en: report.summary_translations?.en || report.summary?.en || '' 
+                id: report.summary_translations?.id || report.summary?.id || (typeof report.summary === 'string' ? report.summary : ''), 
+                en: report.summary_translations?.en || report.summary?.en || '',
+                ar: report.summary_translations?.ar || report.summary?.ar || '',
             },
             total_revenue: report.total_revenue ?? '',
             total_disbursement: report.total_disbursement ?? '',
@@ -353,6 +404,26 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                                         {titleEn}
                                                     </div>
                                                 )}
+                                                {/* Language readiness badges */}
+                                                <div className="flex items-center gap-1.5 mt-1.5">
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded font-mono font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                        ID ✓
+                                                    </span>
+                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
+                                                        report.title_translations?.en || report.title?.en
+                                                            ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+                                                            : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                                                    }`}>
+                                                        EN {report.title_translations?.en || report.title?.en ? '✓' : '—'}
+                                                    </span>
+                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
+                                                        report.title_translations?.ar || report.title?.ar
+                                                            ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                                                            : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                                                    }`}>
+                                                        AR {report.title_translations?.ar || report.title?.ar ? '✓' : '—'}
+                                                    </span>
+                                                </div>
                                             </TableCell>
 
                                             {/* Opini & Auditor */}
@@ -546,11 +617,33 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                 >
                                     English 🇬🇧
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveLangTab('ar')}
+                                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                        activeLangTab === 'ar' 
+                                            ? 'bg-white dark:bg-slate-900 text-insani-blue shadow-xs font-bold' 
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    العربية 🇸🇦
+                                </button>
                             </div>
                         </div>
                     </DialogHeader>
 
                     <form onSubmit={isCreateModalOpen ? submitCreate : submitEdit} className="space-y-6 pt-2">
+                        {/* Translation Status Card */}
+                        <TranslationStatusCard
+                            hasId={Boolean(data.title.id)}
+                            hasEn={Boolean(data.title.en)}
+                            hasAr={Boolean(data.title.ar)}
+                            onTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            compact
+                            description="Terjemahkan judul dan ringkasan eksekutif laporan keuangan ke bahasa Inggris dan Arab secara otomatis."
+                        />
+
                         {/* Judul Laporan */}
                         {activeLangTab === 'id' ? (
                             <div>
@@ -563,10 +656,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
                                     placeholder="Contoh: Laporan Tahunan & Akuntabilitas Yayasan 2024"
                                     className="mt-1.5 h-10 text-sm"
+                                    required
                                 />
                                 {errors['title.id'] && <p className="text-xs text-red-500 mt-1">{errors['title.id']}</p>}
                             </div>
-                        ) : (
+                        ) : activeLangTab === 'en' ? (
                             <div>
                                 <Label htmlFor="title_en" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     Judul Laporan (EN)
@@ -576,6 +670,20 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     value={data.title.en}
                                     onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
                                     placeholder="e.g. Annual & Accountability Report 2024"
+                                    className="mt-1.5 h-10 text-sm"
+                                />
+                            </div>
+                        ) : (
+                            <div>
+                                <Label htmlFor="title_ar" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Judul Laporan (AR - العربية)
+                                </Label>
+                                <Input
+                                    id="title_ar"
+                                    dir="rtl"
+                                    value={data.title.ar}
+                                    onChange={(e) => setData('title', { ...data.title, ar: e.target.value })}
+                                    placeholder="مثال: التقرير السنوي والمساءلة لمؤسسة إنساني 2024"
                                     className="mt-1.5 h-10 text-sm"
                                 />
                             </div>
@@ -657,7 +765,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     className="mt-1.5 text-sm"
                                 />
                             </div>
-                        ) : (
+                        ) : activeLangTab === 'en' ? (
                             <div>
                                 <Label htmlFor="summary_en" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     Executive Summary / Foreword (EN)
@@ -668,6 +776,21 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     value={data.summary.en}
                                     onChange={(e) => setData('summary', { ...data.summary, en: e.target.value })}
                                     placeholder="Brief summary of achievements or executive foreword..."
+                                    className="mt-1.5 text-sm"
+                                />
+                            </div>
+                        ) : (
+                            <div>
+                                <Label htmlFor="summary_ar" className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
+                                    Ringkasan Laporan / Kata Pengantar (AR - العربية)
+                                </Label>
+                                <Textarea
+                                    id="summary_ar"
+                                    dir="rtl"
+                                    rows={3}
+                                    value={data.summary.ar}
+                                    onChange={(e) => setData('summary', { ...data.summary, ar: e.target.value })}
+                                    placeholder="ملخص موجز للإنجازات أو كلمة تمهيدية لإدارة المؤسسة..."
                                     className="mt-1.5 text-sm"
                                 />
                             </div>

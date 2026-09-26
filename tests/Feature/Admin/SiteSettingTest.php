@@ -129,3 +129,46 @@ it('allows administrator to update foundation legal and sk kemenkumham settings'
     expect(AppSetting::get('legal_npwp'))->toBe('12.345.678.9-012.000');
     expect(AppSetting::get('show_sk_in_footer'))->toBe('1');
 });
+
+it('allows administrator to update multilingual organization profile and footer settings', function () {
+    actingAs($this->admin)
+        ->post(route('admin.site-settings.update'), [
+            'about_vision' => [
+                'id' => 'Menjadi lembaga filantropi terdepan.',
+                'en' => 'To become a leading philanthropic institution.',
+                'ar' => 'أن نكون مؤسسة خيرية رائدة.',
+            ],
+            'about_mission' => [
+                'id' => "Memberikan manfaat seluas-luasnya.\nMengembangkan kemandirian umat.",
+                'en' => "Providing widespread benefits.\nDeveloping community self-reliance.",
+                'ar' => "تقديم أوسع الفوائد الممكنة.\nتنمية الاعتماد على الذات لدى المجتمع.",
+            ],
+            'about_values' => [
+                'id' => 'Amanah: Menjaga integritas dan kejujuran.',
+                'en' => 'Trustworthy: Maintaining integrity and honesty.',
+                'ar' => 'الأمانة: الحفاظ على النزاهة والصدق.',
+            ],
+            'footer_description' => [
+                'id' => 'Yayasan filantropi Islam terpercaya.',
+                'en' => 'Trusted Islamic philanthropy foundation.',
+                'ar' => 'مؤسسة خيرية إسلامية موثوقة.',
+            ],
+            'announcement_text' => [
+                'id' => 'Selamat datang di portal kebaikan Insani.',
+                'en' => 'Welcome to the Insani portal of goodness.',
+                'ar' => 'مرحبًا بكم في بوابة الإحسان إنساني.',
+            ],
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $vision = json_decode(AppSetting::get('about_vision'), true);
+    expect($vision)->toBeArray();
+    expect($vision['id'])->toBe('Menjadi lembaga filantropi terdepan.');
+    expect($vision['en'])->toBe('To become a leading philanthropic institution.');
+    expect($vision['ar'])->toBe('أن نكون مؤسسة خيرية رائدة.');
+
+    $footer = json_decode(AppSetting::get('footer_description'), true);
+    expect($footer['en'])->toBe('Trusted Islamic philanthropy foundation.');
+    expect($footer['ar'])->toBe('مؤسسة خيرية إسلامية موثوقة.');
+});

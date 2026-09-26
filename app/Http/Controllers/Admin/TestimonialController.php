@@ -17,8 +17,10 @@ class TestimonialController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('role', 'like', "%{$search}%")
-                        ->orWhere('content', 'like', "%{$search}%");
+                        ->orWhere('role->id', 'like', "%{$search}%")
+                        ->orWhere('role->en', 'like', "%{$search}%")
+                        ->orWhere('content->id', 'like', "%{$search}%")
+                        ->orWhere('content->en', 'like', "%{$search}%");
                 });
             })
             ->orderBy('sort_order')
@@ -34,14 +36,30 @@ class TestimonialController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (is_string($request->input('content'))) {
+            $request->merge(['content' => ['id' => $request->input('content')]]);
+        }
+        if (is_string($request->input('role'))) {
+            $request->merge(['role' => ['id' => $request->input('role')]]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'nullable|string|max:255',
-            'content' => 'required|string|max:1000',
+            'role' => 'nullable|array',
+            'role.id' => 'nullable|string|max:255',
+            'role.en' => 'nullable|string|max:255',
+            'role.ar' => 'nullable|string|max:255',
+            'content' => 'required|array',
+            'content.id' => 'required|string|max:2000',
+            'content.en' => 'nullable|string|max:2000',
+            'content.ar' => 'nullable|string|max:2000',
             'rating' => 'required|integer|min:1|max:5',
             'avatar' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+        ], [
+            'content.id.required' => 'Isi testimoni dalam Bahasa Indonesia wajib diisi.',
+            'content.required' => 'Isi testimoni wajib diisi.',
         ]);
 
         if ($request->hasFile('avatar')) {
@@ -58,14 +76,30 @@ class TestimonialController extends Controller
 
     public function update(Request $request, Testimonial $testimonial): RedirectResponse
     {
+        if (is_string($request->input('content'))) {
+            $request->merge(['content' => ['id' => $request->input('content')]]);
+        }
+        if (is_string($request->input('role'))) {
+            $request->merge(['role' => ['id' => $request->input('role')]]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'nullable|string|max:255',
-            'content' => 'required|string|max:1000',
+            'role' => 'nullable|array',
+            'role.id' => 'nullable|string|max:255',
+            'role.en' => 'nullable|string|max:255',
+            'role.ar' => 'nullable|string|max:255',
+            'content' => 'required|array',
+            'content.id' => 'required|string|max:2000',
+            'content.en' => 'nullable|string|max:2000',
+            'content.ar' => 'nullable|string|max:2000',
             'rating' => 'required|integer|min:1|max:5',
             'avatar' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+        ], [
+            'content.id.required' => 'Isi testimoni dalam Bahasa Indonesia wajib diisi.',
+            'content.required' => 'Isi testimoni wajib diisi.',
         ]);
 
         if ($request->hasFile('avatar')) {

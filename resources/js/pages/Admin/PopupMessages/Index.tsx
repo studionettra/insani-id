@@ -19,6 +19,10 @@ import {
     Image as ImageIcon 
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
+import { getLocalizedValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -43,12 +47,12 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface PopupItem {
     id: number;
-    title: string;
+    title: any;
     display_type: 'image_only' | 'hybrid';
     image_path: string | null;
     image_url: string | null;
-    content: string | null;
-    cta_text: string | null;
+    content: any;
+    cta_text: any;
     cta_url: string | null;
     open_in_new_tab: boolean;
     delay_seconds: number;
@@ -61,6 +65,9 @@ interface PopupItem {
     is_live: boolean;
     created_at: string;
     updated_at: string;
+    title_translations?: Record<string, string>;
+    content_translations?: Record<string, string>;
+    cta_text_translations?: Record<string, string>;
 }
 
 interface Props {
@@ -85,17 +92,20 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
     const [editingPopup, setEditingPopup] = useState<PopupItem | null>(null);
     const [previewPopup, setPreviewPopup] = useState<PopupItem | null>(null);
     const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+    const [previewLocale, setPreviewLocale] = useState<'id' | 'en' | 'ar'>('id');
     const [popupToDelete, setPopupToDelete] = useState<PopupItem | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [langTab, setLangTab] = useState<'id' | 'en' | 'ar'>('id');
+    const [isTranslating, setIsTranslating] = useState(false);
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         _method: 'post',
-        title: '',
+        title: { id: '', en: '', ar: '' },
         display_type: 'image_only' as 'image_only' | 'hybrid',
         image_path: null as File | null,
-        content: '',
-        cta_text: 'Lihat Selengkapnya',
+        content: { id: '', en: '', ar: '' },
+        cta_text: { id: 'Lihat Selengkapnya', en: 'Learn More', ar: 'المزيد' },
         cta_url: '',
         open_in_new_tab: false,
         delay_seconds: 2,
@@ -106,6 +116,55 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
         end_at: '',
         is_active: true,
     });
+
+    const handleAutoTranslate = async () => {
+        const sourceTitle = data.title.id;
+        const sourceContent = data.content.id;
+        const sourceCta = data.cta_text.id;
+
+        if (!sourceTitle.trim()) {
+            toast.error('Silakan isi Judul Pop-up (ID) terlebih dahulu sebelum menerjemahkan.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const fieldsToTranslate: Record<string, string> = {
+                title: sourceTitle,
+            };
+            if (sourceContent && sourceContent.trim()) {
+                fieldsToTranslate.content = sourceContent.trim();
+            }
+            if (sourceCta && sourceCta.trim()) {
+                fieldsToTranslate.cta_text = sourceCta.trim();
+            }
+
+            const res = await autoTranslateFields(fieldsToTranslate);
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    title: {
+                        id: prev.title.id,
+                        en: res.title?.en || prev.title.en,
+                        ar: res.title?.ar || prev.title.ar,
+                    },
+                    content: {
+                        id: prev.content.id,
+                        en: res.content?.en || prev.content.en,
+                        ar: res.content?.ar || prev.content.ar,
+                    },
+                    cta_text: {
+                        id: prev.cta_text.id,
+                        en: res.cta_text?.en || prev.cta_text.en,
+                        ar: res.cta_text?.ar || prev.cta_text.ar,
+                    },
+                }));
+            }
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -135,11 +194,11 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
         reset();
         setData({
             _method: 'post',
-            title: '',
+            title: { id: '', en: '', ar: '' },
             display_type: 'image_only',
             image_path: null,
-            content: '',
-            cta_text: 'Lihat Selengkapnya',
+            content: { id: '', en: '', ar: '' },
+            cta_text: { id: 'Lihat Selengkapnya', en: 'Learn More', ar: 'المزيد' },
             cta_url: '',
             open_in_new_tab: false,
             delay_seconds: 2,
@@ -151,19 +210,36 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
             is_active: true,
         });
         setImagePreview(null);
+        setLangTab('id');
         clearErrors();
         setIsCreateModalOpen(true);
     };
 
     const openEditModal = (popup: PopupItem) => {
         setEditingPopup(popup);
+        const titleObj = popup.title_translations || (typeof popup.title === 'object' && popup.title !== null ? popup.title : { id: popup.title || '', en: '', ar: '' });
+        const contentObj = popup.content_translations || (typeof popup.content === 'object' && popup.content !== null ? popup.content : { id: popup.content || '', en: '', ar: '' });
+        const ctaObj = popup.cta_text_translations || (typeof popup.cta_text === 'object' && popup.cta_text !== null ? popup.cta_text : { id: popup.cta_text || 'Lihat Selengkapnya', en: '', ar: '' });
+
         setData({
             _method: 'put',
-            title: popup.title,
+            title: {
+                id: titleObj.id || (typeof popup.title === 'string' ? popup.title : '') || '',
+                en: titleObj.en || '',
+                ar: titleObj.ar || '',
+            },
             display_type: popup.display_type,
             image_path: null,
-            content: popup.content || '',
-            cta_text: popup.cta_text || 'Lihat Selengkapnya',
+            content: {
+                id: contentObj.id || (typeof popup.content === 'string' ? popup.content : '') || '',
+                en: contentObj.en || '',
+                ar: contentObj.ar || '',
+            },
+            cta_text: {
+                id: ctaObj.id || (typeof popup.cta_text === 'string' ? popup.cta_text : 'Lihat Selengkapnya') || 'Lihat Selengkapnya',
+                en: ctaObj.en || '',
+                ar: ctaObj.ar || '',
+            },
             cta_url: popup.cta_url || '',
             open_in_new_tab: Boolean(popup.open_in_new_tab),
             delay_seconds: popup.delay_seconds ?? 2,
@@ -175,6 +251,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
             is_active: Boolean(popup.is_active),
         });
         setImagePreview(popup.image_url || null);
+        setLangTab('id');
         clearErrors();
         setIsEditModalOpen(true);
     };
@@ -265,7 +342,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                             </h1>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Kelola pop-up pengumuman dan poster event yang langsung menyapa pengunjung website.
+                            Kelola pop-up pengumuman dan poster event dengan dukungan multi-bahasa (ID, EN, AR).
                         </p>
                     </div>
 
@@ -374,150 +451,181 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                popups.data.map((popup) => (
-                                    <TableRow key={popup.id} className="border-b border-gray-100 dark:border-zinc-800/60 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
-                                        {/* Poster Thumbnail */}
-                                        <TableCell className="py-4 pl-6">
-                                            {popup.image_url ? (
-                                                <div 
-                                                    className="w-14 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 shadow-xs cursor-pointer hover:opacity-85 transition-opacity relative group"
-                                                    onClick={() => setPreviewPopup(popup)}
-                                                    title="Klik untuk pratinjau"
-                                                >
-                                                    <img 
-                                                        src={popup.image_url} 
-                                                        alt={popup.title} 
-                                                        className="w-full h-full object-cover" 
-                                                    />
-                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
-                                                        <Eye className="w-4 h-4" />
+                                popups.data.map((popup) => {
+                                    const titleId = getLocalizedValue(popup.title_translations || popup.title, 'id');
+                                    const ctaTextId = getLocalizedValue(popup.cta_text_translations || popup.cta_text, 'id');
+                                    const hasEn = Boolean(popup.title_translations?.en || (typeof popup.title === 'object' && popup.title?.en));
+                                    const hasAr = Boolean(popup.title_translations?.ar || (typeof popup.title === 'object' && popup.title?.ar));
+
+                                    return (
+                                        <TableRow key={popup.id} className="border-b border-gray-100 dark:border-zinc-800/60 hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                                            {/* Poster Thumbnail */}
+                                            <TableCell className="py-4 pl-6">
+                                                {popup.image_url ? (
+                                                    <div 
+                                                        className="w-14 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 shadow-xs cursor-pointer hover:opacity-85 transition-opacity relative group"
+                                                        onClick={() => setPreviewPopup(popup)}
+                                                        title="Klik untuk pratinjau"
+                                                    >
+                                                        <img 
+                                                            src={popup.image_url} 
+                                                            alt={titleId} 
+                                                            className="w-full h-full object-cover" 
+                                                        />
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white">
+                                                            <Eye className="w-4 h-4" />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ) : (
-                                                <div className="w-14 h-16 rounded-lg bg-gray-100 dark:bg-zinc-800 border border-dashed border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-400">
-                                                    <ImageIcon className="w-5 h-5" />
-                                                </div>
-                                            )}
-                                        </TableCell>
-
-                                        {/* Judul & Mode */}
-                                        <TableCell className="py-4">
-                                            <div className="font-semibold text-gray-900 dark:text-white line-clamp-1 max-w-[220px]">
-                                                {popup.title}
-                                            </div>
-                                            <div className="flex items-center gap-1.5 mt-1">
-                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                                                    popup.display_type === 'image_only'
-                                                        ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300'
-                                                        : 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
-                                                }`}>
-                                                    {popup.display_type === 'image_only' ? 'Poster Utuh' : 'Kombinasi Teks'}
-                                                </span>
-                                                {popup.cta_url && (
-                                                    <span className="text-[11px] text-gray-400 truncate max-w-[150px] inline-flex items-center gap-0.5">
-                                                        <ExternalLink className="w-3 h-3 shrink-0" />
-                                                        {popup.cta_text || 'Link CTA'}
-                                                    </span>
+                                                ) : (
+                                                    <div className="w-14 h-16 rounded-lg bg-gray-100 dark:bg-zinc-800 border border-dashed border-gray-200 dark:border-zinc-700 flex items-center justify-center text-gray-400">
+                                                        <ImageIcon className="w-5 h-5" />
+                                                    </div>
                                                 )}
-                                            </div>
-                                        </TableCell>
+                                            </TableCell>
 
-                                        {/* Target & Frekuensi */}
-                                        <TableCell className="py-4 text-xs text-gray-600 dark:text-gray-300">
-                                            <div>
-                                                <span className="font-medium text-gray-900 dark:text-white">
-                                                    {popup.target_page === 'home_only' ? 'Beranda Saja' : 'Semua Halaman'}
-                                                </span>
-                                            </div>
-                                            <div className="text-[11px] text-gray-400 mt-0.5">
-                                                {popup.frequency === 'once_per_day' && '1x per hari'}
-                                                {popup.frequency === 'once_per_session' && '1x per sesi browser'}
-                                                {popup.frequency === 'always' && 'Selalu tampil'}
-                                            </div>
-                                        </TableCell>
-
-                                        {/* Timer */}
-                                        <TableCell className="py-4 text-xs">
-                                            <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300 font-medium">
-                                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                                <span>Delay: {popup.delay_seconds} detik</span>
-                                            </div>
-                                            <div className="text-[11px] text-gray-400 mt-0.5">
-                                                Auto-close: {popup.auto_close_seconds > 0 ? `${popup.auto_close_seconds} detik` : 'Manual (X)'}
-                                            </div>
-                                        </TableCell>
-
-                                        {/* Jadwal Tayang */}
-                                        <TableCell className="py-4 text-xs text-gray-500 dark:text-gray-400">
-                                            {popup.start_at || popup.end_at ? (
-                                                <div className="space-y-0.5">
-                                                    <div>Mulai: {formatDateTime(popup.start_at)}</div>
-                                                    <div>Selesai: {formatDateTime(popup.end_at)}</div>
+                                            {/* Judul & Mode */}
+                                            <TableCell className="py-4">
+                                                <div className="font-semibold text-gray-900 dark:text-white line-clamp-1 max-w-[220px]">
+                                                    {titleId}
                                                 </div>
-                                            ) : (
-                                                <span className="text-gray-400">Tanpa batas waktu</span>
-                                            )}
-                                        </TableCell>
+                                                <div className="flex items-center gap-1.5 mt-1">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                                                        popup.display_type === 'image_only'
+                                                            ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300'
+                                                            : 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+                                                    }`}>
+                                                        {popup.display_type === 'image_only' ? 'Poster Utuh' : 'Kombinasi Teks'}
+                                                    </span>
+                                                    {popup.cta_url && (
+                                                        <span className="text-[11px] text-gray-400 truncate max-w-[150px] inline-flex items-center gap-0.5">
+                                                            <ExternalLink className="w-3 h-3 shrink-0" />
+                                                            {ctaTextId || 'Link CTA'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {/* Language Badges */}
+                                                <div className="flex items-center gap-1.5 mt-1.5">
+                                                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                                        ID ✓
+                                                    </span>
+                                                    {hasEn ? (
+                                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60">
+                                                            EN ✓
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                                                            EN -
+                                                        </span>
+                                                    )}
+                                                    {hasAr ? (
+                                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60">
+                                                            AR ✓
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                                                            AR -
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
 
-                                        {/* Status & Quick Toggle */}
-                                        <TableCell className="py-4 text-center">
-                                            <div className="flex flex-col items-center gap-1.5">
-                                                <Switch
-                                                    checked={Boolean(popup.is_active)}
-                                                    onCheckedChange={() => handleToggleActive(popup)}
-                                                    aria-label="Toggle status pop-up"
-                                                />
-                                                <span className={`text-[10px] font-semibold ${
-                                                    popup.is_live
-                                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                                        : popup.is_active
-                                                        ? 'text-amber-600 dark:text-amber-400'
-                                                        : 'text-gray-400'
-                                                }`}>
-                                                    {popup.is_live ? 'Tayang' : popup.is_active ? 'Terjadwal' : 'Nonaktif'}
-                                                </span>
-                                            </div>
-                                        </TableCell>
+                                            {/* Target & Frekuensi */}
+                                            <TableCell className="py-4 text-xs text-gray-600 dark:text-gray-300">
+                                                <div>
+                                                    <span className="font-medium text-gray-900 dark:text-white">
+                                                        {popup.target_page === 'home_only' ? 'Beranda Saja' : 'Semua Halaman'}
+                                                    </span>
+                                                </div>
+                                                <div className="text-[11px] text-gray-400 mt-0.5">
+                                                    {popup.frequency === 'once_per_day' && '1x per hari'}
+                                                    {popup.frequency === 'once_per_session' && '1x per sesi browser'}
+                                                    {popup.frequency === 'always' && 'Selalu tampil'}
+                                                </div>
+                                            </TableCell>
 
-                                        {/* Actions */}
-                                        <TableCell className="py-4 text-right pr-6">
-                                            <div className="flex items-center justify-end gap-1.5">
-                                                {/* Preview Button */}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => setPreviewPopup(popup)}
-                                                    className="w-8 h-8 rounded-lg text-gray-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/50"
-                                                    title="Pratinjau Pop-up"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
+                                            {/* Timer */}
+                                            <TableCell className="py-4 text-xs">
+                                                <div className="flex items-center gap-1 text-gray-700 dark:text-gray-300 font-medium">
+                                                    <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                                    <span>Delay: {popup.delay_seconds} detik</span>
+                                                </div>
+                                                <div className="text-[11px] text-gray-400 mt-0.5">
+                                                    Auto-close: {popup.auto_close_seconds > 0 ? `${popup.auto_close_seconds} detik` : 'Manual (X)'}
+                                                </div>
+                                            </TableCell>
 
-                                                {/* Edit Button */}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => openEditModal(popup)}
-                                                    className="w-8 h-8 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50"
-                                                    title="Edit Pop-up"
-                                                >
-                                                    <Edit className="w-4 h-4" />
-                                                </Button>
+                                            {/* Jadwal Tayang */}
+                                            <TableCell className="py-4 text-xs text-gray-500 dark:text-gray-400">
+                                                {popup.start_at || popup.end_at ? (
+                                                    <div className="space-y-0.5">
+                                                        <div>Mulai: {formatDateTime(popup.start_at)}</div>
+                                                        <div>Selesai: {formatDateTime(popup.end_at)}</div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400">Tanpa batas waktu</span>
+                                                )}
+                                            </TableCell>
 
-                                                {/* Delete Button */}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => setPopupToDelete(popup)}
-                                                    className="w-8 h-8 rounded-lg text-gray-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50"
-                                                    title="Hapus Pop-up"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                            {/* Status & Quick Toggle */}
+                                            <TableCell className="py-4 text-center">
+                                                <div className="flex flex-col items-center gap-1.5">
+                                                    <Switch
+                                                        checked={Boolean(popup.is_active)}
+                                                        onCheckedChange={() => handleToggleActive(popup)}
+                                                        aria-label="Toggle status pop-up"
+                                                    />
+                                                    <span className={`text-[10px] font-semibold ${
+                                                        popup.is_live
+                                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                                            : popup.is_active
+                                                            ? 'text-amber-600 dark:text-amber-400'
+                                                            : 'text-gray-400'
+                                                    }`}>
+                                                        {popup.is_live ? 'Tayang' : popup.is_active ? 'Terjadwal' : 'Nonaktif'}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+
+                                            {/* Actions */}
+                                            <TableCell className="py-4 text-right pr-6">
+                                                <div className="flex items-center justify-end gap-1.5">
+                                                    {/* Preview Button */}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => setPreviewPopup(popup)}
+                                                        className="w-8 h-8 rounded-lg text-gray-500 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-950/50"
+                                                        title="Pratinjau Pop-up"
+                                                    >
+                                                        <Eye className="w-4 h-4" />
+                                                    </Button>
+
+                                                    {/* Edit Button */}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => openEditModal(popup)}
+                                                        className="w-8 h-8 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50"
+                                                        title="Edit Pop-up"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </Button>
+
+                                                    {/* Delete Button */}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => setPopupToDelete(popup)}
+                                                        className="w-8 h-8 rounded-lg text-gray-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50"
+                                                        title="Hapus Pop-up"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>
@@ -536,7 +644,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                     }
                 }}
             >
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-full sm:max-w-3xl md:max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Megaphone className="w-5 h-5 text-brand-600" />
@@ -550,9 +658,9 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                             <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 Format Tampilan Pop-up *
                             </Label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                 <label 
-                                    className={`relative flex flex-col p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                                    className={`relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all ${
                                         data.display_type === 'image_only'
                                             ? 'border-brand-600 bg-brand-50/40 dark:bg-brand-950/20 shadow-xs'
                                             : 'border-gray-200 dark:border-zinc-800 hover:border-gray-300'
@@ -566,22 +674,24 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                                         onChange={() => setData('display_type', 'image_only')}
                                         className="sr-only"
                                     />
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
-                                            <ImageIcon className="w-4 h-4 text-brand-600" />
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-2 whitespace-nowrap">
+                                            <ImageIcon className="w-4 h-4 text-brand-600 shrink-0" />
                                             Poster Utuh (Image-Only)
                                         </span>
-                                        {data.display_type === 'image_only' && (
-                                            <CheckCircle2 className="w-4 h-4 text-brand-600" />
-                                        )}
+                                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                                            {data.display_type === 'image_only' && (
+                                                <CheckCircle2 className="w-4 h-4 text-brand-600 animate-fade-in" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
                                         Cocok untuk flyer event yang sudah dirancang jadi. Seluruh gambar dapat diklik menuju link aksi.
                                     </p>
                                 </label>
 
                                 <label 
-                                    className={`relative flex flex-col p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                                    className={`relative flex flex-col p-4 rounded-xl border-2 cursor-pointer transition-all ${
                                         data.display_type === 'hybrid'
                                             ? 'border-brand-600 bg-brand-50/40 dark:bg-brand-950/20 shadow-xs'
                                             : 'border-gray-200 dark:border-zinc-800 hover:border-gray-300'
@@ -595,39 +705,228 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                                         onChange={() => setData('display_type', 'hybrid')}
                                         className="sr-only"
                                     />
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
-                                            <Layers className="w-4 h-4 text-brand-600" />
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-2 whitespace-nowrap">
+                                            <Layers className="w-4 h-4 text-brand-600 shrink-0" />
                                             Kombinasi (Poster + Teks)
                                         </span>
-                                        {data.display_type === 'hybrid' && (
-                                            <CheckCircle2 className="w-4 h-4 text-brand-600" />
-                                        )}
+                                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                                            {data.display_type === 'hybrid' && (
+                                                <CheckCircle2 className="w-4 h-4 text-brand-600 animate-fade-in" />
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
                                         Banner gambar di bagian atas, disertai teks judul, deskripsi ringkas, dan tombol aksi tersendiri.
                                     </p>
                                 </label>
                             </div>
                         </div>
 
-                        {/* 2. Judul Pop-up */}
-                        <div className="space-y-1.5">
-                            <Label htmlFor="title" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                Judul Event / Identitas Pop-up *
-                            </Label>
-                            <Input
-                                id="title"
-                                value={data.title}
-                                onChange={(e) => setData('title', e.target.value)}
-                                placeholder="Contoh: Tanggap Darurat Bencana Banjir Bandang"
-                                className="rounded-xl"
-                            />
-                            {errors.title && <p className="text-xs text-rose-500">{errors.title}</p>}
+                        {/* Card Status & Auto Translate */}
+                        <TranslationStatusCard
+                            hasId={Boolean(data.title.id)}
+                            hasEn={Boolean(data.title.en && (data.display_type !== 'hybrid' || data.content.en))}
+                            hasAr={Boolean(data.title.ar && (data.display_type !== 'hybrid' || data.content.ar))}
+                            onTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            compact
+                            description="Terjemahkan judul, deskripsi pesan, dan tombol aksi pop-up ke bahasa Inggris dan Arab secara otomatis."
+                        />
+
+                        {/* Language Switcher Tabs */}
+                        <div className="flex border-b border-gray-100 dark:border-gray-800">
+                            <button
+                                type="button"
+                                onClick={() => setLangTab('id')}
+                                className={`flex items-center gap-1.5 px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
+                                    langTab === 'id'
+                                        ? 'border-brand-600 text-brand-600 dark:text-brand-400 font-semibold'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                }`}
+                            >
+                                <span>🇮🇩 Bahasa Indonesia</span>
+                                <span className="text-[10px] text-red-500 font-bold">*</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLangTab('en')}
+                                className={`flex items-center gap-1.5 px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
+                                    langTab === 'en'
+                                        ? 'border-brand-600 text-brand-600 dark:text-brand-400 font-semibold'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                }`}
+                            >
+                                <span>🇬🇧 English</span>
+                                {data.title.en && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLangTab('ar')}
+                                className={`flex items-center gap-1.5 px-4 py-2 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
+                                    langTab === 'ar'
+                                        ? 'border-brand-600 text-brand-600 dark:text-brand-400 font-semibold'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                }`}
+                            >
+                                <span>🇸🇦 العربية</span>
+                                {data.title.ar && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>}
+                            </button>
                         </div>
 
-                        {/* 3. Upload Gambar Poster Flyer */}
-                        <div className="space-y-1.5">
+                        {/* Tab ID */}
+                        {langTab === 'id' && (
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="title_id" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Judul Event / Identitas Pop-up (ID) *
+                                    </Label>
+                                    <Input
+                                        id="title_id"
+                                        value={data.title.id}
+                                        onChange={(e) => setData('title', { ...data.title, id: e.target.value })}
+                                        placeholder="Contoh: Tanggap Darurat Bencana Banjir Bandang"
+                                        className="rounded-xl"
+                                        required
+                                    />
+                                    {(errors as any)['title.id'] && <p className="text-xs text-rose-500">{(errors as any)['title.id']}</p>}
+                                </div>
+
+                                {data.display_type === 'hybrid' && (
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="content_id" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                            Deskripsi Singkat Pengumuman (ID)
+                                        </Label>
+                                        <Textarea
+                                            id="content_id"
+                                            rows={3}
+                                            value={data.content.id}
+                                            onChange={(e) => setData('content', { ...data.content, id: e.target.value })}
+                                            placeholder="Tuliskan penjelasan singkat mengenai event, kampanye, atau pesan penting yang ingin disampaikan..."
+                                            className="rounded-xl text-sm"
+                                        />
+                                        {(errors as any)['content.id'] && <p className="text-xs text-rose-500">{(errors as any)['content.id']}</p>}
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cta_text_id" className="text-xs text-gray-700 dark:text-gray-300">
+                                        Teks Tombol Aksi (ID)
+                                    </Label>
+                                    <Input
+                                        id="cta_text_id"
+                                        value={data.cta_text.id}
+                                        onChange={(e) => setData('cta_text', { ...data.cta_text, id: e.target.value })}
+                                        placeholder="Contoh: Donasi Sekarang"
+                                        className="rounded-xl text-sm"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab EN */}
+                        {langTab === 'en' && (
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="title_en" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        Event Title / Pop-up Identity (EN) (Opsional)
+                                    </Label>
+                                    <Input
+                                        id="title_en"
+                                        value={data.title.en}
+                                        onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                        placeholder="Example: Emergency Humanitarian Response"
+                                        className="rounded-xl"
+                                    />
+                                    {(errors as any)['title.en'] && <p className="text-xs text-rose-500">{(errors as any)['title.en']}</p>}
+                                </div>
+
+                                {data.display_type === 'hybrid' && (
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="content_en" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                            Short Announcement Description (EN)
+                                        </Label>
+                                        <Textarea
+                                            id="content_en"
+                                            rows={3}
+                                            value={data.content.en}
+                                            onChange={(e) => setData('content', { ...data.content, en: e.target.value })}
+                                            placeholder="Write a brief explanation about the event, campaign, or important message..."
+                                            className="rounded-xl text-sm"
+                                        />
+                                        {(errors as any)['content.en'] && <p className="text-xs text-rose-500">{(errors as any)['content.en']}</p>}
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cta_text_en" className="text-xs text-gray-700 dark:text-gray-300">
+                                        Action Button Text (EN)
+                                    </Label>
+                                    <Input
+                                        id="cta_text_en"
+                                        value={data.cta_text.en}
+                                        onChange={(e) => setData('cta_text', { ...data.cta_text, en: e.target.value })}
+                                        placeholder="Example: Donate Now"
+                                        className="rounded-xl text-sm"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Tab AR */}
+                        {langTab === 'ar' && (
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="title_ar" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        عنوان الفعالية / هوية الرسالة المنبثقة (AR) (اختياري)
+                                    </Label>
+                                    <Input
+                                        id="title_ar"
+                                        dir="rtl"
+                                        value={data.title.ar}
+                                        onChange={(e) => setData('title', { ...data.title, ar: e.target.value })}
+                                        placeholder="مثال: الاستجابة لحالات الطوارئ الإنسانية"
+                                        className="rounded-xl"
+                                    />
+                                    {(errors as any)['title.ar'] && <p className="text-xs text-rose-500">{(errors as any)['title.ar']}</p>}
+                                </div>
+
+                                {data.display_type === 'hybrid' && (
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="content_ar" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                            وصف موجز للإعلان (AR)
+                                        </Label>
+                                        <Textarea
+                                            id="content_ar"
+                                            rows={3}
+                                            dir="rtl"
+                                            value={data.content.ar}
+                                            onChange={(e) => setData('content', { ...data.content, ar: e.target.value })}
+                                            placeholder="اكتب شرحاً موجزاً عن الفعالية أو الحملة أو الرسالة المهمة..."
+                                            className="rounded-xl text-sm"
+                                        />
+                                        {(errors as any)['content.ar'] && <p className="text-xs text-rose-500">{(errors as any)['content.ar']}</p>}
+                                    </div>
+                                )}
+
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cta_text_ar" className="text-xs text-gray-700 dark:text-gray-300">
+                                        نص زر الإجراء (AR)
+                                    </Label>
+                                    <Input
+                                        id="cta_text_ar"
+                                        dir="rtl"
+                                        value={data.cta_text.ar}
+                                        onChange={(e) => setData('cta_text', { ...data.cta_text, ar: e.target.value })}
+                                        placeholder="مثال: تبرع الآن"
+                                        className="rounded-xl text-sm"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Upload Gambar Poster Flyer */}
+                        <div className="space-y-1.5 pt-2 border-t border-gray-100 dark:border-zinc-800">
                             <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 Unggah Poster / Flyer Event {data.display_type === 'image_only' ? '*' : '(Opsional)'}
                             </Label>
@@ -674,43 +973,13 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                             </div>
                         </div>
 
-                        {/* 4. Deskripsi / Konten (Jika Hybrid) */}
-                        {data.display_type === 'hybrid' && (
-                            <div className="space-y-1.5">
-                                <Label htmlFor="content" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                    Deskripsi Singkat Pengumuman
-                                </Label>
-                                <Textarea
-                                    id="content"
-                                    rows={3}
-                                    value={data.content}
-                                    onChange={(e) => setData('content', e.target.value)}
-                                    placeholder="Tuliskan penjelasan singkat mengenai event, kampanye, atau pesan penting yang ingin disampaikan..."
-                                    className="rounded-xl text-sm"
-                                />
-                                {errors.content && <p className="text-xs text-rose-500">{errors.content}</p>}
-                            </div>
-                        )}
-
-                        {/* 5. Pengaturan Tombol & Link CTA */}
+                        {/* Pengaturan Tombol & Link CTA */}
                         <div className="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-3">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
                                 <ExternalLink className="w-3.5 h-3.5" />
-                                Tautan Tindakan (Call to Action)
+                                Tautan URL Tujuan (Call to Action)
                             </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="cta_text" className="text-xs text-gray-700 dark:text-gray-300">
-                                        Teks Tombol Aksi
-                                    </Label>
-                                    <Input
-                                        id="cta_text"
-                                        value={data.cta_text}
-                                        onChange={(e) => setData('cta_text', e.target.value)}
-                                        placeholder="Contoh: Donasi Sekarang"
-                                        className="rounded-xl text-sm bg-white dark:bg-zinc-900"
-                                    />
-                                </div>
+                            <div className="grid grid-cols-1 gap-3">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="cta_url" className="text-xs text-gray-700 dark:text-gray-300">
                                         URL Link Tujuan (Opsional)
@@ -739,7 +1008,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                             </div>
                         </div>
 
-                        {/* 6. Pengaturan Timer & Target Halaman */}
+                        {/* Pengaturan Timer & Target Halaman */}
                         <div className="p-4 rounded-2xl bg-gray-50/70 dark:bg-zinc-800/40 border border-gray-100 dark:border-zinc-800 space-y-4">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
                                 <Clock className="w-3.5 h-3.5" />
@@ -886,7 +1155,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
             <Dialog open={Boolean(previewPopup)} onOpenChange={(open) => !open && setPreviewPopup(null)}>
                 <DialogContent className="max-w-4xl p-0 overflow-hidden bg-zinc-950 border-zinc-800 text-white">
                     {/* Header Toolbar Pratinjau */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/90">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/90 gap-3">
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-5 h-5 text-amber-400" />
                             <div>
@@ -895,28 +1164,61 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                             </div>
                         </div>
 
-                        {/* Device Toggle */}
-                        <div className="flex items-center gap-1 bg-zinc-800 p-1 rounded-xl">
-                            <button
-                                type="button"
-                                onClick={() => setPreviewDevice('desktop')}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-                                    previewDevice === 'desktop' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
-                                }`}
-                            >
-                                <Monitor className="w-3.5 h-3.5" />
-                                Desktop
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setPreviewDevice('mobile')}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
-                                    previewDevice === 'mobile' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
-                                }`}
-                            >
-                                <Smartphone className="w-3.5 h-3.5" />
-                                Mobile
-                            </button>
+                        <div className="flex items-center gap-3">
+                            {/* Language Preview Selector */}
+                            <div className="flex items-center gap-1 bg-zinc-800 p-1 rounded-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewLocale('id')}
+                                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                                        previewLocale === 'id' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
+                                    }`}
+                                >
+                                    🇮🇩 ID
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewLocale('en')}
+                                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                                        previewLocale === 'en' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
+                                    }`}
+                                >
+                                    🇬🇧 EN
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewLocale('ar')}
+                                    className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                                        previewLocale === 'ar' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
+                                    }`}
+                                >
+                                    🇸🇦 AR
+                                </button>
+                            </div>
+
+                            {/* Device Toggle */}
+                            <div className="flex items-center gap-1 bg-zinc-800 p-1 rounded-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewDevice('desktop')}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
+                                        previewDevice === 'desktop' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
+                                    }`}
+                                >
+                                    <Monitor className="w-3.5 h-3.5" />
+                                    Desktop
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewDevice('mobile')}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all ${
+                                        previewDevice === 'mobile' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-white'
+                                    }`}
+                                >
+                                    <Smartphone className="w-3.5 h-3.5" />
+                                    Mobile
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -925,83 +1227,91 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                         {/* Simulated Backdrop */}
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-xs pointer-events-none" />
 
-                        {previewPopup && (
-                            <div 
-                                className={`relative z-10 w-full transition-all duration-300 ${
-                                    previewDevice === 'mobile' 
-                                        ? 'max-w-[340px] shadow-2xl rounded-3xl overflow-hidden' 
-                                        : 'max-w-[480px] shadow-2xl rounded-2xl overflow-hidden'
-                                } bg-white text-zinc-900 border border-zinc-200/30 animate-in fade-in-0 zoom-in-95 duration-200`}
-                            >
-                                {/* Floating Close Button */}
-                                <button
-                                    type="button"
-                                    onClick={() => setPreviewPopup(null)}
-                                    className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-md active:scale-95"
-                                    aria-label="Tutup pratinjau"
+                        {previewPopup && (() => {
+                            const previewTitle = getLocalizedValue(previewPopup.title_translations || previewPopup.title, previewLocale);
+                            const previewContent = getLocalizedValue(previewPopup.content_translations || previewPopup.content, previewLocale);
+                            const previewCta = getLocalizedValue(previewPopup.cta_text_translations || previewPopup.cta_text, previewLocale);
+                            const isRtl = previewLocale === 'ar';
+
+                            return (
+                                <div 
+                                    dir={isRtl ? 'rtl' : 'ltr'}
+                                    className={`relative z-10 w-full transition-all duration-300 ${
+                                        previewDevice === 'mobile' 
+                                            ? 'max-w-[340px] shadow-2xl rounded-3xl overflow-hidden' 
+                                            : 'max-w-[480px] shadow-2xl rounded-2xl overflow-hidden'
+                                    } bg-white text-zinc-900 border border-zinc-200/30 animate-in fade-in-0 zoom-in-95 duration-200`}
                                 >
-                                    <X className="w-4 h-4" />
-                                </button>
+                                    {/* Floating Close Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewPopup(null)}
+                                        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/60 text-white hover:bg-black/80 flex items-center justify-center transition-all shadow-md active:scale-95"
+                                        aria-label="Tutup pratinjau"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
 
-                                {previewPopup.display_type === 'image_only' ? (
-                                    /* Image Only Mode: The entire modal is the poster flyer */
-                                    <div className="relative group cursor-pointer">
-                                        {previewPopup.image_url ? (
-                                            <img
-                                                src={previewPopup.image_url}
-                                                alt={previewPopup.title}
-                                                className="w-full max-h-[75vh] object-contain bg-zinc-900 block"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-80 bg-zinc-100 flex flex-col items-center justify-center text-zinc-400 p-6 text-center">
-                                                <ImageIcon className="w-12 h-12 mb-2 opacity-50" />
-                                                <span className="font-semibold text-sm">Poster Belum Diunggah</span>
-                                                <span className="text-xs text-zinc-500 mt-1">Unggah flyer untuk melihat tampilan visual penuh</span>
-                                            </div>
-                                        )}
-
-                                        {previewPopup.cta_url && (
-                                            <div className="p-3 bg-zinc-900/95 text-white flex items-center justify-between px-4">
-                                                <span className="text-xs font-medium truncate">{previewPopup.cta_text || 'Lihat Selengkapnya'}</span>
-                                                <span className="text-xs font-bold text-brand-400 flex items-center gap-1">
-                                                    Kunjungi &rarr;
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    /* Hybrid Mode: Banner Image + Content + Button */
-                                    <div className="flex flex-col">
-                                        {previewPopup.image_url && (
-                                            <div className="w-full max-h-56 overflow-hidden bg-zinc-100">
-                                                <img
-                                                    src={previewPopup.image_url}
-                                                    alt={previewPopup.title}
-                                                    className="w-full h-full object-cover"
+                                    {previewPopup.display_type === 'image_only' ? (
+                                        /* Image Only Mode: The entire modal is the poster flyer */
+                                        <div className="relative group cursor-pointer">
+                                            {previewPopup.image_url ? (
+                                                <img 
+                                                    src={previewPopup.image_url} 
+                                                    alt={previewTitle} 
+                                                    className="w-full max-h-[75vh] object-contain bg-zinc-900 block" 
                                                 />
-                                            </div>
-                                        )}
-                                        <div className="p-5 space-y-3">
-                                            <h4 className="text-lg font-bold text-zinc-900 leading-tight">
-                                                {previewPopup.title}
-                                            </h4>
-                                            {previewPopup.content && (
-                                                <p className="text-xs text-zinc-600 leading-relaxed">
-                                                    {previewPopup.content}
-                                                </p>
+                                            ) : (
+                                                <div className="w-full h-80 bg-zinc-100 flex flex-col items-center justify-center text-zinc-400 p-6 text-center">
+                                                    <ImageIcon className="w-12 h-12 mb-2 opacity-50" />
+                                                    <span className="font-semibold text-sm">Poster Belum Diunggah</span>
+                                                    <span className="text-xs text-zinc-500 mt-1">Unggah flyer untuk melihat tampilan visual penuh</span>
+                                                </div>
                                             )}
+
                                             {previewPopup.cta_url && (
-                                                <div className="pt-2">
-                                                    <Button className="w-full bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold text-sm">
-                                                        {previewPopup.cta_text || 'Pelajari Lebih Lanjut'}
-                                                    </Button>
+                                                <div className="p-3 bg-zinc-900/95 text-white flex items-center justify-between px-4">
+                                                    <span className="text-xs font-medium truncate">{previewCta || 'Lihat Selengkapnya'}</span>
+                                                    <span className="text-xs font-bold text-brand-400 flex items-center gap-1">
+                                                        {isRtl ? '← زيارة' : 'Kunjungi →'}
+                                                    </span>
                                                 </div>
                                             )}
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                    ) : (
+                                        /* Hybrid Mode: Banner Image + Content + Button */
+                                        <div className="flex flex-col">
+                                            {previewPopup.image_url && (
+                                                <div className="w-full max-h-56 overflow-hidden bg-zinc-100">
+                                                    <img 
+                                                        src={previewPopup.image_url} 
+                                                        alt={previewTitle} 
+                                                        className="w-full h-full object-cover" 
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="p-5 space-y-3">
+                                                <h4 className="text-lg font-bold text-zinc-900 leading-tight">
+                                                    {previewTitle}
+                                                </h4>
+                                                {previewContent && (
+                                                    <p className="text-xs text-zinc-600 leading-relaxed">
+                                                        {previewContent}
+                                                    </p>
+                                                )}
+                                                {previewPopup.cta_url && (
+                                                    <div className="pt-2">
+                                                        <Button className="w-full bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-semibold text-sm">
+                                                            {previewCta || 'Pelajari Lebih Lanjut'}
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     <div className="px-6 py-3 border-t border-zinc-800 bg-zinc-900 flex items-center justify-between text-xs text-zinc-400">
@@ -1023,7 +1333,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                 open={Boolean(popupToDelete)}
                 onOpenChange={(open) => !open && setPopupToDelete(null)}
                 title="Hapus Pesan Pop-up?"
-                description={`Apakah Anda yakin ingin menghapus "${popupToDelete?.title}"? Tindakan ini akan menghapus data dan berkas gambar dari server secara permanen.`}
+                description={`Apakah Anda yakin ingin menghapus "${popupToDelete ? getLocalizedValue(popupToDelete.title_translations || popupToDelete.title, 'id') : ''}"? Tindakan ini akan menghapus data dan berkas gambar dari server secara permanen.`}
                 confirmText="Ya, Hapus"
                 cancelText="Batal"
                 variant="danger"

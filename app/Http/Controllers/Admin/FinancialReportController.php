@@ -19,6 +19,7 @@ class FinancialReportController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('title->id', 'like', "%{$search}%")
                         ->orWhere('title->en', 'like', "%{$search}%")
+                        ->orWhere('title->ar', 'like', "%{$search}%")
                         ->orWhere('auditor_name', 'like', "%{$search}%")
                         ->orWhere('audit_status', 'like', "%{$search}%")
                         ->orWhere('report_year', 'like', "%{$search}%");
@@ -51,10 +52,18 @@ class FinancialReportController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (is_string($request->input('title'))) {
+            $request->merge(['title' => ['id' => $request->input('title')]]);
+        }
+        if (is_string($request->input('summary'))) {
+            $request->merge(['summary' => ['id' => $request->input('summary')]]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
+            'title.ar' => 'nullable|string|max:255',
             'report_year' => 'required|integer|min:2000|max:2100',
             'category' => 'required|string|in:annual_report,audited_financial,impact_report,interim',
             'audit_status' => 'nullable|string|max:255',
@@ -65,11 +74,14 @@ class FinancialReportController extends Controller
             'summary' => 'nullable|array',
             'summary.id' => 'nullable|string|max:2000',
             'summary.en' => 'nullable|string|max:2000',
+            'summary.ar' => 'nullable|string|max:2000',
             'total_revenue' => 'nullable|numeric|min:0',
             'total_disbursement' => 'nullable|numeric|min:0',
             'beneficiaries_count' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+        ], [
+            'title.id.required' => 'Judul laporan dalam Bahasa Indonesia wajib diisi.',
         ]);
 
         if ($request->hasFile('file')) {
@@ -93,10 +105,18 @@ class FinancialReportController extends Controller
 
     public function update(Request $request, FinancialReport $financial_report): RedirectResponse
     {
+        if (is_string($request->input('title'))) {
+            $request->merge(['title' => ['id' => $request->input('title')]]);
+        }
+        if (is_string($request->input('summary'))) {
+            $request->merge(['summary' => ['id' => $request->input('summary')]]);
+        }
+
         $validated = $request->validate([
             'title' => 'required|array',
             'title.id' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
+            'title.ar' => 'nullable|string|max:255',
             'report_year' => 'required|integer|min:2000|max:2100',
             'category' => 'required|string|in:annual_report,audited_financial,impact_report,interim',
             'audit_status' => 'nullable|string|max:255',
@@ -107,11 +127,14 @@ class FinancialReportController extends Controller
             'summary' => 'nullable|array',
             'summary.id' => 'nullable|string|max:2000',
             'summary.en' => 'nullable|string|max:2000',
+            'summary.ar' => 'nullable|string|max:2000',
             'total_revenue' => 'nullable|numeric|min:0',
             'total_disbursement' => 'nullable|numeric|min:0',
             'beneficiaries_count' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
+        ], [
+            'title.id.required' => 'Judul laporan dalam Bahasa Indonesia wajib diisi.',
         ]);
 
         if ($request->hasFile('file')) {

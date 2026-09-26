@@ -95,3 +95,32 @@ it('allows admin to delete a testimonial', function () {
 
     expect(Testimonial::where('id', $item->id)->exists())->toBeFalse();
 });
+
+it('allows admin to create a multilingual testimonial with ID, EN, and AR', function () {
+    actingAs($this->admin)
+        ->post(route('admin.testimonials.store'), [
+            'name' => 'Fauzi Rahman',
+            'role' => [
+                'id' => 'Donatur Tetap',
+                'en' => 'Regular Donor',
+                'ar' => 'متبرع منتظم',
+            ],
+            'content' => [
+                'id' => 'Pelayanan sangat transparan dan amanah.',
+                'en' => 'The service is very transparent and trustworthy.',
+                'ar' => 'الخدمة شفافة وموثوقة للغاية.',
+            ],
+            'rating' => 5,
+            'is_active' => true,
+            'sort_order' => 1,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $testimonial = Testimonial::where('name', 'Fauzi Rahman')->first();
+    expect($testimonial)->not->toBeNull();
+    expect($testimonial->getTranslation('content', 'id'))->toBe('Pelayanan sangat transparan dan amanah.');
+    expect($testimonial->getTranslation('content', 'en'))->toBe('The service is very transparent and trustworthy.');
+    expect($testimonial->getTranslation('content', 'ar'))->toBe('الخدمة شفافة وموثوقة للغاية.');
+    expect($testimonial->getTranslation('role', 'en'))->toBe('Regular Donor');
+});

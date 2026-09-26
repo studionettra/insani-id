@@ -16,7 +16,14 @@ class PopupMessageController extends Controller
     {
         $query = PopupMessage::query()
             ->when($request->input('search'), function ($q, $search) {
-                $q->where('title', 'like', "%{$search}%");
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('title->id', 'like', "%{$search}%")
+                        ->orWhere('title->en', 'like', "%{$search}%")
+                        ->orWhere('title->ar', 'like', "%{$search}%")
+                        ->orWhere('content->id', 'like', "%{$search}%")
+                        ->orWhere('content->en', 'like', "%{$search}%")
+                        ->orWhere('content->ar', 'like', "%{$search}%");
+                });
             })
             ->when($request->input('status'), function ($q, $status) {
                 if ($status === 'active') {
@@ -37,12 +44,9 @@ class PopupMessageController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
+        $rules = [
             'display_type' => 'required|in:image_only,hybrid',
             'image_path' => 'nullable|image|max:5120',
-            'content' => 'nullable|string',
-            'cta_text' => 'nullable|string|max:100',
             'cta_url' => 'nullable|string|max:500',
             'open_in_new_tab' => 'boolean',
             'delay_seconds' => 'integer|min:0|max:60',
@@ -52,7 +56,50 @@ class PopupMessageController extends Controller
             'start_at' => 'nullable|date',
             'end_at' => 'nullable|date|after_or_equal:start_at',
             'is_active' => 'boolean',
+        ];
+
+        if (is_array($request->input('title'))) {
+            $rules['title'] = 'required|array';
+            $rules['title.id'] = 'required|string|max:255';
+            $rules['title.en'] = 'nullable|string|max:255';
+            $rules['title.ar'] = 'nullable|string|max:255';
+        } else {
+            $rules['title'] = 'required|string|max:255';
+        }
+
+        if (is_array($request->input('content'))) {
+            $rules['content'] = 'nullable|array';
+            $rules['content.id'] = 'nullable|string';
+            $rules['content.en'] = 'nullable|string';
+            $rules['content.ar'] = 'nullable|string';
+        } else {
+            $rules['content'] = 'nullable|string';
+        }
+
+        if (is_array($request->input('cta_text'))) {
+            $rules['cta_text'] = 'nullable|array';
+            $rules['cta_text.id'] = 'nullable|string|max:100';
+            $rules['cta_text.en'] = 'nullable|string|max:100';
+            $rules['cta_text.ar'] = 'nullable|string|max:100';
+        } else {
+            $rules['cta_text'] = 'nullable|string|max:100';
+        }
+
+        $validated = $request->validate($rules, [
+            'title.id.required' => 'Judul pop-up dalam Bahasa Indonesia wajib diisi.',
         ]);
+
+        if (is_string($validated['title'])) {
+            $validated['title'] = ['id' => $validated['title']];
+        }
+
+        if (isset($validated['content']) && is_string($validated['content'])) {
+            $validated['content'] = ['id' => $validated['content']];
+        }
+
+        if (isset($validated['cta_text']) && is_string($validated['cta_text'])) {
+            $validated['cta_text'] = ['id' => $validated['cta_text']];
+        }
 
         if ($request->hasFile('image_path')) {
             $validated['image_path'] = $request->file('image_path')->store('popups', 'public');
@@ -72,12 +119,9 @@ class PopupMessageController extends Controller
 
     public function update(Request $request, PopupMessage $popup_message): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
+        $rules = [
             'display_type' => 'required|in:image_only,hybrid',
             'image_path' => 'nullable|image|max:5120',
-            'content' => 'nullable|string',
-            'cta_text' => 'nullable|string|max:100',
             'cta_url' => 'nullable|string|max:500',
             'open_in_new_tab' => 'boolean',
             'delay_seconds' => 'integer|min:0|max:60',
@@ -87,7 +131,50 @@ class PopupMessageController extends Controller
             'start_at' => 'nullable|date',
             'end_at' => 'nullable|date|after_or_equal:start_at',
             'is_active' => 'boolean',
+        ];
+
+        if (is_array($request->input('title'))) {
+            $rules['title'] = 'required|array';
+            $rules['title.id'] = 'required|string|max:255';
+            $rules['title.en'] = 'nullable|string|max:255';
+            $rules['title.ar'] = 'nullable|string|max:255';
+        } else {
+            $rules['title'] = 'required|string|max:255';
+        }
+
+        if (is_array($request->input('content'))) {
+            $rules['content'] = 'nullable|array';
+            $rules['content.id'] = 'nullable|string';
+            $rules['content.en'] = 'nullable|string';
+            $rules['content.ar'] = 'nullable|string';
+        } else {
+            $rules['content'] = 'nullable|string';
+        }
+
+        if (is_array($request->input('cta_text'))) {
+            $rules['cta_text'] = 'nullable|array';
+            $rules['cta_text.id'] = 'nullable|string|max:100';
+            $rules['cta_text.en'] = 'nullable|string|max:100';
+            $rules['cta_text.ar'] = 'nullable|string|max:100';
+        } else {
+            $rules['cta_text'] = 'nullable|string|max:100';
+        }
+
+        $validated = $request->validate($rules, [
+            'title.id.required' => 'Judul pop-up dalam Bahasa Indonesia wajib diisi.',
         ]);
+
+        if (is_string($validated['title'])) {
+            $validated['title'] = ['id' => $validated['title']];
+        }
+
+        if (isset($validated['content']) && is_string($validated['content'])) {
+            $validated['content'] = ['id' => $validated['content']];
+        }
+
+        if (isset($validated['cta_text']) && is_string($validated['cta_text'])) {
+            $validated['cta_text'] = ['id' => $validated['cta_text']];
+        }
 
         if ($request->hasFile('image_path')) {
             if ($popup_message->image_path && Storage::disk('public')->exists($popup_message->image_path)) {

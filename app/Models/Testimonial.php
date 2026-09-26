@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class Testimonial extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     protected $fillable = [
         'name',
@@ -19,6 +20,11 @@ class Testimonial extends Model
         'sort_order',
     ];
 
+    public $translatable = [
+        'role',
+        'content',
+    ];
+
     protected $casts = [
         'rating' => 'integer',
         'is_active' => 'boolean',
@@ -27,7 +33,19 @@ class Testimonial extends Model
 
     protected $appends = [
         'avatar_url',
+        'role_translations',
+        'content_translations',
     ];
+
+    public function getRoleTranslationsAttribute(): array
+    {
+        return $this->getTranslations('role');
+    }
+
+    public function getContentTranslationsAttribute(): array
+    {
+        return $this->getTranslations('content');
+    }
 
     public function getAvatarUrlAttribute(): ?string
     {

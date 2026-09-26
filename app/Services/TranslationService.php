@@ -145,7 +145,7 @@ class TranslationService
         array $fields,
         array $targetLocales = self::SUPPORTED_LOCALES,
         string $sourceLocale = 'id',
-        array $htmlFields = ['story', 'content_html', 'content']
+        array $htmlFields = ['story', 'content_html', 'content', 'answer_html', 'reality_description', 'description']
     ): array {
         $result = [];
 
@@ -154,7 +154,9 @@ class TranslationService
                 continue;
             }
 
-            $isHtml = in_array($key, $htmlFields, true);
+            $isHtml = in_array($key, $htmlFields, true)
+                || str_contains($key, 'html')
+                || (str_contains($value, '<') && str_contains($value, '>'));
             $result[$key] = [
                 $sourceLocale => $value,
             ];

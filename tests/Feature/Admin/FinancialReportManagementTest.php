@@ -200,3 +200,43 @@ it('prevents unauthorized user from accessing admin financial reports', function
         ->get('/admin/financial-reports')
         ->assertForbidden();
 });
+
+it('can create and search multilingual financial reports with ID, EN, and AR', function () {
+    actingAs($this->admin)
+        ->post('/admin/financial-reports', [
+            'title' => [
+                'id' => 'Laporan Akuntabilitas dan Keuangan 2025',
+                'en' => 'Financial and Accountability Report 2025',
+                'ar' => 'تقرير المساءلة والمالية لعام 2025',
+            ],
+            'report_year' => 2025,
+            'category' => 'audited_financial',
+            'audit_status' => 'WTP (Wajar Tanpa Pengecualian)',
+            'auditor_name' => 'KAP Heliantono & Rekan',
+            'summary' => [
+                'id' => 'Pencapaian transparansi keuangan tahun 2025.',
+                'en' => 'Financial transparency achievements in 2025.',
+                'ar' => 'إنجازات الشفافية المالية لعام 2025.',
+            ],
+            'total_revenue' => 6000000000,
+            'total_disbursement' => 5500000000,
+            'beneficiaries_count' => 45000,
+            'is_active' => true,
+            'sort_order' => 1,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $report = FinancialReport::where('report_year', 2025)->first();
+    expect($report)->not->toBeNull();
+    expect($report->getTranslation('title', 'ar'))->toBe('تقرير المساءلة والمالية لعام 2025');
+    expect($report->getTranslation('summary', 'ar'))->toBe('إنجازات الشفافية المالية لعام 2025.');
+
+    // Test search by Arabic title
+    actingAs($this->admin)
+        ->get('/admin/financial-reports?search=المساءلة')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('reports.data', 1)
+        );
+});

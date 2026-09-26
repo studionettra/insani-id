@@ -137,3 +137,39 @@ it('public about page provides dynamic legal documents', function () {
         ->has('legalDocuments')
     );
 });
+
+it('can create and search multilingual legal documents with ID, EN, and AR', function () {
+    actingAs($this->admin)
+        ->post('/admin/legal-documents', [
+            'title' => [
+                'id' => 'Akta Pendirian Yayasan',
+                'en' => 'Deed of Foundation Establishment',
+                'ar' => 'عقد تأسيس المؤسسة',
+            ],
+            'document_number' => 'AHU-00123-2024',
+            'issuer_name' => 'Kemenkumham RI',
+            'icon_type' => 'scale',
+            'description' => [
+                'id' => 'Disahkan oleh Notaris Jakarta.',
+                'en' => 'Ratified by Notary Jakarta.',
+                'ar' => 'مصدق من قبل كاتب العدل في جاكرتا.',
+            ],
+            'is_active' => true,
+            'sort_order' => 1,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $doc = LegalDocument::where('document_number', 'AHU-00123-2024')->first();
+    expect($doc)->not->toBeNull();
+    expect($doc->getTranslation('title', 'ar'))->toBe('عقد تأسيس المؤسسة');
+    expect($doc->getTranslation('description', 'ar'))->toBe('مصدق من قبل كاتب العدل في جاكرتا.');
+
+    // Test search by Arabic title
+    actingAs($this->admin)
+        ->get('/admin/legal-documents?search=تأسيس')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('documents.data', 1)
+        );
+});

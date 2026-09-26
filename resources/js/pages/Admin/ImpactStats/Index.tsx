@@ -1,6 +1,9 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -36,6 +39,40 @@ export default function ImpactStatsIndex({ impactStats, filters }: any) {
         is_active: true,
         sort_order: 0,
     });
+
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    const hasEn = Boolean(data.title.en);
+    const hasAr = Boolean(data.title.ar);
+
+    const handleAutoTranslate = async () => {
+        const sourceTitle = data.title.id;
+
+        if (!sourceTitle.trim()) {
+            toast.error('Silakan isi Label Judul (ID) terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const res = await autoTranslateFields({
+                title: sourceTitle,
+            });
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    title: {
+                        id: prev.title.id,
+                        en: res.title?.en || prev.title.en,
+                        ar: res.title?.ar || prev.title.ar,
+                    },
+                }));
+            }
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -257,6 +294,16 @@ return;
                                 </div>
                             </div>
 
+                            <TranslationStatusCard
+                                hasId={Boolean(data.title.id)}
+                                hasEn={Boolean(data.title.en)}
+                                hasAr={Boolean(data.title.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan label judul statistik ke bahasa Inggris dan Arab secara otomatis."
+                            />
+
                             <div className="grid gap-2">
                                 <Label htmlFor="title_id" className="text-gray-700 dark:text-gray-300">Label Judul (ID) *</Label>
                                 <Input
@@ -270,15 +317,28 @@ return;
                                 {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="title_en" className="text-gray-700 dark:text-gray-300">Label Judul (EN)</Label>
-                                <Input
-                                    id="title_en"
-                                    placeholder="cth: Beneficiaries"
-                                    value={data.title.en}
-                                    onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="title_en" className="text-gray-700 dark:text-gray-300">Label Judul (EN)</Label>
+                                    <Input
+                                        id="title_en"
+                                        placeholder="cth: Beneficiaries"
+                                        value={data.title.en}
+                                        onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="title_ar" className="text-gray-700 dark:text-gray-300">Label Judul (AR)</Label>
+                                    <Input
+                                        id="title_ar"
+                                        placeholder="cth: المستفيدون"
+                                        value={data.title.ar}
+                                        onChange={(e) => setData('title', { ...data.title, ar: e.target.value })}
+                                        dir="rtl"
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid gap-2">
@@ -367,6 +427,16 @@ return;
                                 </div>
                             </div>
 
+                            <TranslationStatusCard
+                                hasId={Boolean(data.title.id)}
+                                hasEn={Boolean(data.title.en)}
+                                hasAr={Boolean(data.title.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan label judul statistik ke bahasa Inggris dan Arab secara otomatis."
+                            />
+
                             <div className="grid gap-2">
                                 <Label htmlFor="edit_title_id" className="text-gray-700 dark:text-gray-300">Label Judul (ID) *</Label>
                                 <Input
@@ -380,14 +450,27 @@ return;
                                 {errors['title.id'] && <p className="text-sm text-red-500">{errors['title.id']}</p>}
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="edit_title_en" className="text-gray-700 dark:text-gray-300">Label Judul (EN)</Label>
-                                <Input
-                                    id="edit_title_en"
-                                    value={data.title.en}
-                                    onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="edit_title_en" className="text-gray-700 dark:text-gray-300">Label Judul (EN)</Label>
+                                    <Input
+                                        id="edit_title_en"
+                                        value={data.title.en}
+                                        onChange={(e) => setData('title', { ...data.title, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="edit_title_ar" className="text-gray-700 dark:text-gray-300">Label Judul (AR)</Label>
+                                    <Input
+                                        id="edit_title_ar"
+                                        placeholder="cth: المستفيدون"
+                                        value={data.title.ar}
+                                        onChange={(e) => setData('title', { ...data.title, ar: e.target.value })}
+                                        dir="rtl"
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid gap-2">

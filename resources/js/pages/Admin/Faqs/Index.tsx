@@ -1,6 +1,9 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -58,6 +61,47 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
         is_active: true,
         sort_order: 0,
     });
+
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    const hasEn = Boolean(data.question.en && data.answer_html.en);
+    const hasAr = Boolean(data.question.ar && data.answer_html.ar);
+
+    const handleAutoTranslate = async () => {
+        const sourceQuestion = data.question.id;
+        const sourceAnswer = data.answer_html.id;
+
+        if (!sourceQuestion.trim() && !sourceAnswer.trim()) {
+            toast.error('Silakan isi Pertanyaan (ID) atau Jawaban (ID) terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const res = await autoTranslateFields({
+                question: sourceQuestion,
+                answer_html: sourceAnswer,
+            });
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    question: {
+                        id: prev.question.id,
+                        en: res.question?.en || prev.question.en,
+                        ar: res.question?.ar || prev.question.ar,
+                    },
+                    answer_html: {
+                        id: prev.answer_html.id,
+                        en: res.answer_html?.en || prev.answer_html.en,
+                        ar: res.answer_html?.ar || prev.answer_html.ar,
+                    },
+                }));
+            }
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -330,6 +374,15 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
+                            <TranslationStatusCard
+                                hasId={Boolean(data.question.id)}
+                                hasEn={Boolean(data.question.en && data.answer_html.en)}
+                                hasAr={Boolean(data.question.ar && data.answer_html.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan pertanyaan dan jawaban FAQ ke bahasa Inggris dan Arab secara otomatis."
+                            />
                             <div className="grid gap-2">
                                 <Label htmlFor="question_id" className="text-gray-700 dark:text-gray-300">Pertanyaan (ID) *</Label>
                                 <Input
@@ -480,6 +533,15 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
+                            <TranslationStatusCard
+                                hasId={Boolean(data.question.id)}
+                                hasEn={Boolean(data.question.en && data.answer_html.en)}
+                                hasAr={Boolean(data.question.ar && data.answer_html.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan pertanyaan dan jawaban FAQ ke bahasa Inggris dan Arab secara otomatis."
+                            />
                             <div className="grid gap-2">
                                 <Label htmlFor="edit_question_id" className="text-gray-700 dark:text-gray-300">Pertanyaan (ID) *</Label>
                                 <Input
@@ -599,7 +661,7 @@ export default function FaqsIndex({ faqs = { data: [] }, filters = {} }: any) {
                                     <Checkbox 
                                         id="edit_is_active" 
                                         checked={data.is_active}
-                                        onCheckedChange={(checked) => setData('edit_is_active', checked === true)}
+                                        onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
                                     <label htmlFor="edit_is_active" className="text-sm font-medium leading-none text-gray-700 dark:text-gray-300 cursor-pointer">
                                         FAQ Aktif

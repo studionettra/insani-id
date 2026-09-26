@@ -3,6 +3,7 @@ import { ArrowLeft, Upload, X, Calendar, Sparkles, ExternalLink } from 'lucide-r
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -307,7 +308,16 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
 
                     {/* Sidebar Column (4 cols) */}
                     <div className="lg:col-span-4 flex flex-col gap-6">
-                        
+                        {/* Translation Status Card */}
+                        <TranslationStatusCard
+                            hasId={Boolean(titles.id)}
+                            hasEn={Boolean(titles.en && (excerpts.en || contents.en))}
+                            hasAr={Boolean(titles.ar && (excerpts.ar || contents.ar))}
+                            onTranslate={handleAutoTranslate}
+                            isTranslating={isTranslating}
+                            description="Status kesiapan judul, ringkasan, dan isi naskah artikel berita dalam 3 bahasa."
+                        />
+
                         {/* Publishing Options Card */}
                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col gap-4">
                             <h3 className="font-semibold text-sm text-slate-900 dark:text-white">

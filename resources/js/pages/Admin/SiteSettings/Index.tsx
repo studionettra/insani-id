@@ -15,14 +15,49 @@ import {
     Globe,
     ExternalLink,
     Building2,
-    FileCheck
+    FileCheck,
+    Languages,
+    Loader2
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
+
+interface MultilingualField {
+    id: string;
+    en: string;
+    ar: string;
+}
+
+const parseMultilingual = (val: any, defaultText = ''): MultilingualField => {
+    if (!val) return { id: defaultText, en: '', ar: '' };
+    if (typeof val === 'object' && val !== null) {
+        return { 
+            id: val.id ?? defaultText, 
+            en: val.en ?? '', 
+            ar: val.ar ?? '' 
+        };
+    }
+    if (typeof val === 'string' && val.trim().startsWith('{')) {
+        try {
+            const parsed = JSON.parse(val.trim());
+            if (typeof parsed === 'object' && parsed !== null) {
+                return { 
+                    id: parsed.id ?? defaultText, 
+                    en: parsed.en ?? '', 
+                    ar: parsed.ar ?? '' 
+                };
+            }
+        } catch (e) {}
+    }
+    return { id: val || defaultText, en: '', ar: '' };
+};
 
 interface Props {
     settings: Record<string, string>;
@@ -41,15 +76,15 @@ export default function SiteSettingsIndex({ settings }: Props) {
         contact_holiday_note: settings.contact_holiday_note || 'Tutup Pada Tanggal Merah & Cuti Bersama',
         contact_address: settings.contact_address || 'Jl. Kebaikan No. 1, Jakarta',
         contact_maps_url: settings.contact_maps_url || 'https://maps.google.com',
-        about_vision: settings.about_vision || '',
-        about_mission: settings.about_mission || '',
-        about_values: settings.about_values || '',
+        about_vision: parseMultilingual(settings.about_vision, ''),
+        about_mission: parseMultilingual(settings.about_mission, ''),
+        about_values: parseMultilingual(settings.about_values, ''),
         social_facebook: settings.social_facebook || 'https://www.facebook.com/insaniindonesia',
         social_instagram: settings.social_instagram || 'https://www.instagram.com/insaniindonesia',
         social_youtube: settings.social_youtube || 'https://www.youtube.com/@insaniindonesia',
         social_x: settings.social_x || 'https://x.com/officialinsani',
         social_threads: settings.social_threads || 'https://www.threads.com/@insaniindonesia',
-        footer_description: settings.footer_description || 'Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan universal.',
+        footer_description: parseMultilingual(settings.footer_description, 'Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan universal.'),
         legal_foundation_name: settings.legal_foundation_name || 'Yayasan Peduli Insani Indonesia',
         legal_sk_kemenkumham: settings.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019',
         legal_sk_label: settings.legal_sk_label || 'SK Kemenkumham RI',
@@ -61,7 +96,7 @@ export default function SiteSettingsIndex({ settings }: Props) {
         receipt_signature_image: null as File | null,
         receipt_stamp_image: null as File | null,
         announcement_enabled: settings.announcement_enabled || '0',
-        announcement_text: settings.announcement_text || '',
+        announcement_text: parseMultilingual(settings.announcement_text, ''),
         announcement_link: settings.announcement_link || '',
         announcement_bg_color: settings.announcement_bg_color || '#1A56DB',
         site_logo: null as File | null,
@@ -87,6 +122,116 @@ export default function SiteSettingsIndex({ settings }: Props) {
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [logoWhitePreview, setLogoWhitePreview] = useState<string | null>(null);
     const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
+
+    // Multilingual states
+    const [aboutLangTab, setAboutLangTab] = useState<'id' | 'en' | 'ar'>('id');
+    const [isTranslatingAbout, setIsTranslatingAbout] = useState(false);
+
+    const [footerLangTab, setFooterLangTab] = useState<'id' | 'en' | 'ar'>('id');
+    const [isTranslatingFooter, setIsTranslatingFooter] = useState(false);
+
+    const [announcementLangTab, setAnnouncementLangTab] = useState<'id' | 'en' | 'ar'>('id');
+    const [isTranslatingAnnouncement, setIsTranslatingAnnouncement] = useState(false);
+
+    const handleTranslateAbout = async () => {
+        if (!data.about_vision.id && !data.about_mission.id && !data.about_values.id) {
+            toast.error('Isi konten Visi, Misi, atau Nilai dalam Bahasa Indonesia terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslatingAbout(true);
+        try {
+            const fieldsToTranslate: Record<string, string> = {};
+            if (data.about_vision.id) fieldsToTranslate.about_vision = data.about_vision.id;
+            if (data.about_mission.id) fieldsToTranslate.about_mission = data.about_mission.id;
+            if (data.about_values.id) fieldsToTranslate.about_values = data.about_values.id;
+
+            const results = await autoTranslateFields(fieldsToTranslate);
+
+            setData(prev => ({
+                ...prev,
+                about_vision: {
+                    ...prev.about_vision,
+                    en: results.en?.about_vision || prev.about_vision.en,
+                    ar: results.ar?.about_vision || prev.about_vision.ar,
+                },
+                about_mission: {
+                    ...prev.about_mission,
+                    en: results.en?.about_mission || prev.about_mission.en,
+                    ar: results.ar?.about_mission || prev.about_mission.ar,
+                },
+                about_values: {
+                    ...prev.about_values,
+                    en: results.en?.about_values || prev.about_values.en,
+                    ar: results.ar?.about_values || prev.about_values.ar,
+                },
+            }));
+
+            toast.success('Profil Lembaga (Visi, Misi, Nilai) berhasil diterjemahkan ke EN & AR!');
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal menerjemahkan Profil Lembaga');
+        } finally {
+            setIsTranslatingAbout(false);
+        }
+    };
+
+    const handleTranslateFooter = async () => {
+        if (!data.footer_description.id) {
+            toast.error('Isi deskripsi footer dalam Bahasa Indonesia terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslatingFooter(true);
+        try {
+            const results = await autoTranslateFields({
+                footer_description: data.footer_description.id,
+            });
+
+            setData(prev => ({
+                ...prev,
+                footer_description: {
+                    ...prev.footer_description,
+                    en: results.en?.footer_description || prev.footer_description.en,
+                    ar: results.ar?.footer_description || prev.footer_description.ar,
+                },
+            }));
+
+            toast.success('Deskripsi footer berhasil diterjemahkan ke EN & AR!');
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal menerjemahkan Deskripsi Footer');
+        } finally {
+            setIsTranslatingFooter(false);
+        }
+    };
+
+    const handleTranslateAnnouncement = async () => {
+        if (!data.announcement_text.id) {
+            toast.error('Isi teks pengumuman dalam Bahasa Indonesia terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslatingAnnouncement(true);
+        try {
+            const results = await autoTranslateFields({
+                announcement_text: data.announcement_text.id,
+            });
+
+            setData(prev => ({
+                ...prev,
+                announcement_text: {
+                    ...prev.announcement_text,
+                    en: results.en?.announcement_text || prev.announcement_text.en,
+                    ar: results.ar?.announcement_text || prev.announcement_text.ar,
+                },
+            }));
+
+            toast.success('Teks pengumuman berhasil diterjemahkan ke EN & AR!');
+        } catch (err: any) {
+            toast.error(err?.message || 'Gagal menerjemahkan Pengumuman');
+        } finally {
+            setIsTranslatingAnnouncement(false);
+        }
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -403,57 +548,147 @@ export default function SiteSettingsIndex({ settings }: Props) {
 
                             {/* Card: Profil Lembaga - Visi, Misi & Nilai Perjuangan */}
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
-                                        <Sparkles className="w-5 h-5" />
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
+                                            <Sparkles className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profil Lembaga: Visi, Misi & Nilai</h2>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Konten landasan gerak yang ditampilkan di halaman Tentang Kami (/tentang-kami).</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profil Lembaga: Visi, Misi & Nilai</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Konten landasan gerak yang ditampilkan di halaman Tentang Kami (/tentang-kami).</p>
-                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleTranslateAbout}
+                                        disabled={isTranslatingAbout || (!data.about_vision.id && !data.about_mission.id && !data.about_values.id)}
+                                        className="text-xs flex items-center gap-1.5 self-start sm:self-auto border-indigo-200 hover:bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
+                                    >
+                                        {isTranslatingAbout ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                Menerjemahkan...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Languages className="w-3.5 h-3.5" />
+                                                Terjemahkan Otomatis
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+
+                                {/* Translation Status Card */}
+                                <div className="mb-4">
+                                    <TranslationStatusCard
+                                        title="Status Terjemahan Visi, Misi & Nilai"
+                                        hasId={Boolean(data.about_vision.id || data.about_mission.id || data.about_values.id)}
+                                        hasEn={Boolean(data.about_vision.en && data.about_mission.en && data.about_values.en)}
+                                        hasAr={Boolean(data.about_vision.ar && data.about_mission.ar && data.about_values.ar)}
+                                        onTranslate={handleTranslateAbout}
+                                        isTranslating={isTranslatingAbout}
+                                        disabled={!data.about_vision.id && !data.about_mission.id && !data.about_values.id}
+                                        compact
+                                    />
+                                </div>
+
+                                {/* Language Tabs */}
+                                <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setAboutLangTab('id')}
+                                        className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
+                                            aboutLangTab === 'id'
+                                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        🇮🇩 Bahasa Indonesia (Sumber)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAboutLangTab('en')}
+                                        className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
+                                            aboutLangTab === 'en'
+                                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        🇬🇧 English {data.about_vision.en && '✓'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAboutLangTab('ar')}
+                                        className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
+                                            aboutLangTab === 'ar'
+                                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        🇸🇦 العربية (Arabic) {data.about_vision.ar && '✓'}
+                                    </button>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="about_vision">Visi Yayasan</Label>
+                                        <Label htmlFor={`about_vision_${aboutLangTab}`}>
+                                            Visi Yayasan {aboutLangTab === 'en' ? '(English)' : aboutLangTab === 'ar' ? '(العربية)' : ''}
+                                        </Label>
                                         <textarea
-                                            id="about_vision"
+                                            id={`about_vision_${aboutLangTab}`}
                                             rows={3}
-                                            value={data.about_vision}
-                                            onChange={(e) => setData('about_vision', e.target.value)}
-                                            placeholder="Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya..."
+                                            dir={aboutLangTab === 'ar' ? 'rtl' : 'ltr'}
+                                            value={data.about_vision[aboutLangTab] || ''}
+                                            onChange={(e) => setData('about_vision', { ...data.about_vision, [aboutLangTab]: e.target.value })}
+                                            placeholder={aboutLangTab === 'ar' ? 'رؤية المؤسسة...' : aboutLangTab === 'en' ? 'Foundation vision...' : 'Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya...'}
                                             className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                                         />
-                                        <p className="text-xs text-gray-400 mt-1">Kosongkan jika ingin menggunakan rumusan visi baku bawaan sistem.</p>
-                                        {errors.about_vision && <p className="text-xs text-red-500 mt-1">{errors.about_vision}</p>}
+                                        {aboutLangTab === 'id' && (
+                                            <p className="text-xs text-gray-400 mt-1">Kosongkan jika ingin menggunakan rumusan visi baku bawaan sistem.</p>
+                                        )}
+                                        {errors[`about_vision.${aboutLangTab}`] && (
+                                            <p className="text-xs text-red-500 mt-1">{errors[`about_vision.${aboutLangTab}`]}</p>
+                                        )}
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="about_mission">Misi Yayasan (Gunakan baris baru untuk setiap butir misi)</Label>
+                                        <Label htmlFor={`about_mission_${aboutLangTab}`}>
+                                            Misi Yayasan {aboutLangTab === 'en' ? '(English)' : aboutLangTab === 'ar' ? '(العربية)' : ''} (Gunakan baris baru untuk setiap butir misi)
+                                        </Label>
                                         <textarea
-                                            id="about_mission"
+                                            id={`about_mission_${aboutLangTab}`}
                                             rows={4}
-                                            value={data.about_mission}
-                                            onChange={(e) => setData('about_mission', e.target.value)}
-                                            placeholder="Menggalang kepedulian masyarakat...&#10;Memberikan bantuan tepat sasaran...&#10;Mengedukasi masyarakat..."
+                                            dir={aboutLangTab === 'ar' ? 'rtl' : 'ltr'}
+                                            value={data.about_mission[aboutLangTab] || ''}
+                                            onChange={(e) => setData('about_mission', { ...data.about_mission, [aboutLangTab]: e.target.value })}
+                                            placeholder={aboutLangTab === 'ar' ? 'رسالة المؤسسة...' : aboutLangTab === 'en' ? 'Foundation mission points (one per line)...' : 'Menggalang kepedulian masyarakat...\nMemberikan bantuan tepat sasaran...\nMengedukasi masyarakat...'}
                                             className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                                         />
                                         <p className="text-xs text-gray-400 mt-1">Setiap baris baru akan dirender sebagai butir poin misi terpisah.</p>
-                                        {errors.about_mission && <p className="text-xs text-red-500 mt-1">{errors.about_mission}</p>}
+                                        {errors[`about_mission.${aboutLangTab}`] && (
+                                            <p className="text-xs text-red-500 mt-1">{errors[`about_mission.${aboutLangTab}`]}</p>
+                                        )}
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="about_values">Nilai-Nilai Perjuangan (Format: Judul: Keterangan per baris)</Label>
+                                        <Label htmlFor={`about_values_${aboutLangTab}`}>
+                                            Nilai-Nilai Perjuangan {aboutLangTab === 'en' ? '(English)' : aboutLangTab === 'ar' ? '(العربية)' : ''} (Format: Judul: Keterangan per baris)
+                                        </Label>
                                         <textarea
-                                            id="about_values"
+                                            id={`about_values_${aboutLangTab}`}
                                             rows={4}
-                                            value={data.about_values}
-                                            onChange={(e) => setData('about_values', e.target.value)}
-                                            placeholder="Integritas: Transparan dan akuntabel dalam pengelolaan amanah donatur.&#10;Kolaborasi: Bersinergi dengan semua pihak untuk dampak yang lebih luas.&#10;Empati: Bergerak dari panggilan hati nurani untuk meringankan beban sesama."
+                                            dir={aboutLangTab === 'ar' ? 'rtl' : 'ltr'}
+                                            value={data.about_values[aboutLangTab] || ''}
+                                            onChange={(e) => setData('about_values', { ...data.about_values, [aboutLangTab]: e.target.value })}
+                                            placeholder={aboutLangTab === 'ar' ? 'القيم الأساسية...' : aboutLangTab === 'en' ? 'Core Values (Format: Title: Description per line)...' : 'Integritas: Transparan dan akuntabel dalam pengelolaan amanah donatur.\nKolaborasi: Bersinergi dengan semua pihak untuk dampak yang lebih luas.\nEmpati: Bergerak dari panggilan hati nurani untuk meringankan beban sesama.'}
                                             className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                                         />
                                         <p className="text-xs text-gray-400 mt-1">Contoh format: <code>Integritas: Transparan dan akuntabel...</code> (1 nilai per baris).</p>
-                                        {errors.about_values && <p className="text-xs text-red-500 mt-1">{errors.about_values}</p>}
+                                        {errors[`about_values.${aboutLangTab}`] && (
+                                            <p className="text-xs text-red-500 mt-1">{errors[`about_values.${aboutLangTab}`]}</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -463,27 +698,105 @@ export default function SiteSettingsIndex({ settings }: Props) {
                         <div className="lg:col-span-5 space-y-8">
                             {/* Card 3: Profil Footer */}
                             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-                                        <FileText className="w-5 h-5" />
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
+                                            <FileText className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profil Footer Website</h2>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Deskripsi singkat di bawah logo pada bagian footer.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profil Footer Website</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Deskripsi singkat di bawah logo pada bagian footer.</p>
-                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleTranslateFooter}
+                                        disabled={isTranslatingFooter || !data.footer_description.id}
+                                        className="text-xs flex items-center gap-1.5 self-start sm:self-auto border-purple-200 hover:bg-purple-50 text-purple-700 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950"
+                                    >
+                                        {isTranslatingFooter ? (
+                                            <>
+                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                Menerjemahkan...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Languages className="w-3.5 h-3.5" />
+                                                Terjemahkan Otomatis
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+
+                                {/* Translation Status Card */}
+                                <div className="mb-4">
+                                    <TranslationStatusCard
+                                        title="Status Terjemahan Profil Footer"
+                                        hasId={Boolean(data.footer_description.id)}
+                                        hasEn={Boolean(data.footer_description.en)}
+                                        hasAr={Boolean(data.footer_description.ar)}
+                                        onTranslate={handleTranslateFooter}
+                                        isTranslating={isTranslatingFooter}
+                                        disabled={!data.footer_description.id}
+                                        compact
+                                    />
+                                </div>
+
+                                {/* Language Tabs */}
+                                <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFooterLangTab('id')}
+                                        className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
+                                            footerLangTab === 'id'
+                                                ? 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        🇮🇩 ID (Sumber)
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFooterLangTab('en')}
+                                        className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
+                                            footerLangTab === 'en'
+                                                ? 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        🇬🇧 EN {data.footer_description.en && '✓'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFooterLangTab('ar')}
+                                        className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
+                                            footerLangTab === 'ar'
+                                                ? 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                        }`}
+                                    >
+                                        🇸🇦 AR {data.footer_description.ar && '✓'}
+                                    </button>
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="footer_description">Teks Ringkasan Profil</Label>
+                                    <Label htmlFor={`footer_description_${footerLangTab}`}>
+                                        Teks Ringkasan Profil {footerLangTab === 'en' ? '(English)' : footerLangTab === 'ar' ? '(العربية)' : ''}
+                                    </Label>
                                     <textarea
-                                        id="footer_description"
+                                        id={`footer_description_${footerLangTab}`}
                                         rows={4}
-                                        value={data.footer_description}
-                                        onChange={(e) => setData('footer_description', e.target.value)}
-                                        placeholder="Deskripsi singkat yayasan..."
+                                        dir={footerLangTab === 'ar' ? 'rtl' : 'ltr'}
+                                        value={data.footer_description[footerLangTab] || ''}
+                                        onChange={(e) => setData('footer_description', { ...data.footer_description, [footerLangTab]: e.target.value })}
+                                        placeholder={footerLangTab === 'ar' ? 'وصف موجز للمؤسسة...' : footerLangTab === 'en' ? 'Brief organization description for footer...' : 'Deskripsi singkat yayasan...'}
                                         className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                                     />
-                                    {errors.footer_description && <p className="text-xs text-red-500 mt-1">{errors.footer_description}</p>}
+                                    {errors[`footer_description.${footerLangTab}`] && (
+                                        <p className="text-xs text-red-500 mt-1">{errors[`footer_description.${footerLangTab}`]}</p>
+                                    )}
                                 </div>
                             </div>
 
@@ -756,14 +1069,94 @@ export default function SiteSettingsIndex({ settings }: Props) {
 
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="announcement_text" className="text-xs">Teks Pengumuman / Peringatan</Label>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <Label htmlFor={`announcement_text_${announcementLangTab}`} className="text-xs">
+                                                Teks Pengumuman / Peringatan {announcementLangTab === 'en' ? '(English)' : announcementLangTab === 'ar' ? '(العربية)' : ''}
+                                            </Label>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={handleTranslateAnnouncement}
+                                                disabled={isTranslatingAnnouncement || !data.announcement_text.id}
+                                                className="h-7 text-xs flex items-center gap-1 text-amber-700 hover:text-amber-800 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950"
+                                            >
+                                                {isTranslatingAnnouncement ? (
+                                                    <>
+                                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                                        Menerjemahkan...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Languages className="w-3 h-3" />
+                                                        Terjemahkan Otomatis
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+
+                                        {/* Translation Status Card */}
+                                        <div className="mb-3">
+                                            <TranslationStatusCard
+                                                title="Status Terjemahan Bilah Pengumuman"
+                                                hasId={Boolean(data.announcement_text.id)}
+                                                hasEn={Boolean(data.announcement_text.en)}
+                                                hasAr={Boolean(data.announcement_text.ar)}
+                                                onTranslate={handleTranslateAnnouncement}
+                                                isTranslating={isTranslatingAnnouncement}
+                                                disabled={!data.announcement_text.id}
+                                                compact
+                                            />
+                                        </div>
+
+                                        {/* Language Tabs */}
+                                        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => setAnnouncementLangTab('id')}
+                                                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
+                                                    announcementLangTab === 'id'
+                                                        ? 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400'
+                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                                }`}
+                                            >
+                                                🇮🇩 ID (Sumber)
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setAnnouncementLangTab('en')}
+                                                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
+                                                    announcementLangTab === 'en'
+                                                        ? 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400'
+                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                                }`}
+                                            >
+                                                🇬🇧 EN {data.announcement_text.en && '✓'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setAnnouncementLangTab('ar')}
+                                                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
+                                                    announcementLangTab === 'ar'
+                                                        ? 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400'
+                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                                }`}
+                                            >
+                                                🇸🇦 AR {data.announcement_text.ar && '✓'}
+                                            </button>
+                                        </div>
+
                                         <Input
-                                            id="announcement_text"
-                                            value={data.announcement_text}
-                                            onChange={(e) => setData('announcement_text', e.target.value)}
-                                            placeholder="cth: Tanggap Darurat Bencana Banjir Bandang: Salurkan bantuan Anda sekarang!"
+                                            id={`announcement_text_${announcementLangTab}`}
+                                            dir={announcementLangTab === 'ar' ? 'rtl' : 'ltr'}
+                                            value={data.announcement_text[announcementLangTab] || ''}
+                                            onChange={(e) => setData('announcement_text', { ...data.announcement_text, [announcementLangTab]: e.target.value })}
+                                            placeholder={announcementLangTab === 'ar' ? 'نص الإعلان أو التنبيه...' : announcementLangTab === 'en' ? 'Announcement / alert text...' : 'cth: Tanggap Darurat Bencana Banjir Bandang: Salurkan bantuan Anda sekarang!'}
                                             className="mt-1"
                                         />
+                                        {errors[`announcement_text.${announcementLangTab}`] && (
+                                            <p className="text-xs text-red-500 mt-1">{errors[`announcement_text.${announcementLangTab}`]}</p>
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -1,6 +1,9 @@
 import { Head, useForm, router } from '@inertiajs/react';
 import { Trash2, Edit, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -56,6 +59,40 @@ export default function ManagementIndex({ members = { data: [] }, filters = {} }
         is_active: true,
         sort_order: 0,
     });
+
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    const hasEn = Boolean(data.position.en);
+    const hasAr = Boolean(data.position.ar);
+
+    const handleAutoTranslate = async () => {
+        const sourcePosition = data.position.id;
+
+        if (!sourcePosition.trim()) {
+            toast.error('Silakan isi Jabatan (ID) terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const res = await autoTranslateFields({
+                position: sourcePosition,
+            });
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    position: {
+                        id: prev.position.id,
+                        en: res.position?.en || prev.position.en,
+                        ar: res.position?.ar || prev.position.ar,
+                    },
+                }));
+            }
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -279,6 +316,16 @@ return;
                                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                             </div>
                             
+                            <TranslationStatusCard
+                                hasId={Boolean(data.position.id)}
+                                hasEn={Boolean(data.position.en)}
+                                hasAr={Boolean(data.position.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan jabatan anggota manajemen ke bahasa Inggris dan Arab secara otomatis."
+                            />
+
                             <div className="grid gap-2">
                                 <Label htmlFor="position_id" className="text-gray-700 dark:text-gray-300">Jabatan (ID) *</Label>
                                 <Input
@@ -290,15 +337,27 @@ return;
                                 />
                                 {errors['position.id'] && <p className="text-sm text-red-500">{errors['position.id']}</p>}
                             </div>
-                            
-                            <div className="grid gap-2">
-                                <Label htmlFor="position_en" className="text-gray-700 dark:text-gray-300">Jabatan (EN)</Label>
-                                <Input
-                                    id="position_en"
-                                    value={data.position.en}
-                                    onChange={(e) => setData('position', { ...data.position, en: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="position_en" className="text-gray-700 dark:text-gray-300">Jabatan (EN)</Label>
+                                    <Input
+                                        id="position_en"
+                                        value={data.position.en}
+                                        onChange={(e) => setData('position', { ...data.position, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="position_ar" className="text-gray-700 dark:text-gray-300">Jabatan (AR)</Label>
+                                    <Input
+                                        id="position_ar"
+                                        value={data.position.ar}
+                                        onChange={(e) => setData('position', { ...data.position, ar: e.target.value })}
+                                        dir="rtl"
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid gap-2">
@@ -371,6 +430,16 @@ return;
                                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                             </div>
                             
+                            <TranslationStatusCard
+                                hasId={Boolean(data.position.id)}
+                                hasEn={Boolean(data.position.en)}
+                                hasAr={Boolean(data.position.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan jabatan anggota manajemen ke bahasa Inggris dan Arab secara otomatis."
+                            />
+
                             <div className="grid gap-2">
                                 <Label htmlFor="edit_position_id" className="text-gray-700 dark:text-gray-300">Jabatan (ID) *</Label>
                                 <Input
@@ -382,15 +451,27 @@ return;
                                 />
                                 {errors['position.id'] && <p className="text-sm text-red-500">{errors['position.id']}</p>}
                             </div>
-                            
-                            <div className="grid gap-2">
-                                <Label htmlFor="edit_position_en" className="text-gray-700 dark:text-gray-300">Jabatan (EN)</Label>
-                                <Input
-                                    id="edit_position_en"
-                                    value={data.position.en}
-                                    onChange={(e) => setData('position', { ...data.position, en: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="edit_position_en" className="text-gray-700 dark:text-gray-300">Jabatan (EN)</Label>
+                                    <Input
+                                        id="edit_position_en"
+                                        value={data.position.en}
+                                        onChange={(e) => setData('position', { ...data.position, en: e.target.value })}
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="edit_position_ar" className="text-gray-700 dark:text-gray-300">Jabatan (AR)</Label>
+                                    <Input
+                                        id="edit_position_ar"
+                                        value={data.position.ar}
+                                        onChange={(e) => setData('position', { ...data.position, ar: e.target.value })}
+                                        dir="rtl"
+                                        className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid gap-2">
