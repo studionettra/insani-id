@@ -33,7 +33,9 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
     const { t, locale } = useTranslation();
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const pillarTitle = t(getLocalizedValue(pillar.name_translations || pillar.name, locale));
+    const customPillarTitle = getLocalizedValue(pillar.public_name_translations || pillar.public_name, locale);
+    const defaultPillarTitle = getLocalizedValue(pillar.name_translations || pillar.name, locale);
+    const pillarTitle = t(customPillarTitle || defaultPillarTitle);
     const pillarDesc = t(getLocalizedValue(pillar.description_translations || pillar.description, locale));
     const realityTitle = t(getLocalizedValue(pillar.reality_title_translations || pillar.reality_title, locale));
     const realityDesc = t(getLocalizedValue(pillar.reality_description_translations || pillar.reality_description, locale));
@@ -435,7 +437,9 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {otherPillars.map((other: any) => {
-                                const title = t(getLocalizedValue(other.name_translations || other.name, locale));
+                                const customTitle = getLocalizedValue(other.public_name_translations || other.public_name, locale);
+                                const defaultTitle = getLocalizedValue(other.name_translations || other.name, locale);
+                                const title = t(customTitle || defaultTitle);
                                 return (
                                     <Link 
                                         key={other.id} 

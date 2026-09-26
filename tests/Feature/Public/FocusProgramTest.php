@@ -74,3 +74,27 @@ it('returns 404 if category is not a focus program or inactive', function () {
     $responseInactive = $this->get('/fokus-program/'.$inactivePillar->slug);
     $responseInactive->assertNotFound();
 });
+
+it('passes public_name_translations to public pages', function () {
+    $pillar = Category::create([
+        'name' => ['id' => 'Kesehatan', 'en' => 'Health'],
+        'public_name' => ['id' => 'Layanan Kesehatan & Gizi Balita', 'en' => 'Health & Nutrition Services'],
+        'slug' => 'kesehatan',
+        'is_focus_program' => true,
+        'is_active' => true,
+    ]);
+
+    $response = $this->get('/fokus-program');
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Public/FocusProgram/Index')
+        ->where('pillars.0.public_name_translations.id', 'Layanan Kesehatan & Gizi Balita')
+    );
+
+    $responseShow = $this->get('/fokus-program/'.$pillar->slug);
+    $responseShow->assertOk();
+    $responseShow->assertInertia(fn ($page) => $page
+        ->component('Public/FocusProgram/Show')
+        ->where('pillar.public_name_translations.id', 'Layanan Kesehatan & Gizi Balita')
+    );
+});

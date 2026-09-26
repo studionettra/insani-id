@@ -115,3 +115,35 @@ it('allows updating detailed focus program fields including gallery and metrics'
     expect($this->category->distribution_gallery)->toHaveCount(1);
     Storage::disk('public')->assertExists($this->category->distribution_gallery[0]);
 });
+
+it('allows administrator to create a category with an icon string', function () {
+    actingAs($this->admin)
+        ->post(route('admin.categories.store'), [
+            'name' => ['id' => 'Kesehatan Medis'],
+            'description' => ['id' => 'Bantuan kesehatan'],
+            'icon' => 'HeartPulse',
+            'platform_fee_percent' => 5,
+            'is_active' => true,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $category = Category::where('slug', 'kesehatan-medis')->first();
+    expect($category)->not->toBeNull();
+    expect($category->icon)->toBe('HeartPulse');
+});
+
+it('allows administrator to update a category with an icon string', function () {
+    actingAs($this->admin)
+        ->put(route('admin.categories.update', $this->category), [
+            'name' => ['id' => 'Kategori Diperbarui'],
+            'description' => ['id' => 'Deskripsi'],
+            'icon' => 'GraduationCap',
+            'platform_fee_percent' => 5,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $this->category->refresh();
+    expect($this->category->icon)->toBe('GraduationCap');
+});

@@ -39,6 +39,10 @@ import {
     Lightbulb,
     Gift,
     Sparkles,
+    AlertTriangle,
+    Sprout,
+    Moon,
+    Package,
     Search,
     X,
     ChevronDown,
@@ -66,6 +70,7 @@ export const ICONS_LIST: IconItem[] = [
     { name: 'Smile', label: 'Kebahagiaan', category: 'sosial', keywords: ['smile', 'senyum', 'bahagia', 'senang', 'harapan'], component: Smile },
     { name: 'Baby', label: 'Anak & Balita', category: 'sosial', keywords: ['baby', 'anak', 'yatim', 'piatu', 'balita', 'bayi'], component: Baby },
     { name: 'Home', label: 'Hunian / Rumah', category: 'sosial', keywords: ['home', 'rumah', 'hunian', 'tempat tinggal', 'panti'], component: Home },
+    { name: 'Moon', label: 'Dakwah / Keagamaan', category: 'sosial', keywords: ['moon', 'bulan', 'dakwah', 'islam', 'ramadhan', 'masjid', 'qurban'], component: Moon },
 
     // Keuangan & Donasi
     { name: 'Coins', label: 'Koin / Donasi', category: 'donasi', keywords: ['coins', 'koin', 'donasi', 'uang', 'rupiah', 'sedekah', 'infaq'], component: Coins },
@@ -96,6 +101,8 @@ export const ICONS_LIST: IconItem[] = [
     { name: 'Droplets', label: 'Air Bersih & Sanitasi', category: 'kesehatan', keywords: ['water', 'air', 'sanitasi', 'sumur', 'bersih', 'wudhu'], component: Droplets },
     { name: 'Flame', label: 'Tanggap Darurat', category: 'kesehatan', keywords: ['flame', 'api', 'bencana', 'darurat', 'kebakaran'], component: Flame },
     { name: 'LifeBuoy', label: 'Bantuan Bencana', category: 'kesehatan', keywords: ['lifebuoy', 'pelampung', 'banjir', 'evakuasi', 'penyelamatan'], component: LifeBuoy },
+    { name: 'AlertTriangle', label: 'Siaga Bencana', category: 'kesehatan', keywords: ['alert', 'peringatan', 'bencana', 'darurat', 'bahaya', 'gempa'], component: AlertTriangle },
+    { name: 'Package', label: 'Paket Logistik & Sembako', category: 'kesehatan', keywords: ['package', 'paket', 'sembako', 'dus', 'bantuan', 'distribusi', 'pangan'], component: Package },
 
     // Pendidikan & Lainnya
     { name: 'GraduationCap', label: 'Pendidikan / Beasiswa', category: 'pendidikan', keywords: ['education', 'toga', 'kuliah', 'beasiswa', 'sarjana', 'pendidikan'], component: GraduationCap },
@@ -103,6 +110,7 @@ export const ICONS_LIST: IconItem[] = [
     { name: 'School', label: 'Sekolah / Madrasah', category: 'pendidikan', keywords: ['school', 'sekolah', 'madrasah', 'pesantren', 'kelas'], component: School },
     { name: 'Briefcase', label: 'Ekonomi / UMKM', category: 'pendidikan', keywords: ['briefcase', 'tas', 'kerja', 'umkm', 'usaha', 'modal', 'ekonomi'], component: Briefcase },
     { name: 'Lightbulb', label: 'Inovasi / Pelatihan', category: 'pendidikan', keywords: ['lightbulb', 'ide', 'inovasi', 'pelatihan', 'kursus', 'ilmu'], component: Lightbulb },
+    { name: 'Sprout', label: 'Pemberdayaan & Tani', category: 'pendidikan', keywords: ['sprout', 'tani', 'lingkungan', 'tanam', 'pemberdayaan', 'hijau', 'bibit'], component: Sprout },
     { name: 'Gift', label: 'Paket Kado / Bantuan', category: 'pendidikan', keywords: ['gift', 'kado', 'hadiah', 'bingkisan', 'paket', 'santunan'], component: Gift },
     { name: 'Sparkles', label: 'Dampak & Manfaat', category: 'pendidikan', keywords: ['sparkles', 'bintang', 'cahaya', 'manfaat', 'keberkahan'], component: Sparkles },
 ];

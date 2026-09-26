@@ -38,7 +38,9 @@ export default function FocusProgramIndex({ pillars }: any) {
                     {pillars && pillars.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {pillars.map((cat: any, index: number) => {
-                                const catName = t(getLocalizedValue(cat.name_translations || cat.name, locale));
+                                const customName = getLocalizedValue(cat.public_name_translations || cat.public_name, locale);
+                                const defaultName = getLocalizedValue(cat.name_translations || cat.name, locale);
+                                const catName = t(customName || defaultName);
                                 const catDesc = t(getLocalizedValue(cat.description_translations || cat.description, locale)) || 
                                     t(`Dedikasi kebaikan berkelanjutan untuk program bantuan dan pemberdayaan dalam fokus ${catName}.`);
 

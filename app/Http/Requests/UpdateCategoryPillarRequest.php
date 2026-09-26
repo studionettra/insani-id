@@ -13,8 +13,9 @@ class UpdateCategoryPillarRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // Use the policy method to authorize
-        return Gate::allows('updatePillar', $this->route('category'));
+        $category = $this->route('category') ?? $this->route('focus_program');
+
+        return Gate::allows('updatePillar', $category);
     }
 
     /**
@@ -26,6 +27,15 @@ class UpdateCategoryPillarRequest extends FormRequest
     {
         return [
             'is_focus_program' => ['required', 'boolean'],
+            'public_name' => ['nullable', 'array'],
+            'public_name.id' => ['nullable', 'string', 'max:255'],
+            'public_name.en' => ['nullable', 'string', 'max:255'],
+            'public_name.ar' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'array'],
+            'description.id' => ['nullable', 'string'],
+            'description.en' => ['nullable', 'string'],
+            'description.ar' => ['nullable', 'string'],
+            'sort_order' => ['nullable', 'integer'],
             'pillar_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:4096'],
             'reality_title' => ['nullable', 'array'],
             'reality_title.id' => ['nullable', 'string', 'max:255'],

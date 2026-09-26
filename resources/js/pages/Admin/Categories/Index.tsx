@@ -1,6 +1,9 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
 import { Trash2, Edit, Plus, Search, X, Image as ImageIcon, Sparkles, Video, BarChart2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import { autoTranslateFields } from '@/lib/translate';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -25,6 +28,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { IconPicker, renderStatIcon } from '@/components/ui/icon-picker';
 
 export default function CategoriesIndex({ categories, filters }: any) {
     const { auth } = usePage().props as any;
@@ -37,7 +41,7 @@ export default function CategoriesIndex({ categories, filters }: any) {
     const { data, setData, post, put, delete: destroy, processing, errors, reset, clearErrors } = useForm({
         name: { id: '', en: '', ar: '' },
         description: { id: '', en: '', ar: '' },
-        icon: null as File | null,
+        icon: '',
         pillar_image: null as File | null,
         reality_title: { id: '', en: '', ar: '' },
         reality_description: { id: '', en: '', ar: '' },
@@ -54,6 +58,47 @@ export default function CategoriesIndex({ categories, filters }: any) {
         _method: 'post',
     });
 
+    const [isTranslating, setIsTranslating] = useState(false);
+
+    const hasEn = Boolean(data.name.en);
+    const hasAr = Boolean(data.name.ar);
+
+    const handleAutoTranslate = async () => {
+        const sourceName = data.name.id;
+        const sourceDesc = data.description.id || '';
+
+        if (!sourceName.trim()) {
+            toast.error('Silakan isi Nama Kategori (ID) terlebih dahulu.');
+            return;
+        }
+
+        setIsTranslating(true);
+        try {
+            const res = await autoTranslateFields({
+                name: sourceName,
+                description: sourceDesc,
+            });
+
+            if (res) {
+                setData(prev => ({
+                    ...prev,
+                    name: {
+                        id: prev.name.id,
+                        en: res.name?.en || prev.name.en,
+                        ar: res.name?.ar || prev.name.ar,
+                    },
+                    description: {
+                        id: prev.description.id,
+                        en: res.description?.en || prev.description.en,
+                        ar: res.description?.ar || prev.description.ar,
+                    },
+                }));
+            }
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         router.get(
@@ -65,7 +110,25 @@ export default function CategoriesIndex({ categories, filters }: any) {
 
     const openCreateModal = () => {
         reset();
-        setData('_method', 'post');
+        setData({
+            name: { id: '', en: '', ar: '' },
+            description: { id: '', en: '', ar: '' },
+            icon: '',
+            pillar_image: null,
+            reality_title: { id: '', en: '', ar: '' },
+            reality_description: { id: '', en: '', ar: '' },
+            reality_source: '',
+            video_url: '',
+            stats_metrics: [],
+            gallery_images: [],
+            existing_gallery: [],
+            platform_fee_percent: 0,
+            is_disaster_category: false,
+            is_focus_program: false,
+            is_active: true,
+            sort_order: 0,
+            _method: 'post',
+        });
         clearErrors();
         setIsCreateModalOpen(true);
     };
@@ -83,7 +146,7 @@ export default function CategoriesIndex({ categories, filters }: any) {
                 en: category.description_translations?.en || '', 
                 ar: category.description_translations?.ar || '' 
             },
-            icon: null,
+            icon: category.icon || '',
             pillar_image: null,
             reality_title: {
                 id: category.reality_title_translations?.id || '',
@@ -214,7 +277,23 @@ return;
                                 categories.map((category: any) => (
                                     <TableRow key={category.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                                         <TableCell className="text-gray-500 dark:text-gray-400">{category.id}</TableCell>
-                                        <TableCell className="font-medium text-gray-900 dark:text-white">{category.name_translations?.id || category.name}</TableCell>
+                                        <TableCell className="font-medium text-gray-900 dark:text-white">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center shrink-0 text-[#1A56DB] dark:text-blue-400">
+                                                    {renderStatIcon(category.icon, "w-4 h-4 text-current") || <Sparkles className="w-4 h-4 text-gray-300 dark:text-gray-600" />}
+                                                </div>
+                                                <div>
+                                                    <div className="font-semibold text-gray-900 dark:text-white leading-tight">
+                                                        {category.name_translations?.id || category.name}
+                                                    </div>
+                                                    {category.name_translations?.en && (
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                            {category.name_translations.en}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="text-gray-600 dark:text-gray-300">{category.platform_fee_percent}%</TableCell>
                                         <TableCell>
                                             <div className="flex gap-2">
@@ -230,6 +309,11 @@ return;
                                                 {category.is_disaster_category && (
                                                     <span className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-600/20 dark:bg-orange-950/40 dark:text-orange-300 dark:ring-orange-800">
                                                         Bencana
+                                                    </span>
+                                                )}
+                                                {category.is_focus_program && (
+                                                    <span className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/20 dark:bg-blue-950/40 dark:text-blue-300 dark:ring-blue-800">
+                                                        Fokus Program
                                                     </span>
                                                 )}
                                             </div>
@@ -274,6 +358,15 @@ return;
                         </DialogHeader>
                         
                         <div className="px-6 py-4 space-y-4 overflow-y-auto">
+                            <TranslationStatusCard
+                                hasId={Boolean(data.name.id)}
+                                hasEn={Boolean(data.name.en)}
+                                hasAr={Boolean(data.name.ar)}
+                                onTranslate={handleAutoTranslate}
+                                isTranslating={isTranslating}
+                                compact
+                                description="Terjemahkan otomatis nama & deskripsi kategori ke bahasa Inggris dan Arab."
+                            />
                             <div className="space-y-1.5">
                                 <Label htmlFor="name_id" className="text-sm font-medium text-gray-700 dark:text-gray-300">Nama Kategori (ID) *</Label>
                                 <Input
@@ -341,27 +434,15 @@ return;
 
                             <div className="space-y-1.5">
                                 <Label htmlFor="icon" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ikon Kategori</Label>
-                                <Input
+                                <IconPicker
                                     id="icon"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setData('icon', e.target.files ? e.target.files[0] : null)}
-                                    className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] cursor-pointer file:text-[#1A56DB]"
+                                    value={data.icon}
+                                    onChange={(iconName) => setData('icon', iconName)}
                                 />
                                 {errors.icon && <p className="text-xs text-red-500">{errors.icon}</p>}
                             </div>
 
-                            <div className="space-y-1.5">
-                                <Label htmlFor="pillar_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Cover Fokus Program (Opsional)</Label>
-                                <Input
-                                    id="pillar_image"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setData('pillar_image', e.target.files ? e.target.files[0] : null)}
-                                    className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] cursor-pointer file:text-[#1A56DB]"
-                                />
-                                {errors.pillar_image && <p className="text-xs text-red-500">{errors.pillar_image}</p>}
-                            </div>
+
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
@@ -453,6 +534,15 @@ return;
                         <div className="px-6 py-4 space-y-5 overflow-y-auto">
                             {isAdministrator && (
                                 <>
+                                    <TranslationStatusCard
+                                        hasId={Boolean(data.name.id)}
+                                        hasEn={Boolean(data.name.en)}
+                                        hasAr={Boolean(data.name.ar)}
+                                        onTranslate={handleAutoTranslate}
+                                        isTranslating={isTranslating}
+                                        compact
+                                        description="Terjemahkan otomatis nama & deskripsi kategori ke bahasa Inggris dan Arab."
+                                    />
                                     <div className="space-y-1.5">
                                         <Label htmlFor="edit_name_id" className="text-sm font-medium text-gray-700 dark:text-gray-300">Nama Kategori (ID) *</Label>
                                         <Input
@@ -499,31 +589,17 @@ return;
                                     
                                     <div className="space-y-1.5">
                                         <Label htmlFor="edit_icon" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ikon Kategori</Label>
-                                        <Input
+                                        <IconPicker
                                             id="edit_icon"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={(e) => setData('icon', e.target.files ? e.target.files[0] : null)}
-                                            className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] cursor-pointer file:text-[#1A56DB]"
+                                            value={data.icon}
+                                            onChange={(iconName) => setData('icon', iconName)}
                                         />
-                                        {editingCategory?.icon && <p className="text-xs text-gray-500 dark:text-gray-400">Sudah ada ikon. Biarkan kosong jika tidak ingin mengubah.</p>}
                                         {errors.icon && <p className="text-xs text-red-500">{errors.icon}</p>}
                                     </div>
                                 </>
                             )}
 
-                            <div className="space-y-1.5">
-                                <Label htmlFor="edit_pillar_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">Gambar Cover Fokus Program (Opsional)</Label>
-                                <Input
-                                    id="edit_pillar_image"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setData('pillar_image', e.target.files ? e.target.files[0] : null)}
-                                    className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB] cursor-pointer file:text-[#1A56DB]"
-                                />
-                                {editingCategory?.pillar_image && <p className="text-xs text-gray-500 dark:text-gray-400">Sudah ada gambar cover fokus program. Biarkan kosong jika tidak ingin mengubah.</p>}
-                                {errors.pillar_image && <p className="text-xs text-red-500">{errors.pillar_image}</p>}
-                            </div>
+
 
                             {isAdministrator && (
                                 <>
@@ -595,178 +671,29 @@ return;
                                 </div>
                             </div>
 
-                            {/* Section Khusus Fokus Program (PureHands Style) */}
+                            {/* Informasi Fokus Program Terpisah */}
                             {data.is_focus_program && (
-                                <div className="mt-4 p-5 rounded-2xl bg-slate-50 dark:bg-gray-800/60 border border-brand-200 dark:border-brand-900/50 space-y-4">
-                                    <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-gray-700">
-                                        <Sparkles className="w-4 h-4 text-brand-600" />
-                                        <h3 className="font-bold text-sm text-slate-900 dark:text-white">
-                                            Pengaturan Halaman Dedikasi Fokus Program
-                                        </h3>
-                                    </div>
-
-                                    {/* 1. Realitas & Urgensi */}
-                                    <div className="space-y-3">
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="edit_reality_title_id" className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase">
-                                                Judul Section Realitas / Urgensi (ID)
-                                            </Label>
-                                            <Input
-                                                id="edit_reality_title_id"
-                                                placeholder="Contoh: Realitas Krisis Ketahanan Pangan"
-                                                value={data.reality_title.id}
-                                                onChange={(e) => setData('reality_title', { ...data.reality_title, id: e.target.value })}
-                                                className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 text-sm"
-                                            />
+                                <div className="mt-3 p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50">
+                                    <div className="flex items-start gap-3">
+                                        <Sparkles className="w-5 h-5 text-[#1A56DB] dark:text-blue-400 shrink-0 mt-0.5" />
+                                        <div className="space-y-1 text-left">
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                                                Kategori ini aktif sebagai Fokus Program
+                                            </h4>
+                                            <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                                Nama publik kustom, gambar cover hero, narasi urgensi krisis, video YouTube, counter statistik, dan galeri dokumentasi kini dikelola secara mandiri pada menu khusus <strong>Fokus Program</strong>.
+                                            </p>
+                                            {editingCategory && (
+                                                <div className="pt-2">
+                                                    <Link
+                                                        href={`/admin/focus-programs/${editingCategory.id}/edit`}
+                                                        className="inline-flex items-center text-xs font-semibold text-[#1A56DB] hover:underline dark:text-blue-400 gap-1"
+                                                    >
+                                                        Buka Pengaturan Fokus Program Lengkap &rarr;
+                                                    </Link>
+                                                </div>
+                                            )}
                                         </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="edit_reality_description_id" className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase">
-                                                Narasi Kondisi Lapangan (ID)
-                                            </Label>
-                                            <Textarea
-                                                id="edit_reality_description_id"
-                                                rows={3}
-                                                placeholder="Jelaskan kondisi krisis lapangan yang dihadapi masyarakat secara menyentuh..."
-                                                value={data.reality_description.id}
-                                                onChange={(e) => setData('reality_description', { ...data.reality_description, id: e.target.value })}
-                                                className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 text-sm"
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label htmlFor="edit_reality_source" className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase">
-                                                Sumber Data Resmi / Sitasi
-                                            </Label>
-                                            <Input
-                                                id="edit_reality_source"
-                                                placeholder="Contoh: Sumber: Yemen HNRP 2026 – OCHA & UNICEF / Data BPS"
-                                                value={data.reality_source}
-                                                onChange={(e) => setData('reality_source', e.target.value)}
-                                                className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 text-sm"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* 2. Video YouTube */}
-                                    <div className="space-y-1.5 pt-2">
-                                        <Label htmlFor="edit_video_url" className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
-                                            <Video className="w-3.5 h-3.5 text-red-500" />
-                                            <span>Link Video YouTube Dokumentasi</span>
-                                        </Label>
-                                        <Input
-                                            id="edit_video_url"
-                                            placeholder="https://www.youtube.com/watch?v=..."
-                                            value={data.video_url}
-                                            onChange={(e) => setData('video_url', e.target.value)}
-                                            className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 text-sm"
-                                        />
-                                    </div>
-
-                                    {/* 3. Metrik Statistik Dinamis */}
-                                    <div className="space-y-2 pt-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
-                                                <BarChart2 className="w-3.5 h-3.5 text-brand-600" />
-                                                <span>Counter Statistik Dampak</span>
-                                            </Label>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => {
-                                                    const updated = [...(data.stats_metrics || []), { value: '', label: { id: '' }, icon: 'Users' }];
-                                                    setData('stats_metrics', updated);
-                                                }}
-                                                className="h-7 text-xs px-2.5 rounded-lg border-brand-200 text-brand-600 hover:bg-brand-50"
-                                            >
-                                                <Plus className="w-3 h-3 mr-1" />
-                                                Tambah Metrik
-                                            </Button>
-                                        </div>
-
-                                        {data.stats_metrics && data.stats_metrics.length > 0 ? (
-                                            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                                                {data.stats_metrics.map((metric: any, mIdx: number) => (
-                                                    <div key={mIdx} className="flex items-center gap-2 bg-white dark:bg-gray-800 p-2.5 rounded-xl border border-slate-200 dark:border-gray-700">
-                                                        <Input
-                                                            placeholder="Angka (cth: 2.3 Juta+)"
-                                                            value={metric.value || ''}
-                                                            onChange={(e) => {
-                                                                const updated = [...data.stats_metrics];
-                                                                updated[mIdx] = { ...updated[mIdx], value: e.target.value };
-                                                                setData('stats_metrics', updated);
-                                                            }}
-                                                            className="h-8 text-xs w-1/3"
-                                                        />
-                                                        <Input
-                                                            placeholder="Label (cth: Orang Butuh Pangan)"
-                                                            value={typeof metric.label === 'object' ? metric.label?.id || '' : metric.label || ''}
-                                                            onChange={(e) => {
-                                                                const updated = [...data.stats_metrics];
-                                                                updated[mIdx] = { ...updated[mIdx], label: { id: e.target.value } };
-                                                                setData('stats_metrics', updated);
-                                                            }}
-                                                            className="h-8 text-xs flex-1"
-                                                        />
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                const updated = data.stats_metrics.filter((_: any, i: number) => i !== mIdx);
-                                                                setData('stats_metrics', updated);
-                                                            }}
-                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </Button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-slate-400 italic">Belum ada metrik angka statistik.</p>
-                                        )}
-                                    </div>
-
-                                    {/* 4. Dokumentasi Galeri Distribusi */}
-                                    <div className="space-y-2 pt-2">
-                                        <Label className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase flex items-center gap-1.5">
-                                            <ImageIcon className="w-3.5 h-3.5 text-brand-600" />
-                                            <span>Foto Dokumentasi Distribusi</span>
-                                        </Label>
-
-                                        {data.existing_gallery && data.existing_gallery.length > 0 && (
-                                            <div className="grid grid-cols-4 gap-2 mb-2">
-                                                {data.existing_gallery.map((img: string, gIdx: number) => (
-                                                    <div key={gIdx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 bg-slate-100 group">
-                                                        <img src={`/storage/${img}`} alt="" className="w-full h-full object-cover" />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const updated = data.existing_gallery.filter((item: string) => item !== img);
-                                                                setData('existing_gallery', updated);
-                                                            }}
-                                                            className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
-                                                        >
-                                                            <X className="w-3 h-3" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <Input
-                                            type="file"
-                                            multiple
-                                            accept="image/*"
-                                            onChange={(e) => {
-                                                const files = e.target.files ? Array.from(e.target.files) : [];
-                                                setData('gallery_images', files);
-                                            }}
-                                            className="text-xs border-gray-200 dark:border-gray-700 dark:bg-gray-800"
-                                        />
-                                        <p className="text-[11px] text-slate-400">Dapat memilih lebih dari satu foto sekaligus untuk ditambahkan ke galeri dokumentasi.</p>
                                     </div>
                                 </div>
                             )}

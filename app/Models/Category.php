@@ -12,6 +12,7 @@ class Category extends Model
 
     protected $fillable = [
         'name',
+        'public_name',
         'slug',
         'description',
         'icon',
@@ -29,7 +30,14 @@ class Category extends Model
         'sort_order',
     ];
 
-    public $translatable = ['name', 'description', 'reality_title', 'reality_description'];
+    public $translatable = ['name', 'public_name', 'description', 'reality_title', 'reality_description'];
+
+    public function getDisplayNameAttribute(): string
+    {
+        $public = $this->getTranslation('public_name', app()->getLocale(), false);
+
+        return ! empty($public) ? $public : (string) $this->getTranslation('name', app()->getLocale());
+    }
 
     public function programs()
     {

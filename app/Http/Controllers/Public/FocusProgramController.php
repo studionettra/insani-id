@@ -15,6 +15,7 @@ class FocusProgramController extends Controller
             ->get()
             ->map(function ($cat) {
                 $cat->name_translations = $cat->getTranslations('name');
+                $cat->public_name_translations = $cat->getTranslations('public_name');
                 $cat->description_translations = $cat->getTranslations('description');
 
                 return $cat;
@@ -32,6 +33,7 @@ class FocusProgramController extends Controller
         }
 
         $category->name_translations = $category->getTranslations('name');
+        $category->public_name_translations = $category->getTranslations('public_name');
         $category->description_translations = $category->getTranslations('description');
         $category->reality_title_translations = $category->getTranslations('reality_title');
         $category->reality_description_translations = $category->getTranslations('reality_description');
@@ -51,6 +53,7 @@ class FocusProgramController extends Controller
             ->get()
             ->map(function ($cat) {
                 $cat->name_translations = $cat->getTranslations('name');
+                $cat->public_name_translations = $cat->getTranslations('public_name');
                 $cat->description_translations = $cat->getTranslations('description');
 
                 return $cat;

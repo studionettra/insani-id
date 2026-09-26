@@ -50,7 +50,7 @@ class CategoryController extends BaseController
             'name.en' => 'nullable|string|max:255',
             'name.ar' => 'nullable|string|max:255',
             'description' => 'nullable|array',
-            'icon' => 'nullable|image|max:2048',
+            'icon' => 'nullable|string|max:100',
             'platform_fee_percent' => 'nullable|numeric|min:0|max:100',
             'is_disaster_category' => 'boolean',
             'is_focus_program' => 'boolean',
@@ -70,15 +70,12 @@ class CategoryController extends BaseController
         }
 
         $validated['slug'] = $slug;
+        $validated['icon'] = $validated['icon'] ?? null;
         $validated['platform_fee_percent'] = $validated['platform_fee_percent'] ?? 0;
         $validated['is_disaster_category'] = $validated['is_disaster_category'] ?? false;
         $validated['is_focus_program'] = $validated['is_focus_program'] ?? false;
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
-
-        if ($request->hasFile('icon')) {
-            $validated['icon'] = $request->file('icon')->store('categories', 'public');
-        }
 
         if ($request->hasFile('pillar_image')) {
             $validated['pillar_image'] = $request->file('pillar_image')->store('categories/pillars', 'public');
@@ -100,7 +97,7 @@ class CategoryController extends BaseController
             'name.en' => 'nullable|string|max:255',
             'name.ar' => 'nullable|string|max:255',
             'description' => 'nullable|array',
-            'icon' => 'nullable|image|max:2048',
+            'icon' => 'nullable|string|max:100',
             'platform_fee_percent' => 'nullable|numeric|min:0|max:100',
             'is_disaster_category' => 'boolean',
             'is_focus_program' => 'boolean',
@@ -129,13 +126,8 @@ class CategoryController extends BaseController
             $validated['slug'] = $slug;
         }
 
-        if ($request->hasFile('icon')) {
-            if ($category->icon) {
-                Storage::disk('public')->delete($category->icon);
-            }
-            $validated['icon'] = $request->file('icon')->store('categories', 'public');
-        } else {
-            unset($validated['icon']);
+        if ($request->has('icon')) {
+            $validated['icon'] = $request->input('icon') ?: null;
         }
 
         if ($request->hasFile('pillar_image')) {
