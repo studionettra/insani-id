@@ -179,3 +179,48 @@ test('unauthorized users without permission cannot access user management', func
 
     $response->assertForbidden();
 });
+
+test('it passes counts and filters users by segment type', function () {
+    Role::firstOrCreate(['name' => 'Program Officer']);
+    Role::firstOrCreate(['name' => 'Campaigner Lembaga']);
+
+    $staff = User::factory()->create(['name' => 'Staff Program']);
+    $staff->assignRole('Program Officer');
+
+    $lembaga = User::factory()->create(['name' => 'Lembaga Amal']);
+    $lembaga->assignRole('Campaigner Lembaga');
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('admin.users.index', ['type' => 'internal']));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Admin/Users/Index')
+        ->has('counts.internal')
+        ->has('counts.all')
+        ->where('filters.type', 'internal')
+    );
+});
+
+test('it allows admin to toggle active status of another user', function () {
+    $targetUser = User::factory()->create(['is_active' => true]);
+
+    $response = $this->actingAs($this->admin)
+        ->patch(route('admin.users.toggle-status', $targetUser->id));
+
+    $response->assertRedirect();
+    expect($targetUser->fresh()->is_active)->toBeFalse();
+
+    $this->actingAs($this->admin)
+        ->patch(route('admin.users.toggle-status', $targetUser->id));
+    expect($targetUser->fresh()->is_active)->toBeTrue();
+});
+
+test('it prevents admin from toggling their own active status', function () {
+    $response = $this->actingAs($this->admin)
+        ->patch(route('admin.users.toggle-status', $this->admin->id));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+    expect($this->admin->fresh()->is_active)->toBeTrue();
+});

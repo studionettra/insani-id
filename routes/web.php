@@ -188,6 +188,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::post('/auto-translate', [TranslationController::class, 'translate'])->name('auto-translate');
 
         Route::middleware('permission:user.view')->group(function () {
+            Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
             Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
         });
 
