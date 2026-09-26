@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Console\Commands\RouteTranslationsListCommand;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Observers\PaymentObserver;
@@ -22,10 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(
-            'laravellocalizationroutecache.list',
-            RouteTranslationsListCommand::class
-        );
+        //
     }
 
     /**
