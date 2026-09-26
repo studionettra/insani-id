@@ -137,8 +137,9 @@ class ProgramController extends Controller
         $program->category_id = $request->category_id;
         $program->campaigner_type = 'internal';
         $program->created_by = auth()->id();
-        $program->target_amount = $request->target_amount;
-        $program->is_continuous = $request->boolean('is_continuous');
+        $isContinuous = $request->boolean('is_continuous');
+        $program->target_amount = $isContinuous ? null : $request->target_amount;
+        $program->is_continuous = $isContinuous;
         $program->deadline = $request->deadline;
         $program->cover_image = $coverImagePath;
         $program->video_url = $request->video_url;
@@ -220,8 +221,9 @@ class ProgramController extends Controller
         $program->title = $titleTranslations;
         $program->story = $storyTranslations;
         $program->category_id = $request->category_id;
-        $program->target_amount = $request->target_amount;
-        $program->is_continuous = $request->boolean('is_continuous');
+        $isContinuous = $request->boolean('is_continuous');
+        $program->target_amount = $isContinuous ? null : $request->target_amount;
+        $program->is_continuous = $isContinuous;
         $program->deadline = $request->deadline;
         $program->video_url = $request->video_url;
 

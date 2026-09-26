@@ -15,6 +15,7 @@ interface Program {
     program_code: string;
     category: { title: { id: string }, name: { id: string } };
     target_amount: string | null;
+    is_continuous?: boolean;
     collected_amount: number;
     status: string;
     cover_image: string;
@@ -162,7 +163,7 @@ export default function AkunProgramShow({ program }: Props) {
                                     <div>
                                         <p className="text-xs uppercase font-semibold tracking-wider text-slate-500 dark:text-gray-400">Target</p>
                                         <p className="text-base font-bold text-slate-900 dark:text-white">
-                                            {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
+                                            {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : (program.is_continuous ? 'Berkelanjutan' : 'Tanpa Target')}
                                         </p>
                                     </div>
                                 </div>

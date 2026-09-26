@@ -10,6 +10,7 @@ use App\Notifications\ProgramSubmittedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Mews\Purifier\Facades\Purifier;
@@ -87,14 +88,28 @@ class CampaignerProgramController extends Controller
             ]);
         }
 
+        $isContinuous = $request->has('is_continuous')
+            ? $request->boolean('is_continuous')
+            : ! $request->filled('target_amount');
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'target_amount' => 'nullable|numeric|min:0',
+            'is_continuous' => 'nullable|boolean',
+            'target_amount' => [
+                Rule::excludeIf($isContinuous),
+                Rule::requiredIf(! $isContinuous),
+                'numeric',
+                'min:10000',
+            ],
             'deadline' => 'nullable|date|after:today',
             'story' => 'required|string',
             'cover_image' => 'required|image|max:2048',
             'video_url' => 'nullable|url',
+        ], [
+            'target_amount.required' => 'Target donasi wajib diisi jika memilih program dengan target nominal.',
+            'target_amount.min' => 'Target donasi minimal adalah Rp 10.000.',
+            'target_amount.numeric' => 'Target donasi harus berupa angka nominal yang valid.',
         ]);
 
         $coverImagePath = $request->file('cover_image')->store('programs/covers', 'public');
@@ -118,7 +133,8 @@ class CampaignerProgramController extends Controller
         $program->campaigner_type = $campaignerProfile->type;
         $program->campaigner_profile_id = $campaignerProfile->id;
         $program->created_by = auth()->id();
-        $program->target_amount = $request->target_amount;
+        $program->is_continuous = $isContinuous;
+        $program->target_amount = $isContinuous ? null : $request->target_amount;
         $program->deadline = $request->deadline;
         $program->cover_image = $coverImagePath;
         $program->video_url = $request->video_url;
@@ -183,14 +199,28 @@ class CampaignerProgramController extends Controller
             return redirect()->route('akun.programs.index')->with('error', 'Hanya program berstatus draft atau ditolak yang dapat diedit.');
         }
 
+        $isContinuous = $request->has('is_continuous')
+            ? $request->boolean('is_continuous')
+            : ! $request->filled('target_amount');
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'target_amount' => 'nullable|numeric|min:0',
+            'is_continuous' => 'nullable|boolean',
+            'target_amount' => [
+                Rule::excludeIf($isContinuous),
+                Rule::requiredIf(! $isContinuous),
+                'numeric',
+                'min:10000',
+            ],
             'deadline' => 'nullable|date',
             'story' => 'required|string',
             'cover_image' => 'nullable|image|max:2048',
             'video_url' => 'nullable|url',
+        ], [
+            'target_amount.required' => 'Target donasi wajib diisi jika memilih program dengan target nominal.',
+            'target_amount.min' => 'Target donasi minimal adalah Rp 10.000.',
+            'target_amount.numeric' => 'Target donasi harus berupa angka nominal yang valid.',
         ]);
 
         $cleanedStory = Purifier::clean($request->story);
@@ -204,7 +234,8 @@ class CampaignerProgramController extends Controller
         $program->title = $request->title;
         $program->story = $cleanedStory;
         $program->category_id = $request->category_id;
-        $program->target_amount = $request->target_amount;
+        $program->is_continuous = $isContinuous;
+        $program->target_amount = $isContinuous ? null : $request->target_amount;
         $program->deadline = $request->deadline;
         $program->video_url = $request->video_url;
 
