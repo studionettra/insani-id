@@ -24,16 +24,17 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
     const { locale, siteSettings } = usePage().props as any;
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-    const defaultVision = "Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan yang universal.";
-    const visionText = siteSettings?.about_vision || defaultVision;
+    const localizedVision = getLocalizedValue(siteSettings?.about_vision, locale);
+    const visionText = localizedVision || defaultVision;
 
     const defaultMissions = [
         "Menggalang kepedulian masyarakat untuk turut serta dalam program pengentasan krisis kemanusiaan.",
         "Memberikan bantuan tepat sasaran dan terukur melalui kolaborasi dengan berbagai mitra terpercaya.",
         "Mengedukasi masyarakat mengenai isu-isu kemanusiaan di dalam dan luar negeri."
     ];
-    const missions: string[] = siteSettings?.about_mission
-        ? siteSettings.about_mission.split('\n').map((m: string) => m.trim()).filter(Boolean)
+    const rawMission = getLocalizedValue(siteSettings?.about_mission, locale);
+    const missions: string[] = rawMission
+        ? rawMission.split('\n').map((m: string) => m.trim()).filter(Boolean)
         : defaultMissions;
 
     const defaultValues = [
@@ -41,8 +42,9 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
         { title: "Kolaborasi", desc: "Bersinergi dengan semua pihak untuk dampak yang lebih luas." },
         { title: "Empati", desc: "Bergerak dari panggilan hati nurani untuk meringankan beban sesama." }
     ];
-    const values = siteSettings?.about_values
-        ? siteSettings.about_values.split('\n').map((line: string) => {
+    const rawValues = getLocalizedValue(siteSettings?.about_values, locale);
+    const values = rawValues
+        ? rawValues.split('\n').map((line: string) => {
             const parts = line.split(':');
             if (parts.length >= 2) {
                 return { title: parts[0].trim(), desc: parts.slice(1).join(':').trim() };
@@ -260,17 +262,17 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                 </div>
             </section>
 
-            {/* 2.5 Dewan Pengurus Yayasan */}
+            {/* 2.5 Manajemen Insani Indonesia */}
             {management && management.length > 0 && (
-                <section id="pengurus" className="py-24 bg-white border-t border-slate-200">
+                <section id="manajemen" className="py-24 bg-white border-t border-slate-200">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center max-w-3xl mx-auto mb-16">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-insani-blue/10 text-insani-blue mb-4">
                                 <Users className="w-3.5 h-3.5" />
-                                Kepengurusan Lembaga
+                                Tim Manajemen
                             </span>
                             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
-                                Dewan Pengurus Yayasan
+                                Manajemen Insani Indonesia
                             </h2>
                             <p className="text-slate-600 text-lg">
                                 Para pegiat kemanusiaan dan profesional yang berdedikasi mengemban amanah, mengawal tata kelola, dan memajukan program kebaikan Insani Indonesia.

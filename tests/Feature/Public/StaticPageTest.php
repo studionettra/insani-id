@@ -55,3 +55,13 @@ it('returns 404 for non-existent page', function () {
     $response = $this->get('/halaman/halaman-tidak-ada-xyz');
     $response->assertNotFound();
 });
+
+it('can render about page with management team', function () {
+    $response = $this->get('/tentang-kami');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Public/About/Index')
+        ->has('management')
+    );
+});

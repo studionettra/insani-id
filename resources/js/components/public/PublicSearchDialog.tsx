@@ -33,10 +33,19 @@ interface BlogResult {
     url: string;
 }
 
+interface PageResult {
+    id: number;
+    title: string;
+    slug: string;
+    meta_description?: string | null;
+    url: string;
+}
+
 interface SearchResponse {
     programs: ProgramResult[];
     focusPrograms: FocusProgramResult[];
     blogs: BlogResult[];
+    pages: PageResult[];
 }
 
 const POPULAR_TAGS = [
@@ -58,6 +67,7 @@ export default function PublicSearchDialog() {
         programs: [],
         focusPrograms: [],
         blogs: [],
+        pages: [],
     });
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -91,7 +101,7 @@ export default function PublicSearchDialog() {
         } else {
             document.body.style.overflow = '';
             setQuery('');
-            setResults({ programs: [], focusPrograms: [], blogs: [] });
+            setResults({ programs: [], focusPrograms: [], blogs: [], pages: [] });
             setIsLoading(false);
         }
         return () => {
@@ -101,7 +111,7 @@ export default function PublicSearchDialog() {
 
     const performSearch = useCallback(async (keyword: string) => {
         if (keyword.trim().length < 2) {
-            setResults({ programs: [], focusPrograms: [], blogs: [] });
+            setResults({ programs: [], focusPrograms: [], blogs: [], pages: [] });
             setIsLoading(false);
             return;
         }
@@ -115,6 +125,7 @@ export default function PublicSearchDialog() {
                     programs: data.programs || [],
                     focusPrograms: data.focusPrograms || [],
                     blogs: data.blogs || [],
+                    pages: data.pages || [],
                 });
             }
         } catch (err) {
@@ -155,7 +166,7 @@ export default function PublicSearchDialog() {
         }).format(amount);
     };
 
-    const totalResults = results.programs.length + results.focusPrograms.length + results.blogs.length;
+    const totalResults = results.programs.length + results.focusPrograms.length + results.blogs.length + results.pages.length;
     const hasSearched = query.trim().length >= 2;
 
     return (
@@ -490,6 +501,48 @@ export default function PublicSearchDialog() {
                                                                     </div>
                                                                 </div>
                                                                 <ArrowRight className="w-4 h-4 text-zinc-300 group-hover:translate-x-1 group-hover:text-amber-600 transition-transform shrink-0" />
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* 4. Halaman Statis Matches */}
+                                            {results.pages.length > 0 && (
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                                                            <Compass className="w-3.5 h-3.5 text-indigo-500" />
+                                                            {t('Halaman Informasi')}
+                                                        </span>
+                                                        <span className="text-[11px] font-medium text-zinc-400">
+                                                            {results.pages.length} {t('halaman')}
+                                                        </span>
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        {results.pages.map((page) => (
+                                                            <Link
+                                                                key={page.id}
+                                                                href={page.url}
+                                                                onClick={handleClose}
+                                                                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-50 border border-transparent hover:border-zinc-200/80 transition-all group"
+                                                            >
+                                                                <div className="flex items-center gap-2.5 min-w-0">
+                                                                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
+                                                                        <Compass className="w-4 h-4" />
+                                                                    </div>
+                                                                    <div className="truncate">
+                                                                        <div className="text-xs font-semibold text-zinc-900 group-hover:text-indigo-700 truncate">
+                                                                            {page.title}
+                                                                        </div>
+                                                                        {page.meta_description && (
+                                                                            <div className="text-[10px] text-zinc-400 truncate max-w-[200px] sm:max-w-xs">
+                                                                                {page.meta_description}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <ArrowRight className="w-4 h-4 text-zinc-300 group-hover:translate-x-1 group-hover:text-indigo-600 transition-transform shrink-0" />
                                                             </Link>
                                                         ))}
                                                     </div>
