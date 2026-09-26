@@ -270,10 +270,12 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::put('/programs/{id}/status', [ProgramController::class, 'updateStatus'])->name('programs.update-status');
             Route::post('/programs/{id}/translate', [ProgramController::class, 'translate'])->name('programs.translate');
             Route::resource('programs.updates', AdminProgramUpdateController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::put('programs/{program}/updates/{update}/moderation', [AdminProgramUpdateController::class, 'updateModeration'])->name('programs.updates.moderation');
         });
 
         Route::middleware('permission:disbursement.view')->group(function () {
             Route::resource('disbursements', DisbursementController::class)->only(['index', 'show']);
+            Route::get('disbursements/{disbursement}/receipt', [DisbursementController::class, 'receipt'])->name('disbursements.receipt');
             Route::put('disbursements/{disbursement}/status', [DisbursementController::class, 'updateStatus'])->name('disbursements.update-status');
         });
 
@@ -310,6 +312,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('campaigner.verified')->group(function () {
             Route::resource('programs', CampaignerProgramController::class);
             Route::resource('programs.disbursements', CampaignerDisbursementController::class)->only(['index', 'create', 'store']);
+            Route::get('programs/{program}/disbursements/{disbursement}/receipt', [CampaignerDisbursementController::class, 'receipt'])->name('programs.disbursements.receipt');
             Route::resource('programs.updates', CampaignerProgramUpdateController::class)->only(['index', 'store']);
             Route::post('slot-requests', [CampaignerSlotRequestController::class, 'store'])->name('slot-requests.store');
         });

@@ -42,17 +42,33 @@ class DisbursementStatusUpdatedNotification extends Notification implements Shou
         $url = route('akun.programs.disbursements.index', $this->disbursement->program_id);
 
         if ($status === 'transferred') {
-            return $mail
-                ->subject("[Insani] Alhamdulillah! Dana Pencairan Telah Ditransfer - {$programTitle}")
+            $requested = 'Rp '.number_format((float) $this->disbursement->requested_amount, 0, ',', '.');
+            $platformFee = 'Rp '.number_format((float) $this->disbursement->platform_fee_amount, 0, ',', '.');
+            $bankFee = 'Rp '.number_format((float) ($this->disbursement->bank_fee ?? 2500), 0, ',', '.');
+            $nett = 'Rp '.number_format((float) $this->disbursement->nett_amount, 0, ',', '.');
+            $receiptNo = $this->disbursement->receipt_number ?? "KW-DISB-{$this->disbursement->id}";
+
+            $mail
+                ->subject("[Insani] Alhamdulillah! Dana Pencairan Telah Ditransfer ({$receiptNo}) - {$programTitle}")
                 ->greeting('Assalamu’alaikum Warahmatullahi Wabarakatuh, Sahabat Insani.')
                 ->line("Alhamdulillah, permohonan pencairan dana untuk program **\"{$programTitle}\"** telah berhasil ditransfer oleh tim Keuangan Insani Indonesia.")
-                ->line("• **Nominal Ditransfer**: **{$formattedAmount}**")
-                ->line("• **Bank Penerima**: {$this->disbursement->bank_name}")
-                ->line("• **Nomor Rekening**: {$this->disbursement->bank_account_number}")
-                ->line("• **Atas Nama**: {$this->disbursement->bank_account_name}")
-                ->action('Lihat Bukti Transfer & Rincian', $url)
+                ->line("• **Nomor Kuitansi**: **{$receiptNo}**")
+                ->line("• **Nominal Pengajuan**: {$requested}")
+                ->line("• **Biaya Operasional Platform (5%)**: -{$platformFee}")
+                ->line("• **Biaya Admin Bank (BI-Fast)**: -{$bankFee}")
+                ->line("• **Total Bersih yang Ditransfer**: **{$nett}**")
+                ->line("• **Bank Penerima**: {$this->disbursement->bank_name} ({$this->disbursement->bank_account_number} a.n. {$this->disbursement->bank_account_name})")
+                ->line('Bukti transfer asli perbankan telah kami lampirkan bersama email ini.')
+                ->action('Lihat Kuitansi & Rincian di Dashboard', $url)
                 ->line('Sebagai bentuk amanah kepada para donatur, kami mohon untuk memposting Kabar Terbaru / Laporan Penyaluran secara berkala setelah dana disalurkan kepada penerima manfaat.')
                 ->salutation("Wassalamu’alaikum Warahmatullahi Wabarakatuh,\n**Tim Insani Indonesia**");
+
+            if (! empty($this->disbursement->transfer_proof)) {
+                $ext = pathinfo($this->disbursement->transfer_proof, PATHINFO_EXTENSION) ?: 'jpg';
+                $mail->attachFromStorageDisk('public', $this->disbursement->transfer_proof, "Bukti_Transfer_{$receiptNo}.{$ext}");
+            }
+
+            return $mail;
         }
 
         if ($status === 'approved') {

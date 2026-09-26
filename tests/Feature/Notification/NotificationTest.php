@@ -115,6 +115,10 @@ test('pengajuan pencairan dana mengirim notifikasi database ke admin dan keuanga
 
     $response = $this->actingAs($campaigner)->post(route('akun.programs.disbursements.store', $program->id), [
         'requested_amount' => 500000,
+        'distribution_plan' => 'Pencairan tahap 1',
+        'beneficiary_target' => '100 Penerima',
+        'location' => 'Bandung',
+        'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
         'notes' => 'Pencairan tahap 1',
     ]);
 

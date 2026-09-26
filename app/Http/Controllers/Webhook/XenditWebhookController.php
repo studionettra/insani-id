@@ -34,9 +34,30 @@ class XenditWebhookController extends Controller
         $status = strtoupper($payload['status'] ?? '');
         $isPaid = in_array($status, ['PAID', 'SETTLED']);
 
+        $gatewayFee = 0;
+        if (! empty($payload['fees']) && is_array($payload['fees'])) {
+            $gatewayFee = (float) array_sum(array_column($payload['fees'], 'value'));
+        } elseif (isset($payload['fee'])) {
+            $gatewayFee = (float) $payload['fee'];
+        } elseif (isset($payload['fee_amount'])) {
+            $gatewayFee = (float) $payload['fee_amount'];
+        } elseif ($isPaid) {
+            $paidAmount = (float) ($payload['paid_amount'] ?? $payload['amount'] ?? 0);
+            $method = strtoupper($payload['payment_method'] ?? '');
+            $channel = strtoupper($payload['payment_channel'] ?? $payload['bank_code'] ?? '');
+            if ($method === 'QRIS' || $channel === 'QRIS') {
+                $gatewayFee = round($paidAmount * 0.007 * 1.11, 2);
+            } elseif (in_array($method, ['EWALLET', 'OVO', 'DANA', 'SHOPEEPAY', 'ASTRAPAY']) || in_array($channel, ['OVO', 'DANA', 'SHOPEEPAY', 'ASTRAPAY'])) {
+                $gatewayFee = round($paidAmount * 0.015 * 1.11, 2);
+            } elseif (in_array($method, ['VIRTUAL_ACCOUNT', 'POOL', 'FIXED_VA']) || str_contains($method, 'VA') || in_array($channel, ['BCA', 'BNI', 'BRI', 'MANDIRI', 'PERMATA', 'CIMB', 'BSI'])) {
+                $gatewayFee = 4440;
+            }
+        }
+
         $updateData = [
             'gateway_status' => $status,
             'paid_amount' => $isPaid ? ($payload['paid_amount'] ?? $payload['amount'] ?? null) : null,
+            'gateway_fee' => $gatewayFee,
             'paid_at' => $isPaid ? ($payment->paid_at ?? now()) : null,
             'raw_payload' => $payload,
         ];

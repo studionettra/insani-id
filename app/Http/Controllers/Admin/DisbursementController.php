@@ -33,9 +33,18 @@ class DisbursementController extends Controller
 
     public function show(Disbursement $disbursement)
     {
-        $disbursement->load(['program.campaignerProfile', 'program.creator']);
+        $disbursement->load(['program.campaignerProfile', 'program.creator', 'program.category']);
 
         return Inertia::render('Admin/Disbursements/Show', [
+            'disbursement' => $disbursement,
+        ]);
+    }
+
+    public function receipt(Disbursement $disbursement)
+    {
+        $disbursement->load(['program.campaignerProfile', 'program.creator', 'program.category', 'approvedBy']);
+
+        return Inertia::render('Admin/Disbursements/Receipt', [
             'disbursement' => $disbursement,
         ]);
     }
@@ -66,6 +75,9 @@ class DisbursementController extends Controller
 
         if ($status === 'transferred') {
             $disbursement->transferred_at = now();
+            if (empty($disbursement->receipt_number)) {
+                $disbursement->receipt_number = 'KW-DISB-'.now()->format('Ym').'-'.str_pad((string) $disbursement->id, 4, '0', STR_PAD_LEFT);
+            }
             if ($request->hasFile('transfer_proof')) {
                 $path = $request->file('transfer_proof')->store('disbursements', 'public');
                 $disbursement->transfer_proof = $path;

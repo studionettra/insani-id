@@ -60,31 +60,72 @@ export default function Index({ program, disbursements }: any) {
                             ) : (
                                 <div className="space-y-4">
                                     {disbursements.data.map((item: any) => (
-                                        <div key={item.id} className="border border-slate-200 dark:border-gray-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-900">
-                                            <div>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <span className="font-semibold text-lg text-slate-900 dark:text-white">{formatRupiah(item.requested_amount)}</span>
+                                        <div key={item.id} className="border border-slate-200 dark:border-gray-800 rounded-lg p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-900 shadow-2xs">
+                                            <div className="space-y-2 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="font-bold text-lg text-slate-900 dark:text-white">{formatRupiah(item.requested_amount)}</span>
                                                     {getStatusBadge(item.status)}
+                                                    {item.receipt_number && (
+                                                        <Badge variant="outline" className="font-mono text-xs bg-slate-50 text-slate-600 border-slate-200 dark:bg-gray-800 dark:text-gray-300">
+                                                            {item.receipt_number}
+                                                        </Badge>
+                                                    )}
                                                 </div>
-                                                <p className="text-sm text-slate-500 dark:text-gray-400">
-                                                    Diajukan pada {formatDate(item.created_at)}
-                                                </p>
-                                                {item.status === 'rejected' && item.rejection_reason && (
-                                                    <div className="mt-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 p-2 rounded border border-red-100 dark:border-red-900/60">
-                                                        <span className="font-medium">Alasan penolakan:</span> {item.rejection_reason}
+
+                                                <div className="text-xs text-slate-500 dark:text-gray-400 space-y-1">
+                                                    <p>Diajukan: {formatDate(item.created_at)}</p>
+                                                    {item.distribution_plan && (
+                                                        <p className="line-clamp-1 italic text-slate-600 dark:text-gray-300">
+                                                            Rencana: &quot;{item.distribution_plan}&quot; {item.location ? `(${item.location})` : ''}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {item.status === 'transferred' && (
+                                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 dark:text-gray-300 pt-1">
+                                                        <span>Biaya Bank: <strong className="text-red-500">- {formatRupiah(item.bank_fee || 2500)}</strong></span>
+                                                        <span>Bersih Ditransfer: <strong className="text-emerald-600 dark:text-emerald-400">{formatRupiah(item.nett_amount)}</strong></span>
+                                                        {item.transferred_at && <span>Ditransfer: {formatDate(item.transferred_at)}</span>}
                                                     </div>
                                                 )}
-                                                {item.status === 'transferred' && item.transferred_at && (
-                                                    <div className="mt-2 text-sm text-green-600 dark:text-green-400">
-                                                        Ditransfer pada {formatDate(item.transferred_at)}
+
+                                                {item.status === 'rejected' && item.rejection_reason && (
+                                                    <div className="mt-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 p-2.5 rounded border border-red-100 dark:border-red-900/60">
+                                                        <span className="font-semibold">Alasan penolakan:</span> {item.rejection_reason}
                                                     </div>
                                                 )}
                                             </div>
                                             
-                                            <div className="text-left md:text-right text-sm">
-                                                <p className="font-medium text-slate-900 dark:text-white">{item.bank_name}</p>
-                                                <p className="text-slate-500 dark:text-gray-400 font-mono">{item.bank_account_number}</p>
-                                                <p className="text-slate-500 dark:text-gray-400">a.n. {item.bank_account_name}</p>
+                                            <div className="flex flex-col md:items-end justify-between gap-3 text-sm">
+                                                <div className="text-left md:text-right">
+                                                    <p className="font-semibold text-slate-900 dark:text-white text-xs">{item.bank_name}</p>
+                                                    <p className="text-slate-600 dark:text-gray-400 font-mono text-xs">{item.bank_account_number}</p>
+                                                    <p className="text-slate-500 dark:text-gray-500 text-xs">a.n. {item.bank_account_name}</p>
+                                                </div>
+
+                                                <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0">
+                                                    {item.status === 'transferred' && (
+                                                        <>
+                                                            <Button size="sm" variant="outline" asChild className="h-8 text-xs border-slate-200 dark:border-gray-700">
+                                                                <Link href={`/akun/programs/${program.id}/disbursements/${item.id}/receipt`}>
+                                                                    Lihat Kuitansi
+                                                                </Link>
+                                                            </Button>
+                                                            {item.transfer_proof && (
+                                                                <Button size="sm" variant="outline" asChild className="h-8 text-xs border-slate-200 dark:border-gray-700">
+                                                                    <a href={`/storage/${item.transfer_proof}`} target="_blank" rel="noopener noreferrer">
+                                                                        Bukti Transfer
+                                                                    </a>
+                                                                </Button>
+                                                            )}
+                                                            <Button size="sm" asChild className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
+                                                                <Link href={`/akun/programs/${program.id}/updates`}>
+                                                                    Lapor Penyaluran
+                                                                </Link>
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

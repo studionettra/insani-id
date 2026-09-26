@@ -63,14 +63,27 @@ class CampaignerProgramUpdateController extends Controller
             }
         }
 
+        $disbursementId = $request->input('disbursement_id');
+        if (! $disbursementId) {
+            $latestUnlinkedDisbursement = $program->disbursements()
+                ->where('status', 'transferred')
+                ->whereDoesntHave('programUpdate')
+                ->latest('transferred_at')
+                ->first();
+            $disbursementId = $latestUnlinkedDisbursement?->id;
+        }
+
         $program->updates()->create([
+            'program_id' => $program->id,
+            'disbursement_id' => $disbursementId,
             'title' => $validated['title'],
             'content' => $cleanedContent,
-            'is_published' => $validated['is_published'] ?? true,
+            'is_published' => false,
+            'moderation_status' => 'pending',
             'created_by' => auth()->id(),
         ]);
 
-        return back()->with('success', 'Kabar terbaru berhasil ditambahkan.');
+        return back()->with('success', 'Kabar terbaru berhasil ditambahkan dan sedang menunggu peninjauan admin.');
     }
 
     public function update(Request $request, Program $program, ProgramUpdate $update)

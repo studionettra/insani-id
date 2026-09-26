@@ -134,21 +134,50 @@ class ReportController extends Controller
             'Expires' => '0',
         ];
 
-        $columns = ['Tgl Pengajuan', 'Program', 'Nominal Pencairan', 'Status', 'Tujuan Transfer', 'Keterangan'];
+        $columns = [
+            'No Kuitansi',
+            'Tgl Pengajuan',
+            'Tgl Transfer',
+            'Program',
+            'Status',
+            'Nominal Pengajuan (Gross)',
+            'Potongan Platform (5%)',
+            'Biaya Bank (BI-Fast)',
+            'Nominal Bersih (Ditransfer)',
+            'Bank Tujuan',
+            'No Rekening',
+            'Atas Nama',
+            'Rencana Penyaluran',
+            'Target Penerima',
+            'Lokasi Penyaluran',
+            'Estimasi Tgl Salur',
+            'Catatan',
+        ];
 
         $callback = function () use ($disbursements, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
             foreach ($disbursements as $disb) {
-                $row['Tgl Pengajuan'] = $disb->created_at->format('Y-m-d H:i:s');
-                $row['Program'] = $disb->program ? $disb->program->title : '';
-                $row['Nominal Pencairan'] = $disb->requested_amount;
-                $row['Status'] = $disb->status;
-                $row['Tujuan Transfer'] = $disb->bank_name.' - '.$disb->bank_account_number;
-                $row['Keterangan'] = $disb->notes;
-
-                fputcsv($file, [$row['Tgl Pengajuan'], $row['Program'], $row['Nominal Pencairan'], $row['Status'], $row['Tujuan Transfer'], $row['Keterangan']]);
+                fputcsv($file, [
+                    $disb->receipt_number ?? "ID #{$disb->id}",
+                    $disb->created_at->format('Y-m-d H:i:s'),
+                    $disb->transferred_at ? $disb->transferred_at->format('Y-m-d H:i:s') : '-',
+                    $disb->program ? $disb->program->title : '',
+                    $disb->status,
+                    $disb->requested_amount,
+                    $disb->platform_fee_amount,
+                    $disb->bank_fee ?? 2500,
+                    $disb->nett_amount,
+                    $disb->bank_name,
+                    $disb->bank_account_number,
+                    $disb->bank_account_name,
+                    $disb->distribution_plan ?? '-',
+                    $disb->beneficiary_target ?? '-',
+                    $disb->location ?? '-',
+                    $disb->estimated_distribution_date ? $disb->estimated_distribution_date->format('Y-m-d') : '-',
+                    $disb->notes ?? '-',
+                ]);
             }
 
             fclose($file);

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
@@ -89,6 +90,37 @@ class Program extends Model
     public function disbursements()
     {
         return $this->hasMany(Disbursement::class);
+    }
+
+    public function getTotalCollectedAmountAttribute(): float
+    {
+        return (float) $this->donations()->where('status', 'paid')->sum('amount');
+    }
+
+    public function getTotalGatewayFeesAttribute(): float
+    {
+        return (float) DB::table('donations')
+            ->join('payments', 'donations.id', '=', 'payments.donation_id')
+            ->where('donations.program_id', $this->id)
+            ->where('donations.status', 'paid')
+            ->sum('payments.gateway_fee');
+    }
+
+    public function getNetCollectedAmountAttribute(): float
+    {
+        return max(0, $this->total_collected_amount - $this->total_gateway_fees);
+    }
+
+    public function getTotalDisbursedAmountAttribute(): float
+    {
+        return (float) $this->disbursements()
+            ->whereIn('status', ['pending', 'approved', 'transferred'])
+            ->sum('requested_amount');
+    }
+
+    public function getAvailableBalanceAttribute(): float
+    {
+        return max(0, $this->net_collected_amount - $this->total_disbursed_amount);
     }
 
     public function updates()

@@ -12,10 +12,13 @@ class ProgramUpdate extends Model
 
     protected $fillable = [
         'program_id',
+        'disbursement_id',
         'title',
         'content',
         'created_by',
         'is_published',
+        'moderation_status',
+        'rejection_reason',
     ];
 
     public $translatable = [
@@ -45,6 +48,11 @@ class ProgramUpdate extends Model
     public function program()
     {
         return $this->belongsTo(Program::class);
+    }
+
+    public function disbursement()
+    {
+        return $this->belongsTo(Disbursement::class);
     }
 
     public function creator()

@@ -335,8 +335,30 @@ class XenditPaymentService
             ];
 
             if ($isPaid) {
-                $updateData['paid_amount'] = (float) $invoice->getAmount();
+                $paidAmount = (float) $invoice->getAmount();
+                $updateData['paid_amount'] = $paidAmount;
                 $updateData['paid_at'] = $payment->paid_at ?? now();
+
+                $rawInvoice = json_decode(json_encode($invoice), true);
+                $gatewayFee = 0;
+                if (! empty($rawInvoice['fees']) && is_array($rawInvoice['fees'])) {
+                    $gatewayFee = (float) array_sum(array_column($rawInvoice['fees'], 'value'));
+                } elseif (isset($rawInvoice['fee'])) {
+                    $gatewayFee = (float) $rawInvoice['fee'];
+                } elseif (isset($rawInvoice['fee_amount'])) {
+                    $gatewayFee = (float) $rawInvoice['fee_amount'];
+                } else {
+                    $method = strtoupper($invoice->getPaymentMethod() ?? '');
+                    $channel = strtoupper($rawInvoice['payment_channel'] ?? $rawInvoice['bank_code'] ?? '');
+                    if ($method === 'QRIS' || $channel === 'QRIS') {
+                        $gatewayFee = round($paidAmount * 0.007 * 1.11, 2);
+                    } elseif (in_array($method, ['EWALLET', 'OVO', 'DANA', 'SHOPEEPAY', 'ASTRAPAY']) || in_array($channel, ['OVO', 'DANA', 'SHOPEEPAY', 'ASTRAPAY'])) {
+                        $gatewayFee = round($paidAmount * 0.015 * 1.11, 2);
+                    } elseif (in_array($method, ['VIRTUAL_ACCOUNT', 'POOL', 'FIXED_VA']) || str_contains($method, 'VA') || in_array($channel, ['BCA', 'BNI', 'BRI', 'MANDIRI', 'PERMATA', 'CIMB', 'BSI'])) {
+                        $gatewayFee = 4440;
+                    }
+                }
+                $updateData['gateway_fee'] = $gatewayFee;
 
                 if ($invoice->getPaymentMethod()) {
                     $updateData['payment_method'] = self::mapPaymentMethod($invoice->getPaymentMethod());

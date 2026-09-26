@@ -21,6 +21,7 @@ class Payment extends Model
         'gateway_reference_id',
         'gateway_status',
         'paid_amount',
+        'gateway_fee',
         'paid_at',
         'confirmed_by',
         'raw_payload',
@@ -28,6 +29,7 @@ class Payment extends Model
 
     protected $casts = [
         'paid_amount' => 'decimal:2',
+        'gateway_fee' => 'decimal:2',
         'paid_at' => 'datetime',
         'raw_payload' => 'array',
     ];

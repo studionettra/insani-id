@@ -1,8 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
-import DOMPurify from 'dompurify';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, Sparkles, Users, Target, TrendingUp, Heart } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, Sparkles, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -102,9 +101,30 @@ interface Props {
     currentFundraiser?: FundraiserItem | null;
     topFundraisers?: FundraiserItem[];
     userFundraiser?: FundraiserItem | null;
+    transparency?: {
+        total_collected: number;
+        total_gateway_fees: number;
+        net_collected: number;
+        total_disbursed: number;
+        total_platform_fees: number;
+        total_transferred_nett: number;
+        available_balance: number;
+        disbursements: Array<{
+            id: number;
+            receipt_number?: string;
+            requested_amount: number;
+            platform_fee_amount: number;
+            bank_fee?: number;
+            nett_amount: number;
+            distribution_plan?: string;
+            beneficiary_target?: string;
+            location?: string;
+            transferred_at?: string;
+        }>;
+    };
 }
 
-export default function ProgramShow({ program, auth, currentFundraiser, topFundraisers = [], userFundraiser }: Props) {
+export default function ProgramShow({ program, auth, currentFundraiser, topFundraisers = [], userFundraiser, transparency }: Props) {
     const { t, locale, isRtl } = useTranslation();
     const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur' | 'fundraiser'>('cerita');
     const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
@@ -112,6 +132,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     const [copied, setCopied] = useState(false);
     const [isFundraiserModalOpen, setIsFundraiserModalOpen] = useState(false);
     const [fundraiserCopied, setFundraiserCopied] = useState(false);
+    const [isTransparencyModalOpen, setIsTransparencyModalOpen] = useState(false);
 
     const programTitle = getLocalizedValue(program.title, locale);
     const programStory = getLocalizedValue(program.story, locale);
@@ -256,7 +277,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                 )}
                             </div>
                         </div>
-                        <div className="mb-3">
+                        <div className="mb-2">
                             <DonationProgressBar
                                 collectedAmount={program.collected_amount}
                                 targetAmount={program.target_amount}
@@ -265,6 +286,16 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                 percentageFormat="badge"
                                 label={t('Ketercapaian Target', 'Target')}
                             />
+                        </div>
+                        <div className="flex items-center justify-between pt-1">
+                            <button
+                                type="button"
+                                onClick={() => setIsTransparencyModalOpen(true)}
+                                className="inline-flex items-center gap-1.5 text-xs text-insani-blue hover:text-blue-700 font-semibold transition-colors group cursor-pointer"
+                            >
+                                <FileText className="w-3.5 h-3.5 text-insani-blue/70 group-hover:scale-110 transition-transform" />
+                                <span className="underline decoration-dotted underline-offset-2">{t('Rincian Penggunaan Dana', 'Rincian Penggunaan Dana')}</span>
+                            </button>
                         </div>
                     </>
                 ) : (
@@ -277,6 +308,16 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                             <span className="bg-slate-100 px-2.5 py-0.5 rounded-full text-xs font-medium text-slate-600">
                                 {t('Donasi Fleksibel')}
                             </span>
+                        </div>
+                        <div className="mt-2.5">
+                            <button
+                                type="button"
+                                onClick={() => setIsTransparencyModalOpen(true)}
+                                className="inline-flex items-center gap-1.5 text-xs text-insani-blue hover:text-blue-700 font-semibold transition-colors group cursor-pointer"
+                            >
+                                <FileText className="w-3.5 h-3.5 text-insani-blue/70 group-hover:scale-110 transition-transform" />
+                                <span className="underline decoration-dotted underline-offset-2">{t('Rincian Penggunaan Dana', 'Rincian Penggunaan Dana')}</span>
+                            </button>
                         </div>
                     </div>
                 )}
@@ -973,6 +1014,152 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                             </Button>
                         </form>
                     )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal Rincian Penggunaan Dana (Transparansi Finansial) */}
+            <Dialog open={isTransparencyModalOpen} onOpenChange={setIsTransparencyModalOpen}>
+                <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto p-6 bg-white rounded-2xl">
+                    <DialogHeader className="text-left pb-2 border-b border-slate-100">
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-9 h-9 rounded-full bg-blue-50 text-insani-blue flex items-center justify-center font-bold shrink-0">
+                                <Receipt className="w-4.5 h-4.5" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-lg font-bold text-slate-900">
+                                    {t('Rincian Penggunaan Dana', 'Rincian Penggunaan Dana')}
+                                </DialogTitle>
+                                <DialogDescription className="text-xs text-slate-500">
+                                    {t('Transparansi penerimaan dan penyaluran dana program secara terbuka & akuntabel.', 'Transparansi penerimaan dan penyaluran dana program secara terbuka & akuntabel.')}
+                                </DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+
+                    <div className="space-y-5 pt-3">
+                        {/* Ringkasan Saldo & Pos Keuangan */}
+                        <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-100 space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('Ringkasan Alokasi')}</span>
+                                <span className="text-[11px] text-slate-400">{t('Update Real-time')}</span>
+                            </div>
+
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between items-center text-slate-700">
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                        {t('Total Donasi Masuk (Gross)')}
+                                    </span>
+                                    <span className="font-bold text-slate-900">
+                                        {formatCurrency(transparency?.total_collected ?? program.collected_amount)}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center text-slate-600 text-xs pl-3.5">
+                                    <span className="flex items-center gap-1 text-slate-500">
+                                        &bull; {t('Biaya Layanan Pembayaran Digital (Payment Gateway)')}
+                                    </span>
+                                    <span className="font-medium text-red-500">
+                                        - {formatCurrency(transparency?.total_gateway_fees ?? 0)}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center text-slate-600 text-xs pl-3.5">
+                                    <span className="flex items-center gap-1 text-slate-500">
+                                        &bull; {t('Biaya Operasional Platform (5% saat pencairan)')}
+                                    </span>
+                                    <span className="font-medium text-red-500">
+                                        - {formatCurrency(transparency?.total_platform_fees ?? 0)}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center text-slate-700 pt-2 border-t border-slate-200">
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                                        {t('Total Dana Telah Dicairkan')}
+                                    </span>
+                                    <span className="font-bold text-amber-600">
+                                        {formatCurrency(transparency?.total_disbursed ?? 0)}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between items-center p-2.5 rounded-lg bg-emerald-50 border border-emerald-100 font-bold text-slate-900 mt-2">
+                                    <span className="text-emerald-800 text-xs sm:text-sm">
+                                        {t('Sisa Saldo Belum Dicairkan')}
+                                    </span>
+                                    <span className="text-emerald-700 text-sm sm:text-base">
+                                        {formatCurrency(transparency?.available_balance ?? 0)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Riwayat Penyaluran yang Telah Ditransfer */}
+                        <div>
+                            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center justify-between">
+                                <span>{t('Riwayat Penyaluran Dana', 'Riwayat Penyaluran Dana')}</span>
+                                <Badge variant="secondary" className="text-[10px] font-semibold bg-slate-100 text-slate-600">
+                                    {transparency?.disbursements?.length || 0} {t('Penyaluran')}
+                                </Badge>
+                            </h4>
+
+                            {(!transparency?.disbursements || transparency.disbursements.length === 0) ? (
+                                <div className="text-center py-6 px-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-500">
+                                    <p className="text-xs">{t('Belum ada riwayat pencairan/penyaluran dana untuk program ini.')}</p>
+                                    <p className="text-[11px] text-slate-400 mt-0.5">{t('Setiap pencairan dan pertanggungjawaban akan dicatat otomatis di sini.')}</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {transparency.disbursements.map((item: any) => (
+                                        <div key={item.id} className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-blue-200 transition-colors">
+                                            <div className="flex justify-between items-start gap-2 mb-1.5">
+                                                <div>
+                                                    <span className="font-mono text-xs font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                                        {item.receipt_number || `#${item.id}`}
+                                                    </span>
+                                                    <span className="text-[11px] text-slate-400 block mt-1">
+                                                        {item.transferred_at ? formatDate(item.transferred_at) : '-'}
+                                                    </span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-xs text-slate-500 block leading-tight">{t('Nominal Disalurkan')}</span>
+                                                    <span className="font-bold text-sm text-emerald-700">
+                                                        {formatCurrency(item.nett_amount)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {item.distribution_plan && (
+                                                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed">
+                                                    <span className="font-semibold text-slate-700 block mb-0.5">{t('Rencana / Keperluan')}:</span>
+                                                    {item.distribution_plan}
+                                                </div>
+                                            )}
+
+                                            {(item.beneficiary_target || item.location) && (
+                                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px] text-slate-500">
+                                                    {item.beneficiary_target && (
+                                                        <span><strong>{t('Target')}:</strong> {item.beneficiary_target}</span>
+                                                    )}
+                                                    {item.location && (
+                                                        <span><strong>{t('Lokasi')}:</strong> {item.location}</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Edukasi Transparansi */}
+                        <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-[11px] text-blue-900/80 leading-relaxed">
+                            <p className="font-semibold text-blue-950 mb-0.5">{t('Komitmen Akuntabilitas Insani Indonesia')}</p>
+                            <p>
+                                {t('Insani menerapkan audit berlapis. Dana hanya dapat dicairkan oleh campaigner terverifikasi dengan rincian penyaluran yang jelas, dan pengajuan berikutnya diwajibkan menyertakan laporan kabar penyaluran yang telah disetujui.')}
+                            </p>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </PublicLayout>

@@ -65,7 +65,7 @@ beforeEach(function () {
     Donation::create([
         'donation_code' => 'DON-1',
         'program_id' => $this->program->id,
-        'amount' => 100000,
+        'amount' => 500000,
         'status' => 'paid',
         'donor_name' => 'Donor',
         'donor_email' => 'a@b.com',
@@ -106,16 +106,24 @@ test('campaigner can view program detail page', function () {
 test('cannot withdraw more than available balance', function () {
     $response = $this->actingAs($this->campaigner)
         ->post(route('akun.programs.disbursements.store', $this->program->id), [
-            'requested_amount' => 150000, // Available is 100000
+            'requested_amount' => 600000, // Available is 500000
+            'distribution_plan' => 'Penyaluran sembako',
+            'beneficiary_target' => '50 KK',
+            'location' => 'Bandung',
+            'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
         ]);
 
     $response->assertSessionHasErrors('requested_amount');
 });
 
-test('cannot withdraw less than 10000', function () {
+test('cannot withdraw less than 150000', function () {
     $response = $this->actingAs($this->campaigner)
         ->post(route('akun.programs.disbursements.store', $this->program->id), [
-            'requested_amount' => 5000,
+            'requested_amount' => 50000,
+            'distribution_plan' => 'Penyaluran sembako',
+            'beneficiary_target' => '50 KK',
+            'location' => 'Bandung',
+            'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
         ]);
 
     $response->assertSessionHasErrors('requested_amount');
@@ -124,7 +132,11 @@ test('cannot withdraw less than 10000', function () {
 test('can withdraw valid amount and fee is calculated', function () {
     $response = $this->actingAs($this->campaigner)
         ->post(route('akun.programs.disbursements.store', $this->program->id), [
-            'requested_amount' => 50000,
+            'requested_amount' => 200000,
+            'distribution_plan' => 'Penyaluran sembako dhuafa',
+            'beneficiary_target' => '50 KK lansia',
+            'location' => 'Bandung Barat',
+            'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
         ]);
 
     $response->assertRedirect();
@@ -132,12 +144,86 @@ test('can withdraw valid amount and fee is calculated', function () {
 
     $this->assertDatabaseHas('disbursements', [
         'program_id' => $this->program->id,
-        'requested_amount' => 50000,
+        'requested_amount' => 200000,
         'platform_fee_percent' => 5.0,
-        'platform_fee_amount' => 2500, // 5% of 50000
-        'nett_amount' => 47500,
+        'platform_fee_amount' => 10000, // 5% of 200000
+        'bank_fee' => 2500,
+        'nett_amount' => 187500, // 200000 - 10000 - 2500
+        'distribution_plan' => 'Penyaluran sembako dhuafa',
+        'beneficiary_target' => '50 KK lansia',
+        'location' => 'Bandung Barat',
         'status' => 'pending',
     ]);
+});
+
+test('gating prevents second withdrawal until previous disbursement report is approved', function () {
+    // 1. Create a transferred disbursement
+    $disbursement = Disbursement::create([
+        'program_id' => $this->program->id,
+        'requested_amount' => 150000,
+        'bank_name' => 'Bank Mandiri',
+        'bank_account_number' => '1234',
+        'bank_account_name' => 'Test',
+        'platform_fee_percent' => 5.0,
+        'platform_fee_amount' => 7500,
+        'bank_fee' => 2500,
+        'nett_amount' => 140000,
+        'status' => 'transferred',
+        'transferred_at' => now()->subDays(2),
+    ]);
+
+    // Try second withdrawal before any update is created -> should fail with gating error
+    $response = $this->actingAs($this->campaigner)
+        ->post(route('akun.programs.disbursements.store', $this->program->id), [
+            'requested_amount' => 150000,
+            'distribution_plan' => 'Tahap kedua',
+            'beneficiary_target' => '30 KK',
+            'location' => 'Bandung',
+            'estimated_distribution_date' => now()->addDays(2)->format('Y-m-d'),
+        ]);
+
+    $response->assertSessionHasErrors('gating');
+
+    // Create an update but still pending -> should still fail
+    $update = \App\Models\ProgramUpdate::create([
+        'program_id' => $this->program->id,
+        'disbursement_id' => $disbursement->id,
+        'title' => 'Laporan Penyaluran Tahap 1',
+        'content' => 'Dana telah disalurkan dengan baik.',
+        'created_by' => $this->campaigner->id,
+        'is_published' => false,
+        'moderation_status' => 'pending',
+    ]);
+
+    $response2 = $this->actingAs($this->campaigner)
+        ->post(route('akun.programs.disbursements.store', $this->program->id), [
+            'requested_amount' => 150000,
+            'distribution_plan' => 'Tahap kedua',
+            'beneficiary_target' => '30 KK',
+            'location' => 'Bandung',
+            'estimated_distribution_date' => now()->addDays(2)->format('Y-m-d'),
+        ]);
+
+    $response2->assertSessionHasErrors('gating');
+
+    // Admin approves the update
+    $update->update([
+        'moderation_status' => 'approved',
+        'is_published' => true,
+    ]);
+
+    // Now second withdrawal should succeed!
+    $response3 = $this->actingAs($this->campaigner)
+        ->post(route('akun.programs.disbursements.store', $this->program->id), [
+            'requested_amount' => 150000,
+            'distribution_plan' => 'Tahap kedua',
+            'beneficiary_target' => '30 KK',
+            'location' => 'Bandung',
+            'estimated_distribution_date' => now()->addDays(2)->format('Y-m-d'),
+        ]);
+
+    $response3->assertRedirect();
+    $response3->assertSessionHas('success');
 });
 
 test('admin keuangan can approve and transfer disbursement', function () {
@@ -153,13 +239,14 @@ test('admin keuangan can approve and transfer disbursement', function () {
 
     $disbursement = Disbursement::create([
         'program_id' => $this->program->id,
-        'requested_amount' => 50000,
+        'requested_amount' => 150000,
         'bank_name' => 'Bank Mandiri',
         'bank_account_number' => '1234',
         'bank_account_name' => 'Test',
-        'platform_fee_percent' => 0,
-        'platform_fee_amount' => 0,
-        'nett_amount' => 50000,
+        'platform_fee_percent' => 5.0,
+        'platform_fee_amount' => 7500,
+        'bank_fee' => 2500,
+        'nett_amount' => 140000,
         'status' => 'pending',
     ]);
 
@@ -186,6 +273,8 @@ test('admin keuangan can approve and transfer disbursement', function () {
     $response2->assertRedirect();
     $this->assertEquals('transferred', $disbursement->fresh()->status);
     $this->assertNotNull($disbursement->fresh()->transfer_proof);
+    $this->assertNotNull($disbursement->fresh()->receipt_number);
+    $this->assertStringStartsWith('KW-DISB-', $disbursement->fresh()->receipt_number);
 });
 
 test('admin with permission can list disbursements and filter by status', function () {

@@ -332,5 +332,53 @@ test('it successfully processes SETTLED webhook and updates payment channel and 
         ->and($payment->paid_at)->not->toBeNull()
         ->and($payment->payment_method)->toBe('ewallet')
         ->and($payment->payment_channel)->toBe('SHOPEEPAY')
-        ->and($donation->status)->toBe('paid');
+        ->and($donation->status)->toBe('paid')
+        ->and((float) $payment->gateway_fee)->toBeGreaterThan(0);
+});
+
+test('webhook saves explicit fees from payload and updates program available balance correctly', function () {
+    $program = Program::factory()->create([
+        'target_amount' => 1000000,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-FEE-TEST',
+        'amount' => 100000,
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::factory()->create([
+        'donation_id' => $donation->id,
+        'gateway' => 'xendit',
+        'gateway_reference_id' => 'DON-FEE-TEST',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $payload = [
+        'external_id' => 'DON-FEE-TEST',
+        'status' => 'PAID',
+        'amount' => 100000,
+        'paid_amount' => 100000,
+        'fees' => [
+            ['type' => 'admin', 'value' => 4440],
+        ],
+    ];
+
+    $response = $this->withHeaders([
+        'x-callback-token' => 'test-webhook-token',
+    ])->postJson(route('webhooks.xendit'), $payload);
+
+    $response->assertOk();
+
+    $payment->refresh();
+    $donation->refresh();
+    $program->refresh();
+
+    expect((float) $payment->gateway_fee)->toBe(4440.0)
+        ->and($donation->status)->toBe('paid')
+        ->and((float) $program->total_collected_amount)->toBe(100000.0)
+        ->and((float) $program->total_gateway_fees)->toBe(4440.0)
+        ->and((float) $program->net_collected_amount)->toBe(95560.0)
+        ->and((float) $program->available_balance)->toBe(95560.0);
 });

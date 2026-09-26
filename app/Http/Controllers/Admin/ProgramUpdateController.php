@@ -148,6 +148,31 @@ class ProgramUpdateController extends Controller
     }
 
     /**
+     * Update the moderation status of a program update.
+     */
+    public function updateModeration(Request $request, Program $program, ProgramUpdate $update): RedirectResponse
+    {
+        if ($update->program_id !== $program->id) {
+            abort(404);
+        }
+
+        abort_unless(auth()->user()->can('program.update') || auth()->user()->hasRole('Administrator'), 403);
+
+        $validated = $request->validate([
+            'moderation_status' => 'required|in:approved,rejected,pending',
+            'rejection_reason' => 'required_if:moderation_status,rejected|nullable|string|max:1000',
+        ]);
+
+        $update->update([
+            'moderation_status' => $validated['moderation_status'],
+            'rejection_reason' => $validated['moderation_status'] === 'rejected' ? $validated['rejection_reason'] : null,
+            'is_published' => $validated['moderation_status'] === 'approved',
+        ]);
+
+        return back()->with('success', 'Status moderasi laporan kabar terbaru berhasil diperbarui.');
+    }
+
+    /**
      * Authorize that the authenticated user is the creator of this program.
      */
     protected function authorizeCreator(Program $program): void

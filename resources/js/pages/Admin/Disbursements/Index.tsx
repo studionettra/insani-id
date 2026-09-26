@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Download, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Eye, Download, CheckCircle, Clock, AlertCircle, Receipt } from 'lucide-react';
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,9 @@ export default function Index({ disbursements, filters }: any) {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'pending':
-                return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1"/> Menunggu</Badge>;
+                return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1"/> Menunggu Review</Badge>;
             case 'approved':
-                return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200"><CheckCircle className="w-3 h-3 mr-1"/> Disetujui</Badge>;
+                return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200"><CheckCircle className="w-3 h-3 mr-1"/> Siap Transfer</Badge>;
             case 'transferred':
                 return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200"><Download className="w-3 h-3 mr-1"/> Ditransfer</Badge>;
             case 'rejected':
@@ -34,14 +34,14 @@ export default function Index({ disbursements, filters }: any) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Penyaluran Dana</h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola permohonan pencairan dana dari campaigner.</p>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Penyaluran Dana (Disbursements)</h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola permohonan pencairan dana, validasi transfer BI-Fast, dan terbitkan kuitansi resmi.</p>
                     </div>
                 </div>
 
                 <Tabs defaultValue={filters.status || 'pending'} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                        <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Menunggu</TabsTrigger>
+                        <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Menunggu Review</TabsTrigger>
                         <TabsTrigger value="approved" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Disetujui (Siap Transfer)</TabsTrigger>
                         <TabsTrigger value="transferred" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditransfer</TabsTrigger>
                         <TabsTrigger value="rejected" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditolak</TabsTrigger>
@@ -54,9 +54,9 @@ export default function Index({ disbursements, filters }: any) {
                         <table className="w-full text-sm text-left">
                             <thead className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                                 <tr>
-                                    <th className="px-6 py-4 font-medium">Tgl Pengajuan</th>
-                                    <th className="px-6 py-4 font-medium">Program</th>
-                                    <th className="px-6 py-4 font-medium">Nominal Pengajuan</th>
+                                    <th className="px-6 py-4 font-medium">Tgl / No Kuitansi</th>
+                                    <th className="px-6 py-4 font-medium">Program & Rekening Tujuan</th>
+                                    <th className="px-6 py-4 font-medium">Rincian Nominal</th>
                                     <th className="px-6 py-4 font-medium">Status</th>
                                     <th className="px-6 py-4 font-medium text-right">Aksi</th>
                                 </tr>
@@ -71,12 +71,36 @@ export default function Index({ disbursements, filters }: any) {
                                 ) : (
                                     disbursements.data.map((item: any) => (
                                         <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800 transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50">
-                                            <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{formatDate(item.created_at)}</td>
-                                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{item.program?.title}</td>
-                                            <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">{formatRupiah(item.requested_amount)}</td>
+                                            <td className="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                                <div className="font-medium text-gray-900 dark:text-white">{formatDate(item.created_at)}</div>
+                                                {item.receipt_number ? (
+                                                    <span className="font-mono text-xs text-purple-600 font-semibold">{item.receipt_number}</span>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">ID #{item.id}</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                <div className="line-clamp-1 max-w-xs">{item.program?.title}</div>
+                                                <div className="text-xs text-gray-500 mt-0.5">
+                                                    {item.bank_name} &bull; <span className="font-mono">{item.bank_account_number}</span> ({item.bank_account_name})
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="font-bold text-gray-900 dark:text-white">{formatRupiah(item.requested_amount)}</div>
+                                                <div className="text-xs text-emerald-600 font-medium">
+                                                    Bersih: {formatRupiah(item.nett_amount)}
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4">{getStatusBadge(item.status)}</td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end">
+                                                <div className="flex justify-end gap-1.5">
+                                                    {item.status === 'transferred' && (
+                                                        <Button variant="ghost" size="sm" asChild className="h-8 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50">
+                                                            <Link href={`/admin/disbursements/${item.id}/receipt`} target="_blank" title="Cetak Kuitansi">
+                                                                <Receipt className="w-4 h-4" />
+                                                            </Link>
+                                                        </Button>
+                                                    )}
                                                     <Button variant="outline" size="sm" asChild className="border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 h-8 shadow-none">
                                                         <Link href={admin.disbursements.show(item.id).url}>
                                                             <Eye className="w-4 h-4 mr-1.5" /> Detail
@@ -107,9 +131,7 @@ export default function Index({ disbursements, filters }: any) {
                     </div>
                 )}
             </div>
-        
         </>
-        
     );
 }
 
