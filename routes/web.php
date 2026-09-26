@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\DisbursementController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FinancialReportController as AdminFinancialReportController;
+use App\Http\Controllers\Admin\FocusProgramController as AdminFocusProgramController;
 use App\Http\Controllers\Admin\FundraiserController as AdminFundraiserController;
 use App\Http\Controllers\Admin\HomepageBannerController;
 use App\Http\Controllers\Admin\ImpactStatController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PopupMessageController;
 use App\Http\Controllers\Admin\ProgramController;
+use App\Http\Controllers\Admin\ProgramUpdateController as AdminProgramUpdateController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\TestimonialController;
@@ -36,7 +38,6 @@ use App\Http\Controllers\Public\CampaignerProgramController;
 use App\Http\Controllers\Public\CampaignerProgramUpdateController;
 use App\Http\Controllers\Public\CampaignerRegistrationController;
 use App\Http\Controllers\Public\CampaignerSlotRequestController;
-use App\Http\Controllers\Public\CommentController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\DonationController;
 use App\Http\Controllers\Public\DonationReceiptController;
@@ -195,6 +196,8 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('permission:category.view')->group(function () {
             Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit']);
             Route::patch('categories/{category}/pillar', [CategoryController::class, 'updatePillar'])->name('categories.update-pillar');
+            Route::resource('focus-programs', AdminFocusProgramController::class)->parameters(['focus-programs' => 'category'])->except(['create', 'show', 'destroy']);
+            Route::patch('focus-programs/{category}/toggle-status', [AdminFocusProgramController::class, 'toggleStatus'])->name('focus-programs.toggle-status');
         });
 
         Route::middleware('permission:manage_pages')->group(function () {
@@ -265,6 +268,8 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('permission:program.view')->group(function () {
             Route::resource('programs', ProgramController::class);
             Route::put('/programs/{id}/status', [ProgramController::class, 'updateStatus'])->name('programs.update-status');
+            Route::post('/programs/{id}/translate', [ProgramController::class, 'translate'])->name('programs.translate');
+            Route::resource('programs.updates', AdminProgramUpdateController::class)->only(['index', 'store', 'update', 'destroy']);
         });
 
         Route::middleware('permission:disbursement.view')->group(function () {
@@ -292,10 +297,6 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::post('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
         });
     });
-
-    Route::post('/programs/{program}/comments', [CommentController::class, 'store'])
-        ->middleware('throttle:10,1')
-        ->name('programs.comments.store');
 
     Route::middleware('auth')->group(function () {
         Route::post('/upload-image', [ImageUploadController::class, 'upload'])->name('upload.image.root');

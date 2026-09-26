@@ -22,6 +22,7 @@ import {
   MessageSquareQuote,
   Sparkles,
   Bell,
+  Compass,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -127,16 +128,30 @@ const AppSidebar: React.FC = () => {
           name: "Fundraiser Saya",
           path: "/akun/fundraiser",
         },
-        ...((permissions.includes('category.view') || isSuperadmin) ? [{
-          icon: <Layers className="w-5 h-5" />,
-          name: "Kategori Program",
-          path: "/admin/categories",
-        }] : []),
-        ...((permissions.includes('campaigner.view') || permissions.includes('campaigner.verify') || isSuperadmin) ? [{
-          icon: <BadgeCheck className="w-5 h-5" />,
-          name: "Verifikasi Campaigner",
-          path: "/admin/campaigners",
-        }] : []),
+        ...((permissions.includes('category.view') || isSuperadmin) ? [
+          {
+            icon: <Layers className="w-5 h-5" />,
+            name: "Kategori Program",
+            path: "/admin/categories",
+          },
+          {
+            icon: <Compass className="w-5 h-5" />,
+            name: "Fokus Program",
+            path: "/admin/focus-programs",
+          },
+        ] : []),
+        ...((permissions.includes('campaigner.view') || permissions.includes('campaigner.verify') || isSuperadmin) ? [
+          {
+            icon: <BadgeCheck className="w-5 h-5" />,
+            name: "Verifikasi Campaigner",
+            path: "/admin/campaigners",
+          },
+          {
+            icon: <Layers className="w-5 h-5" />,
+            name: "Pengajuan Slot Lembaga",
+            path: "/admin/slot-requests",
+          },
+        ] : []),
         ...((permissions.includes('fundraiser.view') || isSuperadmin) ? [{
           icon: <Megaphone className="w-5 h-5" />,
           name: "Relawan Fundraiser",
@@ -223,7 +238,7 @@ const AppSidebar: React.FC = () => {
         ...(() => {
           const profileSubItems: SubNavItem[] = [
             ...((permissions.includes('manage_management') || isSuperadmin) ? [{
-              name: "Dewan Pengurus",
+              name: "Tim Manajemen",
               path: "/admin/management-members",
             }] : []),
             ...((permissions.includes('manage_legal_documents') || permissions.includes('manage_pages') || isSuperadmin) ? [{

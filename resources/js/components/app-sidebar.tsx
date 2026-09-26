@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Activity, BookOpen, FileCheck, FileText, FolderGit2, LayoutGrid, Sparkles, Users } from 'lucide-react';
+import { Activity, BookOpen, Compass, FileCheck, FileText, FolderGit2, LayoutGrid, Sparkles, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -47,11 +47,18 @@ export function AppSidebar() {
             href: '/akun/programs',
             icon: LayoutGrid,
         }] : []),
-        ...(permissions.includes('category.view') ? [{
-            title: 'Kategori',
-            href: '/admin/categories',
-            icon: LayoutGrid,
-        }] : []),
+        ...(permissions.includes('category.view') ? [
+            {
+                title: 'Kategori',
+                href: '/admin/categories',
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Fokus Program',
+                href: '/admin/focus-programs',
+                icon: Compass,
+            },
+        ] : []),
         ...(permissions.includes('campaigner.view') ? [{
             title: 'Verifikasi Campaigner',
             href: '/admin/campaigners',
