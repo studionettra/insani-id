@@ -1,38 +1,47 @@
 <?php
 
-namespace App\Http\Controllers\Public;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Program;
 use App\Models\ProgramUpdate;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 use Mews\Purifier\Facades\Purifier;
 
-class CampaignerProgramUpdateController extends Controller
+class ProgramUpdateController extends Controller
 {
-    public function index(Program $program)
+    /**
+     * Display a listing of updates for a program.
+     */
+    public function index(Program $program): Response
     {
-        $profileId = auth()->user()->campaignerProfile?->id;
-
-        if (! $profileId || $program->campaigner_profile_id !== $profileId) {
-            abort(403, 'Unauthorized.');
-        }
+        $this->authorizeCreator($program);
 
         $updates = $program->updates()->latest()->paginate(10);
 
-        return inertia('Public/Akun/Program/Updates', [
-            'program' => $program,
+        return Inertia::render('Admin/Programs/Updates', [
+            'program' => [
+                'id' => $program->id,
+                'title' => $program->title,
+                'slug' => $program->slug,
+                'program_code' => $program->program_code,
+                'cover_image' => $program->cover_image,
+                'status' => $program->status,
+                'created_by' => $program->created_by,
+            ],
             'updates' => $updates,
         ]);
     }
 
-    public function store(Request $request, Program $program)
+    /**
+     * Store a newly created update for the program.
+     */
+    public function store(Request $request, Program $program): RedirectResponse
     {
-        $profileId = auth()->user()->campaignerProfile?->id;
-
-        if (! $profileId || $program->campaigner_profile_id !== $profileId) {
-            abort(403, 'Unauthorized.');
-        }
+        $this->authorizeCreator($program);
 
         if (is_string($request->input('title'))) {
             $request->merge(['title' => ['id' => $request->input('title')]]);
@@ -73,12 +82,15 @@ class CampaignerProgramUpdateController extends Controller
         return back()->with('success', 'Kabar terbaru berhasil ditambahkan.');
     }
 
-    public function update(Request $request, Program $program, ProgramUpdate $update)
+    /**
+     * Update the specified update in storage.
+     */
+    public function update(Request $request, Program $program, ProgramUpdate $update): RedirectResponse
     {
-        $profileId = auth()->user()->campaignerProfile?->id;
+        $this->authorizeCreator($program);
 
-        if (! $profileId || $program->campaigner_profile_id !== $profileId || $update->program_id !== $program->id) {
-            abort(403, 'Unauthorized.');
+        if ($update->program_id !== $program->id) {
+            abort(404);
         }
 
         if (is_string($request->input('title'))) {
@@ -119,16 +131,29 @@ class CampaignerProgramUpdateController extends Controller
         return back()->with('success', 'Kabar terbaru berhasil diperbarui.');
     }
 
-    public function destroy(Program $program, ProgramUpdate $update)
+    /**
+     * Remove the specified update from storage.
+     */
+    public function destroy(Program $program, ProgramUpdate $update): RedirectResponse
     {
-        $profileId = auth()->user()->campaignerProfile?->id;
+        $this->authorizeCreator($program);
 
-        if (! $profileId || $program->campaigner_profile_id !== $profileId || $update->program_id !== $program->id) {
-            abort(403, 'Unauthorized.');
+        if ($update->program_id !== $program->id) {
+            abort(404);
         }
 
         $update->delete();
 
         return back()->with('success', 'Kabar terbaru berhasil dihapus.');
+    }
+
+    /**
+     * Authorize that the authenticated user is the creator of this program.
+     */
+    protected function authorizeCreator(Program $program): void
+    {
+        if ((int) $program->created_by !== (int) auth()->id()) {
+            abort(403, 'Akses Ditolak: Anda hanya memiliki hak untuk mengelola kabar pada program yang Anda buat sendiri.');
+        }
     }
 }

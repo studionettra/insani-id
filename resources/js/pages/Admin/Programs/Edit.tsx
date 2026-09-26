@@ -3,6 +3,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -150,14 +151,15 @@ export default function ProgramEdit({ categories, program }: Props) {
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                    <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                            Informasi Program Utama
-                        </h3>
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div className="lg:col-span-8 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+                        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                                Informasi Program Utama
+                            </h3>
+                        </div>
 
-                    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
                         <AutoTranslateBar
                             activeLocale={contentLocale}
                             onLocaleChange={setContentLocale}
@@ -315,7 +317,20 @@ export default function ProgramEdit({ categories, program }: Props) {
                         </div>
                     </form>
                 </div>
+
+                {/* Sidebar Column (4 cols) */}
+                <div className="lg:col-span-4 space-y-6">
+                    <TranslationStatusCard
+                        hasId={Boolean(titles.id)}
+                        hasEn={Boolean(titles.en && stories.en)}
+                        hasAr={Boolean(titles.ar && stories.ar)}
+                        onTranslate={handleAutoTranslate}
+                        isTranslating={isTranslating}
+                        description="Status kelengkapan judul dan cerita program galang dana dalam 3 bahasa."
+                    />
+                </div>
             </div>
+        </div>
         
         </>
         

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\TranslateProgramJob;
 use App\Models\Category;
 use App\Models\Program;
 use App\Notifications\ProgramStatusUpdatedNotification;
@@ -19,18 +20,64 @@ class ProgramController extends Controller
      */
     public function index(Request $request)
     {
+        $type = $request->input('type', 'semua');
         $status = $request->input('status', 'semua');
+        $search = $request->input('search');
+        $categoryId = $request->input('category_id');
+
         $query = Program::with(['category', 'creator', 'campaignerProfile'])->orderBy('created_at', 'desc');
+
+        if ($type !== 'semua') {
+            $query->where('campaigner_type', $type);
+        }
 
         if ($status !== 'semua') {
             $query->where('status', $status);
         }
 
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('program_code', 'like', "%{$search}%")
+                    ->orWhere('title->id', 'like', "%{$search}%")
+                    ->orWhere('title->en', 'like', "%{$search}%")
+                    ->orWhereHas('creator', function ($creatorQuery) use ($search) {
+                        $creatorQuery->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('campaignerProfile', function ($profileQuery) use ($search) {
+                        $profileQuery->where('nama_lembaga', 'like', "%{$search}%");
+                    });
+            });
+        }
+
         $programs = $query->paginate(10)->withQueryString();
+
+        $counts = [
+            'all' => Program::count(),
+            'internal' => Program::where('campaigner_type', 'internal')->count(),
+            'lembaga' => Program::where('campaigner_type', 'lembaga')->count(),
+            'individu' => Program::where('campaigner_type', 'individu')->count(),
+            'pending_verification' => Program::where('status', 'pending_verification')->count(),
+            'pending_in_tab' => $type !== 'semua'
+                ? Program::where('campaigner_type', $type)->where('status', 'pending_verification')->count()
+                : Program::where('status', 'pending_verification')->count(),
+        ];
+
+        $categories = Category::where('is_active', true)->select('id', 'name')->get();
 
         return Inertia::render('Admin/Programs/Index', [
             'programs' => $programs,
-            'filters' => ['status' => $status],
+            'filters' => [
+                'type' => $type,
+                'status' => $status,
+                'search' => $search,
+                'category_id' => $categoryId ? (string) $categoryId : null,
+            ],
+            'counts' => $counts,
+            'categories' => $categories,
         ]);
     }
 
@@ -109,10 +156,13 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        $program = Program::with(['category', 'creator', 'campaignerProfile', 'galleries', 'documents'])->findOrFail($id);
+        $program = Program::with(['category', 'creator', 'campaignerProfile', 'galleries', 'documents', 'updates' => fn ($q) => $q->latest()])->findOrFail($id);
 
         return Inertia::render('Admin/Programs/Show', [
-            'program' => $program,
+            'program' => array_merge($program->toArray(), [
+                'title_translations' => $program->getTranslations('title'),
+                'story_translations' => $program->getTranslations('story'),
+            ]),
         ]);
     }
 
@@ -233,6 +283,10 @@ class ProgramController extends Controller
 
         $program->save();
 
+        if ($request->status === 'published') {
+            TranslateProgramJob::dispatch($program);
+        }
+
         if ($program->creator) {
             rescue(fn () => $program->creator->notify(
                 new ProgramStatusUpdatedNotification($program, $request->status, $request->rejection_notes)
@@ -240,5 +294,17 @@ class ProgramController extends Controller
         }
 
         return redirect()->back()->with('success', 'Status program berhasil diperbarui.');
+    }
+
+    /**
+     * Trigger auto-translation for a program.
+     */
+    public function translate(string $id)
+    {
+        $program = Program::findOrFail($id);
+
+        TranslateProgramJob::dispatch($program, true);
+
+        return redirect()->back()->with('success', 'Penerjemahan program ke Bahasa Inggris dan Arab telah dimasukkan ke dalam antrean.');
     }
 }

@@ -3,6 +3,7 @@ import { ArrowLeft, Save } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -134,14 +135,15 @@ export default function ProgramCreate({ categories }: Props) {
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                    <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                            Informasi Program Utama
-                        </h3>
-                    </div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div className="lg:col-span-8 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+                        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                                Informasi Program Utama
+                            </h3>
+                        </div>
 
-                    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
                         <Alert className="bg-blue-50/50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border-blue-200/60 dark:border-blue-900 mb-6">
                             <AlertDescription>
                                 Program yang dibuat oleh Admin/Program Officer akan langsung berstatus <strong>Aktif</strong> tanpa melalui antrian verifikasi.
@@ -308,7 +310,20 @@ export default function ProgramCreate({ categories }: Props) {
                         </div>
                     </form>
                 </div>
+
+                {/* Sidebar Column (4 cols) */}
+                <div className="lg:col-span-4 space-y-6">
+                    <TranslationStatusCard
+                        hasId={Boolean(titles.id)}
+                        hasEn={Boolean(titles.en && stories.en)}
+                        hasAr={Boolean(titles.ar && stories.ar)}
+                        onTranslate={handleAutoTranslate}
+                        isTranslating={isTranslating}
+                        description="Status kelengkapan judul dan cerita program galang dana dalam 3 bahasa."
+                    />
+                </div>
             </div>
+        </div>
         
         </>
         

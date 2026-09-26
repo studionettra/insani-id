@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\HasTranslations;
 
 class ProgramUpdate extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     protected $fillable = [
         'program_id',
@@ -17,9 +18,29 @@ class ProgramUpdate extends Model
         'is_published',
     ];
 
+    public $translatable = [
+        'title',
+        'content',
+    ];
+
     protected $casts = [
         'is_published' => 'boolean',
     ];
+
+    protected $appends = [
+        'title_translations',
+        'content_translations',
+    ];
+
+    public function getTitleTranslationsAttribute(): array
+    {
+        return $this->getTranslations('title');
+    }
+
+    public function getContentTranslationsAttribute(): array
+    {
+        return $this->getTranslations('content');
+    }
 
     public function program()
     {
