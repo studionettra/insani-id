@@ -9,10 +9,12 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import useTranslation from '@/hooks/use-translation';
+import { renderStatIcon } from '@/components/ui/icon-picker';
 
 interface Category {
     id: number;
     name: { id: string };
+    icon?: string | null;
 }
 
 interface Program {
@@ -105,7 +107,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                         <div className="w-full flex flex-wrap justify-center gap-3 z-10">
                             <button 
                                 onClick={() => handleFilterChange('category', '')}
-                                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                className={`inline-flex items-center justify-center px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
                                     !filters.category 
                                         ? 'bg-insani-blue text-white shadow-md shadow-insani-blue/30 scale-100' 
                                         : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
@@ -117,13 +119,16 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                 <button 
                                     key={cat.id}
                                     onClick={() => handleFilterChange('category', cat.id.toString())}
-                                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                                    className={`inline-flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
                                         filters.category == cat.id.toString() 
                                             ? 'bg-insani-blue text-white shadow-md shadow-insani-blue/30 scale-100' 
                                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
                                     }`}
                                 >
-                                    {t(getLocalizedValue(cat.name, locale))}
+                                    {cat.icon && (
+                                        <span className="shrink-0">{renderStatIcon(cat.icon, "w-4 h-4 text-current")}</span>
+                                    )}
+                                    <span>{t(getLocalizedValue(cat.name, locale))}</span>
                                 </button>
                             ))}
                         </div>

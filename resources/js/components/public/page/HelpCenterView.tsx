@@ -153,21 +153,21 @@ const FAQ_DATA: FaqItem[] = [
         )
     },
     {
-        id: 'apa-itu-kyc',
+        id: 'apa-itu-verifikasi',
         category: 'campaigner',
-        question: 'Apa itu KYC dan mengapa saya perlu melakukannya sebelum bisa menggalang dana?',
-        keywords: ['kyc', 'know your customer', 'apa itu kyc', 'verifikasi identitas', 'kenapa kyc', 'wajib kyc'],
+        question: 'Apa itu Verifikasi Akun dan mengapa saya perlu melakukannya sebelum bisa menggalang dana?',
+        keywords: ['verifikasi akun', 'verifikasi identitas', 'kenapa verifikasi', 'wajib verifikasi'],
         answer: (
             <div className="space-y-2 text-slate-600">
-                <p><strong>KYC</strong> adalah singkatan dari <strong>Know Your Customer</strong> (Kenali Pelanggan Anda), yaitu proses verifikasi identitas yang wajib dijalani oleh calon campaigner sebelum diizinkan membuat program penggalangan dana dan menerima pencairan dana.</p>
-                <p>KYC diterapkan oleh Insani Indonesia karena beberapa alasan penting:</p>
+                <p><strong>Verifikasi Akun</strong> adalah proses pemeriksaan identitas yang wajib dijalani oleh calon campaigner sebelum diizinkan membuat program penggalangan dana dan menerima pencairan dana.</p>
+                <p>Verifikasi Akun diterapkan oleh Insani Indonesia karena beberapa alasan penting:</p>
                 <ul className="list-disc pl-5 space-y-1.5">
                     <li><strong>Melindungi Donatur:</strong> Memastikan setiap program digalang oleh individu atau lembaga yang identitasnya sudah terverifikasi nyata, bukan fiktif.</li>
                     <li><strong>Kepatuhan Hukum:</strong> Proses ini diwajibkan oleh regulasi perbankan dan pemerintah (PPATK) untuk mencegah penyalahgunaan dana.</li>
-                    <li><strong>Keamanan Pencairan Dana:</strong> Dana donasi hanya dapat dicairkan ke rekening bank atas nama yang sudah lolos verifikasi KYC, sehingga amanah donatur terjaga.</li>
+                    <li><strong>Keamanan Pencairan Dana:</strong> Dana donasi hanya dapat dicairkan ke rekening bank atas nama yang sudah lolos verifikasi akun, sehingga amanah donatur terjaga.</li>
                 </ul>
                 <p className="text-xs bg-amber-50 border border-amber-100 rounded-xl p-3 text-amber-700">
-                    <strong>Catatan:</strong> KYC hanya berlaku untuk Campaigner. Jika Anda hanya ingin membantu menyebarkan program orang lain tanpa membuat program sendiri, Anda cukup mendaftar akun biasa dan langsung bisa menjadi <strong>Fundraiser</strong> tanpa KYC.
+                    <strong>Catatan:</strong> Verifikasi Akun hanya berlaku untuk Campaigner. Jika Anda hanya ingin membantu menyebarkan program orang lain tanpa membuat program sendiri, Anda cukup mendaftar akun biasa dan langsung bisa menjadi <strong>Fundraiser</strong> tanpa perlu verifikasi identitas.
                 </p>
             </div>
         )
@@ -185,7 +185,7 @@ const FAQ_DATA: FaqItem[] = [
                         <p className="font-bold text-slate-800 mb-2 flex items-center gap-1.5">🚀 Campaigner</p>
                         <ul className="list-disc pl-4 text-xs space-y-1 text-slate-600">
                             <li><strong>Membuat & mengelola</strong> program penggalangan dana sendiri.</li>
-                            <li>Wajib melewati proses <strong>verifikasi KYC</strong> (upload dokumen identitas).</li>
+                            <li>Wajib melewati proses <strong>verifikasi akun</strong> (upload dokumen identitas).</li>
                             <li>Bertanggung jawab atas <strong>penyaluran dana</strong> ke penerima manfaat.</li>
                             <li>Wajib posting <strong>Kabar Terbaru</strong> sebagai laporan pertanggungjawaban.</li>
                         </ul>
@@ -194,7 +194,7 @@ const FAQ_DATA: FaqItem[] = [
                         <p className="font-bold text-slate-800 mb-2 flex items-center gap-1.5">✨ Fundraiser</p>
                         <ul className="list-disc pl-4 text-xs space-y-1 text-slate-600">
                             <li><strong>Membantu menyebarkan</strong> program milik campaigner lain.</li>
-                            <li><strong>Tidak perlu KYC</strong> — cukup daftar akun biasa.</li>
+                            <li><strong>Tidak perlu verifikasi akun</strong> — cukup daftar akun biasa.</li>
                             <li>Membuat <strong>tautan referral unik</strong> untuk dilacak kontribusinya.</li>
                             <li>Pantau statistik donasi yang berhasil dihimpun lewat dasbor pribadi.</li>
                         </ul>
@@ -204,14 +204,14 @@ const FAQ_DATA: FaqItem[] = [
         )
     },
     {
-        id: 'syarat-kyc-campaigner',
+        id: 'syarat-verifikasi-campaigner',
         category: 'campaigner',
-        question: 'Apa perbedaan syarat verifikasi Campaigner Individu vs Lembaga/Yayasan (KYC)?',
-        keywords: ['kyc', 'verifikasi', 'syarat campaigner', 'dokumen kyc', 'ktp', 'sk kemenkumham', 'npwp'],
+        question: 'Apa perbedaan syarat verifikasi Campaigner Individu vs Lembaga/Yayasan?',
+        keywords: ['verifikasi', 'syarat campaigner', 'dokumen verifikasi', 'ktp', 'sk kemenkumham', 'npwp'],
         answer: (
             <div className="space-y-3 text-slate-600">
-                <p><strong>KYC (Know Your Customer)</strong> adalah proses verifikasi identitas standar perbankan dan industri keuangan digital untuk memastikan keaslian data calon campaigner sebelum diizinkan membuat program dan menerima dana donasi.</p>
-                <p>Seluruh calon campaigner wajib lolos KYC di halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>. Dokumen yang dibutuhkan berbeda berdasarkan tipe campaigner:</p>
+                <p><strong>Verifikasi Akun</strong> adalah proses verifikasi identitas standar perbankan dan industri keuangan digital untuk memastikan keaslian data calon campaigner sebelum diizinkan membuat program dan menerima dana donasi.</p>
+                <p>Seluruh calon campaigner wajib lolos verifikasi di halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>. Dokumen yang dibutuhkan berbeda berdasarkan tipe campaigner:</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <p className="font-bold text-slate-800 mb-1">Campaigner Individu:</p>
@@ -236,13 +236,13 @@ const FAQ_DATA: FaqItem[] = [
         )
     },
     {
-        id: 'lama-verifikasi-kyc',
+        id: 'lama-verifikasi-akun',
         category: 'campaigner',
-        question: 'Berapa lama proses verifikasi akun Campaigner (KYC)?',
-        keywords: ['lama verifikasi', 'durasi kyc', 'review kyc', 'berapa hari'],
+        question: 'Berapa lama proses verifikasi akun Campaigner?',
+        keywords: ['lama verifikasi', 'durasi verifikasi', 'review verifikasi', 'berapa hari'],
         answer: (
             <div className="space-y-2 text-slate-600">
-                <p>Tim verifikasi Insani Indonesia memeriksa keabsahan dokumen KYC dalam waktu <strong>1 x 24 jam hingga maksimal 2 x 24 jam kerja</strong> (Senin - Jumat).</p>
+                <p>Tim verifikasi Insani Indonesia memeriksa keabsahan dokumen verifikasi dalam waktu <strong>1 x 24 jam hingga maksimal 2 x 24 jam kerja</strong> (Senin - Jumat).</p>
                 <p>Pemberitahuan hasil verifikasi (Disetujui / Butuh Revisi / Ditolak) akan dikirimkan via email dan dapat dicek langsung pada menu status akun Anda.</p>
             </div>
         )
@@ -256,9 +256,9 @@ const FAQ_DATA: FaqItem[] = [
             <div className="space-y-2 text-slate-600">
                 <p>Alur penerbitan program donasi terdiri dari 5 langkah:</p>
                 <ol className="list-decimal pl-5 space-y-1.5">
-                    <li><strong>Daftar & Verifikasi KYC:</strong> Kunjungi halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>, lengkapi formulir KYC (data diri, rekening bank, dan dokumen pendukung), lalu kirimkan untuk ditinjau tim kami.</li>
-                    <li><strong>Persetujuan KYC:</strong> Tim Insani Indonesia memverifikasi dokumen dalam 1–2 hari kerja. Notifikasi hasil dikirim via email.</li>
-                    <li><strong>Buat Draf Program:</strong> Setelah KYC disetujui, Anda dapat membuat program baru dari dasbor akun — isi data kampanye, target donasi, batas waktu, foto utama, dan narasi cerita.</li>
+                    <li><strong>Daftar & Verifikasi Akun:</strong> Kunjungi halaman <Link href="/buat-program" className="text-insani-blue font-semibold hover:underline">Pendaftaran Campaigner</Link>, lengkapi formulir verifikasi (data diri, rekening bank, dan dokumen pendukung), lalu kirimkan untuk ditinjau tim kami.</li>
+                    <li><strong>Persetujuan Verifikasi:</strong> Tim Insani Indonesia memverifikasi dokumen dalam 1–2 hari kerja. Notifikasi hasil dikirim via email.</li>
+                    <li><strong>Buat Draf Program:</strong> Setelah verifikasi disetujui, Anda dapat membuat program baru dari dasbor akun — isi data kampanye, target donasi, batas waktu, foto utama, dan narasi cerita.</li>
                     <li><strong>Kurasi oleh Tim:</strong> Program diperiksa oleh tim kurator Insani Indonesia untuk kepatuhan konten dan kelayakan penyaluran.</li>
                     <li><strong>Program Tayang:</strong> Setelah disetujui admin, program mulai aktif menerima donasi dari publik luas.</li>
                 </ol>
@@ -275,7 +275,7 @@ const FAQ_DATA: FaqItem[] = [
                 <p>Campaigner dapat mengajukan pencairan donasi yang telah terkumpul melalui menu Pencairan Dana di dasbor program dengan ketentuan:</p>
                 <ul className="list-disc pl-5 space-y-1.5">
                     <li>Nominal pencairan minimal adalah <strong>Rp 10.000</strong> dan tidak melebihi sisa saldo bersih donasi yang tersedia.</li>
-                    <li>Pencairan hanya ditransfer ke <strong>rekening bank terdaftar yang telah lolos verifikasi KYC</strong>.</li>
+                    <li>Pencairan hanya ditransfer ke <strong>rekening bank terdaftar yang telah lolos verifikasi akun</strong>.</li>
                     <li>Proses transfer perbankan memerlukan waktu 1–3 hari kerja setelah permohonan disetujui tim finance.</li>
                 </ul>
             </div>
@@ -575,7 +575,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Ketik kata kunci (contoh: kuitansi, verifikasi KYC, fundraiser, biaya)..."
+                                placeholder="Ketik kata kunci (contoh: kuitansi, verifikasi, fundraiser, biaya)..."
                                 className="w-full pl-12 pr-12 py-4 bg-white text-slate-900 placeholder:text-slate-400 rounded-2xl shadow-xl shadow-black/20 focus:outline-none focus:ring-4 focus:ring-cyan-400/40 text-sm sm:text-base transition-all"
                             />
                             {searchQuery && (
@@ -592,7 +592,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                         {/* Quick filter tags */}
                         <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs text-slate-300">
                             <span className="text-slate-400 font-medium">Topik Cepat:</span>
-                            {['Cara Donasi', 'Cek Status', 'KYC Campaigner', 'Fundraiser', 'Biaya Platform', 'Kuitansi'].map((tag) => (
+                            {['Cara Donasi', 'Cek Status', 'Verifikasi', 'Fundraiser', 'Biaya Platform', 'Kuitansi'].map((tag) => (
                                 <button
                                     key={tag}
                                     onClick={() => handleTagClick(tag)}
@@ -650,7 +650,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                             Jadi Campaigner
                         </h2>
                         <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                            Daftar KYC & buat kampanye kebaikan baru
+                            Daftar & verifikasi akun untuk buat kampanye baru
                         </p>
                     </Link>
 

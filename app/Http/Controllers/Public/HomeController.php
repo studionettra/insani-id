@@ -28,8 +28,16 @@ class HomeController extends Controller
             ->get();
 
         $focusPrograms = Category::where('is_focus_program', true)
-            ->orderBy('name')
-            ->get();
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($cat) {
+                $cat->name_translations = $cat->getTranslations('name');
+                $cat->public_name_translations = $cat->getTranslations('public_name');
+                $cat->description_translations = $cat->getTranslations('description');
+
+                return $cat;
+            });
 
         $latestPrograms = Program::with('category')
             ->where('status', 'published')

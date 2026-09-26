@@ -43,7 +43,18 @@ return null;
 
 export function getLocalizedValue(val: any, locale = 'id', fallback = ''): string {
     if (!val) return fallback;
-    if (typeof val === 'string') return val;
+    if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+            try {
+                const parsed = JSON.parse(trimmed);
+                return getLocalizedValue(parsed, locale, fallback);
+            } catch (e) {
+                return val;
+            }
+        }
+        return val;
+    }
     if (typeof val === 'object') {
         if (typeof val[locale] === 'string' && val[locale].trim() !== '') return val[locale];
         if (typeof val.id === 'string' && val.id.trim() !== '') return val.id;

@@ -73,17 +73,17 @@ class FaqSeeder extends Seeder
                 'sort_order' => 8,
             ],
             [
-                'question' => 'Apa perbedaan syarat verifikasi Campaigner Individu vs Lembaga/Yayasan (KYC)?',
-                'answer_html' => '<p>Untuk melindungi donatur dari potensi penipuan, seluruh calon campaigner wajib lolos verifikasi identitas (KYC):</p><p><strong>Campaigner Individu:</strong> Foto e-KTP asli, foto selfie memegang e-KTP, rekening bank atas nama pribadi sesuai e-KTP, dan domisili jelas.</p><p><strong>Campaigner Lembaga / Yayasan:</strong> SK Kemenkumham / Izin Lembaga resmi, NPWP Lembaga, rekening koran/bank atas nama Lembaga (bukan pribadi), dan KTP penanggung jawab resmi.</p>',
+                'question' => 'Apa perbedaan syarat verifikasi Campaigner Individu vs Lembaga/Yayasan?',
+                'answer_html' => '<p>Untuk melindungi donatur dari potensi penipuan, seluruh calon campaigner wajib lolos verifikasi identitas:</p><p><strong>Campaigner Individu:</strong> Foto e-KTP asli, foto selfie memegang e-KTP, rekening bank atas nama pribadi sesuai e-KTP, dan domisili jelas.</p><p><strong>Campaigner Lembaga / Yayasan:</strong> SK Kemenkumham / Izin Lembaga resmi, NPWP Lembaga, rekening koran/bank atas nama Lembaga (bukan pribadi), dan KTP penanggung jawab resmi.</p>',
                 'category' => 'campaigner',
-                'keywords' => 'kyc, verifikasi, syarat campaigner, dokumen kyc, ktp, sk kemenkumham, npwp',
+                'keywords' => 'verifikasi akun, verifikasi, syarat campaigner, dokumen verifikasi, ktp, sk kemenkumham, npwp',
                 'sort_order' => 9,
             ],
             [
-                'question' => 'Berapa lama proses verifikasi akun Campaigner (KYC)?',
-                'answer_html' => '<p>Tim verifikasi Insani Indonesia memeriksa keabsahan dokumen KYC dalam waktu <strong>1 x 24 jam hingga maksimal 2 x 24 jam kerja</strong> (Senin - Jumat).</p><p>Pemberitahuan hasil verifikasi (Disetujui / Butuh Revisi / Ditolak) akan dikirimkan via email dan dapat dicek langsung pada menu status akun Anda.</p>',
+                'question' => 'Berapa lama proses verifikasi akun Campaigner?',
+                'answer_html' => '<p>Tim verifikasi Insani Indonesia memeriksa keabsahan dokumen verifikasi dalam waktu <strong>1 x 24 jam hingga maksimal 2 x 24 jam kerja</strong> (Senin - Jumat).</p><p>Pemberitahuan hasil verifikasi (Disetujui / Butuh Revisi / Ditolak) akan dikirimkan via email dan dapat dicek langsung pada menu status akun Anda.</p>',
                 'category' => 'campaigner',
-                'keywords' => 'lama verifikasi, durasi kyc, review kyc, berapa hari',
+                'keywords' => 'lama verifikasi, durasi verifikasi, review verifikasi, berapa hari',
                 'sort_order' => 10,
             ],
             [
@@ -95,7 +95,7 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => 'Bagaimana mekanisme dan syarat pencairan dana (Disbursement)?',
-                'answer_html' => '<p>Campaigner dapat mengajukan pencairan donasi yang telah terkumpul melalui menu Pencairan Dana di dasbor program dengan ketentuan:</p><ul><li>Nominal pencairan minimal adalah <strong>Rp 10.000</strong> dan tidak melebihi sisa saldo bersih donasi yang tersedia.</li><li>Pencairan hanya ditransfer ke <strong>rekening bank terdaftar yang telah lolos verifikasi KYC</strong>.</li><li>Proses transfer perbankan memerlukan waktu 1–3 hari kerja setelah permohonan disetujui tim finance.</li></ul>',
+                'answer_html' => '<p>Campaigner dapat mengajukan pencairan donasi yang telah terkumpul melalui menu Pencairan Dana di dasbor program dengan ketentuan:</p><ul><li>Nominal pencairan minimal adalah <strong>Rp 10.000</strong> dan tidak melebihi sisa saldo bersih donasi yang tersedia.</li><li>Pencairan hanya ditransfer ke <strong>rekening bank terdaftar yang telah lolos verifikasi akun</strong>.</li><li>Proses transfer perbankan memerlukan waktu 1–3 hari kerja setelah permohonan disetujui tim finance.</li></ul>',
                 'category' => 'campaigner',
                 'keywords' => 'pencairan dana, disbursement, tarik dana, syarat pencairan, minimal pencairan',
                 'sort_order' => 12,

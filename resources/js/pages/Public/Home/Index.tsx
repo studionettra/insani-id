@@ -44,56 +44,61 @@ return;
             <section className="relative w-full h-[85dvh] min-h-[600px] overflow-hidden bg-zinc-50">
                 {banners && banners.length > 0 ? (
                     <>
-                        {banners.map((banner: any, index: number) => (
-                            <div 
-                                key={banner.id} 
-                                className={`absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                            >
-                                <img 
-                                    src={`/storage/${banner.desktop_image_url}`} 
-                                    alt={banner.title} 
-                                    className="hidden md:block w-full h-full object-cover" 
-                                />
-                                <img 
-                                    src={`/storage/${banner.mobile_image_url || banner.desktop_image_url}`} 
-                                    alt={banner.title} 
-                                    className="block md:hidden w-full h-full object-cover" 
-                                />
-                                
-                                {/* Gradient for CTA contrast */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/20 to-transparent" />
-                                
-                                {(banner.title || banner.description || banner.cta_link) && (
-                                    <div className="absolute inset-0 flex flex-col justify-end pb-16 md:pb-24">
-                                        <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
-                                            {banner.title && (
-                                                <FadeIn>
-                                                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 md:mb-4 max-w-3xl leading-tight tracking-tight drop-shadow-sm">
-                                                        {banner.title}
-                                                    </h2>
-                                                </FadeIn>
-                                            )}
-                                            {banner.description && (
-                                                <FadeIn delay={0.05}>
-                                                    <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-2xl leading-relaxed mb-6 font-normal drop-shadow-sm">
-                                                        {banner.description}
-                                                    </p>
-                                                </FadeIn>
-                                            )}
-                                            {banner.cta_link && (
-                                                <FadeIn delay={0.1}>
-                                                    <Button asChild size="lg" className="bg-white text-zinc-950 hover:bg-zinc-100 rounded-full font-semibold px-8 h-12 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
-                                                        <a href={banner.cta_link}>
-                                                            {t('Lihat Selengkapnya', 'Selengkapnya')} <ArrowRight className="ml-2 h-4 w-4 rtl:rotate-180" />
-                                                        </a>
-                                                    </Button>
-                                                </FadeIn>
-                                            )}
+                        {banners.map((banner: any, index: number) => {
+                            const bannerTitle = getLocalizedValue(banner.title_translations || banner.title, locale);
+                            const bannerDesc = getLocalizedValue(banner.description_translations || banner.description, locale);
+
+                            return (
+                                <div 
+                                    key={banner.id} 
+                                    className={`absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                                >
+                                    <img 
+                                        src={`/storage/${banner.desktop_image_url}`} 
+                                        alt={bannerTitle} 
+                                        className="hidden md:block w-full h-full object-cover" 
+                                    />
+                                    <img 
+                                        src={`/storage/${banner.mobile_image_url || banner.desktop_image_url}`} 
+                                        alt={bannerTitle} 
+                                        className="block md:hidden w-full h-full object-cover" 
+                                    />
+                                    
+                                    {/* Gradient for CTA contrast */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/20 to-transparent" />
+                                    
+                                    {(bannerTitle || bannerDesc || banner.cta_link) && (
+                                        <div className="absolute inset-0 flex flex-col justify-end pb-16 md:pb-24">
+                                            <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
+                                                {bannerTitle && (
+                                                    <FadeIn>
+                                                        <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 md:mb-4 max-w-3xl leading-tight tracking-tight drop-shadow-sm">
+                                                            {bannerTitle}
+                                                        </h2>
+                                                    </FadeIn>
+                                                )}
+                                                {bannerDesc && (
+                                                    <FadeIn delay={0.05}>
+                                                        <p className="text-sm sm:text-base md:text-lg text-white/90 max-w-2xl leading-relaxed mb-6 font-normal drop-shadow-sm">
+                                                            {bannerDesc}
+                                                        </p>
+                                                    </FadeIn>
+                                                )}
+                                                {banner.cta_link && (
+                                                    <FadeIn delay={0.1}>
+                                                        <Button asChild size="lg" className="bg-white text-zinc-950 hover:bg-zinc-100 rounded-full font-semibold px-8 h-12 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                                            <a href={banner.cta_link}>
+                                                                {t('Lihat Selengkapnya', 'Selengkapnya')} <ArrowRight className="ml-2 h-4 w-4 rtl:rotate-180" />
+                                                            </a>
+                                                        </Button>
+                                                    </FadeIn>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
+                                    )}
+                                </div>
+                            );
+                        })}
                         
                         {/* Slider Controls */}
                         {banners.length > 1 && (
@@ -210,6 +215,10 @@ return;
                                 ];
                                 const bgColor = tints[index % tints.length];
                                 
+                                const customName = getLocalizedValue(cat.public_name_translations || cat.public_name, locale);
+                                const defaultName = getLocalizedValue(cat.name_translations || cat.name, locale);
+                                const catTitle = t(customName || defaultName);
+
                                 return (
                                     <FadeIn
                                         key={cat.id} 
@@ -217,20 +226,20 @@ return;
                                         className={spanClass}
                                     >
                                         <Link 
-                                            href={`/program?category=${cat.id}`} 
+                                            href={`/fokus-program/${cat.slug}`} 
                                             className={`group relative block w-full h-full rounded-2xl overflow-hidden ${bgColor} transition-transform hover:-translate-y-1`}
                                         >
                                             {cat.pillar_image && (
                                                 <img 
                                                     src={`/storage/${cat.pillar_image}`} 
-                                                    alt={getLocalizedValue(cat.name, locale)} 
+                                                    alt={catTitle} 
                                                     className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 group-hover:opacity-80 transition-all duration-700 ease-out" 
                                                 />
                                             )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent p-8 flex flex-col justify-end">
                                                 <div className="flex justify-between items-end">
                                                     <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                                                        {t(getLocalizedValue(cat.name_translations || cat.name, locale))}
+                                                        {catTitle}
                                                     </h3>
                                                     <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-zinc-950 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 shadow-lg">
                                                         <ArrowUpRight className="w-5 h-5 rtl:rotate-90" />
@@ -462,7 +471,7 @@ return;
                                             ))}
                                         </div>
                                         <p className="text-zinc-700 text-base leading-relaxed italic mb-8">
-                                            "{item.content}"
+                                            "{getLocalizedValue(item.content, locale)}"
                                         </p>
                                     </div>
 
@@ -481,7 +490,7 @@ return;
                                         <div>
                                             <h4 className="font-bold text-sm text-zinc-950">{item.name}</h4>
                                             {item.role && (
-                                                <p className="text-xs text-zinc-500 font-medium">{item.role}</p>
+                                                <p className="text-xs text-zinc-500 font-medium">{getLocalizedValue(item.role, locale)}</p>
                                             )}
                                         </div>
                                     </div>

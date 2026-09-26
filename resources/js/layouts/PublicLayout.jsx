@@ -6,6 +6,7 @@ import PublicAccountDropdown from '@/components/public/PublicAccountDropdown';
 import EventPopupModal from '@/components/public/EventPopupModal';
 import { FlashMessages } from '@/components/flash-messages';
 import useTranslation from '@/hooks/use-translation';
+import { getLocalizedValue } from '@/lib/utils';
 
 export default function PublicLayout({ children, title = '', hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
     const { auth, siteSettings, activePopup } = usePage().props;
@@ -40,7 +41,9 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
         return `https://wa.me/${clean}`;
     };
 
-    const footerDescription = siteSettings?.footer_description || "Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan universal.";
+    const rawFooterDescription = getLocalizedValue(siteSettings?.footer_description, locale);
+    const footerDescription = rawFooterDescription || "Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan universal.";
+    const announcementText = getLocalizedValue(siteSettings?.announcement_text, locale);
     const facebookUrl = siteSettings?.social_facebook || "https://www.facebook.com/insaniindonesia";
     const instagramUrl = siteSettings?.social_instagram || "https://www.instagram.com/insaniindonesia";
     const threadsUrl = siteSettings?.social_threads || "https://www.threads.com/@insaniindonesia";
@@ -67,7 +70,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
             </Head>
 
             {/* Global Announcement Bar */}
-            {siteSettings?.announcement_enabled === '1' && siteSettings?.announcement_text && (
+            {siteSettings?.announcement_enabled === '1' && announcementText && (
                 <div 
                     className="text-white text-xs sm:text-sm font-medium py-2 px-4 text-center transition-all print:hidden relative z-[101] shadow-xs"
                     style={{ backgroundColor: siteSettings?.announcement_bg_color || '#0284c7' }}
@@ -78,7 +81,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                         </span>
                         <Megaphone className="w-4 h-4 shrink-0 opacity-90 hidden sm:inline-block" />
-                        <span className="truncate sm:overflow-visible">{siteSettings.announcement_text}</span>
+                        <span className="truncate sm:overflow-visible">{announcementText}</span>
                         {siteSettings?.announcement_link && (
                             <Link 
                                 href={siteSettings.announcement_link}

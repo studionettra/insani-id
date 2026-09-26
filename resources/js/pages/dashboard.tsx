@@ -1195,7 +1195,7 @@ export default function Dashboard({
                                                         <Target className="w-5 h-5" />
                                                     </div>
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100/90 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
-                                                        Verifikasi KYC
+                                                        Verifikasi Akun
                                                     </span>
                                                 </div>
                                                 <h4 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">Punya Inisiatif Sendiri?</h4>
