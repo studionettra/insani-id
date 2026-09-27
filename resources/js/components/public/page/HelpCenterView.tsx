@@ -138,6 +138,62 @@ const FAQ_DATA: FaqItem[] = [
             </div>
         )
     },
+    {
+        id: 'rincian-penggunaan-dana',
+        category: 'donatur',
+        question: 'Apa itu fitur Rincian Penggunaan Dana pada halaman program?',
+        keywords: ['rincian dana', 'penggunaan dana', 'transparansi', 'potongan donasi', 'biaya platform', 'sisa saldo'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Fitur <strong>Rincian Penggunaan Dana</strong> adalah wujud transparansi finansial terbuka platform Insani Indonesia kepada para donatur dan masyarakat. Melalui modal rincian ini, Anda dapat memantau secara terbuka:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                    <li><strong>Total Donasi Masuk (Gross):</strong> Akumulasi donasi yang disalurkan donatur.</li>
+                    <li><strong>Biaya Transaksi Digital:</strong> Biaya resmi payment gateway (Xendit) untuk pemrosesan QRIS, VA, dan E-Wallet.</li>
+                    <li><strong>Biaya Operasional Platform (5% saat pencairan):</strong> Biaya operasional dan verifikasi yayasan yang hanya dipotong ketika penggalang dana mencairkan dana.</li>
+                    <li><strong>Total Dana Telah Dicairkan:</strong> Akumulasi dana yang sudah ditransfer ke campaigner beserta rencana penggunaannya.</li>
+                    <li><strong>Sisa Saldo Belum Dicairkan:</strong> Dana bersih donasi yang masih tersimpan aman dan siap dicairkan pada tahapan berikutnya.</li>
+                </ul>
+            </div>
+        )
+    },
+    {
+        id: 'donasi-fleksibel-vs-target',
+        category: 'donatur',
+        question: 'Apa perbedaan program Donasi Fleksibel dengan program bertarget donasi & batas waktu?',
+        keywords: ['donasi fleksibel', 'target donasi', 'batas waktu', 'open ended', 'jenis kampanye'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <ul className="list-disc pl-5 space-y-1.5">
+                    <li><strong>Program Bertarget &amp; Berbatas Waktu:</strong> Diterapkan pada program yang membutuhkan kepastian nominal dan tenggat waktu darurat (contoh: biaya operasi medis segera atau rekonstruksi darurat bencana).</li>
+                    <li><strong>Program Donasi Fleksibel:</strong> Diterapkan pada inisiatif sosial berkelanjutan (contoh: santunan yatim piatu, biaya operasional santri dhuafa, atau dakwah rutin) di mana setiap donasi yang terkumpul dapat langsung disalurkan secara berkala tanpa harus menunggu target nominal terpenuhi.</li>
+                </ul>
+            </div>
+        )
+    },
+    {
+        id: 'doa-dan-dukungan-moderasi',
+        category: 'donatur',
+        question: 'Bagaimana ketentuan menulis doa saat donasi? Mengapa komentar/doa saya tidak muncul?',
+        keywords: ['doa donatur', 'komentar', 'moderasi', 'pesan dukungan', 'komentar disembunyikan'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Donatur dapat menuliskan doa dan kata-kata penyemangat saat melakukan donasi, yang akan ditampilkan pada tab <em>Doa &amp; Dukungan</em> di halaman program.</p>
+                <p>Demi menjaga ketertiban, kenyamanan, dan kesucian ruang kebaikan bersama, platform menerapkan moderasi berkala. Komentar atau doa yang mengandung unsur <strong>ujaran kebencian, SARA, promosi komersial, tautan mencurigakan, atau judi online</strong> akan otomatis disembunyikan atau dihapus oleh sistem moderator.</p>
+            </div>
+        )
+    },
+    {
+        id: 'laporan-kabar-terbaru-email',
+        category: 'donatur',
+        question: 'Apakah saya akan menerima laporan penyaluran (Kabar Terbaru) atas donasi yang saya salurkan?',
+        keywords: ['laporan penyaluran', 'kabar terbaru', 'email donatur', 'perkembangan program', 'transparansi donasi'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p><strong>Ya, tentu saja!</strong> Setiap kali Campaigner mencairkan dana dan mengunggah dokumentasi realisasi penyaluran melalui fitur <strong>Kabar Terbaru</strong>, sistem kami akan secara otomatis mengirimkan notifikasi laporan tersebut ke alamat email yang Anda gunakan saat berdonasi.</p>
+                <p>Anda juga dapat membuka halaman kampanye kapan saja dan memeriksa tab <em>Kabar Terbaru</em> untuk melihat foto dokumentasi, kuitansi, dan cerita penyerahan manfaat.</p>
+            </div>
+        )
+    },
 
     // ==================== CAMPAIGNER ====================
     {
@@ -290,10 +346,22 @@ const FAQ_DATA: FaqItem[] = [
             <div className="space-y-2 text-slate-600">
                 <p>Insani Indonesia beroperasi secara transparan sesuai UU No. 9 Tahun 1961 dan ketentuan Kementerian Sosial RI:</p>
                 <ul className="list-disc pl-5 space-y-1.5">
-                    <li>Maksimal <strong>10%</strong> untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform dan pemeliharaan teknologi.</li>
+                    <li>Sebesar <strong>5%</strong> (maksimal 10% sesuai regulasi) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform, verifikasi kurator lapangan, dan pemeliharaan server, yang <strong>dipotong saat pencairan dana (disbursement)</strong>.</li>
                     <li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li>
                     <li>Biaya administrasi pihak ketiga (payment gateway seperti perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li>
                 </ul>
+            </div>
+        )
+    },
+    {
+        id: 'slot-kampanye-request',
+        category: 'campaigner',
+        question: 'Bagaimana jika batas kuota program aktif (slot kampanye) saya sudah habis?',
+        keywords: ['slot program', 'batas program', 'kuota kampanye', 'ajukan slot', 'tambah kampanye'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Untuk menjaga akuntabilitas penyaluran dan kualitas pendampingan, sistem memberikan batasan kuota program aktif bagi setiap Campaigner.</p>
+                <p>Jika kuota Anda telah penuh dan Anda ingin membuat program baru, Anda dapat mengajukan permohonan penambahan kuota melalui menu <strong>"Ajukan Tambahan Slot Program"</strong> pada dasbor akun Anda. Tim verifikator Insani Indonesia akan meninjau rekam jejak penyaluran, kelengkapan laporan Kabar Terbaru, dan kepatuhan program-program Anda sebelumnya sebelum menyetujui slot tambahan.</p>
             </div>
         )
     },
@@ -451,11 +519,40 @@ const FAQ_DATA: FaqItem[] = [
         id: 'lapor-penipuan-fraud',
         category: 'keamanan',
         question: 'Bagaimana jika saya menemukan program donasi yang mencurigakan atau indikasi penipuan?',
-        keywords: ['lapor penipuan', 'fraud', 'mencurigakan', 'pengaduan', 'whistleblower'],
+        keywords: ['lapor penipuan', 'fraud', 'mencurigakan', 'pengaduan', 'whistleblower', 'tiket pengaduan', 'laporkan kampanye'],
         answer: (
             <div className="space-y-2 text-slate-600">
                 <p>Insani Indonesia menerapkan <strong>zero tolerance</strong> terhadap rekayasa informasi dan penipuan donasi.</p>
-                <p>Jika Anda mencurigai adanya program fiktif atau penyalahgunaan dana, segera kirimkan bukti tangkapan layar dan rincian ke email <strong>sapa@insani.id</strong> atau WhatsApp Layanan Pengaduan Resmi kami. Tim kepatuhan kami akan segera menginvestigasi dan membekukan kampanye tersebut bila terbukti melanggar.</p>
+                <p>Jika Anda menemukan kampanye fiktif, manipulasi kondisi medis, atau indikasi penyalahgunaan dana, Anda dapat langsung melapor melalui tombol <strong>"Apakah penggalangan dana ini mencurigakan? Laporkan"</strong> di bagian bawah halaman kampanye yang bersangkutan.</p>
+                <p>Pilih kategori pelanggaran, tuliskan kronologi kecurigaan Anda, dan lampirkan bukti otentik (foto, tangkapan layar, kuitansi, atau dokumen medis). Laporan Anda akan menerima <strong>Nomor Tiket Pengaduan</strong> resmi untuk diproses secara prioritas oleh Tim Kepatuhan kami.</p>
+            </div>
+        )
+    },
+    {
+        id: 'whistleblower-protection',
+        category: 'keamanan',
+        question: 'Apakah identitas saya terlindungi jika melaporkan kampanye mencurigakan?',
+        keywords: ['whistleblower', 'privasi pelapor', 'rahasia pelapor', 'keamanan pelapor', 'lindungi identitas'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p><strong>Sangat aman dan terjamin kerahasiaannya (Whistleblower Protection).</strong></p>
+                <p>Sesuai dengan Kebijakan Privasi dan UU Perlindungan Data Pribadi (UU PDP), identitas pelapor (nama, email, nomor WhatsApp) dan dokumen bukti yang Anda lampirkan <strong>tidak akan pernah dibagikan atau diberitahukan kepada Campaigner yang dilaporkan</strong>. Data Anda hanya dapat diakses secara terbatas oleh Tim Kepatuhan Insani Indonesia untuk keperluan verifikasi dan konfirmasi hasil tindak lanjut.</p>
+            </div>
+        )
+    },
+    {
+        id: 'tindakan-sanksi-kampanye',
+        category: 'keamanan',
+        question: 'Apa tindakan yang diambil Insani Indonesia terhadap kampanye yang dilaporkan melanggar?',
+        keywords: ['sanksi kampanye', 'takedown', 'freeze dana', 'pembekuan saldo', 'investigasi kecurangan', 'penindakan hukum'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Setiap laporan pengaduan yang memenuhi bukti permulaan akan ditindaklanjuti secara tegas:</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                    <li><strong>Investigasi &amp; Klarifikasi:</strong> Tim kepatuhan meminta klarifikasi tertulis dan bukti dokumen asli kepada Campaigner dalam waktu 2 x 24 jam kerja.</li>
+                    <li><strong>Pembekuan Dana (Freeze):</strong> Hak pencairan dana kampanye dibekukan sementara selama proses investigasi berlangsung demi mengamankan dana publik.</li>
+                    <li><strong>Penurunan Kampanye (Take Down):</strong> Jika terbukti terjadi manipulasi data atau penipuan, kampanye akan diturunkan secara permanen dari website, akun campaigner diblokir, dan temuan pidana akan diteruskan ke aparat penegak hukum (Kepolisian &amp; Kemensos RI).</li>
+                </ol>
             </div>
         )
     },
@@ -468,6 +565,32 @@ const FAQ_DATA: FaqItem[] = [
             <div className="space-y-2 text-slate-600">
                 <p>Sesuai dengan <Link href="/syarat-ketentuan" className="text-insani-blue font-semibold hover:underline">Syarat dan Ketentuan</Link>, setiap donasi yang telah sukses bersifat <strong>sukarela, final, dan tidak dapat dibatalkan (non-refundable)</strong> karena dana langsung dialokasikan untuk kebutuhan penerima manfaat.</p>
                 <p>Pengembalian dana hanya dipertimbangkan jika terjadi kekeliruan sistem perbankan seperti pendebetan ganda yang disertai bukti sah mutasi rekening.</p>
+            </div>
+        )
+    },
+
+    // ==================== LEMBAGA ====================
+    {
+        id: 'visi-lembaga',
+        category: 'lembaga',
+        question: 'Apa visi dan fokus pergerakan kemanusiaan Insani Indonesia?',
+        keywords: ['visi', 'profil', 'latar belakang', 'fokus gerakan', 'kemanusiaan'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p><strong>Insani Indonesia</strong> (Yayasan Peduli Insani Indonesia) merupakan lembaga nirlaba independen yang berfokus pada penanganan krisis kemanusiaan, pemberdayaan masyarakat, pendidikan generasi bangsa, dan bantuan kebencanaan.</p>
+                <p>Visi utama kami adalah menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan universal.</p>
+            </div>
+        )
+    },
+    {
+        id: 'laporan-keuangan-audit',
+        category: 'lembaga',
+        question: 'Di mana saya bisa melihat dan mengunduh laporan keuangan resmi yayasan yang telah diaudit?',
+        keywords: ['laporan keuangan', 'audit kap', 'akuntabilitas', 'transparansi yayasan', 'download laporan keuangan'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Sebagai wujud pertanggungjawaban publik dan prinsip keterbukaan tata kelola (<em>Good Governance</em>), Insani Indonesia mempublikasikan laporan keuangan tahunan yang telah diaudit secara independen oleh Kantor Akuntan Publik (KAP).</p>
+                <p>Anda dapat mengakses, meninjau, dan mengunduh seluruh dokumen laporan keuangan tahunan tersebut secara bebas dalam format PDF melalui halaman <Link href="/laporan-keuangan" className="text-insani-blue font-semibold hover:underline"><strong>Laporan Keuangan Resmi</strong></Link>.</p>
             </div>
         )
     }
