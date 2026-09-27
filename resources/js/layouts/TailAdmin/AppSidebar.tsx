@@ -162,12 +162,16 @@ const AppSidebar: React.FC = () => {
           {
             icon: <ShieldAlert className="w-5 h-5" />,
             name: "Laporan Pelanggaran",
-            path: "/admin/program-reports",
-          },
-          {
-            icon: <ShieldAlert className="w-5 h-5" />,
-            name: "Kategori Laporan",
-            path: "/admin/program-report-categories",
+            subItems: [
+              {
+                name: "Semua Laporan",
+                path: "/admin/program-reports",
+              },
+              {
+                name: "Kategori Laporan",
+                path: "/admin/program-report-categories",
+              },
+            ],
           },
         ] : []),
       ],
