@@ -234,31 +234,21 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             </div>
                         </div>
 
-                        {/* Kolom 2: Program & Kebaikan (lg:col-span-3) */}
+                        {/* Kolom 2: Tentang & Transparansi (lg:col-span-3) */}
                         <div className="lg:col-span-3 space-y-4">
                             <h3 className="text-xs font-bold uppercase tracking-wider text-blue-300 flex items-center gap-2">
-                                <Heart className="w-3.5 h-3.5" />
-                                <span>{t('Program & Kebaikan')}</span>
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                <span>{t('Tentang & Transparansi')}</span>
                             </h3>
                             <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
                                 <li>
-                                    <Link href="/program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Katalog Program Donasi')}</span>
+                                    <Link href="/tentang-kami" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Tentang Insani')}</span>
                                     </Link>
                                 </li>
                                 <li>
                                     <Link href="/fokus-program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Fokus Program')}</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/buat-program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Daftar Jadi Campaigner')}</span>
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/pusat-bantuan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Program Relawan Fundraiser')}</span>
                                     </Link>
                                 </li>
                                 <li>
@@ -269,6 +259,11 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 <li>
                                     <Link href="/tentang-kami#laporan-keuangan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Laporan Keuangan Yayasan')}</span>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/tentang-kami#legalitas" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Legalitas & Perizinan')}</span>
                                     </Link>
                                 </li>
                             </ul>
@@ -282,6 +277,11 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             </h3>
                             <ul className="space-y-3 text-xs sm:text-sm text-slate-300">
                                 <li>
+                                    <Link href="/program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Katalog Program Donasi')}</span>
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link href="/cek-donasi" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
                                         <span>{t('Cek Status Donasi')}</span>
                                     </Link>
@@ -292,18 +292,13 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/pusat-bantuan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Pusat Bantuan & FAQ')}</span>
+                                    <Link href="/buat-program" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Daftar Jadi Campaigner')}</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Konfirmasi Transfer Manual')}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <Link href="/kontak" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Hubungi Layanan CS')}</span>
+                                    <Link href="/pusat-bantuan" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Pusat Bantuan & FAQ')}</span>
                                     </Link>
                                 </li>
                             </ul>
@@ -330,13 +325,16 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                 </p>
                             </div>
 
-                            {/* Legal compliance links */}
+                            {/* Legal compliance & support links */}
                             <div className="pt-1 flex flex-col space-y-1.5 text-xs text-slate-400">
                                 <Link href="/syarat-ketentuan" className="hover:text-blue-300 transition-colors">
                                     &bull; {t('Syarat & Ketentuan')}
                                 </Link>
                                 <Link href="/kebijakan-privasi" className="hover:text-blue-300 transition-colors">
                                     &bull; {t('Kebijakan Privasi')}
+                                </Link>
+                                <Link href="/kontak" className="hover:text-blue-300 transition-colors">
+                                    &bull; {t('Hubungi Layanan CS')}
                                 </Link>
                             </div>
                         </div>
