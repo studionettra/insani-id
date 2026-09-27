@@ -2,6 +2,7 @@
 
 use App\Models\ImpactStat;
 use App\Models\User;
+use Database\Seeders\ImpactStatSeeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -60,4 +61,32 @@ it('can create and update impact stat with translations', function () {
     expect($stat->getTranslation('label', 'id'))->toBe('Penerima Manfaat Global');
     expect($stat->getTranslation('label', 'en'))->toBe('Global Beneficiaries');
     expect($stat->category)->toBe('Luar Negeri');
+});
+
+it('seeds impact statistics correctly from seeder', function () {
+    $this->seed(ImpactStatSeeder::class);
+
+    expect(ImpactStat::count())->toBe(9);
+
+    $totalProgram = ImpactStat::where('label->id', 'Total Program Terlaksana')->first();
+    expect($totalProgram)->not->toBeNull();
+    expect($totalProgram->value)->toBe('554');
+    expect($totalProgram->category)->toBe('Umum');
+    expect($totalProgram->group)->toBe('umum');
+    expect($totalProgram->icon)->toBe('CheckCircle2');
+
+    $totalBeneficiary = ImpactStat::where('label->id', 'Total Penerima Manfaat')->first();
+    expect($totalBeneficiary)->not->toBeNull();
+    expect($totalBeneficiary->value)->toBe('75.121');
+    expect($totalBeneficiary->category)->toBe('Umum');
+
+    $domesticProv = ImpactStat::where('label->id', 'Persebaran Provinsi')->first();
+    expect($domesticProv)->not->toBeNull();
+    expect($domesticProv->value)->toBe('22');
+    expect($domesticProv->category)->toBe('Dalam Negeri');
+
+    $foreignCountry = ImpactStat::where('label->id', 'Persebaran Negara')->first();
+    expect($foreignCountry)->not->toBeNull();
+    expect($foreignCountry->value)->toBe('7');
+    expect($foreignCountry->category)->toBe('Luar Negeri');
 });
