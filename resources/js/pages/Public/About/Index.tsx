@@ -24,6 +24,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
     const { locale, siteSettings } = usePage().props as any;
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+    const defaultVision = "Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan yang universal.";
     const localizedVision = getLocalizedValue(siteSettings?.about_vision, locale);
     const visionText = localizedVision || defaultVision;
 
