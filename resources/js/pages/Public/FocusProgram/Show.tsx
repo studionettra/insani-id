@@ -12,7 +12,8 @@ import {
     Info, 
     Share2, 
     TrendingUp, 
-    Layers
+    Layers,
+    ExternalLink
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -40,8 +41,14 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
     const realityTitle = t(getLocalizedValue(pillar.reality_title_translations || pillar.reality_title, locale));
     const realityDesc = t(getLocalizedValue(pillar.reality_description_translations || pillar.reality_description, locale));
     const realitySource = pillar.reality_source;
-    const metrics = Array.isArray(pillar.stats_metrics) ? pillar.stats_metrics : [];
+    const impactTitle = t(getLocalizedValue(pillar.impact_title_translations || pillar.impact_title, locale));
+    const impactDesc = t(getLocalizedValue(pillar.impact_description_translations || pillar.impact_description, locale));
+    
+    const allMetrics = Array.isArray(pillar.stats_metrics) ? pillar.stats_metrics : [];
+    const realitaMetrics = allMetrics.filter((m: any) => m.tipe === 'realita');
+    const capaianMetrics = allMetrics.filter((m: any) => m.tipe !== 'realita');
     const gallery = Array.isArray(pillar.distribution_gallery) ? pillar.distribution_gallery : [];
+    const crisisGallery = Array.isArray(pillar.crisis_gallery) ? pillar.crisis_gallery : [];
 
     // Helper to get YouTube Embed URL
     const getYouTubeEmbedUrl = (url: string | null) => {
@@ -52,6 +59,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
     };
 
     const youtubeEmbedUrl = getYouTubeEmbedUrl(pillar.video_url);
+    const crisisYoutubeEmbedUrl = getYouTubeEmbedUrl(pillar.crisis_video_url);
     const cleanDesc = (pillarDesc || '').replace(/<[^>]*>?/gm, '').slice(0, 160);
     const pillarImageUrl = pillar.pillar_image ? `/storage/${pillar.pillar_image}` : '/images/logo/logo-landscape-color.png';
 
@@ -149,7 +157,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
             </section>
 
             {/* 2. Reality & Problem Statement Section */}
-            {(realityTitle || realityDesc || metrics.length > 0) && (
+            {(realityTitle || realityDesc || realitaMetrics.length > 0) && (
                 <section id="realitas" className="py-20 md:py-32 bg-white relative">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
@@ -181,9 +189,9 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
 
                             {/* Right Column: Key Stats Counters */}
                             <div className="lg:col-span-7">
-                                {metrics.length > 0 ? (
+                                {realitaMetrics.length > 0 ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        {metrics.map((metric: any, idx: number) => {
+                                        {realitaMetrics.map((metric: any, idx: number) => {
                                             const labelText = typeof metric.label === 'object' 
                                                 ? getLocalizedValue(metric.label, locale) 
                                                 : metric.label;
@@ -192,10 +200,160 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                                 <FadeIn 
                                                     key={idx} 
                                                     delay={idx * 0.1}
-                                                    className="p-8 rounded-3xl bg-slate-50/80 border border-slate-100 hover:border-brand-200 hover:bg-white hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
+                                                    className="p-8 rounded-3xl bg-slate-50/80 border border-slate-100 hover:border-rose-200 hover:bg-white hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
+                                                >
+                                                    <div>
+                                                        {metric.icon && (
+                                                            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-6 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-300 shadow-xs">
+                                                                {renderStatIcon(metric.icon, "w-6 h-6")}
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <div className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight group-hover:text-rose-600 transition-colors mb-2">
+                                                                {metric.value}
+                                                            </div>
+                                                            <div className="text-slate-600 text-sm md:text-base font-medium leading-snug">
+                                                                {t(labelText)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {metric.sumber && (
+                                                        <div className="mt-6 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+                                                            <span className="text-slate-400 font-medium">{t('Sumber')}:</span>
+                                                            {metric.url_sumber ? (
+                                                                <a 
+                                                                    href={metric.url_sumber} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-rose-600 hover:text-rose-700 font-semibold inline-flex items-center gap-1 hover:underline transition-colors"
+                                                                >
+                                                                    <span>{metric.sumber}</span>
+                                                                    <ExternalLink className="w-3 h-3" />
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-slate-600 font-semibold">{metric.sumber}</span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </FadeIn>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 flex items-center gap-4 text-slate-500 text-sm">
+                                        <TrendingUp className="w-6 h-6 text-brand-600 shrink-0" />
+                                        <span>{t('Data dan metrik dampak krisis sedang diperbarui oleh tim riset Insani.')}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Potret Situasi & Galeri Realita Lapangan */}
+                        {(crisisGallery.length > 0 || crisisYoutubeEmbedUrl) && (
+                            <div className="mt-16 pt-12 border-t border-slate-200/80">
+                                <FadeIn className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+                                    <div>
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-wider mb-2 border border-rose-100">
+                                            <ImageIcon className="w-3.5 h-3.5" />
+                                            <span>{t('Dokumentasi Realita Lapangan')}</span>
+                                        </div>
+                                        <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+                                            {t('Potret Situasi & Kondisi Riil di Titik Krisis')}
+                                        </h3>
+                                    </div>
+                                    {crisisGallery.length > 0 && (
+                                        <span className="text-xs text-slate-400 font-medium">
+                                            {crisisGallery.length} {t('foto dokumentasi')}
+                                        </span>
+                                    )}
+                                </FadeIn>
+
+                                {crisisYoutubeEmbedUrl && (
+                                    <FadeIn className="mb-8">
+                                        <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200 aspect-video max-w-4xl mx-auto bg-black">
+                                            <iframe
+                                                src={crisisYoutubeEmbedUrl}
+                                                title={`${pillarTitle} Crisis Report`}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                className="w-full h-full"
+                                            />
+                                        </div>
+                                    </FadeIn>
+                                )}
+
+                                {crisisGallery.length > 0 && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+                                        {crisisGallery.map((imgPath: string, idx: number) => (
+                                            <FadeIn key={idx} delay={idx * 0.05}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedImage(`/storage/${imgPath}`)}
+                                                    className="group relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-xs hover:shadow-xl hover:border-rose-300 transition-all duration-300 block text-left focus:outline-none focus:ring-2 focus:ring-rose-500"
+                                                >
+                                                    <img 
+                                                        src={`/storage/${imgPath}`} 
+                                                        alt={`${pillarTitle} crisis doc ${idx + 1}`} 
+                                                        className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500 ease-out" 
+                                                    />
+                                                    <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 duration-300">
+                                                        <div className="w-10 h-10 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform">
+                                                            <ArrowUpRight className="w-5 h-5 rtl:rotate-90" />
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </FadeIn>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {/* 3. Capaian Program & Intervensi Insani Section */}
+            {(impactTitle || impactDesc || capaianMetrics.length > 0) && (
+                <section id="capaian" className="py-20 md:py-28 bg-slate-50/80 border-t border-slate-100 relative">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+                            
+                            {/* Left Column: Solution Narrative */}
+                            <div className="lg:col-span-5 lg:sticky lg:top-28">
+                                <FadeIn>
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-100">
+                                        <Sparkles className="w-3.5 h-3.5 text-[#1A56DB]" />
+                                        <span>{t('Ikhtiar & Solusi Insani')}</span>
+                                    </div>
+
+                                    <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-[1.15] mb-6">
+                                        {impactTitle || t('Hadir Menjawab Krisis dengan Aksi Nyata')}
+                                    </h2>
+
+                                    <p className="text-slate-600 text-base md:text-lg leading-relaxed whitespace-pre-line">
+                                        {impactDesc || t('Insani Indonesia berkomitmen menghadirkan solusi berkelanjutan dan penyaluran bantuan langsung yang transparan dan tepat sasaran.')}
+                                    </p>
+                                </FadeIn>
+                            </div>
+
+                            {/* Right Column: Key Capaian Stats */}
+                            <div className="lg:col-span-7">
+                                {capaianMetrics.length > 0 ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        {capaianMetrics.map((metric: any, idx: number) => {
+                                            const labelText = typeof metric.label === 'object' 
+                                                ? getLocalizedValue(metric.label, locale) 
+                                                : metric.label;
+
+                                            return (
+                                                <FadeIn 
+                                                    key={idx} 
+                                                    delay={idx * 0.1}
+                                                    className="p-8 rounded-3xl bg-white border border-slate-200/80 hover:border-brand-300 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
                                                 >
                                                     {metric.icon && (
-                                                        <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mb-6 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-300 shadow-xs">
+                                                        <div className="w-12 h-12 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center mb-6 group-hover:bg-brand-600 group-hover:text-white transition-colors duration-300 shadow-xs">
                                                             {renderStatIcon(metric.icon, "w-6 h-6")}
                                                         </div>
                                                     )}
@@ -212,9 +370,9 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                         })}
                                     </div>
                                 ) : (
-                                    <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 flex items-center gap-4 text-slate-500 text-sm">
+                                    <div className="p-8 rounded-3xl bg-white border border-slate-200 flex items-center gap-4 text-slate-500 text-sm">
                                         <TrendingUp className="w-6 h-6 text-brand-600 shrink-0" />
-                                        <span>{t('Data dan metrik dampak sedang diperbarui oleh tim monitoring evaluasi Insani.')}</span>
+                                        <span>{t('Data dan metrik capaian dampak sedang diperbarui oleh tim monitoring evaluasi Insani.')}</span>
                                     </div>
                                 )}
                             </div>
@@ -223,7 +381,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                 </section>
             )}
 
-            {/* 3. Video Documentation Section */}
+            {/* 4. Video Documentation Section (Penyaluran Bantuan) */}
             {youtubeEmbedUrl && (
                 <section className="py-20 md:py-28 bg-slate-900 text-white relative overflow-hidden">
                     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -253,9 +411,9 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                 </section>
             )}
 
-            {/* 4. Distribution Photo Gallery Section */}
+            {/* 5. Distribution Photo Gallery Section */}
             {gallery.length > 0 && (
-                <section className="py-20 md:py-28 bg-slate-50 border-t border-slate-100">
+                <section className="py-20 md:py-28 bg-white border-t border-slate-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <FadeIn className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                             <div>

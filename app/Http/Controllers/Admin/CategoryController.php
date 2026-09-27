@@ -204,7 +204,7 @@ class CategoryController extends BaseController
             $validated['stats_metrics'] = json_decode($validated['stats_metrics'], true) ?: [];
         }
 
-        // Process gallery
+        // Process distribution gallery
         $currentGallery = $category->distribution_gallery ?? [];
         $existingKept = $validated['existing_gallery'] ?? [];
 
@@ -221,6 +221,24 @@ class CategoryController extends BaseController
         }
         $validated['distribution_gallery'] = $gallery;
         unset($validated['gallery_images'], $validated['existing_gallery']);
+
+        // Process crisis gallery
+        $currentCrisisGallery = $category->crisis_gallery ?? [];
+        $existingCrisisKept = $validated['existing_crisis_gallery'] ?? [];
+
+        $removedCrisisImages = array_diff($currentCrisisGallery, $existingCrisisKept);
+        foreach ($removedCrisisImages as $removed) {
+            Storage::disk('public')->delete($removed);
+        }
+
+        $crisisGallery = array_values($existingCrisisKept);
+        if ($request->hasFile('crisis_gallery_images')) {
+            foreach ($request->file('crisis_gallery_images') as $file) {
+                $crisisGallery[] = $file->store('categories/crisis', 'public');
+            }
+        }
+        $validated['crisis_gallery'] = $crisisGallery;
+        unset($validated['crisis_gallery_images'], $validated['existing_crisis_gallery']);
 
         $category->update($validated);
 

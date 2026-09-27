@@ -23,14 +23,18 @@ class Category extends Model
         'reality_title',
         'reality_description',
         'reality_source',
+        'impact_title',
+        'impact_description',
         'stats_metrics',
         'video_url',
         'distribution_gallery',
+        'crisis_video_url',
+        'crisis_gallery',
         'is_active',
         'sort_order',
     ];
 
-    public $translatable = ['name', 'public_name', 'description', 'reality_title', 'reality_description'];
+    public $translatable = ['name', 'public_name', 'description', 'reality_title', 'reality_description', 'impact_title', 'impact_description'];
 
     public function getDisplayNameAttribute(): string
     {
@@ -58,5 +62,6 @@ class Category extends Model
         'platform_fee_percent' => 'decimal:2',
         'stats_metrics' => 'array',
         'distribution_gallery' => 'array',
+        'crisis_gallery' => 'array',
     ];
 }

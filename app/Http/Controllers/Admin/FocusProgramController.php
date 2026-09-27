@@ -47,8 +47,9 @@ class FocusProgramController extends Controller
             $c->has_cover = ! empty($c->pillar_image);
             $c->has_reality = ! empty($c->getTranslation('reality_title', 'id', false))
                 && ! empty($c->getTranslation('reality_description', 'id', false));
-            $c->has_video = ! empty($c->video_url);
-            $c->gallery_count = is_array($c->distribution_gallery) ? count($c->distribution_gallery) : 0;
+            $c->has_video = ! empty($c->video_url) || ! empty($c->crisis_video_url);
+            $c->gallery_count = (is_array($c->distribution_gallery) ? count($c->distribution_gallery) : 0)
+                + (is_array($c->crisis_gallery) ? count($c->crisis_gallery) : 0);
             $c->metrics_count = is_array($c->stats_metrics) ? count($c->stats_metrics) : 0;
 
             return $c;
@@ -111,6 +112,8 @@ class FocusProgramController extends Controller
         $category->description_translations = $category->getTranslations('description');
         $category->reality_title_translations = $category->getTranslations('reality_title');
         $category->reality_description_translations = $category->getTranslations('reality_description');
+        $category->impact_title_translations = $category->getTranslations('impact_title');
+        $category->impact_description_translations = $category->getTranslations('impact_description');
         $category->display_name = $category->display_name;
 
         // Ambil contoh program terkait yang aktif
@@ -147,7 +150,7 @@ class FocusProgramController extends Controller
             $validated['stats_metrics'] = json_decode($validated['stats_metrics'], true) ?: [];
         }
 
-        // Process gallery
+        // Process distribution gallery
         $currentGallery = $category->distribution_gallery ?? [];
         $existingKept = $validated['existing_gallery'] ?? [];
 
@@ -164,6 +167,24 @@ class FocusProgramController extends Controller
         }
         $validated['distribution_gallery'] = $gallery;
         unset($validated['gallery_images'], $validated['existing_gallery']);
+
+        // Process crisis gallery
+        $currentCrisisGallery = $category->crisis_gallery ?? [];
+        $existingCrisisKept = $validated['existing_crisis_gallery'] ?? [];
+
+        $removedCrisisImages = array_diff($currentCrisisGallery, $existingCrisisKept);
+        foreach ($removedCrisisImages as $removed) {
+            Storage::disk('public')->delete($removed);
+        }
+
+        $crisisGallery = array_values($existingCrisisKept);
+        if ($request->hasFile('crisis_gallery_images')) {
+            foreach ($request->file('crisis_gallery_images') as $file) {
+                $crisisGallery[] = $file->store('categories/crisis', 'public');
+            }
+        }
+        $validated['crisis_gallery'] = $crisisGallery;
+        unset($validated['crisis_gallery_images'], $validated['existing_crisis_gallery']);
 
         $category->update($validated);
 

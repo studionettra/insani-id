@@ -119,3 +119,73 @@ it('allows toggling focus program status', function () {
     $this->category->refresh();
     expect($this->category->is_focus_program)->toBeTrue();
 });
+
+it('allows updating focus program with impact narrative and separated metrics', function () {
+    actingAs($this->editor)
+        ->put(route('admin.focus-programs.update', $this->category), [
+            'is_focus_program' => true,
+            'impact_title' => [
+                'id' => 'Hadir Menjawab Krisis: Ikhtiar Insani',
+                'en' => 'Present in Crisis: Insani Response',
+            ],
+            'impact_description' => [
+                'id' => 'Dua pendekatan aksi nyata dan portofolio sub-program.',
+                'en' => 'Two practical approaches and sub-program portfolio.',
+            ],
+            'stats_metrics' => [
+                [
+                    'tipe' => 'realita',
+                    'value' => '97,5%',
+                    'label' => ['id' => 'Sekolah rusak di Gaza', 'en' => 'Damaged schools in Gaza'],
+                    'icon' => 'AlertCircle',
+                    'sumber' => 'UNICEF, 2026',
+                    'url_sumber' => 'https://unicef.org',
+                ],
+                [
+                    'tipe' => 'capaian',
+                    'value' => '333',
+                    'label' => ['id' => 'Total Program Pendidikan', 'en' => 'Total Education Programs'],
+                    'icon' => 'Layers',
+                ],
+            ],
+        ])
+        ->assertRedirect(route('admin.focus-programs.index'))
+        ->assertSessionHas('success');
+
+    $this->category->refresh();
+
+    expect($this->category->getTranslation('impact_title', 'id'))->toBe('Hadir Menjawab Krisis: Ikhtiar Insani');
+    expect($this->category->getTranslation('impact_title', 'en'))->toBe('Present in Crisis: Insani Response');
+    expect($this->category->getTranslation('impact_description', 'id'))->toBe('Dua pendekatan aksi nyata dan portofolio sub-program.');
+    expect($this->category->stats_metrics)->toHaveCount(2);
+    expect($this->category->stats_metrics[0]['tipe'])->toBe('realita');
+    expect($this->category->stats_metrics[0]['sumber'])->toBe('UNICEF, 2026');
+    expect($this->category->stats_metrics[1]['tipe'])->toBe('capaian');
+});
+
+it('allows uploading crisis gallery images and crisis video url', function () {
+    Storage::fake('public');
+
+    $crisisImg = UploadedFile::fake()->image('crisis_field.jpg', 800, 600);
+    $distImg = UploadedFile::fake()->image('dist_field.jpg', 800, 600);
+
+    actingAs($this->editor)
+        ->put(route('admin.focus-programs.update', $this->category), [
+            'is_focus_program' => true,
+            'crisis_video_url' => 'https://www.youtube.com/watch?v=krisis12345',
+            'video_url' => 'https://www.youtube.com/watch?v=distribusi12',
+            'crisis_gallery_images' => [$crisisImg],
+            'gallery_images' => [$distImg],
+        ])
+        ->assertRedirect(route('admin.focus-programs.index'))
+        ->assertSessionHas('success');
+
+    $this->category->refresh();
+
+    expect($this->category->crisis_video_url)->toBe('https://www.youtube.com/watch?v=krisis12345');
+    expect($this->category->video_url)->toBe('https://www.youtube.com/watch?v=distribusi12');
+    expect($this->category->crisis_gallery)->toHaveCount(1);
+    expect($this->category->distribution_gallery)->toHaveCount(1);
+    Storage::disk('public')->assertExists($this->category->crisis_gallery[0]);
+    Storage::disk('public')->assertExists($this->category->distribution_gallery[0]);
+});

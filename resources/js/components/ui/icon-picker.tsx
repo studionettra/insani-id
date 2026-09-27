@@ -43,6 +43,7 @@ import {
     Sprout,
     Moon,
     Package,
+    Layers,
     Search,
     X,
     ChevronDown,
@@ -82,6 +83,7 @@ export const ICONS_LIST: IconItem[] = [
     { name: 'Target', label: 'Sasaran / Target', category: 'donasi', keywords: ['target', 'sasaran', 'tujuan', 'fokus'], component: Target },
     { name: 'ShieldCheck', label: 'Amanah & Audit', category: 'donasi', keywords: ['shield', 'aman', 'transparan', 'terpercaya', 'amanah', 'audit'], component: ShieldCheck },
     { name: 'CheckCircle2', label: 'Tuntas / Selesai', category: 'donasi', keywords: ['check', 'sukses', 'tuntas', 'berhasil', 'selesai'], component: CheckCircle2 },
+    { name: 'Layers', label: 'Program / Lapisan', category: 'donasi', keywords: ['layers', 'program', 'kategori', 'tingkat', 'lapisan'], component: Layers },
 
     // Jangkauan & Program
     { name: 'Globe', label: 'Wilayah / Global', category: 'wilayah', keywords: ['globe', 'dunia', 'global', 'internasional', 'bumi', 'wilayah'], component: Globe },
