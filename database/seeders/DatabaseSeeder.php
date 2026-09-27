@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             FaqSeeder::class,
             FinancialReportSeeder::class,
             TestimonialSeeder::class,
+            ProgramReportCategorySeeder::class,
         ]);
 
         $admin = User::factory()->create([

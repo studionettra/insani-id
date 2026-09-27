@@ -2,7 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, Sparkles, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, Sparkles, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet, Flag } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -680,6 +680,28 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                     )}
                                 </CardContent>
                             </Card>
+
+                            {/* Card Disclaimer & Report Link */}
+                            <div className="rounded-2xl p-4 sm:p-5 bg-blue-50/70 border border-blue-200/80 shadow-xs space-y-3">
+                                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                                    <strong className="font-bold text-slate-900">Disclaimer: </strong>
+                                    {t(
+                                        'Informasi, opini, dan foto yang tertulis di halaman program ini adalah milik lembaga (pihak yang menggalang dana) dan tidak mewakili Insani.id.',
+                                        'Informasi, opini, dan foto yang tertulis di halaman program ini adalah milik lembaga (pihak yang menggalang dana) dan tidak mewakili Insani.id.'
+                                    )}
+                                </p>
+                                <div className="pt-2 border-t border-blue-200/60">
+                                    <Link
+                                        href={`/program/${program.slug}/lapor`}
+                                        className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-insani-blue transition-colors group"
+                                    >
+                                        <Flag className="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors shrink-0" />
+                                        <span className="underline decoration-slate-300 group-hover:decoration-insani-blue underline-offset-4">
+                                            {t('Apakah penggalangan dana ini mencurigakan? Laporkan', 'Apakah penggalangan dana ini mencurigakan? Laporkan')}
+                                        </span>
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Sidebar (Right) - Hidden on Mobile */}

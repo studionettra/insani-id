@@ -25,6 +25,7 @@ class PermissionSeeder extends Seeder
             'update-post.view', 'update-post.create', 'update-post.update', 'update-post.delete',
             'comment.view', 'comment.moderate',
             'report.view',
+            'program_report.view', 'program_report.manage',
             'settings.view', 'settings.update',
 
             // New Modules (Survey & Fundraiser)

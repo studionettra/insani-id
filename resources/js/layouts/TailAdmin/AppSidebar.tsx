@@ -23,6 +23,7 @@ import {
   Sparkles,
   Bell,
   Compass,
+  ShieldAlert,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -157,6 +158,18 @@ const AppSidebar: React.FC = () => {
           name: "Relawan Fundraiser",
           path: "/admin/fundraisers",
         }] : []),
+        ...((permissions.includes('program_report.manage') || permissions.includes('program_report.view') || isSuperadmin) ? [
+          {
+            icon: <ShieldAlert className="w-5 h-5" />,
+            name: "Laporan Pelanggaran",
+            path: "/admin/program-reports",
+          },
+          {
+            icon: <ShieldAlert className="w-5 h-5" />,
+            name: "Kategori Laporan",
+            path: "/admin/program-report-categories",
+          },
+        ] : []),
       ],
     },
     {

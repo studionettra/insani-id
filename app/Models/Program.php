@@ -138,6 +138,11 @@ class Program extends Model
         return $this->hasMany(Fundraiser::class);
     }
 
+    public function reports()
+    {
+        return $this->hasMany(ProgramReport::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();

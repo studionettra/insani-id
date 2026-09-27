@@ -21,6 +21,8 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PopupMessageController;
 use App\Http\Controllers\Admin\ProgramController;
+use App\Http\Controllers\Admin\ProgramReportCategoryController;
+use App\Http\Controllers\Admin\ProgramReportController;
 use App\Http\Controllers\Admin\ProgramUpdateController as AdminProgramUpdateController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SiteSettingController;
@@ -48,6 +50,7 @@ use App\Http\Controllers\Public\FundraiserController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController as PublicPageController;
 use App\Http\Controllers\Public\ProgramListingController;
+use App\Http\Controllers\Public\ProgramReportController as PublicProgramReportController;
 use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
@@ -71,6 +74,10 @@ Route::group([
     Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])->name('donation.status');
     Route::get('/donasi/kwitansi/{donationCode}', [DonationReceiptController::class, 'show'])->name('donation.receipt');
     Route::get('/cek-donasi', [DonationController::class, 'lookup'])->name('donation.lookup');
+    Route::get('/program/{slug}/lapor', [PublicProgramReportController::class, 'create'])->name('program.report.create');
+    Route::post('/program/{slug}/lapor', [PublicProgramReportController::class, 'store'])
+        ->middleware('throttle:5,1')
+        ->name('program.report.store');
     Route::get('/program/{slug}', [ProgramListingController::class, 'show'])->name('program.show');
 
     // Public Pages
@@ -282,6 +289,16 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
         Route::middleware('permission:comment.moderate')->group(function () {
             Route::get('comments', [CommentModerationController::class, 'index'])->name('comments.index');
             Route::put('comments/{comment}/toggle-hidden', [CommentModerationController::class, 'toggleHidden'])->name('comments.toggle-hidden');
+        });
+
+        Route::middleware('permission:program_report.manage')->group(function () {
+            Route::patch('program-report-categories/{program_report_category}/toggle-active', [ProgramReportCategoryController::class, 'toggleActive'])->name('program-report-categories.toggle-active');
+            Route::resource('program-report-categories', ProgramReportCategoryController::class)->except(['show', 'create', 'edit']);
+
+            Route::get('program-reports', [ProgramReportController::class, 'index'])->name('program-reports.index');
+            Route::put('program-reports/{program_report}/status', [ProgramReportController::class, 'updateStatus'])->name('program-reports.update-status');
+            Route::post('program-reports/{program_report}/takedown', [ProgramReportController::class, 'actionTakeDown'])->name('program-reports.takedown');
+            Route::delete('program-reports/{program_report}', [ProgramReportController::class, 'destroy'])->name('program-reports.destroy');
         });
 
         Route::middleware('permission:report.view')->group(function () {
