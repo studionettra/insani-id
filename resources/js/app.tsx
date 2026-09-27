@@ -61,9 +61,11 @@ if (typeof window !== 'undefined') {
     });
 
     router.on('navigate', (event) => {
-        if (sessionStorage.getItem('logged_out') === 'true') {
+        const loggedOutRedirect = sessionStorage.getItem('logged_out_redirect') || (sessionStorage.getItem('logged_out') === 'true' ? '/login' : null);
+        if (loggedOutRedirect) {
+            sessionStorage.removeItem('logged_out_redirect');
             sessionStorage.removeItem('logged_out');
-            window.location.replace('/login');
+            window.location.replace(loggedOutRedirect);
 
             return;
         }

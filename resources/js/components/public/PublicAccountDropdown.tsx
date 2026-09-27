@@ -107,16 +107,30 @@ export default function PublicAccountDropdown({
         }
     };
 
+    const isStaff = user?.roles?.some((r: any) => [
+        'Administrator',
+        'Program Officer',
+        'Verifikator',
+        'Keuangan',
+        'Content Editor',
+        'Customer Service',
+        'Eksekutif',
+        'Relawan Lapangan',
+        'admin',
+        'superadmin',
+    ].includes(r?.name || r)) || Boolean(user?.is_admin);
+
     const handleLogout = (e: React.MouseEvent) => {
         e.preventDefault();
         setIsOpen(false);
+        const redirectUrl = isStaff ? '/login' : '/';
         if (typeof window !== 'undefined') {
-            sessionStorage.setItem('logged_out', 'true');
+            sessionStorage.setItem('logged_out_redirect', redirectUrl);
         }
         router.post('/logout', {}, {
             onFinish: () => {
                 router.clearHistory();
-                window.location.replace('/login');
+                window.location.replace(redirectUrl);
             },
         });
     };

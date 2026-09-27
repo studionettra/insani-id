@@ -20,6 +20,7 @@ use Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -61,4 +62,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (HttpException $exception, Request $request) {
+            if ($exception->getStatusCode() === 419) {
+                if ($request->is('api/*') || $request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Sesi Anda telah berakhir. Silakan masuk kembali.',
+                    ], 419);
+                }
+
+                return redirect()->route('login')->with('status', 'Sesi Anda telah berakhir. Silakan masuk kembali.');
+            }
+        });
     })->create();

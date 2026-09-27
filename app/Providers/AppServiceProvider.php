@@ -7,9 +7,11 @@ use App\Models\Program;
 use App\Observers\PaymentObserver;
 use App\Observers\ProgramObserver;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -35,6 +37,13 @@ class AppServiceProvider extends ServiceProvider
         // Implicitly grant "Administrator" role all permissions
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Administrator') ? true : null;
+        });
+
+        // Capture user entity on logout before session is invalidated
+        Event::listen(Logout::class, function (Logout $event) {
+            if ($event->user) {
+                request()->attributes->set('logged_out_user', $event->user);
+            }
         });
 
         Program::observe(ProgramObserver::class);

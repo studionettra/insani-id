@@ -51,7 +51,7 @@ export default function UserDropdown() {
     e.preventDefault();
     setIsOpen(false);
     if (typeof window !== "undefined") {
-      sessionStorage.setItem("logged_out", "true");
+      sessionStorage.setItem("logged_out_redirect", "/login");
     }
     router.post("/logout", {}, {
       onFinish: () => {

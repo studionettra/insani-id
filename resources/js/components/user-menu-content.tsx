@@ -23,13 +23,30 @@ export function UserMenuContent({ user }: Props) {
     const handleLogout = (e: React.MouseEvent) => {
         e.preventDefault();
         cleanup();
+
+        const userRoles = auth?.user?.roles || (user as any)?.roles || [];
+        const isStaff = userRoles.some((r: any) => [
+            'Administrator',
+            'Program Officer',
+            'Verifikator',
+            'Keuangan',
+            'Content Editor',
+            'Customer Service',
+            'Eksekutif',
+            'Relawan Lapangan',
+            'admin',
+            'superadmin',
+        ].includes(r?.name || r)) || Boolean(auth?.user?.is_admin || (user as any)?.is_admin);
+
+        const redirectUrl = isStaff ? '/login' : '/';
+
         if (typeof window !== 'undefined') {
-            sessionStorage.setItem('logged_out', 'true');
+            sessionStorage.setItem('logged_out_redirect', redirectUrl);
         }
         router.post(logout(), {}, {
             onFinish: () => {
                 router.clearHistory();
-                window.location.replace('/login');
+                window.location.replace(redirectUrl);
             },
         });
     };

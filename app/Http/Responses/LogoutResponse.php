@@ -22,8 +22,30 @@ class LogoutResponse implements LogoutResponseContract
             return new JsonResponse('', 204);
         }
 
+        $user = $request->attributes->get('logged_out_user');
+
+        $staffRoles = [
+            'Administrator',
+            'Program Officer',
+            'Verifikator',
+            'Keuangan',
+            'Content Editor',
+            'Customer Service',
+            'Eksekutif',
+            'Relawan Lapangan',
+            'admin',
+            'superadmin',
+        ];
+
+        $isStaff = $user && (
+            (method_exists($user, 'hasAnyRole') && $user->hasAnyRole($staffRoles))
+            || (! empty($user->is_admin))
+        );
+
+        $targetUrl = $isStaff ? route('login') : route('home');
+
         Inertia::clearHistory();
 
-        return Inertia::location(route('login'));
+        return Inertia::location($targetUrl);
     }
 }

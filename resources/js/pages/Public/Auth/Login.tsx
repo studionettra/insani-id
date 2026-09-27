@@ -1,6 +1,6 @@
 import { useForm, Head, Link, usePage } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { ArrowRight, Lock, Mail } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Lock, Mail, AlertCircle, CheckCircle2 } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,11 +30,25 @@ export default function Login({ status }: { status?: string }) {
             {/* Kiri: Form Login */}
             <div className="flex w-full flex-col justify-center px-4 py-6 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32 lg:py-0">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
-                    <img 
-                        src={siteLogo} 
-                        alt="Logo Insani" 
-                        className="h-10 w-auto mb-4 object-contain" 
-                    />
+                    {/* Navigasi Sekunder Kembali ke Beranda */}
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brand-600 transition-colors mb-6 group w-fit"
+                    >
+                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        <span>Kembali ke Beranda</span>
+                    </Link>
+
+                    {/* Logo sebagai tautan ke beranda */}
+                    <div>
+                        <Link href="/" title="Kembali ke Beranda" className="inline-block mb-4 hover:opacity-85 transition-opacity">
+                            <img 
+                                src={siteLogo} 
+                                alt="Logo Insani" 
+                                className="h-10 w-auto object-contain" 
+                            />
+                        </Link>
+                    </div>
                     
                     <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
                         Selamat Datang
@@ -44,8 +58,19 @@ export default function Login({ status }: { status?: string }) {
                     </p>
 
                     {status && (
-                        <div className="mt-4 rounded-md bg-green-50 p-4 text-sm font-medium text-green-800">
-                            {status}
+                        <div
+                            className={`mt-4 rounded-xl p-3.5 text-sm font-medium flex items-start gap-2.5 border ${
+                                status.toLowerCase().includes('sesi')
+                                    ? 'bg-amber-50 border-amber-200 text-amber-900'
+                                    : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                            }`}
+                        >
+                            {status.toLowerCase().includes('sesi') ? (
+                                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                            ) : (
+                                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                            )}
+                            <div className="leading-snug">{status}</div>
                         </div>
                     )}
 

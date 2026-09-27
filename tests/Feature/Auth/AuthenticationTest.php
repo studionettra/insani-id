@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
+use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     Http::fake([
@@ -62,25 +64,60 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
-test('users can logout', function () {
+test('regular users are redirected to home on logout', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post(route('logout'));
+
+    $response->assertRedirect(route('home'));
+
+    $this->assertGuest();
+});
+
+test('inertia regular users receive 409 location header to home on logout', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('logout'), [], ['X-Inertia' => 'true']);
+
+    $response->assertStatus(409);
+    $response->assertHeader('X-Inertia-Location', route('home'));
+
+    $this->assertGuest();
+});
+
+test('staff or admin users are redirected to login on logout', function () {
+    Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'web']);
+    $admin = User::factory()->create();
+    $admin->assignRole('Administrator');
+
+    $response = $this->actingAs($admin)->post(route('logout'));
 
     $response->assertRedirect(route('login'));
 
     $this->assertGuest();
 });
 
-test('inertia users receive 409 location header on logout to prevent back history', function () {
-    $user = User::factory()->create();
+test('inertia staff or admin users receive 409 location header to login on logout', function () {
+    Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'web']);
+    $admin = User::factory()->create();
+    $admin->assignRole('Administrator');
 
-    $response = $this->actingAs($user)->post(route('logout'), [], ['X-Inertia' => 'true']);
+    $response = $this->actingAs($admin)->post(route('logout'), [], ['X-Inertia' => 'true']);
 
     $response->assertStatus(409);
     $response->assertHeader('X-Inertia-Location', route('login'));
 
     $this->assertGuest();
+});
+
+test('session expired token mismatch exception redirects to login with flash status', function () {
+    Route::post('/test-csrf-route', function () {
+        throw new TokenMismatchException('CSRF token mismatch.');
+    })->middleware('web');
+
+    $response = $this->post('/test-csrf-route');
+    $response->assertRedirect(route('login'));
+    $response->assertSessionHas('status', 'Sesi Anda telah berakhir. Silakan masuk kembali.');
 });
 
 test('prevent back history headers are set on protected dashboard routes', function () {

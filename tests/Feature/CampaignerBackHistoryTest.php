@@ -61,9 +61,9 @@ test('logged out campaigner cannot access dashboard or program routes on back na
     $response = $this->actingAs($user)->get('/akun/programs');
     $response->assertOk();
 
-    // 2. Perform logout
+    // 2. Perform logout (campaigner is redirected to home)
     $logoutResponse = $this->post(route('logout'));
-    $logoutResponse->assertRedirect(route('login'));
+    $logoutResponse->assertRedirect(route('home'));
     $this->assertGuest();
 
     // 3. Attempt to visit campaigner programs or dashboard again (simulating back navigation)

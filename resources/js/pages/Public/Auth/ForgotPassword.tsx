@@ -1,6 +1,6 @@
 import { useForm, Head, Link, usePage } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { ArrowRight, Mail, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Mail, LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,11 +27,25 @@ export default function ForgotPassword({ status }: { status?: string }) {
             {/* Kiri: Form Lupa Password */}
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
-                    <img 
-                        src={siteLogo} 
-                        alt="Logo Insani" 
-                        className="h-10 w-auto mb-4 object-contain" 
-                    />
+                    {/* Navigasi Sekunder Kembali ke Beranda */}
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-brand-600 transition-colors mb-6 group w-fit"
+                    >
+                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        <span>Kembali ke Beranda</span>
+                    </Link>
+
+                    {/* Logo sebagai tautan ke beranda */}
+                    <div>
+                        <Link href="/" title="Kembali ke Beranda" className="inline-block mb-4 hover:opacity-85 transition-opacity">
+                            <img 
+                                src={siteLogo} 
+                                alt="Logo Insani" 
+                                className="h-10 w-auto object-contain" 
+                            />
+                        </Link>
+                    </div>
                     
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
                         Lupa Password
