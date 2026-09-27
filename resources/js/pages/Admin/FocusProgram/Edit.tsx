@@ -818,17 +818,18 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                 </div>
 
                                 {/* ========================================== */}
-                                {/* GRUP 1: REALITA & KRISIS LAPANGAN (BLOK A) */}
+                                {/* GRUP 1: KONDISI NYATA LAPANGAN             */}
                                 {/* ========================================== */}
                                 <div className="p-5 rounded-2xl border border-rose-200/80 bg-rose-50/30 dark:border-rose-900/50 dark:bg-rose-950/20 space-y-6">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-rose-200/60 dark:border-rose-900/40">
                                         <div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex flex-wrap items-center gap-2">
                                                 <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                                                    1. Dokumentasi Realita & Kondisi Krisis Lapangan
+                                                    1. Dokumentasi Realita & Kondisi Lapangan
                                                 </h4>
-                                                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950 dark:text-rose-400 dark:border-rose-900">
-                                                    Blok A · Krisis Riil
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold rounded-full bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-900">
+                                                    <Info className="w-3.5 h-3.5 text-rose-500" />
+                                                    <span>Kondisi Nyata Lapangan</span>
                                                 </span>
                                             </div>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -917,17 +918,18 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                 </div>
 
                                 {/* ========================================== */}
-                                {/* GRUP 2: AKSI & PENYALURAN INSANI (BLOK B)   */}
+                                {/* GRUP 2: IKHTIAR & SOLUSI INSANI            */}
                                 {/* ========================================== */}
                                 <div className="p-5 rounded-2xl border border-blue-200/80 bg-blue-50/30 dark:border-blue-900/50 dark:bg-blue-950/20 space-y-6">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-blue-200/60 dark:border-blue-900/40">
                                         <div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex flex-wrap items-center gap-2">
                                                 <h4 className="text-sm font-bold text-gray-900 dark:text-white">
                                                     2. Dokumentasi Aksi & Penyaluran Bantuan Insani
                                                 </h4>
-                                                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-900">
-                                                    Blok B · Penyaluran Insani
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-900">
+                                                    <Sparkles className="w-3.5 h-3.5 text-[#1A56DB]" />
+                                                    <span>Ikhtiar & Solusi Insani</span>
                                                 </span>
                                             </div>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
