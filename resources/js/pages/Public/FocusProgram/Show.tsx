@@ -23,6 +23,7 @@ import { formatCurrency, getLocalizedValue } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { renderStatIcon } from '@/components/ui/icon-picker';
 import useTranslation from '@/hooks/use-translation';
+import FocusNarrativeRenderer from '@/components/public/FocusNarrativeRenderer';
 
 interface FocusProgramShowProps {
     pillar: any;
@@ -137,7 +138,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                         {t('Donasi Program Ini')}
                                     </a>
                                 </Button>
-                                {(realityTitle || metrics.length > 0) && (
+                                {(realityTitle || realitaMetrics.length > 0) && (
                                     <Button 
                                         variant="outline" 
                                         size="lg" 
@@ -174,9 +175,12 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                         {realityTitle || t('Mengapa Fokus Ini Sangat Krusial?')}
                                     </h2>
 
-                                    <p className="text-slate-600 text-base md:text-lg leading-relaxed whitespace-pre-line mb-6">
-                                        {realityDesc || t('Banyak saudara kita yang berhadapan dengan situasi krisis dan membutuhkan uluran tangan kebaikan sesegera mungkin. Setiap kontribusi Anda memberikan napas baru dan harapan nyata.')}
-                                    </p>
+                                    <FocusNarrativeRenderer 
+                                        text={realityDesc || t('Banyak saudara kita yang berhadapan dengan situasi krisis dan membutuhkan uluran tangan kebaikan sesegera mungkin. Setiap kontribusi Anda memberikan napas baru dan harapan nyata.')}
+                                        locale={locale}
+                                        variant="reality"
+                                        className="mb-6"
+                                    />
 
                                     {realitySource && (
                                         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-medium">
@@ -331,9 +335,11 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                         {impactTitle || t('Hadir Menjawab Krisis dengan Aksi Nyata')}
                                     </h2>
 
-                                    <p className="text-slate-600 text-base md:text-lg leading-relaxed whitespace-pre-line">
-                                        {impactDesc || t('Insani Indonesia berkomitmen menghadirkan solusi berkelanjutan dan penyaluran bantuan langsung yang transparan dan tepat sasaran.')}
-                                    </p>
+                                    <FocusNarrativeRenderer 
+                                        text={impactDesc || t('Insani Indonesia berkomitmen menghadirkan solusi berkelanjutan dan penyaluran bantuan langsung yang transparan dan tepat sasaran.')}
+                                        locale={locale}
+                                        variant="impact"
+                                    />
                                 </FadeIn>
                             </div>
 

@@ -28,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { IconPicker, renderStatIcon } from '@/components/ui/icon-picker';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import TextareaWithToolbar from '@/components/admin/TextareaWithToolbar';
 import { autoTranslateFields } from '@/lib/translate';
 
 interface CategoryData {
@@ -647,18 +648,18 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                     <Label htmlFor="reality_description" className="text-sm font-semibold text-gray-900 dark:text-white">
                                         Narasi Kondisi Lapangan ({activeLang.toUpperCase()})
                                     </Label>
-                                    <Textarea
+                                    <TextareaWithToolbar
                                         id="reality_description"
                                         rows={6}
                                         placeholder="Ceritakan dengan jelas dan menyentuh kondisi nyata yang dihadapi para penerima manfaat di pelosok, tantangan geografis, dan konsekuensi jika tidak segera dibantu..."
                                         value={data.reality_description[activeLang]}
-                                        onChange={(e) => setData('reality_description', { ...data.reality_description, [activeLang]: e.target.value })}
+                                        onChange={(val) => setData('reality_description', { ...data.reality_description, [activeLang]: val })}
                                         dir={activeLang === 'ar' ? 'rtl' : 'ltr'}
-                                        className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 text-sm focus-visible:ring-[#1A56DB] leading-relaxed"
+                                        locale={activeLang}
+                                        variant="reality"
+                                        error={errors[`reality_description.${activeLang}`]}
+                                        helperText="Tip: Gunakan tombol toolbar untuk teks tebal (**teks**) atau daftar pointer (• Poin). Klik tab 'Pratinjau' untuk melihat tampilan publik."
                                     />
-                                    {errors[`reality_description.${activeLang}`] && (
-                                        <p className="text-xs text-red-500">{errors[`reality_description.${activeLang}`]}</p>
-                                    )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -1051,18 +1052,18 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                     <Label htmlFor="impact_description" className="text-sm font-semibold text-gray-900 dark:text-white">
                                         Narasi Solusi & Capaian Intervensi ({activeLang.toUpperCase()})
                                     </Label>
-                                    <Textarea
+                                    <TextareaWithToolbar
                                         id="impact_description"
                                         rows={6}
                                         placeholder="Ceritakan pendekatan Insani, dua pilar aksi, dan rincian portofolio sub-program intervensi yang telah berjalan..."
                                         value={data.impact_description[activeLang]}
-                                        onChange={(e) => setData('impact_description', { ...data.impact_description, [activeLang]: e.target.value })}
+                                        onChange={(val) => setData('impact_description', { ...data.impact_description, [activeLang]: val })}
                                         dir={activeLang === 'ar' ? 'rtl' : 'ltr'}
-                                        className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 text-sm focus-visible:ring-[#1A56DB] leading-relaxed"
+                                        locale={activeLang}
+                                        variant="impact"
+                                        error={errors[`impact_description.${activeLang}`]}
+                                        helperText="Tip: Gunakan tombol toolbar untuk teks tebal (**teks**) atau daftar pointer (• Poin). Klik tab 'Pratinjau' untuk melihat tampilan publik."
                                     />
-                                    {errors[`impact_description.${activeLang}`] && (
-                                        <p className="text-xs text-red-500">{errors[`impact_description.${activeLang}`]}</p>
-                                    )}
                                 </div>
 
                                 <div className="pt-4 border-t border-gray-100 dark:border-gray-800 space-y-4">
