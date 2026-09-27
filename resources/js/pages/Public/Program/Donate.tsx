@@ -748,7 +748,7 @@ selectChannel(manualChannels[0]);
 
                         {/* Sidebar Recap */}
                         <div className="md:col-span-1">
-                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-24">
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 static md:sticky md:top-24">
                                 <h3 className="font-bold text-slate-800 mb-4 pb-4 border-b">Ringkasan Donasi</h3>
                                 
                                 <div className="flex gap-4 items-start mb-6">
@@ -765,13 +765,13 @@ selectChannel(manualChannels[0]);
                                 </div>
 
                                 <div className="space-y-3 mb-6 pb-6 border-b">
-                                    <div className="flex justify-between text-slate-600 text-sm">
+                                    <div className="flex justify-between items-center text-slate-600 text-sm">
                                         <span>Nominal Donasi</span>
                                         <span className="font-medium text-slate-800">{formatCurrency(data.amount)}</span>
                                     </div>
-                                    <div className="flex justify-between text-slate-600 text-sm">
-                                        <span>Metode Dipilih</span>
-                                        <span className="font-semibold text-slate-800 text-right max-w-[150px] truncate">
+                                    <div className="flex justify-between items-start gap-3 text-slate-600 text-sm">
+                                        <span className="shrink-0">Metode Dipilih</span>
+                                        <span className="font-semibold text-slate-800 text-right">
                                             {selectedChannelDef?.name || 'Metode Pembayaran'}
                                         </span>
                                     </div>
