@@ -58,6 +58,12 @@ class FinancialReportController extends Controller
         if (is_string($request->input('summary'))) {
             $request->merge(['summary' => ['id' => $request->input('summary')]]);
         }
+        if ($request->has('total_revenue') && is_string($request->input('total_revenue'))) {
+            $request->merge(['total_revenue' => str_replace('.', '', $request->input('total_revenue'))]);
+        }
+        if ($request->has('total_disbursement') && is_string($request->input('total_disbursement'))) {
+            $request->merge(['total_disbursement' => str_replace('.', '', $request->input('total_disbursement'))]);
+        }
 
         $validated = $request->validate([
             'title' => 'required|array',
@@ -110,6 +116,12 @@ class FinancialReportController extends Controller
         }
         if (is_string($request->input('summary'))) {
             $request->merge(['summary' => ['id' => $request->input('summary')]]);
+        }
+        if ($request->has('total_revenue') && is_string($request->input('total_revenue'))) {
+            $request->merge(['total_revenue' => str_replace('.', '', $request->input('total_revenue'))]);
+        }
+        if ($request->has('total_disbursement') && is_string($request->input('total_disbursement'))) {
+            $request->merge(['total_disbursement' => str_replace('.', '', $request->input('total_disbursement'))]);
         }
 
         $validated = $request->validate([

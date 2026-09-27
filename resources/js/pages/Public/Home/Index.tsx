@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Star, Quote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Star, Quote, Handshake } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -142,8 +142,8 @@ return;
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
                             <div className="lg:col-span-5 lg:sticky lg:top-32">
                                 <FadeIn>
-                                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 leading-[1.1]">
-                                        {t('Jejak Kebaikan Bersama')}
+                                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 leading-[1.1]">
+                                        {t('Jejak Kebaikan Para Inisiator')}
                                     </h2>
                                     <p className="mt-6 text-lg text-zinc-600 max-w-md leading-relaxed">
                                         {t('Berkat dukungan Anda, kami telah menyalurkan bantuan ke berbagai wilayah yang membutuhkan. Setiap donasi menciptakan perubahan nyata.')}
@@ -182,39 +182,30 @@ return;
                 </section>
             )}
 
-            {/* 3. Focus Programs (Bento Grid) Section */}
+            {/* 3. Focus Programs Section (6 Columns 1 Row on Desktop) */}
             {focusPrograms && focusPrograms.length > 0 && (
                 <section className="py-24 bg-zinc-50">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                        <FadeIn className="max-w-2xl mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-6">
-                                {t('Fokus Program')}
-                            </h2>
-                            <p className="text-lg text-zinc-600 leading-relaxed">
-                                {t('Fokus program kebaikan yang kami dedikasikan untuk memberdayakan dan membangkitkan harapan umat di berbagai aspek kehidupan.')}
-                            </p>
+                        <FadeIn className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+                            <div className="max-w-2xl">
+                                <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-4 md:mb-6">
+                                    {t('Fokus Program')}
+                                </h2>
+                                <p className="text-lg text-zinc-600 leading-relaxed">
+                                    {t('Fokus program kebaikan yang kami dedikasikan untuk memberdayakan dan membangkitkan harapan umat di berbagai aspek kehidupan.')}
+                                </p>
+                            </div>
+                            <div className="shrink-0">
+                                <Button asChild variant="outline" className="rounded-full h-11 px-6 border-zinc-200 hover:bg-zinc-100 text-zinc-950 transition-all active:scale-[0.98]">
+                                    <Link href="/fokus-program">
+                                        {t('Lihat Semua')} <ArrowRight className="w-4 h-4 ml-2 rtl:rotate-180" />
+                                    </Link>
+                                </Button>
+                            </div>
                         </FadeIn>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 auto-rows-[300px]">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 xl:gap-5">
                             {focusPrograms.map((cat: any, index: number) => {
-                                // Dynamic bento sizing logic
-                                let spanClass = "col-span-1 md:col-span-2";
-
-                                if (focusPrograms.length % 2 !== 0 && index === 0) {
-                                    spanClass = "col-span-1 md:col-span-4 row-span-2";
-                                } else if (index % 3 === 0) {
-                                    spanClass = "col-span-1 md:col-span-2";
-                                }
-                                
-                                // Color tints for variety
-                                const tints = [
-                                    "bg-brand-900",
-                                    "bg-slate-900",
-                                    "bg-zinc-900",
-                                    "bg-stone-900"
-                                ];
-                                const bgColor = tints[index % tints.length];
-                                
                                 const customName = getLocalizedValue(cat.public_name_translations || cat.public_name, locale);
                                 const defaultName = getLocalizedValue(cat.name_translations || cat.name, locale);
                                 const catTitle = t(customName || defaultName);
@@ -222,28 +213,36 @@ return;
                                 return (
                                     <FadeIn
                                         key={cat.id} 
-                                        delay={index * 0.1}
-                                        className={spanClass}
+                                        delay={index * 0.08}
+                                        className="col-span-1"
                                     >
                                         <Link 
                                             href={`/fokus-program/${cat.slug}`} 
-                                            className={`group relative block w-full h-full rounded-2xl overflow-hidden ${bgColor} transition-transform hover:-translate-y-1`}
+                                            className="group relative flex flex-col justify-between w-full aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                                         >
-                                            {cat.pillar_image && (
+                                            {cat.pillar_image ? (
                                                 <img 
                                                     src={`/storage/${cat.pillar_image}`} 
                                                     alt={catTitle} 
-                                                    className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 group-hover:opacity-80 transition-all duration-700 ease-out" 
+                                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
                                                 />
+                                            ) : (
+                                                <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950" />
                                             )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/20 to-transparent p-8 flex flex-col justify-end">
-                                                <div className="flex justify-between items-end">
-                                                    <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                                            
+                                            {/* Gradient overlay to ensure title & arrow legibility without obscuring the cover image */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/20 to-zinc-950/30 group-hover:from-zinc-950/70 group-hover:via-transparent transition-all duration-300" />
+                                            
+                                            <div className="relative z-10 p-5 sm:p-6 lg:p-4 xl:p-5 flex flex-col justify-between h-full">
+                                                <div className="flex justify-end">
+                                                    <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-8 lg:h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-80 group-hover:opacity-100 group-hover:bg-white group-hover:text-zinc-950 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                                                        <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-4 lg:h-4 rtl:rotate-90" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl sm:text-2xl lg:text-sm xl:text-base font-bold text-white tracking-tight leading-snug line-clamp-2">
                                                         {catTitle}
                                                     </h3>
-                                                    <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-zinc-950 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 shadow-lg">
-                                                        <ArrowUpRight className="w-5 h-5 rtl:rotate-90" />
-                                                    </div>
                                                 </div>
                                             </div>
                                         </Link>
@@ -261,8 +260,9 @@ return;
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
                         <FadeIn className="flex flex-col mb-16">
                             <div className="max-w-2xl mb-8">
-                                <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-6">
-                                    {t('Bantu Mereka Sekarang')}
+                                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-6 leading-tight">
+                                    <span className="block">{t('Saatnya Menjadi')}</span>
+                                    <span className="block">{t('Inisiator Kebaikan')}</span>
                                 </h2>
                                 <p className="text-lg text-zinc-600 leading-relaxed">
                                     {t('Pilih program kebaikan dan salurkan donasi Anda hari ini.')}
@@ -505,6 +505,13 @@ return;
             {partners && partners.length > 0 && (
                 <section className="py-20 bg-white border-t border-zinc-100">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+                        <FadeIn className="flex justify-center mb-10 md:mb-12">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-insani-blue border border-blue-200/60 shadow-2xs">
+                                <Handshake className="w-3.5 h-3.5" />
+                                {t('Mitra Kebaikan Insani')}
+                            </span>
+                        </FadeIn>
+
                         <FadeIn delay={0.2} className="flex flex-wrap justify-center items-center gap-12 md:gap-20 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
                             {partners.map((partner: any) => (
                                 <a key={partner.id} href={partner.website_url || '#'} target={partner.website_url ? "_blank" : "_self"} rel="noreferrer" className="block transform transition-transform hover:-translate-y-1">

@@ -70,10 +70,12 @@ class FaqSeeder extends Seeder
                 'question' => [
                     'id' => 'Apa perbedaan metode pembayaran otomatis dan transfer manual bank?',
                     'en' => 'What is the difference between automated payment methods and manual bank transfer?',
+                    'ar' => 'ما هو الفرق بين طرق الدفع التلقائي والتحويل المصرفي اليدوي؟',
                 ],
                 'answer_html' => [
                     'id' => '<ul><li><strong>Pembayaran Otomatis (QRIS, Virtual Account, E-Wallet):</strong> Donasi diverifikasi secara <em>real-time</em> oleh payment gateway berlisensi Bank Indonesia (Xendit). Donasi terkonfirmasi lunas dalam beberapa detik tanpa perlu mengirimkan bukti transfer.</li><li><strong>Transfer Manual Bank (BSI & BRI Giro):</strong> Anda mentransfer dana langsung ke rekening giro resmi yayasan. Setelah transfer, Anda <strong>wajib mengonfirmasi</strong> dengan mengirimkan foto/screenshot bukti transfer ke WhatsApp Customer Service kami agar admin keuangan memverifikasinya.</li></ul>',
                     'en' => '<ul><li><strong>Automated Payments (QRIS, Virtual Account, E-Wallets):</strong> Donations are verified in real time by licensed Bank Indonesia payment gateways (Xendit). The transaction is confirmed within seconds without uploading proof of transfer.</li><li><strong>Manual Bank Transfer (BSI & BRI):</strong> You transfer funds directly to the foundation official corporate giro account. Afterward, you <strong>must confirm</strong> by sending a transfer receipt screenshot to our WhatsApp Customer Service for finance manual reconciliation.</li></ul>',
+                    'ar' => '<ul><li><strong>الدفع التلقائي (QRIS، الحساب الافتراضي، المحفظة الإلكترونية):</strong> يتم التحقق من التبرع فورياً بواسطة بوابة دفع مرخصة من بنك إندونيسيا (Xendit). يتم تأكيد اكتمال التبرع في غضون ثوانٍ دون الحاجة إلى إرسال إيصال التحويل.</li><li><strong>التحويل المصرفي اليدوي (حساب BSI و BRI الجاري):</strong> تقوم بتحويل الأموال مباشرة إلى الحساب الجاري الرسمي للمؤسسة. بعد التحويل، <strong>يتعين عليك تأكيد التبرع</strong> بإرسال صورة/لقطة شاشة لإيصال التحويل إلى خدمة العملاء عبر واتساب لتقوم الإدارة المالية بمطابقتها.</li></ul>',
                 ],
                 'category' => 'donatur',
                 'keywords' => 'otomatis, manual, verifikasi otomatis, konfirmasi manual, xendit, qris',
@@ -109,10 +111,12 @@ class FaqSeeder extends Seeder
                 'question' => [
                     'id' => 'Apa itu fitur Rincian Penggunaan Dana pada halaman program?',
                     'en' => 'What is the Fund Usage Details feature on the campaign page?',
+                    'ar' => 'ما هي ميزة تفاصيل استخدام الأموال في صفحة البرنامج؟',
                 ],
                 'answer_html' => [
-                    'id' => '<p>Fitur <strong>Rincian Penggunaan Dana</strong> adalah wujud transparansi finansial terbuka platform Insani Indonesia kepada para donatur dan masyarakat. Melalui modal rincian ini, Anda dapat memantau secara terbuka:</p><ul><li><strong>Total Donasi Masuk (Gross):</strong> Akumulasi donasi yang disalurkan donatur.</li><li><strong>Biaya Transaksi Digital:</strong> Biaya resmi payment gateway (Xendit) untuk pemrosesan QRIS, VA, dan E-Wallet.</li><li><strong>Biaya Operasional Platform (5% saat pencairan):</strong> Biaya operasional dan verifikasi yayasan yang hanya dipotong ketika penggalang dana mencairkan dana.</li><li><strong>Total Dana Telah Dicairkan:</strong> Akumulasi dana yang sudah ditransfer ke campaigner beserta rencana penggunaannya.</li><li><strong>Sisa Saldo Belum Dicairkan:</strong> Dana bersih donasi yang masih tersimpan aman dan siap dicairkan pada tahapan berikutnya.</li></ul>',
-                    'en' => '<p>The <strong>Fund Usage Details</strong> feature represents Insani Indonesia\'s commitment to financial transparency. Through this modal, donors and the public can view:</p><ul><li><strong>Total Gross Donations:</strong> Accumulated donations contributed by donors.</li><li><strong>Digital Payment Fees:</strong> Official payment gateway transaction fees (Xendit) for QRIS, VA, and E-Wallet processing.</li><li><strong>Platform Operational Fee (5% upon disbursement):</strong> Foundation operational and verification fees deducted only when funds are disbursed.</li><li><strong>Total Disbursed Funds:</strong> Accumulated funds already transferred to the campaigner along with allocation plans.</li><li><strong>Remaining Undisbursed Balance:</strong> Net donation balance safely held and ready for subsequent disbursement milestones.</li></ul>',
+                    'id' => '<p>Fitur <strong>Rincian Penggunaan Dana</strong> adalah wujud transparansi finansial terbuka platform Insani Indonesia kepada para donatur dan masyarakat. Melalui modal rincian ini, Anda dapat memantau secara terbuka:</p><ul><li><strong>Total Donasi Masuk (Gross):</strong> Akumulasi donasi yang disalurkan donatur.</li><li><strong>Biaya Transaksi Pembayaran Digital:</strong> Biaya transaksi resmi payment gateway (Xendit) untuk pemrosesan QRIS, VA, dan E-Wallet.</li><li><strong>Biaya Operasional Platform (5% saat pencairan):</strong> Biaya operasional dan verifikasi yayasan yang hanya dipotong ketika penggalang dana mencairkan dana.</li><li><strong>Total Dana Telah Dicairkan:</strong> Akumulasi dana yang sudah ditransfer ke campaigner beserta rencana penggunaannya.</li><li><strong>Sisa Saldo Belum Dicairkan:</strong> Dana bersih donasi yang masih tersimpan aman dan siap dicairkan pada tahapan berikutnya.</li></ul>',
+                    'en' => '<p>The <strong>Fund Usage Details</strong> feature represents Insani Indonesia\'s commitment to financial transparency. Through this modal, donors and the public can view:</p><ul><li><strong>Total Gross Donations:</strong> Accumulated donations contributed by donors.</li><li><strong>Digital Payment Transaction Fee:</strong> Official payment gateway transaction fees (Xendit) for QRIS, VA, and E-Wallet processing.</li><li><strong>Platform Operational Fee (5% upon disbursement):</strong> Foundation operational and verification fees deducted only when funds are disbursed.</li><li><strong>Total Disbursed Funds:</strong> Accumulated funds already transferred to the campaigner along with allocation plans.</li><li><strong>Remaining Undisbursed Balance:</strong> Net donation balance safely held and ready for subsequent disbursement milestones.</li></ul>',
+                    'ar' => '<p>تُعد ميزة <strong>تفاصيل استخدام الأموال</strong> تجسيداً للشفافية المالية المفتوحة لمنصة إنساني إندونيسيا تجاه المتبرعين والمجتمع. ومن خلال هذه النافذة، يمكنك المتابعة بكل شفافية:</p><ul><li><strong>إجمالي التبرعات المستلمة (الإجمالي):</strong> التبرعات المتراكمة المقدمة من المتبرعين.</li><li><strong>رسوم معاملات الدفع الرقمي:</strong> الرسوم الرسمية لبوابة الدفع (Xendit) لمعالجة QRIS، والحسابات الافتراضية، والمحافظ الإلكترونية.</li><li><strong>رسوم تشغيل المنصة (5% عند الصرف):</strong> رسوم تشغيل وتحقق المؤسسة والتي تُخصم فقط عندما يقوم صاحب الحملة بصرف الأموال.</li><li><strong>إجمالي الأموال المصروفة:</strong> إجمالي الأموال المحولة بالفعل إلى منظم الحملة مع خطة الاستخدام.</li><li><strong>الرصيد المتبقي غير المصروف:</strong> صافي أموال التبرعات المحفوظة بأمان والجاهزة للصرف في المراحل اللاحقة.</li></ul>',
                 ],
                 'category' => 'donatur',
                 'keywords' => 'rincian dana, penggunaan dana, transparansi, potongan donasi, biaya platform, sisa saldo',
@@ -228,10 +232,12 @@ class FaqSeeder extends Seeder
                 'question' => [
                     'id' => 'Berapa biaya operasional platform yang dikenakan pada program?',
                     'en' => 'What platform operational fees are charged on campaigns?',
+                    'ar' => 'كم تبلغ رسوم تشغيل المنصة المفروضة على البرامج؟',
                 ],
                 'answer_html' => [
-                    'id' => '<p>Insani Indonesia beroperasi secara transparan sesuai UU No. 9 Tahun 1961 dan ketentuan Kementerian Sosial RI:</p><ul><li>Sebesar <strong>5%</strong> (maksimal 10% sesuai undang-undang) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform dan verifikasi, yang <strong>dipotong saat pencairan dana (disbursement)</strong>.</li><li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li><li>Biaya administrasi pihak ketiga (payment gateway seperti perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li></ul>',
-                    'en' => '<p>Insani Indonesia operates transparently in compliance with Indonesian Law No. 9/1961 and Social Ministry regulations:</p><ul><li><strong>5%</strong> (up to the legal ceiling of 10%) for social, humanitarian, and healthcare campaigns for platform operations, field verification, and maintenance, <strong>deducted only upon disbursement</strong>.</li><li><strong>0% (zero platform fee)</strong> for designated emergency disaster relief programs.</li><li>Third-party payment gateway processing fees are deducted at Bank Indonesia official standard rates.</li></ul>',
+                    'id' => '<p>Insani Indonesia beroperasi secara transparan sesuai UU No. 9 Tahun 1961 dan ketentuan Kementerian Sosial RI:</p><ul><li>Sebesar <strong>5%</strong> (maksimal 10% sesuai undang-undang) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform dan verifikasi, yang <strong>dipotong saat pencairan dana (disbursement)</strong>.</li><li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li><li>Biaya transaksi pembayaran digital pihak ketiga (payment gateway perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li></ul>',
+                    'en' => '<p>Insani Indonesia operates transparently in compliance with Indonesian Law No. 9/1961 and Social Ministry regulations:</p><ul><li><strong>5%</strong> (up to the legal ceiling of 10%) for social, humanitarian, and healthcare campaigns for platform operations, field verification, and maintenance, <strong>deducted only upon disbursement</strong>.</li><li><strong>0% (zero platform fee)</strong> for designated emergency disaster relief programs.</li><li>Third-party digital payment transaction fees (banking/QRIS payment gateways) are deducted at Bank Indonesia official standard rates.</li></ul>',
+                    'ar' => '<p>تعمل إنساني إندونيسيا بشفافية تامة وفقاً للقانون رقم 9 لسنة 1961 ولوائح وزارة الشؤون الاجتماعية الإندونيسية:</p><ul><li>نسبة <strong>5%</strong> (بحد أقصى 10% وفقاً للقانون) للبرامج الاجتماعية والإنسانية العامة والصحية كرسوم لتشغيل المنصة والتحقق الميداني، والتي <strong>تُخصم عند صرف الأموال (Disbursement)</strong>.</li><li><strong>0% (معفاة تماماً من رسوم المنصة)</strong> لبرامج الإغاثة الطارئة المحددة للكوارث الطبيعية.</li><li>تُخصم رسوم معاملات الدفع الرقمي لأطراف خارجية (بوابات الدفع المصرفية وQRIS) وفقاً للأسعار الرسمية القياسية لبنك إندونيسيا.</li></ul>',
                 ],
                 'category' => 'campaigner',
                 'keywords' => 'biaya operasional, potongan platform, fee, persentase potongan, uu 9 1961',
@@ -349,10 +355,12 @@ class FaqSeeder extends Seeder
                 'question' => [
                     'id' => 'Bagaimana Insani Indonesia melindungi privasi dan data pribadi pengguna?',
                     'en' => 'How does Insani Indonesia protect users privacy and personal data?',
+                    'ar' => 'كيف تحمي إنساني إندونيسيا خصوصية المستخدمين وبياناتهم الشخصية؟',
                 ],
                 'answer_html' => [
                     'id' => '<p>Kami mematuhi <strong>UU Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP)</strong>:</p><ul><li>Seluruh data dienkripsi dengan protokol SSL/HTTPS 256-bit standar industri perbankan.</li><li>Kami <strong>tidak pernah memperjualbelikan</strong> data nomor kontak, email, atau identitas donatur kepada pihak mana pun.</li><li>Data sensitif perbankan diproses langsung oleh payment gateway resmi Bank Indonesia tanpa disimpan di server kami.</li><li>Baca ketentuan lengkapnya di halaman Kebijakan Privasi.</li></ul>',
                     'en' => '<p>We strictly adhere to <strong>Law No. 27/2022 on Personal Data Protection (UU PDP)</strong>:</p><ul><li>All data transmissions are encrypted using banking-grade 256-bit SSL/HTTPS protocols.</li><li>We <strong>never sell or monetize</strong> contact phone numbers, emails, or personal identities to third parties.</li><li>Sensitive banking details are processed directly by Bank Indonesia-licensed gateways without touching our servers.</li><li>Read our complete terms on the Privacy Policy page.</li></ul>',
+                    'ar' => '<p>نحن نلتزم بشكل صارم بـ <strong>القانون رقم 27 لسنة 2022 بشأن حماية البيانات الشخصية (UU PDP)</strong>:</p><ul><li>يتم تشفير جميع البيانات باستخدام بروتوكول SSL/HTTPS بتشفير 256 بت وفقاً لأعلى المعايير المصرفية.</li><li>نحن <strong>لا نبيع ولا نتاجر أبداً</strong> بأرقام الهواتف أو البريد الإلكتروني أو بيانات الهوية لأي طرف آخر.</li><li>تتم معالجة البيانات المصرفية الحساسة مباشرة عبر بوابات الدفع الرسمية المرخصة من بنك إندونيسيا دون حفظها على خوادمنا.</li><li>يمكنكم الاطلاع على الشروط الكاملة في صفحة سياسة الخصوصية.</li></ul>',
                 ],
                 'category' => 'keamanan',
                 'keywords' => 'keamanan data, uu pdp, privasi, enkripsi, ssl, bocor data',
@@ -554,6 +562,15 @@ class FaqSeeder extends Seeder
                 'id' => $item['answer_html'],
                 'en' => $item['answer_html'],
             ];
+
+            if ($existing) {
+                if (! isset($questionData['ar']) && $existing->getTranslation('question', 'ar', false)) {
+                    $questionData['ar'] = $existing->getTranslation('question', 'ar', false);
+                }
+                if (! isset($answerData['ar']) && $existing->getTranslation('answer_html', 'ar', false)) {
+                    $answerData['ar'] = $existing->getTranslation('answer_html', 'ar', false);
+                }
+            }
 
             if (! $existing) {
                 Faq::create([

@@ -148,7 +148,7 @@ const FAQ_DATA: FaqItem[] = [
                 <p>Fitur <strong>Rincian Penggunaan Dana</strong> adalah wujud transparansi finansial terbuka platform Insani Indonesia kepada para donatur dan masyarakat. Melalui modal rincian ini, Anda dapat memantau secara terbuka:</p>
                 <ul className="list-disc pl-5 space-y-1">
                     <li><strong>Total Donasi Masuk (Gross):</strong> Akumulasi donasi yang disalurkan donatur.</li>
-                    <li><strong>Biaya Transaksi Digital:</strong> Biaya resmi payment gateway (Xendit) untuk pemrosesan QRIS, VA, dan E-Wallet.</li>
+                    <li><strong>Biaya Transaksi Pembayaran Digital:</strong> Biaya transaksi resmi payment gateway (Xendit) untuk pemrosesan QRIS, VA, dan E-Wallet.</li>
                     <li><strong>Biaya Operasional Platform (5% saat pencairan):</strong> Biaya operasional dan verifikasi yayasan yang hanya dipotong ketika penggalang dana mencairkan dana.</li>
                     <li><strong>Total Dana Telah Dicairkan:</strong> Akumulasi dana yang sudah ditransfer ke campaigner beserta rencana penggunaannya.</li>
                     <li><strong>Sisa Saldo Belum Dicairkan:</strong> Dana bersih donasi yang masih tersimpan aman dan siap dicairkan pada tahapan berikutnya.</li>
@@ -348,7 +348,7 @@ const FAQ_DATA: FaqItem[] = [
                 <ul className="list-disc pl-5 space-y-1.5">
                     <li>Sebesar <strong>5%</strong> (maksimal 10% sesuai regulasi) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform, verifikasi kurator lapangan, dan pemeliharaan server, yang <strong>dipotong saat pencairan dana (disbursement)</strong>.</li>
                     <li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li>
-                    <li>Biaya administrasi pihak ketiga (payment gateway seperti perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li>
+                    <li>Biaya transaksi pembayaran digital pihak ketiga (payment gateway perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li>
                 </ul>
             </div>
         )

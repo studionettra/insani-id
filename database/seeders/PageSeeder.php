@@ -97,15 +97,22 @@ class PageSeeder extends Seeder
                 ? File::get($item['file'])
                 : '<p>Konten halaman sedang diperbarui.</p>';
 
+            $existing = Page::where('slug', $item['slug'])->first();
+            $contentHtml = [
+                'id' => $htmlContent,
+                'en' => ($existing && $existing->getTranslation('content_html', 'en', false) && $existing->getTranslation('content_html', 'en', false) !== $existing->getTranslation('content_html', 'id', false))
+                    ? $existing->getTranslation('content_html', 'en', false)
+                    : $htmlContent,
+                'ar' => ($existing && $existing->getTranslation('content_html', 'ar', false) && $existing->getTranslation('content_html', 'ar', false) !== $existing->getTranslation('content_html', 'id', false))
+                    ? $existing->getTranslation('content_html', 'ar', false)
+                    : $htmlContent,
+            ];
+
             Page::updateOrCreate(
                 ['slug' => $item['slug']],
                 [
                     'title' => $item['title'],
-                    'content_html' => [
-                        'id' => $htmlContent,
-                        'en' => $htmlContent,
-                        'ar' => $htmlContent,
-                    ],
+                    'content_html' => $contentHtml,
                     'meta_title' => $item['meta_title'],
                     'meta_description' => $item['meta_description'],
                     'is_active' => true,

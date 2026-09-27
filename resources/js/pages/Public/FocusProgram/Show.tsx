@@ -13,7 +13,8 @@ import {
     Share2, 
     TrendingUp, 
     Layers,
-    ExternalLink
+    ExternalLink,
+    HandHeart
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -168,7 +169,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                 <FadeIn>
                                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-wider mb-4 border border-rose-100">
                                         <Info className="w-3.5 h-3.5" />
-                                        <span>{t('Kondisi Nyata Lapangan')}</span>
+                                        <span>{t('Realitas Saat Ini')}</span>
                                     </div>
 
                                     <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-[1.15] mb-6">
@@ -328,7 +329,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                 <FadeIn>
                                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-100">
                                         <Sparkles className="w-3.5 h-3.5 text-[#1A56DB]" />
-                                        <span>{t('Ikhtiar & Solusi Insani')}</span>
+                                        <span>{t('Ikhtiar Insani')}</span>
                                     </div>
 
                                     <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-[1.15] mb-6">
@@ -491,8 +492,8 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                     <FadeIn className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                         <div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-3">
-                                <Heart className="w-3.5 h-3.5 fill-current" />
-                                <span>{t('Aksi Nyata Anda')}</span>
+                                <HandHeart className="w-3.5 h-3.5" />
+                                <span>{t('Menjadi Inisiator Kebaikan')}</span>
                             </div>
                             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
                                 {t('Program Donasi Terkait')}

@@ -1,5 +1,5 @@
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
-import { MapPin, Phone, Mail, Clock, CheckCircle2, UserPlus, Wallet, Handshake, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, CheckCircle2, UserPlus, Wallet, Handshake, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -141,6 +141,10 @@ export default function ContactCreate({ faqs = [] }: any) {
             <div className="bg-insani-darkblue text-white py-16 md:py-24 relative overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-semibold mb-6 border border-white/10">
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>{t('Saluran Komunikasi')}</span>
+                    </div>
                     <h1 className="text-4xl md:text-5xl font-bold mb-6">{t('Kontak')}</h1>
                     <p className="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto">
                         {t('Hubungi kami sesuai kebutuhan Anda. Kami siap memberikan layanan terbaik demi kebaikan bersama.')}

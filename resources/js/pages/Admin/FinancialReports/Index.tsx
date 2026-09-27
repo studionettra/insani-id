@@ -54,6 +54,13 @@ const CATEGORY_OPTIONS = [
     { value: 'interim', label: 'Laporan Triwulan / Semester' },
 ];
 
+const formatRupiahInput = (val: string | number | null | undefined): string => {
+    if (val === null || val === undefined || val === '') return '';
+    const digits = String(val).replace(/\D/g, '');
+    if (!digits) return '';
+    return new Intl.NumberFormat('id-ID').format(BigInt(digits));
+};
+
 export default function FinancialReportsIndex({ reports, availableYears = [], filters = {} }: any) {
     const [search, setSearch] = useState(filters.search || '');
     const [selectedYear, setSelectedYear] = useState(filters.year || '');
@@ -67,7 +74,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
     const [isTranslating, setIsTranslating] = useState(false);
     const [activeLangTab, setActiveLangTab] = useState<'id' | 'en' | 'ar'>('id');
 
-    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
+    const { data, setData, post, processing, errors, reset, clearErrors, transform } = useForm({
         _method: 'post',
         title: { id: '', en: '', ar: '' },
         report_year: new Date().getFullYear(),
@@ -84,6 +91,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
         is_active: true,
         sort_order: 0,
     });
+
+    const handleRupiahChange = (field: 'total_revenue' | 'total_disbursement', rawValue: string) => {
+        const digits = rawValue.replace(/\D/g, '');
+        setData(field, digits ? formatRupiahInput(digits) : '');
+    };
 
     const handleAutoTranslate = async () => {
         const sourceTitle = data.title.id;
@@ -191,8 +203,8 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                 en: report.summary_translations?.en || report.summary?.en || '',
                 ar: report.summary_translations?.ar || report.summary?.ar || '',
             },
-            total_revenue: report.total_revenue ?? '',
-            total_disbursement: report.total_disbursement ?? '',
+            total_revenue: report.total_revenue ? formatRupiahInput(report.total_revenue) : '',
+            total_disbursement: report.total_disbursement ? formatRupiahInput(report.total_disbursement) : '',
             beneficiaries_count: report.beneficiaries_count ?? '',
             is_active: !!report.is_active,
             sort_order: report.sort_order ?? 0,
@@ -204,6 +216,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
 
     const submitCreate = (e: React.FormEvent) => {
         e.preventDefault();
+        transform((data) => ({
+            ...data,
+            total_revenue: data.total_revenue ? String(data.total_revenue).replace(/\./g, '') : '',
+            total_disbursement: data.total_disbursement ? String(data.total_disbursement).replace(/\./g, '') : '',
+        }));
         post('/admin/financial-reports', {
             forceFormData: true,
             onSuccess: () => {
@@ -217,6 +234,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
         e.preventDefault();
         if (!editingReport) return;
 
+        transform((data) => ({
+            ...data,
+            total_revenue: data.total_revenue ? String(data.total_revenue).replace(/\./g, '') : '',
+            total_disbursement: data.total_disbursement ? String(data.total_disbursement).replace(/\./g, '') : '',
+        }));
         post(`/admin/financial-reports/${editingReport.id}`, {
             forceFormData: true,
             onSuccess: () => {
@@ -809,28 +831,40 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <Label htmlFor="total_revenue" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Total Penghimpunan (Rp)</Label>
-                                    <Input
-                                        id="total_revenue"
-                                        type="number"
-                                        min="0"
-                                        value={data.total_revenue}
-                                        onChange={(e) => setData('total_revenue', e.target.value)}
-                                        placeholder="Contoh: 4850000000"
-                                        className="mt-1.5 h-10 text-sm bg-white dark:bg-slate-900"
-                                    />
+                                    <Label htmlFor="total_revenue" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Total Penghimpunan</Label>
+                                    <div className="relative mt-1.5 rounded-lg shadow-2xs">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">Rp</span>
+                                        </div>
+                                        <Input
+                                            id="total_revenue"
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={data.total_revenue}
+                                            onChange={(e) => handleRupiahChange('total_revenue', e.target.value)}
+                                            placeholder="Contoh: 4.850.000.000"
+                                            className="pl-9 h-10 text-sm bg-white dark:bg-slate-900"
+                                        />
+                                    </div>
+                                    {errors.total_revenue && <p className="text-xs text-red-500 mt-1">{errors.total_revenue}</p>}
                                 </div>
                                 <div>
-                                    <Label htmlFor="total_disbursement" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Total Penyaluran (Rp)</Label>
-                                    <Input
-                                        id="total_disbursement"
-                                        type="number"
-                                        min="0"
-                                        value={data.total_disbursement}
-                                        onChange={(e) => setData('total_disbursement', e.target.value)}
-                                        placeholder="Contoh: 4320000000"
-                                        className="mt-1.5 h-10 text-sm bg-white dark:bg-slate-900"
-                                    />
+                                    <Label htmlFor="total_disbursement" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Total Penyaluran</Label>
+                                    <div className="relative mt-1.5 rounded-lg shadow-2xs">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">Rp</span>
+                                        </div>
+                                        <Input
+                                            id="total_disbursement"
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={data.total_disbursement}
+                                            onChange={(e) => handleRupiahChange('total_disbursement', e.target.value)}
+                                            placeholder="Contoh: 4.320.000.000"
+                                            className="pl-9 h-10 text-sm bg-white dark:bg-slate-900"
+                                        />
+                                    </div>
+                                    {errors.total_disbursement && <p className="text-xs text-red-500 mt-1">{errors.total_disbursement}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="beneficiaries_count" className="text-xs font-semibold text-slate-700 dark:text-slate-300">Penerima Manfaat (Jiwa)</Label>

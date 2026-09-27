@@ -19,9 +19,11 @@ import React, { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { getLocalizedValue } from '@/lib/utils';
+import useTranslation from '@/hooks/use-translation';
 
 export default function AboutIndex({ management = [], faqs = [], aboutPage, legalDocuments = [], financialReports = [] }: any) {
     const { locale, siteSettings } = usePage().props as any;
+    const { t } = useTranslation();
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
     const defaultVision = "Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan yang universal.";
@@ -270,7 +272,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                         <div className="text-center max-w-3xl mx-auto mb-16">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-insani-blue/10 text-insani-blue mb-4">
                                 <Users className="w-3.5 h-3.5" />
-                                Tim Manajemen
+                                {t('Tim Manajemen')}
                             </span>
                             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
                                 Manajemen Insani Indonesia
@@ -330,6 +332,10 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                         <div className="max-w-2xl">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-insani-blue border border-blue-200/60 mb-4">
+                                <Scale className="w-3.5 h-3.5" />
+                                {t('Kepatuhan Hukum & Regulasi')}
+                            </span>
                             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Legalitas Resmi</h2>
                             <p className="text-slate-600 text-lg">
                                 Insani Indonesia beroperasi secara legal dan diakui oleh negara. Kami berkomitmen pada transparansi dan kepatuhan hukum sebagai bentuk tanggung jawab publik.
@@ -404,7 +410,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                         <div className="text-center max-w-3xl mx-auto mb-16">
                             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60 mb-4">
                                 <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
-                                Transparansi & Akuntabilitas Publik
+                                {t('Transparansi & Akuntabilitas Publik')}
                             </span>
                             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
                                 Laporan Keuangan & Annual Report
@@ -495,13 +501,13 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                                 <div className="grid grid-cols-2 gap-2 p-3 bg-white rounded-xl border border-slate-100 mb-5 text-xs">
                                                     {report.formatted_revenue && (
                                                         <div>
-                                                            <span className="text-[10px] text-slate-400 block font-medium">Dana Terhimpun</span>
+                                                            <span className="text-[10px] text-slate-400 block font-medium">{t('Total Penghimpunan')}</span>
                                                             <span className="font-bold text-slate-800">{report.formatted_revenue}</span>
                                                         </div>
                                                     )}
                                                     {report.formatted_disbursement && (
                                                         <div>
-                                                            <span className="text-[10px] text-emerald-600 block font-medium">Realisasi Salur</span>
+                                                            <span className="text-[10px] text-emerald-600 block font-medium">{t('Total Penyaluran')}</span>
                                                             <span className="font-bold text-emerald-700">{report.formatted_disbursement}</span>
                                                         </div>
                                                     )}

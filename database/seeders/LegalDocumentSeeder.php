@@ -17,6 +17,7 @@ class LegalDocumentSeeder extends Seeder
                 'title' => [
                     'id' => 'Akta Pendirian',
                     'en' => 'Deed of Establishment',
+                    'ar' => 'عقد التأسيس',
                 ],
                 'document_number' => null,
                 'issuer_name' => 'Notaris',
@@ -26,6 +27,7 @@ class LegalDocumentSeeder extends Seeder
                 'description' => [
                     'id' => 'Akta pendirian resmi Yayasan Peduli Insani Indonesia.',
                     'en' => 'Official deed of establishment of Insani Indonesia Foundation.',
+                    'ar' => 'عقد التأسيس الرسمي لمؤسسة إنساني إندونيسيا.',
                 ],
                 'is_active' => true,
                 'sort_order' => 1,
@@ -34,6 +36,7 @@ class LegalDocumentSeeder extends Seeder
                 'title' => [
                     'id' => 'Akta Perubahan',
                     'en' => 'Deed of Amendment',
+                    'ar' => 'وثيقة التعديل',
                 ],
                 'document_number' => null,
                 'issuer_name' => 'Notaris',
@@ -43,6 +46,7 @@ class LegalDocumentSeeder extends Seeder
                 'description' => [
                     'id' => 'Akta perubahan anggaran dasar Yayasan Peduli Insani Indonesia.',
                     'en' => 'Deed of amendment of articles of association.',
+                    'ar' => 'وثيقة تعديل النظام الأساسي لمؤسسة إنساني إندونيسيا.',
                 ],
                 'is_active' => true,
                 'sort_order' => 2,
@@ -51,6 +55,7 @@ class LegalDocumentSeeder extends Seeder
                 'title' => [
                     'id' => 'SK Kemenkumham Pendirian',
                     'en' => 'Establishment Decree by Ministry of Law and Human Rights',
+                    'ar' => 'قرار التأسيس من وزارة القانون وحقوق الإنسان',
                 ],
                 'document_number' => 'AHU-0002557.AH.01.04.Tahun 2019',
                 'issuer_name' => 'Kemenkumham RI',
@@ -60,6 +65,7 @@ class LegalDocumentSeeder extends Seeder
                 'description' => [
                     'id' => 'Surat Keputusan Menteri Hukum dan HAM RI tentang pengesahan badan hukum yayasan.',
                     'en' => 'Decree of the Minister of Law and Human Rights on legal entity ratification.',
+                    'ar' => 'قرار وزير القانون وحقوق الإنسان بجمهورية إندونيسيا بشأن اعتماد الكيان القانوني للمؤسسة.',
                 ],
                 'is_active' => true,
                 'sort_order' => 3,
@@ -68,6 +74,7 @@ class LegalDocumentSeeder extends Seeder
                 'title' => [
                     'id' => 'SK Kemenkumham Perubahan',
                     'en' => 'Amendment Decree by Ministry of Law and Human Rights',
+                    'ar' => 'قرار التعديل من وزارة القانون وحقوق الإنسان',
                 ],
                 'document_number' => null,
                 'issuer_name' => 'Kemenkumham RI',
@@ -77,6 +84,7 @@ class LegalDocumentSeeder extends Seeder
                 'description' => [
                     'id' => 'Surat Keputusan Menteri Hukum dan HAM RI tentang pengesahan perubahan anggaran dasar.',
                     'en' => 'Decree of the Minister of Law and Human Rights on amendment ratification.',
+                    'ar' => 'قرار وزير القانون وحقوق الإنسان بجمهورية إندونيسيا بشأن اعتماد تعديل النظام الأساسي.',
                 ],
                 'is_active' => true,
                 'sort_order' => 4,
@@ -85,6 +93,7 @@ class LegalDocumentSeeder extends Seeder
                 'title' => [
                     'id' => 'Surat Tanda Daftar Yayasan & Izin Kegiatan',
                     'en' => 'Foundation Registration & Activity Permit',
+                    'ar' => 'شهادة تسجيل المؤسسة وتصريح الأنشطة',
                 ],
                 'document_number' => null,
                 'issuer_name' => 'Pemerintah Provinsi DKI Jakarta',
@@ -94,6 +103,7 @@ class LegalDocumentSeeder extends Seeder
                 'description' => [
                     'id' => 'Tanda daftar yayasan sosial dan izin operasional kegiatan.',
                     'en' => 'Social foundation certificate of registration and operational permit.',
+                    'ar' => 'شهادة تسجيل المؤسسة الاجتماعية وتصريح مزاولة الأنشطة التشغيلية.',
                 ],
                 'is_active' => true,
                 'sort_order' => 5,
@@ -102,6 +112,7 @@ class LegalDocumentSeeder extends Seeder
                 'title' => [
                     'id' => 'Surat Keterangan Domisili',
                     'en' => 'Certificate of Domicile',
+                    'ar' => 'شهادة إثبات المقر',
                 ],
                 'document_number' => null,
                 'issuer_name' => 'Pemerintah Provinsi DKI Jakarta',
@@ -111,6 +122,7 @@ class LegalDocumentSeeder extends Seeder
                 'description' => [
                     'id' => 'Surat keterangan domisili sekretariat Yayasan Peduli Insani Indonesia.',
                     'en' => 'Certificate of official foundation secretariat domicile.',
+                    'ar' => 'شهادة إثبات المقر الرسمي لأمانة مؤسسة إنساني إندونيسيا.',
                 ],
                 'is_active' => true,
                 'sort_order' => 6,

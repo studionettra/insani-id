@@ -240,3 +240,24 @@ it('can create and search multilingual financial reports with ID, EN, and AR', f
             ->has('reports.data', 1)
         );
 });
+
+it('normalizes total_revenue and total_disbursement with indonesian dot separators', function () {
+    actingAs($this->admin)
+        ->post('/admin/financial-reports', [
+            'title' => [
+                'id' => 'Laporan Keuangan Format Titik 2026',
+            ],
+            'report_year' => 2026,
+            'category' => 'annual_report',
+            'total_revenue' => '4.850.000.000',
+            'total_disbursement' => '4.320.000.000',
+            'is_active' => true,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $report = FinancialReport::where('report_year', 2026)->first();
+    expect($report)->not->toBeNull();
+    expect($report->total_revenue)->toBe(4850000000.0);
+    expect($report->total_disbursement)->toBe(4320000000.0);
+});

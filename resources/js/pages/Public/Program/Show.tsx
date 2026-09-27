@@ -1080,7 +1080,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
 
                                 <div className="flex justify-between items-center text-slate-600 text-xs pl-3.5">
                                     <span className="flex items-center gap-1 text-slate-500">
-                                        &bull; {t('Biaya Layanan Pembayaran Digital (Payment Gateway)')}
+                                        &bull; {t('Biaya Transaksi Pembayaran Digital')}
                                     </span>
                                     <span className="font-medium text-red-500">
                                         - {formatCurrency(transparency?.total_gateway_fees ?? 0)}
