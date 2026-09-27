@@ -33,6 +33,7 @@ class RoleSeeder extends Seeder
                 'dashboard.view',
                 'campaigner.view', 'campaigner.verify', 'campaigner.reject', 'campaigner.suspend',
                 'program.view', 'program.publish', 'program.reject',
+                'program_report.view', 'program_report.manage',
             ],
 
             'Keuangan' => [

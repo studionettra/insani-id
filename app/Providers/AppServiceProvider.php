@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -30,6 +31,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        // Implicitly grant "Administrator" role all permissions
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Administrator') ? true : null;
+        });
 
         Program::observe(ProgramObserver::class);
         Payment::observe(PaymentObserver::class);
