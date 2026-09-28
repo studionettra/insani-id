@@ -798,7 +798,7 @@ export default function Dashboard({
                                         Konfirmasi Donasi Masuk
                                     </h3>
                                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 leading-relaxed">
-                                        Validasi struk transfer manual, cek mutasi bank rekening giro, dan setujui donasi.
+                                        Validasi struk transfer manual, cek mutasi rekening bank, dan setujui donasi.
                                     </p>
                                 </div>
                                 <div className="mt-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 flex items-center justify-between text-xs font-semibold text-amber-600 dark:text-amber-400">
@@ -905,7 +905,7 @@ export default function Dashboard({
                                             <Landmark className="h-4.5 w-4.5" />
                                         </div>
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-400 border border-teal-200/60 dark:border-teal-800/50">
-                                            Giro Resmi
+                                            Rekening Resmi
                                         </span>
                                     </div>
                                     <h3 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">

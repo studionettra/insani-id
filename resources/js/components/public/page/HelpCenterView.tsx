@@ -103,7 +103,7 @@ const FAQ_DATA: FaqItem[] = [
                         <strong>Pembayaran Otomatis (QRIS, Virtual Account, E-Wallet):</strong> Donasi diverifikasi secara <em>real-time</em> oleh payment gateway berlisensi Bank Indonesia (Xendit). Donasi terkonfirmasi lunas dalam beberapa detik tanpa perlu mengirimkan bukti transfer.
                     </li>
                     <li>
-                        <strong>Transfer Manual Bank (BSI & BRI Giro):</strong> Anda mentransfer dana langsung ke rekening giro resmi yayasan. Setelah transfer, Anda <strong>wajib mengonfirmasi</strong> dengan mengirimkan foto/screenshot bukti transfer ke WhatsApp Customer Service kami agar admin keuangan memverifikasinya.
+                        <strong>Transfer Manual Bank (BSI & BRI):</strong> Anda mentransfer dana langsung ke rekening resmi yayasan. Setelah transfer, Anda <strong>wajib mengonfirmasi</strong> dengan mengirimkan foto/screenshot bukti transfer ke WhatsApp Customer Service kami agar admin keuangan memverifikasinya.
                     </li>
                 </ul>
             </div>

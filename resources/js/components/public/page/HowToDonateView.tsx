@@ -113,10 +113,10 @@ export default function HowToDonateView() {
                         <span className="w-8 h-8 rounded-xl bg-blue-50 text-insani-blue flex items-center justify-center text-sm font-extrabold">
                             2
                         </span>
-                        <span>Transfer Manual ke Rekening Giro Yayasan</span>
+                        <span>Transfer Manual ke Rekening Yayasan</span>
                     </h2>
                     <p className="text-sm text-slate-600 mb-6">
-                        Jika Anda lebih nyaman berdonasi lewat transfer ATM atau internet banking langsung ke rekening giro resmi {foundationName}:
+                        Jika Anda lebih nyaman berdonasi lewat transfer ATM atau internet banking langsung ke rekening resmi {foundationName}:
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

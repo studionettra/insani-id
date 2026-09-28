@@ -100,7 +100,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
             account_name: 'Yayasan Peduli Insani Indonesia',
             bank_type: 'syariah',
             logo: null,
-            instructions: 'Transfer tepat sesuai nominal yang tertera ke rekening giro resmi yayasan.',
+            instructions: 'Transfer tepat sesuai nominal yang tertera ke rekening resmi yayasan.',
             is_active: true,
             sort_order: (accounts.data?.length || 0) + 1,
         });
@@ -336,7 +336,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                     <DialogHeader>
                         <DialogTitle>Tambah Rekening Bank</DialogTitle>
                         <DialogDescription>
-                            Tambahkan rekening giro/tabungan resmi yayasan untuk saluran transfer donatur.
+                            Tambahkan rekening resmi yayasan untuk saluran transfer donatur.
                         </DialogDescription>
                     </DialogHeader>
 
