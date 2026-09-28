@@ -314,7 +314,9 @@ const AppSidebar: React.FC = () => {
   const isActive = useCallback(
     (path?: string) => {
       if (!path) return false;
-      return url === path || url.startsWith(path + '/');
+      const currentPath = url.split(/[?#]/)[0];
+      const targetPath = path.split(/[?#]/)[0];
+      return currentPath === targetPath || currentPath.startsWith(targetPath + '/');
     },
     [url]
   );
