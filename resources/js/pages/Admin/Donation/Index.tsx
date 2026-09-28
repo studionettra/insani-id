@@ -14,9 +14,15 @@ import {
     Heart, 
     CreditCard, 
     ShieldCheck,
-    CheckCircle2
+    CheckCircle2,
+    UploadCloud,
+    FileImage,
+    X,
+    ExternalLink,
+    ZoomIn,
+    FileText
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,6 +62,8 @@ interface PaymentInfo {
     paid_amount?: string | number | null;
     paid_at?: string | null;
     confirmed_by?: number | null;
+    transfer_proof?: string | null;
+    transfer_proof_url?: string | null;
     confirmed_by_user?: {
         name: string;
     } | null;
@@ -155,6 +163,11 @@ export default function Index({ donations, filters = {}, counts }: Props) {
     const [confirmingDonation, setConfirmingDonation] = useState<DonationRecord | null>(null);
     const [selectedDonation, setSelectedDonation] = useState<DonationRecord | null>(null);
     const [loadingConfirm, setLoadingConfirm] = useState(false);
+    const [transferProofFile, setTransferProofFile] = useState<File | null>(null);
+    const [transferProofPreview, setTransferProofPreview] = useState<string | null>(null);
+    const [fileError, setFileError] = useState<string | null>(null);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [selectedChannel, setSelectedChannel] = useState(filters.channel || 'all');
 
@@ -208,8 +221,43 @@ export default function Index({ donations, filters = {}, counts }: Props) {
         });
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setFileError(null);
+        if (!file) return;
+
+        if (!['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.type)) {
+            setFileError('Format file harus berupa gambar (JPG, PNG, atau WEBP).');
+            return;
+        }
+
+        if (file.size > 3 * 1024 * 1024) {
+            setFileError('Ukuran file maksimal 3MB.');
+            return;
+        }
+
+        setTransferProofFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setTransferProofPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveFile = () => {
+        setTransferProofFile(null);
+        setTransferProofPreview(null);
+        setFileError(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     const confirmManualDonation = (donation: DonationRecord) => {
         setConfirmingDonation(donation);
+        setTransferProofFile(null);
+        setTransferProofPreview(null);
+        setFileError(null);
         setIsConfirmDialogOpen(true);
     };
 
@@ -218,23 +266,44 @@ export default function Index({ donations, filters = {}, counts }: Props) {
             return;
         }
 
+        if (!transferProofFile) {
+            setFileError('Bukti transfer wajib diunggah untuk konfirmasi donasi manual.');
+            toast.error('Silakan unggah bukti transfer terlebih dahulu.');
+            return;
+        }
+
         setLoadingConfirm(true);
 
         try {
             await router.post(
                 donationsConfirm.url({ donation: confirmingDonation.id }),
-                {},
                 {
+                    transfer_proof: transferProofFile,
+                },
+                {
+                    forceFormData: true,
                     onSuccess: () => {
                         setIsConfirmDialogOpen(false);
                         setConfirmingDonation(null);
+                        setTransferProofFile(null);
+                        setTransferProofPreview(null);
+                        setFileError(null);
                         if (selectedDonation && selectedDonation.id === confirmingDonation.id) {
-                            setSelectedDonation(prev => prev ? { ...prev, status: 'paid', paid_at: new Date().toISOString() } : null);
+                            setSelectedDonation(prev => prev ? { 
+                                ...prev, 
+                                status: 'paid', 
+                                paid_at: new Date().toISOString() 
+                            } : null);
                         }
-                        toast.success('Donasi manual berhasil dikonfirmasi dan status terupdate menjadi Berhasil!');
+                        toast.success('Donasi manual berhasil diverifikasi dan dikonfirmasi!');
                     },
-                    onError: () => {
-                        toast.error('Gagal mengonfirmasi donasi. Silakan periksa kembali.');
+                    onError: (errors) => {
+                        if (errors.transfer_proof) {
+                            setFileError(errors.transfer_proof);
+                            toast.error(errors.transfer_proof);
+                        } else {
+                            toast.error('Gagal mengonfirmasi donasi. Silakan periksa kembali.');
+                        }
                     },
                 }
             );
@@ -246,6 +315,9 @@ export default function Index({ donations, filters = {}, counts }: Props) {
     const handleCancelConfirm = () => {
         setIsConfirmDialogOpen(false);
         setConfirmingDonation(null);
+        setTransferProofFile(null);
+        setTransferProofPreview(null);
+        setFileError(null);
     };
 
     const renderStatusBadge = (status: string) => {
@@ -456,6 +528,8 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                     const programTitle = getProgramTitle(donation.program?.title);
                                     const paymentMethod = donation.payments?.[0]?.payment_method || (donation.channel === 'offline' ? 'Manual Transfer' : 'Online Gateway');
                                     const isManualPending = donation.channel === 'offline' && donation.status === 'pending';
+                                    const donationProofUrl = donation.payments?.find(p => p.transfer_proof_url)?.transfer_proof_url 
+                                        || (donation.payments?.[0]?.transfer_proof ? `/storage/${donation.payments[0].transfer_proof}` : null);
 
                                     return (
                                         <TableRow 
@@ -553,6 +627,20 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                             {/* Aksi */}
                                             <TableCell className="text-right whitespace-nowrap pr-4">
                                                 <div className="flex items-center justify-end gap-1.5">
+                                                    {/* Tombol Lihat Bukti Transfer jika ada */}
+                                                    {Boolean(donationProofUrl) && (
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            onClick={() => setPreviewImageUrl(donationProofUrl)} 
+                                                            className="border-blue-200 dark:border-blue-900/60 bg-blue-50/50 hover:bg-blue-100 text-blue-700 dark:text-blue-300 dark:bg-blue-950/40 dark:hover:bg-blue-900/60 h-7 sm:h-8 px-2 sm:px-2.5 text-xs font-semibold rounded-lg shadow-none" 
+                                                            title="Lihat Bukti Transfer"
+                                                        >
+                                                            <FileText className="w-3.5 h-3.5 mr-1 text-blue-600 dark:text-blue-400" />
+                                                            Bukti
+                                                        </Button>
+                                                    )}
+
                                                     {/* Tombol Konfirmasi Cepat untuk Donasi Manual Pending */}
                                                     {isManualPending && (
                                                         <Button 
@@ -760,6 +848,49 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                         </p>
                                     </div>
                                 )}
+
+                                {/* Bukti Transfer Terverifikasi */}
+                                {(() => {
+                                    const selectedDonationProofUrl = selectedDonation.payments?.find(p => p.transfer_proof_url)?.transfer_proof_url 
+                                        || (selectedDonation.payments?.[0]?.transfer_proof ? `/storage/${selectedDonation.payments[0].transfer_proof}` : null);
+
+                                    if (!selectedDonationProofUrl) return null;
+
+                                    return (
+                                        <div className="p-3.5 rounded-xl border border-blue-200/80 bg-blue-50/50 dark:border-blue-900/50 dark:bg-blue-950/20">
+                                            <div className="flex items-center justify-between gap-2 mb-2">
+                                                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-900 dark:text-blue-300">
+                                                    <FileImage className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                                                    Bukti Transfer Terverifikasi:
+                                                </div>
+                                                <a 
+                                                    href={selectedDonationProofUrl} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium inline-flex items-center gap-1 hover:underline"
+                                                >
+                                                    <span>Buka di Tab Baru</span>
+                                                    <ExternalLink className="w-3 h-3" />
+                                                </a>
+                                            </div>
+                                            <div 
+                                                onClick={() => setPreviewImageUrl(selectedDonationProofUrl)}
+                                                className="cursor-pointer group relative rounded-lg overflow-hidden border border-blue-200/60 dark:border-blue-800 bg-white dark:bg-zinc-900 max-h-52 flex items-center justify-center"
+                                                title="Klik untuk memperbesar"
+                                            >
+                                                <img 
+                                                    src={selectedDonationProofUrl} 
+                                                    alt="Bukti Transfer" 
+                                                    className="max-h-52 object-contain group-hover:scale-[1.02] transition-transform duration-200"
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-medium gap-1.5 backdrop-blur-[2px]">
+                                                    <ZoomIn className="w-4 h-4" />
+                                                    Klik untuk memperbesar
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             <DialogFooter className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-800">
@@ -789,7 +920,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                 </DialogContent>
             </Dialog>
 
-            {/* Confirmation Dialog */}
+            {/* Confirmation Dialog with Required Proof Upload */}
             <Dialog
                 open={isConfirmDialogOpen}
                 onOpenChange={(open) => {
@@ -798,43 +929,195 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                     }
                 }}
             >
-                <DialogContent className="max-w-md p-0 border-0 bg-transparent shadow-none [&>button]:hidden">
-                    <div className="relative w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 mx-auto">
-                        <div className="flex flex-col items-center text-center">
-                            {/* Icon */}
-                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 mb-6">
-                                <AlertCircle className="h-8 w-8" />
+                <DialogContent className="max-w-lg p-0 border-0 bg-transparent shadow-none [&>button]:hidden">
+                    <div className="relative w-full max-w-lg bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-7 mx-auto">
+                        <div className="flex flex-col">
+                            {/* Header */}
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400">
+                                    <ShieldCheck className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                                        Konfirmasi Donasi Manual
+                                    </h3>
+                                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                        Validasi transaksi transfer bank dengan melampirkan struk / bukti transfer.
+                                    </p>
+                                </div>
                             </div>
 
-                            {/* Title */}
-                            <h3 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
-                                Konfirmasi Donasi Manual
-                            </h3>
+                            {/* Summary Box */}
+                            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/60 p-3.5 mb-4 text-xs space-y-1.5">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-zinc-500">Kode Donasi:</span>
+                                    <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{confirmingDonation?.donation_code}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-zinc-500">Nama Donatur:</span>
+                                    <span className="font-semibold text-zinc-800 dark:text-zinc-200">{confirmingDonation?.is_anonymous ? 'Hamba Allah' : confirmingDonation?.donor_name}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-zinc-500">Total Nominal:</span>
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">{formatCurrency(confirmingDonation?.amount)}</span>
+                                </div>
+                            </div>
 
-                            {/* Description */}
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed mb-6">
-                                Anda akan mengonfirmasi pembayaran donasi <span className="font-semibold text-zinc-900 dark:text-white font-mono">{confirmingDonation?.donation_code}</span> sebesar <span className="font-bold text-emerald-600">{formatCurrency(confirmingDonation?.amount)}</span>.<br />
-                                Pastikan dana telah benar-benar masuk ke rekening giro yayasan sebelum melanjutkan.
+                            {/* Upload Area */}
+                            <div className="mb-4">
+                                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                                    Unggah Bukti Transfer / Struk <span className="text-rose-500">*</span>
+                                </label>
+
+                                <input 
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                    id="transfer-proof-input"
+                                />
+
+                                {!transferProofFile ? (
+                                    <div 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            const file = e.dataTransfer.files?.[0];
+                                            if (file) {
+                                                const fakeEvent = { target: { files: [file] } } as any;
+                                                handleFileChange(fakeEvent);
+                                            }
+                                        }}
+                                        className={`cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition-all ${
+                                            fileError 
+                                                ? 'border-rose-400 bg-rose-50/40 dark:border-rose-800 dark:bg-rose-950/20' 
+                                                : 'border-zinc-300 dark:border-zinc-700 hover:border-emerald-500 hover:bg-emerald-50/20 bg-zinc-50/40 dark:bg-zinc-900/30'
+                                        }`}
+                                    >
+                                        <div className="flex flex-col items-center justify-center">
+                                            <div className="h-10 w-10 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
+                                                <UploadCloud className="h-5 w-5" />
+                                            </div>
+                                            <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                                                Klik untuk memilih atau seret gambar struk ke sini
+                                            </p>
+                                            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                                Format JPG, PNG, WEBP (Maksimal 3MB)
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/30 dark:bg-emerald-950/20 p-3">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                {transferProofPreview && (
+                                                    <img 
+                                                        src={transferProofPreview} 
+                                                        alt="Pratinjau Struk" 
+                                                        className="h-12 w-12 rounded-lg object-cover border border-emerald-300 dark:border-emerald-800 shrink-0"
+                                                    />
+                                                )}
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate">
+                                                        {transferProofFile.name}
+                                                    </p>
+                                                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                                                        {(transferProofFile.size / 1024).toFixed(1)} KB • Siap diunggah
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={handleRemoveFile}
+                                                className="text-zinc-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 h-8 px-2 text-xs"
+                                                title="Hapus file"
+                                            >
+                                                <X className="h-4 w-4 mr-1" />
+                                                Ganti
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {fileError && (
+                                    <p className="text-xs text-rose-600 dark:text-rose-400 mt-1.5 flex items-center gap-1 font-medium">
+                                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                        {fileError}
+                                    </p>
+                                )}
+                            </div>
+
+                            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed mb-5">
+                                Pastikan dana telah benar-benar masuk ke mutasi rekening yayasan sebelum menyetujui donasi ini.
                             </p>
 
                             {/* Buttons */}
-                            <div className="flex w-full gap-3">
+                            <div className="flex w-full gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                                 <button
                                     onClick={handleCancelConfirm}
                                     disabled={loadingConfirm}
-                                    className="flex-1 px-5 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 font-medium transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 font-medium transition-all text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Batal
                                 </button>
                                 <button
                                     onClick={handleConfirmSubmit}
-                                    disabled={loadingConfirm}
-                                    className="flex-1 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all shadow-lg shadow-emerald-500/25 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={loadingConfirm || !transferProofFile}
+                                    className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-all shadow-md shadow-emerald-600/20 text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                                 >
-                                    {loadingConfirm ? 'Mengonfirmasi...' : 'Ya, Setujui Donasi'}
+                                    {loadingConfirm ? (
+                                        <>
+                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1"></span>
+                                            Mengonfirmasi...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle2 className="h-4 w-4" />
+                                            Ya, Setujui Donasi
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Image Preview / Lightbox Dialog */}
+            <Dialog open={Boolean(previewImageUrl)} onOpenChange={(open) => !open && setPreviewImageUrl(null)}>
+                <DialogContent className="max-w-3xl p-5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl">
+                    <DialogHeader>
+                        <div className="flex items-center justify-between">
+                            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                                <FileImage className="w-4 h-4 text-blue-600" />
+                                Pratinjau Bukti Transfer
+                            </DialogTitle>
+                            {previewImageUrl && (
+                                <a
+                                    href={previewImageUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    download
+                                    className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 inline-flex items-center gap-1 font-medium hover:underline mr-6"
+                                >
+                                    <span>Buka di Tab Baru</span>
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                            )}
+                        </div>
+                    </DialogHeader>
+                    <div className="mt-2 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center max-h-[75vh]">
+                        {previewImageUrl && (
+                            <img 
+                                src={previewImageUrl} 
+                                alt="Bukti Transfer" 
+                                className="w-full h-auto max-h-[75vh] object-contain"
+                            />
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

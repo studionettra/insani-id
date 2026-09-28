@@ -7,7 +7,9 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -72,8 +74,9 @@ test('admin can view donations list', function () {
     $response->assertStatus(200);
 });
 
-test('admin can confirm offline donation', function () {
+test('admin can confirm offline donation with transfer proof', function () {
     Mail::fake();
+    Storage::fake('public');
 
     $donation = Donation::create([
         'donation_code' => 'DON-OFFLINE',
@@ -91,19 +94,52 @@ test('admin can confirm offline donation', function () {
         'gateway' => 'manual',
         'payment_method' => 'bank_transfer_manual',
         'gateway_status' => 'PENDING',
-        'amount' => 100000,
+        'paid_amount' => 100000,
     ]);
 
-    $response = $this->actingAs($this->admin)->post("/admin/donations/{$donation->id}/confirm");
+    $file = UploadedFile::fake()->image('struk_transfer.jpg', 600, 800);
+
+    $response = $this->actingAs($this->admin)->post("/admin/donations/{$donation->id}/confirm", [
+        'transfer_proof' => $file,
+    ]);
 
     $response->assertRedirect();
-    $response->assertSessionHas('success', 'Donasi manual berhasil dikonfirmasi.');
+    $response->assertSessionHas('success', 'Donasi manual berhasil diverifikasi dan dikonfirmasi.');
 
     expect($payment->fresh()->gateway_status)->toBe('PAID');
     expect($donation->fresh()->status)->toBe('paid');
+    expect($payment->fresh()->transfer_proof)->not->toBeNull();
+
+    Storage::disk('public')->assertExists($payment->fresh()->transfer_proof);
 
     // Check program collected amount updated
     expect($this->program->fresh()->collected_amount)->toEqual(100000);
 
     Mail::assertSent(DonationSuccessNotification::class);
+});
+
+test('admin cannot confirm offline donation without uploading transfer proof', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-OFFLINE-NOPROOF',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donor',
+        'donor_email' => 'donor@test.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'offline',
+        'status' => 'pending',
+        'amount' => 100000,
+    ]);
+
+    Payment::create([
+        'donation_id' => $donation->id,
+        'gateway' => 'manual',
+        'payment_method' => 'bank_transfer_manual',
+        'gateway_status' => 'PENDING',
+        'paid_amount' => 100000,
+    ]);
+
+    $response = $this->actingAs($this->admin)->post("/admin/donations/{$donation->id}/confirm", []);
+
+    $response->assertSessionHasErrors(['transfer_proof']);
+    expect($donation->fresh()->status)->toBe('pending');
 });

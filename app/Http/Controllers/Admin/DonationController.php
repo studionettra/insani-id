@@ -82,20 +82,34 @@ class DonationController extends Controller
             return back()->with('error', 'Donasi ini tidak dapat dikonfirmasi manual.');
         }
 
+        $request->validate([
+            'transfer_proof' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
+        ], [
+            'transfer_proof.required' => 'Bukti transfer wajib diunggah untuk konfirmasi donasi manual.',
+            'transfer_proof.image' => 'Bukti transfer harus berupa file gambar.',
+            'transfer_proof.mimes' => 'Format gambar yang didukung adalah JPEG, PNG, JPG, dan WEBP.',
+            'transfer_proof.max' => 'Ukuran file bukti transfer maksimal 3MB.',
+        ]);
+
         // Get the pending offline payment
         $payment = $donation->payments()->where('gateway', 'manual')->where('gateway_status', 'PENDING')->first();
 
-        if ($payment) {
-            $payment->update([
-                'gateway_status' => 'PAID',
-                'paid_amount' => $donation->amount,
-                'paid_at' => now(),
-                'confirmed_by' => auth()->id(),
-            ]);
-
-            // This will trigger the PaymentObserver to update Donation and send email.
+        if (! $payment) {
+            return back()->with('error', 'Data pembayaran manual tidak ditemukan atau sudah diproses.');
         }
 
-        return back()->with('success', 'Donasi manual berhasil dikonfirmasi.');
+        $proofPath = $request->file('transfer_proof')->store('donation-proofs', 'public');
+
+        $payment->update([
+            'gateway_status' => 'PAID',
+            'paid_amount' => $donation->amount,
+            'paid_at' => now(),
+            'confirmed_by' => auth()->id(),
+            'transfer_proof' => $proofPath,
+        ]);
+
+        // This will trigger the PaymentObserver to update Donation and send email.
+
+        return back()->with('success', 'Donasi manual berhasil diverifikasi dan dikonfirmasi.');
     }
 }

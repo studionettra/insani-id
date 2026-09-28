@@ -24,8 +24,22 @@ class Payment extends Model
         'gateway_fee',
         'paid_at',
         'confirmed_by',
+        'transfer_proof',
         'raw_payload',
     ];
+
+    protected $appends = [
+        'transfer_proof_url',
+    ];
+
+    public function getTransferProofUrlAttribute(): ?string
+    {
+        if (! $this->transfer_proof) {
+            return null;
+        }
+
+        return asset('storage/'.$this->transfer_proof);
+    }
 
     protected $casts = [
         'paid_amount' => 'decimal:2',
