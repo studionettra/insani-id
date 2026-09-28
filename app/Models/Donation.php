@@ -72,6 +72,24 @@ class Donation extends Model
         return $this->hasOne(Comment::class);
     }
 
+    public function getPaymentChannelLabelAttribute(): string
+    {
+        $payments = $this->relationLoaded('payments') ? $this->payments : $this->payments()->get();
+        $payment = $payments->whereIn('gateway_status', ['PAID', 'SETTLED'])->sortByDesc('created_at')->first()
+            ?? $payments->sortByDesc('created_at')->first();
+
+        if ($payment) {
+            return $payment->payment_channel_label;
+        }
+
+        return Payment::formatChannelLabel(
+            null,
+            null,
+            null,
+            $this->channel
+        );
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();

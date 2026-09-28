@@ -20,7 +20,6 @@ import {
     X,
     ExternalLink,
     ZoomIn,
-    FileText,
     Copy,
     Check,
 } from 'lucide-react';
@@ -692,13 +691,6 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                     const isManualPending =
                                         donation.channel === 'offline' &&
                                         donation.status === 'pending';
-                                    const donationProofUrl =
-                                        donation.payments?.find(
-                                            (p) => p.transfer_proof_url,
-                                        )?.transfer_proof_url ||
-                                        (donation.payments?.[0]?.transfer_proof
-                                            ? `/storage/${donation.payments[0].transfer_proof}`
-                                            : null);
 
                                     return (
                                         <TableRow
@@ -794,14 +786,23 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                     {(() => {
                                                         const firstPayment =
                                                             donation.payments?.[0];
+                                                        const channelLabel =
+                                                            formatPaymentChannelName(
+                                                                firstPayment?.payment_channel,
+                                                            );
+                                                        if (
+                                                            donation.channel ===
+                                                            'offline'
+                                                        ) {
+                                                            return (
+                                                                channelLabel ||
+                                                                'Transfer Bank'
+                                                            );
+                                                        }
                                                         const methodLabel =
                                                             formatPaymentMethodName(
                                                                 firstPayment?.payment_method,
                                                                 donation.channel,
-                                                            );
-                                                        const channelLabel =
-                                                            formatPaymentChannelName(
-                                                                firstPayment?.payment_channel,
                                                             );
                                                         if (
                                                             channelLabel &&
@@ -872,26 +873,6 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                             {/* Aksi */}
                                             <TableCell className="pr-4 text-right whitespace-nowrap">
                                                 <div className="flex items-center justify-end gap-1.5">
-                                                    {/* Tombol Lihat Bukti Transfer jika ada */}
-                                                    {Boolean(
-                                                        donationProofUrl,
-                                                    ) && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                setPreviewImageUrl(
-                                                                    donationProofUrl,
-                                                                )
-                                                            }
-                                                            className="h-7.5 shrink-0 rounded-lg border-blue-200 bg-blue-50/50 px-2 text-xs font-semibold text-blue-700 shadow-none hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
-                                                            title="Lihat Bukti Transfer"
-                                                        >
-                                                            <FileText className="mr-1 h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                                                            Bukti
-                                                        </Button>
-                                                    )}
-
                                                     {/* Tombol Konfirmasi Cepat untuk Donasi Manual Pending */}
                                                     {isManualPending && (
                                                         <Button
@@ -1027,62 +1008,66 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                     }
                 }}
             >
-                <DialogContent className="max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl sm:p-7 dark:border-gray-800 dark:bg-gray-900">
+                <DialogContent className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
                     {selectedDonation && (
                         <>
-                            <DialogHeader>
-                                <div className="flex flex-col justify-between gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center dark:border-gray-800">
-                                    <div>
-                                        <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
-                                            <span>Rincian Donasi</span>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleCopyCode(
-                                                        selectedDonation.donation_code,
-                                                    )
-                                                }
-                                                className="group inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 font-mono text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-                                                title="Klik untuk menyalin kode donasi"
-                                            >
-                                                <span>
-                                                    {selectedDonation.donation_code}
-                                                </span>
-                                                {copiedCode ? (
-                                                    <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-                                                ) : (
-                                                    <Copy className="h-3 w-3 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200" />
-                                                )}
-                                            </button>
-                                        </DialogTitle>
-                                        <DialogDescription className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                            Dibuat pada{' '}
-                                            {new Date(
-                                                selectedDonation.created_at,
-                                            ).toLocaleDateString('id-ID', {
-                                                weekday: 'long',
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric',
-                                            })}{' '}
-                                            pukul{' '}
-                                            {new Date(
-                                                selectedDonation.created_at,
-                                            ).toLocaleTimeString('id-ID')}{' '}
-                                            WIB
-                                        </DialogDescription>
+                            {/* Sticky Header */}
+                            <div className="shrink-0 border-b border-gray-100 p-5 sm:px-6 sm:py-5 dark:border-gray-800">
+                                <DialogHeader>
+                                    <div className="flex flex-col justify-between gap-3 pr-8 sm:flex-row sm:items-center">
+                                        <div>
+                                            <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                                                <span>Rincian Donasi</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleCopyCode(
+                                                            selectedDonation.donation_code,
+                                                        )
+                                                    }
+                                                    className="group inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 font-mono text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                                    title="Klik untuk menyalin kode donasi"
+                                                >
+                                                    <span>
+                                                        {selectedDonation.donation_code}
+                                                    </span>
+                                                    {copiedCode ? (
+                                                        <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                                                    ) : (
+                                                        <Copy className="h-3 w-3 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200" />
+                                                    )}
+                                                </button>
+                                            </DialogTitle>
+                                            <DialogDescription className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                Dibuat pada{' '}
+                                                {new Date(
+                                                    selectedDonation.created_at,
+                                                ).toLocaleDateString('id-ID', {
+                                                    weekday: 'long',
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}{' '}
+                                                pukul{' '}
+                                                {new Date(
+                                                    selectedDonation.created_at,
+                                                ).toLocaleTimeString('id-ID')}{' '}
+                                                WIB
+                                            </DialogDescription>
+                                        </div>
+                                        <div className="shrink-0">
+                                            {renderStatusBadge(
+                                                selectedDonation.status,
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="shrink-0">
-                                        {renderStatusBadge(
-                                            selectedDonation.status,
-                                        )}
-                                    </div>
-                                </div>
-                            </DialogHeader>
+                                </DialogHeader>
+                            </div>
 
-                            <div className="grid gap-4 py-3 text-xs sm:text-sm">
+                            {/* Scrollable Body Content */}
+                            <div className="flex-1 space-y-4 overflow-y-auto p-5 text-xs sm:p-6 sm:text-sm">
                                 {/* Grid: Donatur & Program */}
-                                <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="grid gap-3.5 sm:grid-cols-2">
                                     {/* Donatur Box */}
                                     <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 dark:border-gray-800 dark:bg-gray-800/40">
                                         <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-500 uppercase">
@@ -1425,32 +1410,53 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                 })()}
                             </div>
 
-                            <DialogFooter className="flex flex-col items-stretch justify-between gap-2.5 border-t border-gray-100 pt-3 sm:flex-row sm:items-center dark:border-gray-800">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setSelectedDonation(null)}
-                                    className="border-gray-200 text-xs sm:text-sm dark:border-gray-700"
-                                >
-                                    Tutup
-                                </Button>
+                            {/* Sticky Footer */}
+                            <div className="shrink-0 border-t border-gray-100 bg-gray-50/70 p-4 sm:px-6 dark:border-gray-800 dark:bg-gray-800/40">
+                                <DialogFooter className="flex flex-col items-stretch justify-between gap-2.5 sm:flex-row sm:items-center">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setSelectedDonation(null)}
+                                        className="border-gray-200 text-xs sm:text-sm dark:border-gray-700"
+                                    >
+                                        Tutup
+                                    </Button>
 
-                                {selectedDonation.channel === 'offline' &&
-                                    selectedDonation.status === 'pending' && (
-                                        <Button
-                                            onClick={() => {
-                                                const itemToConfirm =
-                                                    selectedDonation;
-                                                confirmManualDonation(
-                                                    itemToConfirm,
-                                                );
-                                            }}
-                                            className="bg-emerald-600 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 sm:text-sm"
-                                        >
-                                            <CheckCircle className="mr-1.5 h-4 w-4" />
-                                            Konfirmasi Donasi Ini
-                                        </Button>
-                                    )}
-                            </DialogFooter>
+                                    <div className="flex items-center gap-2">
+                                        {selectedDonation.status === 'paid' && (
+                                            <Button
+                                                variant="outline"
+                                                onClick={() =>
+                                                    window.open(
+                                                        `/donasi/kwitansi/${selectedDonation.donation_code}`,
+                                                        '_blank',
+                                                    )
+                                                }
+                                                className="border-blue-200 text-xs font-semibold text-blue-700 hover:bg-blue-50 sm:text-sm dark:border-blue-900/60 dark:text-blue-300 dark:hover:bg-blue-950/40"
+                                            >
+                                                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                                                Lihat Kuitansi Resmi
+                                            </Button>
+                                        )}
+
+                                        {selectedDonation.channel === 'offline' &&
+                                            selectedDonation.status === 'pending' && (
+                                                <Button
+                                                    onClick={() => {
+                                                        const itemToConfirm =
+                                                            selectedDonation;
+                                                        confirmManualDonation(
+                                                            itemToConfirm,
+                                                        );
+                                                    }}
+                                                    className="bg-emerald-600 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 sm:text-sm"
+                                                >
+                                                    <CheckCircle className="mr-1.5 h-4 w-4" />
+                                                    Konfirmasi Donasi Ini
+                                                </Button>
+                                            )}
+                                    </div>
+                                </DialogFooter>
+                            </div>
                         </>
                     )}
                 </DialogContent>
@@ -1465,7 +1471,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                     }
                 }}
             >
-                <DialogContent className="max-w-lg border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+                <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
                     <div className="relative mx-auto w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl sm:p-7 dark:border-zinc-800 dark:bg-zinc-950">
                         <div className="flex flex-col">
                             {/* Header */}

@@ -23,7 +23,8 @@ class DonationReceiptController extends Controller
                 ->with('error', 'Kwitansi resmi hanya tersedia untuk donasi yang telah terkonfirmasi lunas.');
         }
 
-        $payment = $donation->payments()->whereIn('gateway_status', ['PAID', 'SETTLED'])->latest()->first();
+        $payment = $donation->payments()->whereIn('gateway_status', ['PAID', 'SETTLED'])->latest()->first()
+            ?? $donation->payments()->latest()->first();
 
         $settings = AppSetting::pluck('value', 'key')->toArray();
 

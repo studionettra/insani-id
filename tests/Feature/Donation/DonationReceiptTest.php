@@ -85,3 +85,67 @@ test('it redirects to status page with error if donation is not paid', function 
     $response->assertRedirect(route('donation.status', ['donationCode' => $donation->donation_code]));
     $response->assertSessionHas('error');
 });
+
+test('it displays friendly bank name and does not display technical MANUAL_BRI code on receipt', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-MANUAL-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Siti Aminah',
+        'donor_email' => 'siti@example.com',
+        'donor_phone' => '081233344455',
+        'amount' => 500000,
+        'channel' => 'offline',
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'bank_transfer_manual',
+        'payment_channel' => 'MANUAL_BRI',
+        'payment_destination' => '034501001366304',
+        'gateway' => 'manual',
+        'gateway_reference_id' => 'DON-MANUAL-01',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 500000,
+        'paid_at' => now(),
+    ]);
+
+    $response = $this->get(route('donation.receipt', $donation->donation_code));
+
+    $response->assertOk();
+    $response->assertViewIs('receipt');
+    $response->assertSee('DON-MANUAL-01');
+    $response->assertDontSee('MANUAL_BRI');
+    $response->assertSee('Bank Rakyat Indonesia (BRI)');
+});
+
+test('it displays QRIS cleanly on receipt for qris donations', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-QRIS-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donatur QRIS',
+        'donor_email' => 'qris@example.com',
+        'donor_phone' => '081299988877',
+        'amount' => 50000,
+        'channel' => 'online',
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'xendit',
+        'gateway_reference_id' => 'QRIS-12345',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 50000,
+        'paid_at' => now(),
+    ]);
+
+    $response = $this->get(route('donation.receipt', $donation->donation_code));
+
+    $response->assertOk();
+    $response->assertSee('QRIS');
+});

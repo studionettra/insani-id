@@ -318,7 +318,7 @@
                     <tr>
                         <td class="col-label">Metode Pembayaran</td>
                         <td class="col-value">
-                            {{ strtoupper($payment?->payment_channel ?? ($donation->channel === 'offline' ? 'Transfer Bank Manual' : 'Online Payment')) }}
+                            {{ $payment?->payment_channel_label ?? $donation->payment_channel_label }}
                         </td>
                     </tr>
                     @if($payment?->gateway_reference_id)
