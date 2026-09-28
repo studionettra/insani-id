@@ -21,6 +21,8 @@ import {
     ExternalLink,
     ZoomIn,
     FileText,
+    Copy,
+    Check,
 } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 import { toast } from 'sonner';
@@ -64,7 +66,11 @@ interface PaymentInfo {
     gateway_status: string;
     paid_amount?: string | number | null;
     paid_at?: string | null;
-    confirmed_by?: number | null;
+    confirmed_by?: {
+        id?: number;
+        name: string;
+        email?: string;
+    } | number | null;
     transfer_proof?: string | null;
     transfer_proof_url?: string | null;
     confirmed_by_user?: {
@@ -163,6 +169,55 @@ const formatCurrency = (val: number | string | null | undefined): string => {
     }).format(num);
 };
 
+const formatPaymentMethodName = (
+    method?: string | null,
+    channel?: string | null,
+): string => {
+    if (!method) {
+        return channel === 'offline' ? 'Transfer Bank' : 'Online Gateway';
+    }
+    const m = method.toLowerCase();
+    if (m === 'bank_transfer_manual' || m === 'bank_transfer') {
+        return 'Transfer Bank Manual';
+    }
+    if (m === 'virtual_account') {
+        return 'Virtual Account';
+    }
+    if (m === 'ewallet') {
+        return 'E-Wallet';
+    }
+    if (m === 'qris') {
+        return 'QRIS';
+    }
+    if (m === 'credit_card') {
+        return 'Kartu Kredit';
+    }
+    return m.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const formatPaymentChannelName = (
+    paymentChannel?: string | null,
+): string | null => {
+    if (!paymentChannel) return null;
+    const raw = paymentChannel.trim();
+    const code = raw.toUpperCase().replace(/^MANUAL_/, '');
+    const bankMap: Record<string, string> = {
+        BRI: 'Bank BRI',
+        BSI: 'Bank Syariah Indonesia (BSI)',
+        BCA: 'Bank BCA',
+        BNI: 'Bank BNI',
+        MANDIRI: 'Bank Mandiri',
+        PERMATA: 'Bank Permata',
+        CIMB: 'Bank CIMB Niaga',
+        QRIS: 'QRIS',
+        OVO: 'OVO',
+        DANA: 'DANA',
+        SHOPEEPAY: 'ShopeePay',
+        ASTRAPAY: 'AstraPay',
+    };
+    return bankMap[code] || (raw.startsWith('MANUAL_') ? `Bank ${code}` : raw);
+};
+
 export default function Index({ donations, filters = {}, counts }: Props) {
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
     const [confirmingDonation, setConfirmingDonation] =
@@ -178,11 +233,19 @@ export default function Index({ donations, filters = {}, counts }: Props) {
     >(null);
     const [fileError, setFileError] = useState<string | null>(null);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+    const [copiedCode, setCopiedCode] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [selectedChannel, setSelectedChannel] = useState(
         filters.channel || 'all',
     );
+
+    const handleCopyCode = (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopiedCode(true);
+        toast.success(`Kode donasi ${code} berhasil disalin!`);
+        setTimeout(() => setCopiedCode(false), 2000);
+    };
 
     const currentStatus = filters.status || 'all';
 
@@ -727,11 +790,28 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                             : 'Otomatis Online'}
                                                     </span>
                                                 </div>
-                                                <div className="mt-0.5 text-[10px] text-gray-500 capitalize dark:text-gray-400">
-                                                    {paymentMethod.replace(
-                                                        /_/g,
-                                                        ' ',
-                                                    )}
+                                                <div className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                                                    {(() => {
+                                                        const firstPayment =
+                                                            donation.payments?.[0];
+                                                        const methodLabel =
+                                                            formatPaymentMethodName(
+                                                                firstPayment?.payment_method,
+                                                                donation.channel,
+                                                            );
+                                                        const channelLabel =
+                                                            formatPaymentChannelName(
+                                                                firstPayment?.payment_channel,
+                                                            );
+                                                        if (
+                                                            channelLabel &&
+                                                            channelLabel !==
+                                                                methodLabel
+                                                        ) {
+                                                            return `${methodLabel} • ${channelLabel}`;
+                                                        }
+                                                        return methodLabel;
+                                                    })()}
                                                 </div>
                                             </TableCell>
 
@@ -953,11 +1033,27 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                             <DialogHeader>
                                 <div className="flex flex-col justify-between gap-3 border-b border-gray-100 pb-4 sm:flex-row sm:items-center dark:border-gray-800">
                                     <div>
-                                        <DialogTitle className="flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                                        <DialogTitle className="flex flex-wrap items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
                                             <span>Rincian Donasi</span>
-                                            <span className="font-mono rounded-md bg-gray-100 px-2 py-0.5 text-sm font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                                {selectedDonation.donation_code}
-                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCopyCode(
+                                                        selectedDonation.donation_code,
+                                                    )
+                                                }
+                                                className="group inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 font-mono text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                                title="Klik untuk menyalin kode donasi"
+                                            >
+                                                <span>
+                                                    {selectedDonation.donation_code}
+                                                </span>
+                                                {copiedCode ? (
+                                                    <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                                                ) : (
+                                                    <Copy className="h-3 w-3 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200" />
+                                                )}
+                                            </button>
                                         </DialogTitle>
                                         <DialogDescription className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                             Dibuat pada{' '}
@@ -1016,7 +1112,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                             <Heart className="h-3.5 w-3.5 text-rose-500" />
                                             Program Donasi
                                         </div>
-                                        <div className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
+                                        <div className="break-words text-sm font-semibold leading-snug text-gray-900 dark:text-white">
                                             {getProgramTitle(
                                                 selectedDonation.program?.title,
                                             )}
@@ -1029,69 +1125,230 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                 </div>
 
                                 {/* Financial Details Box */}
-                                <div className="rounded-xl border border-gray-100 bg-gray-50/30 p-4 dark:border-gray-800 dark:bg-gray-800/20">
-                                    <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-500 uppercase">
-                                        <CreditCard className="h-3.5 w-3.5 text-[#1A56DB]" />
-                                        Rincian Pembayaran
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                                        <div>
-                                            <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                Total Nominal
-                                            </span>
-                                            <p className="mt-0.5 text-base font-bold text-gray-900 dark:text-white">
-                                                {formatCurrency(
-                                                    selectedDonation.amount,
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                Kode Unik
-                                            </span>
-                                            <p className="mt-0.5 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                                {selectedDonation.unique_code
-                                                    ? `+${selectedDonation.unique_code}`
-                                                    : '-'}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                Kanal Transaksi
-                                            </span>
-                                            <p className="mt-0.5 text-sm font-semibold text-gray-800 capitalize dark:text-gray-200">
-                                                {selectedDonation.channel ===
-                                                'offline'
-                                                    ? 'Manual Transfer'
-                                                    : 'Online Gateway'}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                Metode
-                                            </span>
-                                            <p className="mt-0.5 truncate text-sm font-semibold text-gray-800 capitalize dark:text-gray-200">
-                                                {(
-                                                    selectedDonation
-                                                        .payments?.[0]
-                                                        ?.payment_method ||
-                                                    selectedDonation.channel
-                                                ).replace(/_/g, ' ')}
-                                            </p>
-                                        </div>
-                                    </div>
+                                {(() => {
+                                    const payment =
+                                        selectedDonation.payments?.[0];
+                                    const uniqueCode = Number(
+                                        selectedDonation.unique_code || 0,
+                                    );
+                                    const totalAmount = Number(
+                                        selectedDonation.amount || 0,
+                                    );
+                                    const baseAmount =
+                                        uniqueCode > 0
+                                            ? Math.max(
+                                                  0,
+                                                  totalAmount - uniqueCode,
+                                              )
+                                            : totalAmount;
+                                    const paymentMethodLabel =
+                                        formatPaymentMethodName(
+                                            payment?.payment_method,
+                                            selectedDonation.channel,
+                                        );
+                                    const bankChannelLabel =
+                                        formatPaymentChannelName(
+                                            payment?.payment_channel,
+                                        );
+                                    const confirmedByName =
+                                        typeof payment?.confirmed_by ===
+                                            'object' &&
+                                        payment?.confirmed_by?.name
+                                            ? payment.confirmed_by.name
+                                            : payment?.confirmed_by_user
+                                                    ?.name || null;
 
-                                    {/* Paid status info */}
-                                    {selectedDonation.paid_at && (
-                                        <div className="mt-3 flex items-center border-t border-gray-200/60 pt-3 text-xs font-medium text-emerald-700 dark:border-gray-700/60 dark:text-emerald-400">
-                                            <ShieldCheck className="mr-1.5 h-4 w-4 shrink-0" />
-                                            Telah lunas terverifikasi pada:{' '}
-                                            {new Date(
-                                                selectedDonation.paid_at,
-                                            ).toLocaleString('id-ID')}
+                                    return (
+                                        <div className="rounded-xl border border-gray-200/80 bg-gray-50/40 p-4 dark:border-gray-800 dark:bg-gray-800/30">
+                                            <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2">
+                                                <div className="flex items-center gap-1.5 text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                                                    <CreditCard className="h-4 w-4 text-[#1A56DB]" />
+                                                    <span>
+                                                        Rincian Pembayaran
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span
+                                                        className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                                                            selectedDonation.channel ===
+                                                            'offline'
+                                                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300'
+                                                                : 'bg-blue-100 text-blue-800 dark:bg-blue-950/70 dark:text-blue-300'
+                                                        }`}
+                                                    >
+                                                        {selectedDonation.channel ===
+                                                        'offline'
+                                                            ? 'Manual Transfer (Offline)'
+                                                            : `Online Gateway (${payment?.gateway ? payment.gateway.toUpperCase() : 'Xendit'})`}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Total Highlight Card */}
+                                            <div className="rounded-lg border border-gray-200/70 bg-white p-3.5 shadow-xs dark:border-gray-700/60 dark:bg-gray-900/60">
+                                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div>
+                                                        <span className="text-[11px] font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                                                            Total Nominal Transfer
+                                                        </span>
+                                                        <div className="mt-0.5 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                                            {formatCurrency(
+                                                                totalAmount,
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {uniqueCode > 0 ? (
+                                                        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-right">
+                                                            <div className="rounded-md bg-gray-100 px-2.5 py-1 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                                                                <span className="text-gray-500 dark:text-gray-400">
+                                                                    Nominal Pokok:{' '}
+                                                                </span>
+                                                                <span className="font-semibold text-gray-900 dark:text-white">
+                                                                    {formatCurrency(
+                                                                        baseAmount,
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                            <div className="rounded-md bg-amber-100/80 px-2.5 py-1 font-medium text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                                                                <span>
+                                                                    Kode Unik:{' '}
+                                                                </span>
+                                                                <span className="font-mono font-bold">
+                                                                    +{uniqueCode}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                            Tanpa kode unik tambahan
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Payment Method & Destination Details */}
+                                            <div className="mt-3.5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                                {/* Metode Pembayaran */}
+                                                <div className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900/40">
+                                                    <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                                        Metode Pembayaran
+                                                    </span>
+                                                    <p className="mt-1 break-words text-sm font-semibold text-gray-900 dark:text-white">
+                                                        {paymentMethodLabel}
+                                                    </p>
+                                                </div>
+
+                                                {/* Bank / Akun Tujuan */}
+                                                <div className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900/40">
+                                                    <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                                        {selectedDonation.channel ===
+                                                        'offline'
+                                                            ? 'Bank Tujuan Transfer'
+                                                            : 'Kanal Pembayaran'}
+                                                    </span>
+                                                    <div className="mt-1">
+                                                        <p className="break-words text-sm font-semibold text-gray-900 dark:text-white">
+                                                            {bankChannelLabel ||
+                                                                (selectedDonation.channel ===
+                                                                'offline'
+                                                                    ? 'Rekening Yayasan'
+                                                                    : 'Otomatis Online')}
+                                                        </p>
+                                                        {payment?.payment_destination && (
+                                                            <p className="mt-0.5 font-mono text-xs text-gray-600 dark:text-gray-400">
+                                                                No. Rek / ID:{' '}
+                                                                <span className="font-semibold text-gray-900 dark:text-gray-200">
+                                                                    {
+                                                                        payment.payment_destination
+                                                                    }
+                                                                </span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Status Transaksi Gateway */}
+                                                <div className="rounded-lg border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900/40">
+                                                    <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                                        Status Transaksi
+                                                    </span>
+                                                    <div className="mt-1 flex items-center gap-1.5">
+                                                        <span
+                                                            className={`inline-flex items-center rounded px-2 py-0.5 font-mono text-xs font-semibold ${
+                                                                (
+                                                                    payment?.gateway_status ||
+                                                                    selectedDonation.status
+                                                                ).toUpperCase() ===
+                                                                    'PAID' ||
+                                                                (
+                                                                    payment?.gateway_status ||
+                                                                    selectedDonation.status
+                                                                ).toUpperCase() ===
+                                                                    'SETTLED'
+                                                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                                                    : (
+                                                                            payment?.gateway_status ||
+                                                                            selectedDonation.status
+                                                                        ).toUpperCase() ===
+                                                                          'PENDING'
+                                                                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                                                                      : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                                                            }`}
+                                                        >
+                                                            {payment?.gateway_status ||
+                                                                (selectedDonation.status ===
+                                                                'paid'
+                                                                    ? 'PAID'
+                                                                    : selectedDonation.status.toUpperCase())}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Paid status info banner */}
+                                            {selectedDonation.paid_at && (
+                                                <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-emerald-200/80 bg-emerald-50/70 p-3 text-xs text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300">
+                                                    <div className="flex items-center gap-2">
+                                                        <ShieldCheck className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                                        <span>
+                                                            Telah lunas
+                                                            terverifikasi pada:{' '}
+                                                            <strong>
+                                                                {new Date(
+                                                                    selectedDonation.paid_at,
+                                                                ).toLocaleDateString(
+                                                                    'id-ID',
+                                                                    {
+                                                                        day: 'numeric',
+                                                                        month: 'long',
+                                                                        year: 'numeric',
+                                                                    },
+                                                                )}{' '}
+                                                                pukul{' '}
+                                                                {new Date(
+                                                                    selectedDonation.paid_at,
+                                                                ).toLocaleTimeString(
+                                                                    'id-ID',
+                                                                )}{' '}
+                                                                WIB
+                                                            </strong>
+                                                        </span>
+                                                    </div>
+                                                    {confirmedByName && (
+                                                        <div className="text-xs text-emerald-700 dark:text-emerald-400">
+                                                            Diverifikasi oleh:{' '}
+                                                            <strong>
+                                                                {
+                                                                    confirmedByName
+                                                                }
+                                                            </strong>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
+                                    );
+                                })()}
 
                                 {/* Doa / Pesan Kebaikan Donatur */}
                                 {selectedDonation.message && (
