@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Disbursement;
 use App\Models\Donation;
 use App\Models\Program;
+use App\Models\ProgramUpdate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -185,7 +186,7 @@ test('gating prevents second withdrawal until previous disbursement report is ap
     $response->assertSessionHasErrors('gating');
 
     // Create an update but still pending -> should still fail
-    $update = \App\Models\ProgramUpdate::create([
+    $update = ProgramUpdate::create([
         'program_id' => $this->program->id,
         'disbursement_id' => $disbursement->id,
         'title' => 'Laporan Penyaluran Tahap 1',

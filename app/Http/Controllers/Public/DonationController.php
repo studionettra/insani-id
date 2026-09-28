@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDonationRequest;
 use App\Mail\DonationPendingNotification;
+use App\Models\BankAccount;
 use App\Models\Donation;
 use App\Models\Fundraiser;
 use App\Models\Payment;
@@ -139,12 +140,13 @@ class DonationController extends Controller
         } else {
             // Offline/Manual transfer
             $channelCode = $validated['payment_channel'] ?? 'MANUAL_BSI';
-            $channelDef = XenditPaymentService::findChannel($channelCode);
+            $channelDef = XenditPaymentService::findChannel($channelCode, 'offline')
+                ?? XenditPaymentService::findChannel($channelCode);
 
             Payment::create([
                 'donation_id' => $donation->id,
                 'payment_method' => 'bank_transfer_manual',
-                'payment_channel' => $channelCode,
+                'payment_channel' => $channelDef['code'] ?? $channelCode,
                 'payment_destination' => $channelDef['account_number'] ?? '713 219 5026',
                 'gateway' => 'manual',
                 'gateway_reference_id' => $donationCode,
@@ -172,8 +174,73 @@ class DonationController extends Controller
             }
         }
 
+        $selectedBankAccount = null;
+        if ($donation->channel === 'offline') {
+            $latestPayment = $donation->payments->last() ?? $donation->payments->first();
+            if ($latestPayment) {
+                $cleanDestination = preg_replace('/[^0-9]/', '', (string) $latestPayment->payment_destination);
+                $channelCode = strtoupper(trim((string) $latestPayment->payment_channel));
+
+                // 1. Try matching in active bank accounts
+                $selectedBankAccount = BankAccount::where('is_active', true)
+                    ->get()
+                    ->first(function ($account) use ($cleanDestination, $channelCode) {
+                        $cleanAccNum = preg_replace('/[^0-9]/', '', (string) $account->account_number);
+                        if (! empty($cleanDestination) && $cleanAccNum === $cleanDestination) {
+                            return true;
+                        }
+
+                        $accBankCode = strtoupper((string) ($account->bank_code ?? ''));
+                        if (! empty($accBankCode) && ($channelCode === $accBankCode || $channelCode === 'MANUAL_'.$accBankCode)) {
+                            return true;
+                        }
+
+                        $generatedCode = 'MANUAL_'.strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $account->bank_name));
+
+                        return $channelCode === $generatedCode;
+                    });
+
+                // 2. Fallback to all bank accounts if deactivated
+                if (! $selectedBankAccount) {
+                    $selectedBankAccount = BankAccount::all()
+                        ->first(function ($account) use ($cleanDestination, $channelCode) {
+                            $cleanAccNum = preg_replace('/[^0-9]/', '', (string) $account->account_number);
+                            if (! empty($cleanDestination) && $cleanAccNum === $cleanDestination) {
+                                return true;
+                            }
+
+                            $accBankCode = strtoupper((string) ($account->bank_code ?? ''));
+                            if (! empty($accBankCode) && ($channelCode === $accBankCode || $channelCode === 'MANUAL_'.$accBankCode)) {
+                                return true;
+                            }
+
+                            $generatedCode = 'MANUAL_'.strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $account->bank_name));
+
+                            return $channelCode === $generatedCode;
+                        });
+                }
+
+                // 3. Fallback to channel definition
+                if (! $selectedBankAccount) {
+                    $channelDef = XenditPaymentService::findChannel($channelCode, 'offline');
+                    if ($channelDef) {
+                        $selectedBankAccount = [
+                            'id' => 0,
+                            'bank_name' => $channelDef['name'] ?? 'Transfer Bank Manual',
+                            'bank_code' => $channelDef['code'] ?? $channelCode,
+                            'account_number' => $latestPayment->payment_destination ?: ($channelDef['account_number'] ?? ''),
+                            'account_name' => $channelDef['account_name'] ?? 'Yayasan Peduli Insani Indonesia',
+                            'instructions' => $channelDef['instructions'] ?? null,
+                            'logo_url' => $channelDef['logo_url'] ?? null,
+                        ];
+                    }
+                }
+            }
+        }
+
         return inertia('Public/Donation/Status', [
             'donation' => $donation,
+            'selectedBankAccount' => $selectedBankAccount,
         ]);
     }
 

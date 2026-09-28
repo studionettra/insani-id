@@ -85,7 +85,7 @@ class StoreDonationRequest extends FormRequest
             $amount = (float) $this->input('amount');
 
             if (! empty($channelCode) && $amount > 0) {
-                $channelDef = XenditPaymentService::findChannel($channelCode);
+                $channelDef = XenditPaymentService::findChannel($channelCode, $this->input('channel'));
                 if ($channelDef) {
                     if (isset($channelDef['min_amount']) && $amount < $channelDef['min_amount']) {
                         $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} minimal Rp ".number_format($channelDef['min_amount'], 0, ',', '.').'.');

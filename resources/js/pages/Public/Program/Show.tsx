@@ -366,7 +366,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                 <meta name="twitter:image" content={coverImageUrl} />
             </Head>
 
-            <div className="bg-slate-50 py-0 lg:py-12">
+            <div className="bg-slate-50 pt-0 pb-12 lg:py-12">
                 <div className="container mx-auto px-0 lg:px-4 max-w-6xl">
 
                     {/* Breadcrumbs */}
@@ -682,7 +682,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                             </Card>
 
                             {/* Card Disclaimer & Report Link */}
-                            <div className="rounded-2xl p-4 sm:p-5 bg-blue-50/70 border border-blue-200/80 shadow-xs space-y-3">
+                            <div className="rounded-2xl p-5 sm:p-6 bg-blue-50/70 border border-blue-200/80 shadow-xs space-y-3.5 mx-4 lg:mx-0 mt-4 sm:mt-6">
                                 <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                                     <strong className="font-bold text-slate-900">Disclaimer: </strong>
                                     {t(
@@ -690,7 +690,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                         'Informasi, opini, dan foto yang tertulis di halaman program ini adalah milik lembaga (pihak yang menggalang dana) dan tidak mewakili Insani.id.'
                                     )}
                                 </p>
-                                <div className="pt-2 border-t border-blue-200/60">
+                                <div className="pt-3 border-t border-blue-200/60">
                                     <Link
                                         href={`/program/${program.slug}/lapor`}
                                         className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-insani-blue transition-colors group"
@@ -1127,9 +1127,12 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                             </h4>
 
                             {(!transparency?.disbursements || transparency.disbursements.length === 0) ? (
-                                <div className="text-center py-6 px-4 bg-slate-50 rounded-xl border border-slate-100 text-slate-500">
-                                    <p className="text-xs">{t('Belum ada riwayat pencairan/penyaluran dana untuk program ini.')}</p>
-                                    <p className="text-[11px] text-slate-400 mt-0.5">{t('Setiap pencairan dan pertanggungjawaban akan dicatat otomatis di sini.')}</p>
+                                <div className="flex items-start gap-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-left">
+                                    <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-xs font-medium text-slate-700">{t('Belum ada riwayat pencairan/penyaluran dana untuk program ini.')}</p>
+                                        <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{t('Setiap pencairan dan pertanggungjawaban akan dicatat otomatis di sini.')}</p>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="space-y-3">
@@ -1176,11 +1179,14 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                         </div>
 
                         {/* Edukasi Transparansi */}
-                        <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-[11px] text-blue-900/80 leading-relaxed">
-                            <p className="font-semibold text-blue-950 mb-0.5">{t('Komitmen Akuntabilitas Insani Indonesia')}</p>
-                            <p>
-                                {t('Insani menerapkan audit berlapis. Dana hanya dapat dicairkan oleh campaigner terverifikasi dengan rincian penyaluran yang jelas, dan pengajuan berikutnya diwajibkan menyertakan laporan kabar penyaluran yang telah disetujui.')}
-                            </p>
+                        <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-blue-50/60 border border-blue-100 text-[11px] text-blue-900/80 leading-relaxed text-left">
+                            <ShieldCheck className="w-4 h-4 text-insani-blue shrink-0 mt-0.5" />
+                            <div>
+                                <p className="font-semibold text-blue-950 mb-0.5">{t('Komitmen Akuntabilitas Insani Indonesia')}</p>
+                                <p>
+                                    {t('Insani menerapkan audit berlapis. Dana hanya dapat dicairkan oleh campaigner terverifikasi dengan rincian penyaluran yang jelas, dan pengajuan berikutnya diwajibkan menyertakan laporan kabar penyaluran yang telah disetujui.')}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </DialogContent>

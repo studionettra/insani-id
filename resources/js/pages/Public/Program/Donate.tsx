@@ -350,13 +350,15 @@ return null;
 
                                     {/* Payment Method Section (Option A: Selected in Website) */}
                                     <div className="space-y-4 border-t pt-8">
-                                        <div className="flex items-center justify-between">
-                                            <div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="min-w-0 flex-1">
                                                 <h2 className="text-xl font-bold text-slate-800">Pilih Metode Pembayaran</h2>
-                                                <p className="text-xs text-slate-500 mt-0.5">Pilih metode yang paling nyaman untuk Anda.</p>
+                                                <p className="text-xs text-slate-500 mt-0.5">
+                                                    Pilih metode yang paling nyaman <span className="sm:inline block">untuk Anda.</span>
+                                                </p>
                                             </div>
                                             {selectedChannelDef && (
-                                                <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-insani-blue rounded-full border border-blue-100">
+                                                <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-insani-blue rounded-full border border-blue-100 shrink-0 text-center max-w-[150px] sm:max-w-none">
                                                     {selectedChannelDef.name}
                                                 </span>
                                             )}

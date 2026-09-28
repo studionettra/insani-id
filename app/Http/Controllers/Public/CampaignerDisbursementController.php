@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDisbursementRequest;
+use App\Models\Disbursement;
 use App\Models\Program;
 use App\Models\User;
 use App\Notifications\DisbursementRequestedNotification;
@@ -166,7 +167,7 @@ class CampaignerDisbursementController extends Controller
         return redirect()->route('akun.programs.disbursements.index', $program->id)->with('success', 'Pengajuan pencairan dana berhasil dibuat.');
     }
 
-    public function receipt(Program $program, \App\Models\Disbursement $disbursement)
+    public function receipt(Program $program, Disbursement $disbursement)
     {
         if ($program->campaigner_type === 'internal') {
             abort(403, 'Unauthorized.');

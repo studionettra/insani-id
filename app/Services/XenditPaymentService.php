@@ -152,8 +152,19 @@ class XenditPaymentService
                     $accounts = BankAccount::where('is_active', true)->orderBy('sort_order')->get();
                     if ($accounts->isNotEmpty()) {
                         return $accounts->map(function ($acc) {
+                            $rawCode = trim((string) ($acc->bank_code ?? ''));
+                            if (! empty($rawCode)) {
+                                $code = str_starts_with(strtoupper($rawCode), 'MANUAL_')
+                                    ? strtoupper($rawCode)
+                                    : 'MANUAL_'.strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $rawCode));
+                            } else {
+                                $code = 'MANUAL_'.strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $acc->bank_name));
+                            }
+
                             return [
-                                'code' => $acc->bank_code ?: 'MANUAL_'.strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $acc->bank_name)),
+                                'id' => $acc->id,
+                                'bank_account_id' => $acc->id,
+                                'code' => $code,
                                 'name' => $acc->bank_name,
                                 'subtitle' => 'Konfirmasi WhatsApp',
                                 'category' => 'manual',
@@ -163,6 +174,8 @@ class XenditPaymentService
                                 'max_amount' => 500000000,
                                 'account_number' => $acc->account_number,
                                 'account_name' => $acc->account_name,
+                                'instructions' => $acc->instructions,
+                                'logo_url' => $acc->logo_url,
                             ];
                         })->all();
                     }
@@ -172,6 +185,7 @@ class XenditPaymentService
 
                 return [
                     [
+                        'id' => 1,
                         'code' => 'MANUAL_BSI',
                         'name' => 'Bank Syariah Indonesia (BSI)',
                         'subtitle' => 'Konfirmasi WhatsApp',
@@ -182,8 +196,11 @@ class XenditPaymentService
                         'max_amount' => 500000000,
                         'account_number' => '713 219 5026',
                         'account_name' => 'A.n Insani Indonesia',
+                        'instructions' => null,
+                        'logo_url' => null,
                     ],
                     [
+                        'id' => 2,
                         'code' => 'MANUAL_BRI',
                         'name' => 'Bank Rakyat Indonesia (BRI)',
                         'subtitle' => 'Konfirmasi WhatsApp',
@@ -194,6 +211,8 @@ class XenditPaymentService
                         'max_amount' => 500000000,
                         'account_number' => '0345 0100 1366 304',
                         'account_name' => 'A.n Insani Indonesia',
+                        'instructions' => null,
+                        'logo_url' => null,
                     ],
                 ];
             })()),
@@ -205,11 +224,27 @@ class XenditPaymentService
      *
      * @return array<string, mixed>|null
      */
-    public static function findChannel(string $code): ?array
+    public static function findChannel(string $code, ?string $channelType = null): ?array
     {
+        $codeUpper = strtoupper(trim($code));
+
         foreach (self::getAvailableChannels() as $channel) {
-            if (strtoupper($channel['code']) === strtoupper($code)) {
+            if ($channelType && ($channel['channel'] ?? null) !== $channelType) {
+                continue;
+            }
+
+            $currentCode = strtoupper($channel['code']);
+            if ($currentCode === $codeUpper) {
                 return $channel;
+            }
+
+            // For manual transfer channels, allow matching with or without MANUAL_ prefix
+            if (($channel['category'] ?? '') === 'manual') {
+                $withoutPrefix = str_replace('MANUAL_', '', $currentCode);
+                $codeWithoutPrefix = str_replace('MANUAL_', '', $codeUpper);
+                if ($withoutPrefix === $codeWithoutPrefix) {
+                    return $channel;
+                }
             }
         }
 
