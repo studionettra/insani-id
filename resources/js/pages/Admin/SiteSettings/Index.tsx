@@ -1,69 +1,25 @@
-import { Head, useForm } from '@inertiajs/react';
-import { 
-    Phone, 
-    Share2, 
-    QrCode, 
-    FileText, 
-    Save, 
-    UploadCloud,
-    CheckCircle2,
-    BarChart3,
-    Sparkles,
-    Info,
-    Megaphone,
-    ShieldCheck,
-    Globe,
-    ExternalLink,
-    Building2,
-    FileCheck,
-    Languages,
-    Loader2
-} from 'lucide-react';
 import React, { useState } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { Save, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import { autoTranslateFields } from '@/lib/translate';
-
-interface MultilingualField {
-    id: string;
-    en: string;
-    ar: string;
-}
-
-const parseMultilingual = (val: any, defaultText = ''): MultilingualField => {
-    if (!val) return { id: defaultText, en: '', ar: '' };
-    if (typeof val === 'object' && val !== null) {
-        return { 
-            id: val.id ?? defaultText, 
-            en: val.en ?? '', 
-            ar: val.ar ?? '' 
-        };
-    }
-    if (typeof val === 'string' && val.trim().startsWith('{')) {
-        try {
-            const parsed = JSON.parse(val.trim());
-            if (typeof parsed === 'object' && parsed !== null) {
-                return { 
-                    id: parsed.id ?? defaultText, 
-                    en: parsed.en ?? '', 
-                    ar: parsed.ar ?? '' 
-                };
-            }
-        } catch (e) {}
-    }
-    return { id: val || defaultText, en: '', ar: '' };
-};
+import { TabKey, parseMultilingual } from './types';
+import SettingsTabNav from './components/SettingsTabNav';
+import GeneralContactTab from './tabs/GeneralContactTab';
+import BrandingMediaTab from './tabs/BrandingMediaTab';
+import AboutProfileTab from './tabs/AboutProfileTab';
+import LegalReceiptTab from './tabs/LegalReceiptTab';
+import AnnouncementTab from './tabs/AnnouncementTab';
+import MarketingIntegrationTab from './tabs/MarketingIntegrationTab';
 
 interface Props {
     settings: Record<string, string>;
 }
 
 export default function SiteSettingsIndex({ settings }: Props) {
+    const [activeTab, setActiveTab] = useState<TabKey>('general');
+
     const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
         contact_whatsapp: settings.contact_whatsapp || '081319456675',
         contact_phone: settings.contact_phone || '(021) 27871199',
@@ -116,23 +72,47 @@ export default function SiteSettingsIndex({ settings }: Props) {
         ads_txt_content: settings.ads_txt_content || '',
     });
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
-    const [stampPreview, setStampPreview] = useState<string | null>(null);
+    // File Preview States
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [logoWhitePreview, setLogoWhitePreview] = useState<string | null>(null);
     const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
+    const [qrisPreview, setQrisPreview] = useState<string | null>(null);
+    const [stampPreview, setStampPreview] = useState<string | null>(null);
+    const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
 
-    // Multilingual states
-    const [aboutLangTab, setAboutLangTab] = useState<'id' | 'en' | 'ar'>('id');
+    // Translation Loading States
     const [isTranslatingAbout, setIsTranslatingAbout] = useState(false);
-
-    const [footerLangTab, setFooterLangTab] = useState<'id' | 'en' | 'ar'>('id');
     const [isTranslatingFooter, setIsTranslatingFooter] = useState(false);
-
-    const [announcementLangTab, setAnnouncementLangTab] = useState<'id' | 'en' | 'ar'>('id');
     const [isTranslatingAnnouncement, setIsTranslatingAnnouncement] = useState(false);
 
+    // File change handler
+    const handleFileChange = (field: string, file: File | null) => {
+        setData(field as any, file);
+        const objectUrl = file ? URL.createObjectURL(file) : null;
+
+        switch (field) {
+            case 'site_logo':
+                setLogoPreview(objectUrl);
+                break;
+            case 'site_logo_white':
+                setLogoWhitePreview(objectUrl);
+                break;
+            case 'site_favicon':
+                setFaviconPreview(objectUrl);
+                break;
+            case 'qris_image':
+                setQrisPreview(objectUrl);
+                break;
+            case 'receipt_stamp_image':
+                setStampPreview(objectUrl);
+                break;
+            case 'receipt_signature_image':
+                setSignaturePreview(objectUrl);
+                break;
+        }
+    };
+
+    // Auto translate handlers
     const handleTranslateAbout = async () => {
         if (!data.about_vision.id && !data.about_mission.id && !data.about_values.id) {
             toast.error('Isi konten Visi, Misi, atau Nilai dalam Bahasa Indonesia terlebih dahulu.');
@@ -147,6 +127,7 @@ export default function SiteSettingsIndex({ settings }: Props) {
             if (data.about_values.id) fieldsToTranslate.about_values = data.about_values.id;
 
             const results = await autoTranslateFields(fieldsToTranslate);
+            if (!results) return;
 
             setData(prev => ({
                 ...prev,
@@ -186,6 +167,7 @@ export default function SiteSettingsIndex({ settings }: Props) {
             const results = await autoTranslateFields({
                 footer_description: data.footer_description.id,
             });
+            if (!results) return;
 
             setData(prev => ({
                 ...prev,
@@ -215,6 +197,7 @@ export default function SiteSettingsIndex({ settings }: Props) {
             const results = await autoTranslateFields({
                 announcement_text: data.announcement_text.id,
             });
+            if (!results) return;
 
             setData(prev => ({
                 ...prev,
@@ -233,46 +216,39 @@ export default function SiteSettingsIndex({ settings }: Props) {
         }
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        setData('qris_image', file);
-
-        if (file) {
-            setPreviewUrl(URL.createObjectURL(file));
-        } else {
-            setPreviewUrl(null);
-        }
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/admin/site-settings', {
             forceFormData: true,
             preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Pengaturan website berhasil disimpan!');
+            },
+            onError: () => {
+                toast.error('Gagal menyimpan. Silakan periksa tab yang memiliki pesan error.');
+            },
         });
     };
-
-    const currentQrisUrl = previewUrl || (settings.qris_image ? `/storage/${settings.qris_image}` : '/images/qris/logo-qris-insani.webp');
 
     return (
         <>
             <Head title="Pengaturan Website" />
 
-            <div className="space-y-8 pb-12">
+            <div className="space-y-6 pb-8">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200 pb-5 dark:border-gray-800">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200/80 pb-5 dark:border-gray-800">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                             Pengaturan Website
                         </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Kelola kontak resmi, tautan media sosial, teks profil footer, dan barcode QRIS donasi cepat.
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Kelola identitas resmi, informasi kontak, profil yayasan, pengesahan dokumen, dan konfigurasi integrasi situs.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                         {recentlySuccessful && (
-                            <span className="flex items-center text-sm font-medium text-green-600 dark:text-green-400 animate-fade-in">
+                            <span className="flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 animate-fade-in">
                                 <CheckCircle2 className="w-4 h-4 mr-1.5" />
                                 Tersimpan
                             </span>
@@ -280,1461 +256,96 @@ export default function SiteSettingsIndex({ settings }: Props) {
                         <Button 
                             onClick={handleSubmit} 
                             disabled={processing}
-                            className="bg-brand-600 hover:bg-brand-700 text-white shadow-xs"
+                            className="bg-brand-600 hover:bg-brand-700 text-white shadow-xs rounded-xl text-xs font-semibold h-9 px-4"
                         >
-                            <Save className="w-4 h-4 mr-2" />
+                            <Save className="w-3.5 h-3.5 mr-1.5" />
                             {processing ? 'Menyimpan...' : 'Simpan Pengaturan'}
                         </Button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        {/* Kolom Kiri: Kontak & Medsos */}
-                        <div className="lg:col-span-7 space-y-8">
-                            {/* Card 1: Kontak & Lokasi */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
-                                        <Phone className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Kontak & Lokasi Yayasan</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Informasi kontak yang ditampilkan kepada publik dan donatur.</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="contact_whatsapp">Nomor WhatsApp Resmi (Footer)</Label>
-                                            <div className="relative mt-1">
-                                                <Input
-                                                    id="contact_whatsapp"
-                                                    value={data.contact_whatsapp}
-                                                    onChange={(e) => setData('contact_whatsapp', e.target.value)}
-                                                    placeholder="cth: 081319456675"
-                                                    className="pl-3"
-                                                />
-                                            </div>
-                                            {errors.contact_whatsapp && <p className="text-xs text-red-500 mt-1">{errors.contact_whatsapp}</p>}
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="contact_phone">Telepon Kantor Resmi</Label>
-                                            <div className="relative mt-1">
-                                                <Input
-                                                    id="contact_phone"
-                                                    value={data.contact_phone}
-                                                    onChange={(e) => setData('contact_phone', e.target.value)}
-                                                    placeholder="cth: (021) 27871199"
-                                                    className="pl-3"
-                                                />
-                                            </div>
-                                            {errors.contact_phone && <p className="text-xs text-red-500 mt-1">{errors.contact_phone}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="contact_email">Email Resmi Yayasan</Label>
-                                        <div className="relative mt-1">
-                                            <Input
-                                                id="contact_email"
-                                                type="email"
-                                                value={data.contact_email}
-                                                onChange={(e) => setData('contact_email', e.target.value)}
-                                                placeholder="sapa@insani.id"
-                                                className="pl-3"
-                                            />
-                                        </div>
-                                        {errors.contact_email && <p className="text-xs text-red-500 mt-1">{errors.contact_email}</p>}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="contact_operating_hours">Jam Operasional Kantor</Label>
-                                            <Input
-                                                id="contact_operating_hours"
-                                                value={data.contact_operating_hours}
-                                                onChange={(e) => setData('contact_operating_hours', e.target.value)}
-                                                placeholder="Senin - Jum'at | 10:00 - 18.00 WIB"
-                                                className="mt-1"
-                                            />
-                                            {errors.contact_operating_hours && <p className="text-xs text-red-500 mt-1">{errors.contact_operating_hours}</p>}
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="contact_holiday_note">Catatan Hari Libur</Label>
-                                            <Input
-                                                id="contact_holiday_note"
-                                                value={data.contact_holiday_note}
-                                                onChange={(e) => setData('contact_holiday_note', e.target.value)}
-                                                placeholder="Tutup Pada Tanggal Merah & Cuti Bersama"
-                                                className="mt-1"
-                                            />
-                                            {errors.contact_holiday_note && <p className="text-xs text-red-500 mt-1">{errors.contact_holiday_note}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="contact_address">Alamat Kantor Yayasan</Label>
-                                        <textarea
-                                            id="contact_address"
-                                            rows={2}
-                                            value={data.contact_address}
-                                            onChange={(e) => setData('contact_address', e.target.value)}
-                                            placeholder="Alamat kantor lengkap yayasan..."
-                                            className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
-                                        />
-                                        {errors.contact_address && <p className="text-xs text-red-500 mt-1">{errors.contact_address}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="contact_maps_url">Link Google Maps (Opsional / Embed)</Label>
-                                        <Input
-                                            id="contact_maps_url"
-                                            value={data.contact_maps_url}
-                                            onChange={(e) => setData('contact_maps_url', e.target.value)}
-                                            placeholder="https://maps.google.com/..."
-                                            className="mt-1"
-                                        />
-                                        {errors.contact_maps_url && <p className="text-xs text-red-500 mt-1">{errors.contact_maps_url}</p>}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card 2: Media Sosial */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                                        <Share2 className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Tautan Media Sosial</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Ikon dan link akun resmi yayasan di footer website.</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="social_instagram">Instagram</Label>
-                                        <Input
-                                            id="social_instagram"
-                                            value={data.social_instagram}
-                                            onChange={(e) => setData('social_instagram', e.target.value)}
-                                            placeholder="https://www.instagram.com/insaniindonesia"
-                                            className="mt-1 text-xs"
-                                        />
-                                        {errors.social_instagram && <p className="text-xs text-red-500 mt-1">{errors.social_instagram}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="social_facebook">Facebook</Label>
-                                        <Input
-                                            id="social_facebook"
-                                            value={data.social_facebook}
-                                            onChange={(e) => setData('social_facebook', e.target.value)}
-                                            placeholder="https://www.facebook.com/insaniindonesia"
-                                            className="mt-1 text-xs"
-                                        />
-                                        {errors.social_facebook && <p className="text-xs text-red-500 mt-1">{errors.social_facebook}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="social_youtube">YouTube</Label>
-                                        <Input
-                                            id="social_youtube"
-                                            value={data.social_youtube}
-                                            onChange={(e) => setData('social_youtube', e.target.value)}
-                                            placeholder="https://www.youtube.com/@insaniindonesia"
-                                            className="mt-1 text-xs"
-                                        />
-                                        {errors.social_youtube && <p className="text-xs text-red-500 mt-1">{errors.social_youtube}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="social_x">X (Twitter)</Label>
-                                        <Input
-                                            id="social_x"
-                                            value={data.social_x}
-                                            onChange={(e) => setData('social_x', e.target.value)}
-                                            placeholder="https://x.com/officialinsani"
-                                            className="mt-1 text-xs"
-                                        />
-                                        {errors.social_x && <p className="text-xs text-red-500 mt-1">{errors.social_x}</p>}
-                                    </div>
-
-                                    <div className="sm:col-span-2">
-                                        <Label htmlFor="social_threads">Threads</Label>
-                                        <Input
-                                            id="social_threads"
-                                            value={data.social_threads}
-                                            onChange={(e) => setData('social_threads', e.target.value)}
-                                            placeholder="https://www.threads.com/@insaniindonesia"
-                                            className="mt-1 text-xs"
-                                        />
-                                        {errors.social_threads && <p className="text-xs text-red-500 mt-1">{errors.social_threads}</p>}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card: Layanan Kontak Divisi (Halaman Kontak) */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                                        <Phone className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Kontak Divisi Layanan (Halaman Kontak)</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Nomor WhatsApp dan email spesifik untuk dukungan donatur, konfirmasi transfer, dan kemitraan.</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="contact_donor_support_wa">WhatsApp Dukungan Donatur</Label>
-                                            <Input
-                                                id="contact_donor_support_wa"
-                                                value={data.contact_donor_support_wa}
-                                                onChange={(e) => setData('contact_donor_support_wa', e.target.value)}
-                                                placeholder="081319456675"
-                                                className="mt-1"
-                                            />
-                                            {errors.contact_donor_support_wa && <p className="text-xs text-red-500 mt-1">{errors.contact_donor_support_wa}</p>}
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="contact_donation_confirm_wa">WhatsApp Konfirmasi Donasi</Label>
-                                            <Input
-                                                id="contact_donation_confirm_wa"
-                                                value={data.contact_donation_confirm_wa}
-                                                onChange={(e) => setData('contact_donation_confirm_wa', e.target.value)}
-                                                placeholder="0895373388880"
-                                                className="mt-1"
-                                            />
-                                            {errors.contact_donation_confirm_wa && <p className="text-xs text-red-500 mt-1">{errors.contact_donation_confirm_wa}</p>}
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <Label htmlFor="contact_partnership_wa">WhatsApp Kemitraan Lembaga</Label>
-                                            <Input
-                                                id="contact_partnership_wa"
-                                                value={data.contact_partnership_wa}
-                                                onChange={(e) => setData('contact_partnership_wa', e.target.value)}
-                                                placeholder="082124837496"
-                                                className="mt-1"
-                                            />
-                                            {errors.contact_partnership_wa && <p className="text-xs text-red-500 mt-1">{errors.contact_partnership_wa}</p>}
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="contact_finance_email">Email Khusus Keuangan</Label>
-                                            <Input
-                                                id="contact_finance_email"
-                                                type="email"
-                                                value={data.contact_finance_email}
-                                                onChange={(e) => setData('contact_finance_email', e.target.value)}
-                                                placeholder="financial@insani.id"
-                                                className="mt-1"
-                                            />
-                                            {errors.contact_finance_email && <p className="text-xs text-red-500 mt-1">{errors.contact_finance_email}</p>}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card: Profil Lembaga - Visi, Misi & Nilai Perjuangan */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
-                                            <Sparkles className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profil Lembaga: Visi, Misi & Nilai</h2>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Konten landasan gerak yang ditampilkan di halaman Tentang Kami (/tentang-kami).</p>
-                                        </div>
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handleTranslateAbout}
-                                        disabled={isTranslatingAbout || (!data.about_vision.id && !data.about_mission.id && !data.about_values.id)}
-                                        className="text-xs flex items-center gap-1.5 self-start sm:self-auto border-indigo-200 hover:bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:text-indigo-300 dark:hover:bg-indigo-950"
-                                    >
-                                        {isTranslatingAbout ? (
-                                            <>
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                Menerjemahkan...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Languages className="w-3.5 h-3.5" />
-                                                Terjemahkan Otomatis
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-
-                                {/* Translation Status Card */}
-                                <div className="mb-4">
-                                    <TranslationStatusCard
-                                        title="Status Terjemahan Visi, Misi & Nilai"
-                                        hasId={Boolean(data.about_vision.id || data.about_mission.id || data.about_values.id)}
-                                        hasEn={Boolean(data.about_vision.en && data.about_mission.en && data.about_values.en)}
-                                        hasAr={Boolean(data.about_vision.ar && data.about_mission.ar && data.about_values.ar)}
-                                        onTranslate={handleTranslateAbout}
-                                        isTranslating={isTranslatingAbout}
-                                        disabled={!data.about_vision.id && !data.about_mission.id && !data.about_values.id}
-                                        compact
-                                    />
-                                </div>
-
-                                {/* Language Tabs */}
-                                <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setAboutLangTab('id')}
-                                        className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
-                                            aboutLangTab === 'id'
-                                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
-                                    >
-                                        🇮🇩 Bahasa Indonesia (Sumber)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setAboutLangTab('en')}
-                                        className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
-                                            aboutLangTab === 'en'
-                                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
-                                    >
-                                        🇬🇧 English {data.about_vision.en && '✓'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setAboutLangTab('ar')}
-                                        className={`px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
-                                            aboutLangTab === 'ar'
-                                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
-                                    >
-                                        🇸🇦 العربية (Arabic) {data.about_vision.ar && '✓'}
-                                    </button>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor={`about_vision_${aboutLangTab}`}>
-                                            Visi Yayasan {aboutLangTab === 'en' ? '(English)' : aboutLangTab === 'ar' ? '(العربية)' : ''}
-                                        </Label>
-                                        <textarea
-                                            id={`about_vision_${aboutLangTab}`}
-                                            rows={3}
-                                            dir={aboutLangTab === 'ar' ? 'rtl' : 'ltr'}
-                                            value={data.about_vision[aboutLangTab] || ''}
-                                            onChange={(e) => setData('about_vision', { ...data.about_vision, [aboutLangTab]: e.target.value })}
-                                            placeholder={aboutLangTab === 'ar' ? 'رؤية المؤسسة...' : aboutLangTab === 'en' ? 'Foundation vision...' : 'Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya...'}
-                                            className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
-                                        />
-                                        {aboutLangTab === 'id' && (
-                                            <p className="text-xs text-gray-400 mt-1">Kosongkan jika ingin menggunakan rumusan visi baku bawaan sistem.</p>
-                                        )}
-                                        {errors[`about_vision.${aboutLangTab}`] && (
-                                            <p className="text-xs text-red-500 mt-1">{errors[`about_vision.${aboutLangTab}`]}</p>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor={`about_mission_${aboutLangTab}`}>
-                                            Misi Yayasan {aboutLangTab === 'en' ? '(English)' : aboutLangTab === 'ar' ? '(العربية)' : ''} (Gunakan baris baru untuk setiap butir misi)
-                                        </Label>
-                                        <textarea
-                                            id={`about_mission_${aboutLangTab}`}
-                                            rows={4}
-                                            dir={aboutLangTab === 'ar' ? 'rtl' : 'ltr'}
-                                            value={data.about_mission[aboutLangTab] || ''}
-                                            onChange={(e) => setData('about_mission', { ...data.about_mission, [aboutLangTab]: e.target.value })}
-                                            placeholder={aboutLangTab === 'ar' ? 'رسالة المؤسسة...' : aboutLangTab === 'en' ? 'Foundation mission points (one per line)...' : 'Menggalang kepedulian masyarakat...\nMemberikan bantuan tepat sasaran...\nMengedukasi masyarakat...'}
-                                            className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Setiap baris baru akan dirender sebagai butir poin misi terpisah.</p>
-                                        {errors[`about_mission.${aboutLangTab}`] && (
-                                            <p className="text-xs text-red-500 mt-1">{errors[`about_mission.${aboutLangTab}`]}</p>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor={`about_values_${aboutLangTab}`}>
-                                            Nilai-Nilai Perjuangan {aboutLangTab === 'en' ? '(English)' : aboutLangTab === 'ar' ? '(العربية)' : ''} (Format: Judul: Keterangan per baris)
-                                        </Label>
-                                        <textarea
-                                            id={`about_values_${aboutLangTab}`}
-                                            rows={4}
-                                            dir={aboutLangTab === 'ar' ? 'rtl' : 'ltr'}
-                                            value={data.about_values[aboutLangTab] || ''}
-                                            onChange={(e) => setData('about_values', { ...data.about_values, [aboutLangTab]: e.target.value })}
-                                            placeholder={aboutLangTab === 'ar' ? 'القيم الأساسية...' : aboutLangTab === 'en' ? 'Core Values (Format: Title: Description per line)...' : 'Integritas: Transparan dan akuntabel dalam pengelolaan amanah donatur.\nKolaborasi: Bersinergi dengan semua pihak untuk dampak yang lebih luas.\nEmpati: Bergerak dari panggilan hati nurani untuk meringankan beban sesama.'}
-                                            className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Contoh format: <code>Integritas: Transparan dan akuntabel...</code> (1 nilai per baris).</p>
-                                        {errors[`about_values.${aboutLangTab}`] && (
-                                            <p className="text-xs text-red-500 mt-1">{errors[`about_values.${aboutLangTab}`]}</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Kolom Kanan: Footer & QRIS */}
-                        <div className="lg:col-span-5 space-y-8">
-                            {/* Card 3: Profil Footer */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-                                            <FileText className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Profil Footer Website</h2>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Deskripsi singkat di bawah logo pada bagian footer.</p>
-                                        </div>
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handleTranslateFooter}
-                                        disabled={isTranslatingFooter || !data.footer_description.id}
-                                        className="text-xs flex items-center gap-1.5 self-start sm:self-auto border-purple-200 hover:bg-purple-50 text-purple-700 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950"
-                                    >
-                                        {isTranslatingFooter ? (
-                                            <>
-                                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                Menerjemahkan...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Languages className="w-3.5 h-3.5" />
-                                                Terjemahkan Otomatis
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-
-                                {/* Translation Status Card */}
-                                <div className="mb-4">
-                                    <TranslationStatusCard
-                                        title="Status Terjemahan Profil Footer"
-                                        hasId={Boolean(data.footer_description.id)}
-                                        hasEn={Boolean(data.footer_description.en)}
-                                        hasAr={Boolean(data.footer_description.ar)}
-                                        onTranslate={handleTranslateFooter}
-                                        isTranslating={isTranslatingFooter}
-                                        disabled={!data.footer_description.id}
-                                        compact
-                                    />
-                                </div>
-
-                                {/* Language Tabs */}
-                                <div className="flex border-b border-gray-200 dark:border-gray-700 mb-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFooterLangTab('id')}
-                                        className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                            footerLangTab === 'id'
-                                                ? 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
-                                    >
-                                        🇮🇩 ID (Sumber)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFooterLangTab('en')}
-                                        className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                            footerLangTab === 'en'
-                                                ? 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
-                                    >
-                                        🇬🇧 EN {data.footer_description.en && '✓'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFooterLangTab('ar')}
-                                        className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                            footerLangTab === 'ar'
-                                                ? 'border-purple-600 text-purple-600 dark:border-purple-400 dark:text-purple-400'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                        }`}
-                                    >
-                                        🇸🇦 AR {data.footer_description.ar && '✓'}
-                                    </button>
-                                </div>
-
-                                <div>
-                                    <Label htmlFor={`footer_description_${footerLangTab}`}>
-                                        Teks Ringkasan Profil {footerLangTab === 'en' ? '(English)' : footerLangTab === 'ar' ? '(العربية)' : ''}
-                                    </Label>
-                                    <textarea
-                                        id={`footer_description_${footerLangTab}`}
-                                        rows={4}
-                                        dir={footerLangTab === 'ar' ? 'rtl' : 'ltr'}
-                                        value={data.footer_description[footerLangTab] || ''}
-                                        onChange={(e) => setData('footer_description', { ...data.footer_description, [footerLangTab]: e.target.value })}
-                                        placeholder={footerLangTab === 'ar' ? 'وصف موجز للمؤسسة...' : footerLangTab === 'en' ? 'Brief organization description for footer...' : 'Deskripsi singkat yayasan...'}
-                                        className="mt-1 flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
-                                    />
-                                    {errors[`footer_description.${footerLangTab}`] && (
-                                        <p className="text-xs text-red-500 mt-1">{errors[`footer_description.${footerLangTab}`]}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Card 4: QRIS Donasi Cepat */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                                        <QrCode className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">QRIS Donasi Cepat</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Gambar barcode QRIS resmi yayasan di footer.</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                                    <div className="bg-white p-2.5 rounded-xl shadow-xs mb-4">
-                                        <img 
-                                            src={currentQrisUrl} 
-                                            alt="QRIS Donasi Preview" 
-                                            className="w-44 h-auto rounded-lg object-contain" 
-                                        />
-                                    </div>
-
-                                    <label className="cursor-pointer">
-                                        <div className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-2xs transition-colors">
-                                            <UploadCloud className="w-4 h-4 mr-2 text-brand-600" />
-                                            {data.qris_image ? 'Ganti File Gambar' : 'Unggah Barcode QRIS Baru'}
-                                        </div>
-                                        <input 
-                                            type="file" 
-                                            accept="image/png,image/jpeg,image/webp" 
-                                            className="hidden" 
-                                            onChange={handleFileChange} 
-                                        />
-                                    </label>
-                                    <p className="text-[11px] text-gray-400 mt-2 text-center">
-                                        Format: PNG, JPG, atau WebP (Maks 3 MB)
-                                    </p>
-                                    {errors.qris_image && <p className="text-xs text-red-500 mt-1">{errors.qris_image}</p>}
-                                </div>
-                            </div>
-
-                            {/* Card: Identitas Visual & Branding */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-950 dark:text-teal-400">
-                                        <Globe className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Identitas Visual & Branding</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Logo lembaga dan favicon browser.</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="site_logo" className="text-xs font-semibold">Logo Utama Website (Header & Kwitansi)</Label>
-                                        <div className="mt-1.5 flex items-center gap-3">
-                                            {(logoPreview || settings.site_logo) && (
-                                                <div className="h-12 w-28 bg-slate-100 dark:bg-slate-900 rounded-lg p-1.5 flex items-center justify-center border border-slate-200">
-                                                    <img 
-                                                        src={logoPreview || `/storage/${settings.site_logo}`} 
-                                                        alt="Logo Preview" 
-                                                        className="h-full w-auto object-contain" 
-                                                    />
-                                                </div>
-                                            )}
-                                            <label className="flex-1 cursor-pointer">
-                                                <div className="px-3 py-2 text-xs border border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-insani-blue text-center">
-                                                    Pilih file logo PNG/SVG...
-                                                </div>
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/png,image/svg+xml,image/webp,image/jpeg" 
-                                                    className="hidden" 
-                                                    onChange={(e) => {
-                                                        const f = e.target.files?.[0] || null;
-                                                        setData('site_logo', f);
-                                                        setLogoPreview(f ? URL.createObjectURL(f) : null);
-                                                    }} 
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="site_logo_white" className="text-xs font-semibold">Logo Versi Putih / Dark Mode (Footer & Sidebar)</Label>
-                                        <div className="mt-1.5 flex items-center gap-3">
-                                            {(logoWhitePreview || settings.site_logo_white) && (
-                                                <div className="h-12 w-28 bg-slate-900 rounded-lg p-1.5 flex items-center justify-center border border-slate-800">
-                                                    <img 
-                                                        src={logoWhitePreview || `/storage/${settings.site_logo_white}`} 
-                                                        alt="Logo White Preview" 
-                                                        className="h-full w-auto object-contain" 
-                                                    />
-                                                </div>
-                                            )}
-                                            <label className="flex-1 cursor-pointer">
-                                                <div className="px-3 py-2 text-xs border border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-insani-blue text-center">
-                                                    Pilih file logo putih PNG/SVG...
-                                                </div>
-                                                <input 
-                                                    type="file" 
-                                                    accept="image/png,image/svg+xml,image/webp,image/jpeg" 
-                                                    className="hidden" 
-                                                    onChange={(e) => {
-                                                        const f = e.target.files?.[0] || null;
-                                                        setData('site_logo_white', f);
-                                                        setLogoWhitePreview(f ? URL.createObjectURL(f) : null);
-                                                    }} 
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="site_favicon" className="text-xs font-semibold">Favicon Browser (.ico / .png / .svg)</Label>
-                                        <div className="mt-1.5 flex items-center gap-3">
-                                            {(faviconPreview || settings.site_favicon) && (
-                                                <div className="h-10 w-10 bg-slate-100 dark:bg-slate-900 rounded-lg p-1.5 flex items-center justify-center border border-slate-200">
-                                                    <img 
-                                                        src={faviconPreview || `/storage/${settings.site_favicon}`} 
-                                                        alt="Favicon" 
-                                                        className="h-full w-auto object-contain" 
-                                                    />
-                                                </div>
-                                            )}
-                                            <label className="flex-1 cursor-pointer">
-                                                <div className="px-3 py-2 text-xs border border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-insani-blue text-center">
-                                                    Pilih file favicon...
-                                                </div>
-                                                <input 
-                                                    type="file" 
-                                                    accept=".ico,image/png,image/svg+xml" 
-                                                    className="hidden" 
-                                                    onChange={(e) => {
-                                                        const f = e.target.files?.[0] || null;
-                                                        setData('site_favicon', f);
-                                                        setFaviconPreview(f ? URL.createObjectURL(f) : null);
-                                                    }} 
-                                                />
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card: Pengesahan Kwitansi Resmi Donasi */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center gap-2 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                                        <ShieldCheck className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Pengesahan Kwitansi Donasi</h2>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">Pejabat penandatangan dan stempel resmi pada e-receipt donatur.</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label htmlFor="receipt_signatory_name" className="text-xs">Nama Lengkap Penandatangan</Label>
-                                        <Input
-                                            id="receipt_signatory_name"
-                                            value={data.receipt_signatory_name}
-                                            onChange={(e) => setData('receipt_signatory_name', e.target.value)}
-                                            placeholder="cth: H. Muhammad Ihsan, S.Sos"
-                                            className="mt-1"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="receipt_signatory_title" className="text-xs">Jabatan Lembaga</Label>
-                                        <Input
-                                            id="receipt_signatory_title"
-                                            value={data.receipt_signatory_title}
-                                            onChange={(e) => setData('receipt_signatory_title', e.target.value)}
-                                            placeholder="cth: Direktur Eksekutif Yayasan"
-                                            className="mt-1"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                                        <div>
-                                            <Label className="text-xs">Stempel Resmi (PNG Transparan)</Label>
-                                            <div className="mt-1">
-                                                {(stampPreview || settings.receipt_stamp_image) && (
-                                                    <div className="h-16 w-full bg-slate-100 rounded-lg p-2 flex items-center justify-center border mb-1">
-                                                        <img 
-                                                            src={stampPreview || `/storage/${settings.receipt_stamp_image}`} 
-                                                            alt="Stempel" 
-                                                            className="h-full object-contain" 
-                                                        />
-                                                    </div>
-                                                )}
-                                                <label className="cursor-pointer block">
-                                                    <div className="px-2 py-1.5 text-[11px] border border-dashed rounded-lg text-slate-600 hover:border-insani-blue text-center">
-                                                        Upload Stempel...
-                                                    </div>
-                                                    <input 
-                                                        type="file" 
-                                                        accept="image/png,image/webp" 
-                                                        className="hidden" 
-                                                        onChange={(e) => {
-                                                            const f = e.target.files?.[0] || null;
-                                                            setData('receipt_stamp_image', f);
-                                                            setStampPreview(f ? URL.createObjectURL(f) : null);
-                                                        }} 
-                                                    />
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <Label className="text-xs">Tanda Tangan Digital (PNG)</Label>
-                                            <div className="mt-1">
-                                                {(signaturePreview || settings.receipt_signature_image) && (
-                                                    <div className="h-16 w-full bg-slate-100 rounded-lg p-2 flex items-center justify-center border mb-1">
-                                                        <img 
-                                                            src={signaturePreview || `/storage/${settings.receipt_signature_image}`} 
-                                                            alt="Tanda Tangan" 
-                                                            className="h-full object-contain" 
-                                                        />
-                                                    </div>
-                                                )}
-                                                <label className="cursor-pointer block">
-                                                    <div className="px-2 py-1.5 text-[11px] border border-dashed rounded-lg text-slate-600 hover:border-insani-blue text-center">
-                                                        Upload TTD...
-                                                    </div>
-                                                    <input 
-                                                        type="file" 
-                                                        accept="image/png,image/webp" 
-                                                        className="hidden" 
-                                                        onChange={(e) => {
-                                                            const f = e.target.files?.[0] || null;
-                                                            setData('receipt_signature_image', f);
-                                                            setSignaturePreview(f ? URL.createObjectURL(f) : null);
-                                                        }} 
-                                                    />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Card: Bilah Pengumuman Global (Announcement Bar) */}
-                            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                                <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
-                                            <Megaphone className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Bilah Pengumuman Global</h2>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Tampilkan banner darurat / pengumuman penting di bagian paling atas website.</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Switch
-                                            checked={data.announcement_enabled === '1'}
-                                            onCheckedChange={(checked) => setData('announcement_enabled', checked ? '1' : '0')}
-                                        />
-                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                            {data.announcement_enabled === '1' ? 'Aktif' : 'Nonaktif'}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <Label htmlFor={`announcement_text_${announcementLangTab}`} className="text-xs">
-                                                Teks Pengumuman / Peringatan {announcementLangTab === 'en' ? '(English)' : announcementLangTab === 'ar' ? '(العربية)' : ''}
-                                            </Label>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={handleTranslateAnnouncement}
-                                                disabled={isTranslatingAnnouncement || !data.announcement_text.id}
-                                                className="h-7 text-xs flex items-center gap-1 text-amber-700 hover:text-amber-800 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950"
-                                            >
-                                                {isTranslatingAnnouncement ? (
-                                                    <>
-                                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                                        Menerjemahkan...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Languages className="w-3 h-3" />
-                                                        Terjemahkan Otomatis
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </div>
-
-                                        {/* Translation Status Card */}
-                                        <div className="mb-3">
-                                            <TranslationStatusCard
-                                                title="Status Terjemahan Bilah Pengumuman"
-                                                hasId={Boolean(data.announcement_text.id)}
-                                                hasEn={Boolean(data.announcement_text.en)}
-                                                hasAr={Boolean(data.announcement_text.ar)}
-                                                onTranslate={handleTranslateAnnouncement}
-                                                isTranslating={isTranslatingAnnouncement}
-                                                disabled={!data.announcement_text.id}
-                                                compact
-                                            />
-                                        </div>
-
-                                        {/* Language Tabs */}
-                                        <div className="flex border-b border-gray-200 dark:border-gray-700 mb-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => setAnnouncementLangTab('id')}
-                                                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                                    announcementLangTab === 'id'
-                                                        ? 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400'
-                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                                }`}
-                                            >
-                                                🇮🇩 ID (Sumber)
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setAnnouncementLangTab('en')}
-                                                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                                    announcementLangTab === 'en'
-                                                        ? 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400'
-                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                                }`}
-                                            >
-                                                🇬🇧 EN {data.announcement_text.en && '✓'}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setAnnouncementLangTab('ar')}
-                                                className={`px-3 py-1.5 text-xs font-medium border-b-2 transition-colors ${
-                                                    announcementLangTab === 'ar'
-                                                        ? 'border-amber-600 text-amber-600 dark:border-amber-400 dark:text-amber-400'
-                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                                }`}
-                                            >
-                                                🇸🇦 AR {data.announcement_text.ar && '✓'}
-                                            </button>
-                                        </div>
-
-                                        <Input
-                                            id={`announcement_text_${announcementLangTab}`}
-                                            dir={announcementLangTab === 'ar' ? 'rtl' : 'ltr'}
-                                            value={data.announcement_text[announcementLangTab] || ''}
-                                            onChange={(e) => setData('announcement_text', { ...data.announcement_text, [announcementLangTab]: e.target.value })}
-                                            placeholder={announcementLangTab === 'ar' ? 'نص الإعلان أو التنبيه...' : announcementLangTab === 'en' ? 'Announcement / alert text...' : 'cth: Tanggap Darurat Bencana Banjir Bandang: Salurkan bantuan Anda sekarang!'}
-                                            className="mt-1"
-                                        />
-                                        {errors[`announcement_text.${announcementLangTab}`] && (
-                                            <p className="text-xs text-red-500 mt-1">{errors[`announcement_text.${announcementLangTab}`]}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <Label htmlFor="announcement_link" className="text-xs">Tautan Link Tujuan (Opsional)</Label>
-                                            <Input
-                                                id="announcement_link"
-                                                value={data.announcement_link}
-                                                onChange={(e) => setData('announcement_link', e.target.value)}
-                                                placeholder="cth: /program/darurat-banjir"
-                                                className="mt-1"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="announcement_bg_color" className="text-xs">Warna Latar Banner</Label>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <input 
-                                                    type="color" 
-                                                    id="announcement_bg_color"
-                                                    value={data.announcement_bg_color}
-                                                    onChange={(e) => setData('announcement_bg_color', e.target.value)}
-                                                    className="w-10 h-9 p-0.5 rounded border border-slate-200 cursor-pointer"
-                                                />
-                                                <Input
-                                                    value={data.announcement_bg_color}
-                                                    onChange={(e) => setData('announcement_bg_color', e.target.value)}
-                                                    className="flex-1 font-mono text-xs"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Card: Legalitas Yayasan & SK Kemenkumham (Full Width) */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
-                                    <ShieldCheck className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                                            Legalitas Yayasan & SK Kemenkumham
-                                        </h2>
-                                        <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
-                                            Kredibilitas & Keabsahan
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        Informasi badan hukum resmi yang ditampilkan pada fat footer website, e-kwitansi, dan tanda terima donasi.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/60 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
-                                <Label htmlFor="show_sk_in_footer" className="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                    Tampilkan di Footer Publik
-                                </Label>
-                                <Switch
-                                    id="show_sk_in_footer"
-                                    checked={data.show_sk_in_footer === '1'}
-                                    onCheckedChange={(checked) => setData('show_sk_in_footer', checked ? '1' : '0')}
-                                />
-                                <span className={`text-[11px] font-semibold ${data.show_sk_in_footer === '1' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`}>
-                                    {data.show_sk_in_footer === '1' ? 'Aktif' : 'Nonaktif'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                            {/* Kolom Kiri: Form Input Data Legalitas */}
-                            <div className="lg:col-span-7 space-y-4">
-                                <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <Label htmlFor="legal_foundation_name" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            Nama Resmi Badan Hukum Yayasan
-                                        </Label>
-                                        <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
-                                            Wajib / Identitas Utama
-                                        </span>
-                                    </div>
-                                    <Input
-                                        id="legal_foundation_name"
-                                        value={data.legal_foundation_name}
-                                        onChange={(e) => setData('legal_foundation_name', e.target.value)}
-                                        placeholder="cth: Yayasan Peduli Insani Indonesia"
-                                        className="mt-1"
-                                    />
-                                    <p className="text-xs text-gray-400 mt-1">Nama badan hukum resmi yang tercantum pada hak cipta footer, e-receipt, dan dokumen tanda terima donasi.</p>
-                                    {errors.legal_foundation_name && <p className="text-xs text-red-500 mt-1">{errors.legal_foundation_name}</p>}
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="legal_sk_label" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            Label SK Footer
-                                        </Label>
-                                        <Input
-                                            id="legal_sk_label"
-                                            value={data.legal_sk_label}
-                                            onChange={(e) => setData('legal_sk_label', e.target.value)}
-                                            placeholder="cth: SK Kemenkumham RI"
-                                            className="mt-1"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Label pengenal di samping nomor SK (default: <em>SK Kemenkumham RI</em>).</p>
-                                        {errors.legal_sk_label && <p className="text-xs text-red-500 mt-1">{errors.legal_sk_label}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="legal_sk_kemenkumham" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            Nomor SK Kemenkumham RI
-                                        </Label>
-                                        <Input
-                                            id="legal_sk_kemenkumham"
-                                            value={data.legal_sk_kemenkumham}
-                                            onChange={(e) => setData('legal_sk_kemenkumham', e.target.value)}
-                                            placeholder="cth: AHU-0002557.AH.01.04.Tahun 2019"
-                                            className="mt-1 font-mono text-xs"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Nomor surat keputusan pengesahan pendirian atau perubahan aktif dari Kemenkumham.</p>
-                                        {errors.legal_sk_kemenkumham && <p className="text-xs text-red-500 mt-1">{errors.legal_sk_kemenkumham}</p>}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="legal_operational_permit" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            Izin Operasional / PUB Kemensos (Opsional)
-                                        </Label>
-                                        <Input
-                                            id="legal_operational_permit"
-                                            value={data.legal_operational_permit}
-                                            onChange={(e) => setData('legal_operational_permit', e.target.value)}
-                                            placeholder="cth: SK Kemensos No. xxx/HUK-PS/2024"
-                                            className="mt-1"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Nomor izin pengumpulan uang/barang dari Kementerian Sosial atau Dinas Sosial.</p>
-                                        {errors.legal_operational_permit && <p className="text-xs text-red-500 mt-1">{errors.legal_operational_permit}</p>}
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="legal_npwp" className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            NPWP Lembaga (Opsional)
-                                        </Label>
-                                        <Input
-                                            id="legal_npwp"
-                                            value={data.legal_npwp}
-                                            onChange={(e) => setData('legal_npwp', e.target.value)}
-                                            placeholder="cth: 00.000.000.0-000.000"
-                                            className="mt-1 font-mono text-xs"
-                                        />
-                                        <p className="text-xs text-gray-400 mt-1">Nomor Pokok Wajib Pajak yayasan untuk akuntabilitas perpajakan donasi.</p>
-                                        {errors.legal_npwp && <p className="text-xs text-red-500 mt-1">{errors.legal_npwp}</p>}
-                                    </div>
-                                </div>
-
-                                <div className="pt-2">
-                                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200/70 dark:border-slate-800 text-xs">
-                                        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                                            <Info className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                                            <span>Butuh melampirkan berkas sertifikat, akta notaris, atau SK PDF lengkap?</span>
-                                        </div>
-                                        <a 
-                                            href="/admin/legal-documents" 
-                                            className="inline-flex items-center gap-1 font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 transition-colors whitespace-nowrap ml-2"
-                                        >
-                                            Kelola Arsip Dokumen
-                                            <ExternalLink className="w-3.5 h-3.5" />
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Kolom Kanan: Pratinjau Interaktif & Visualisasi Distribusi */}
-                            <div className="lg:col-span-5 space-y-4">
-                                {/* 1. Pratinjau Live Footer Bawah */}
-                                <div className="p-4 bg-slate-900 dark:bg-slate-950 rounded-xl border border-slate-800 text-slate-300 shadow-inner">
-                                    <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-800/80">
-                                        <span className="text-[11px] font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                                            <span className="relative flex h-2 w-2">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                            </span>
-                                            Pratinjau Footer Publik
-                                        </span>
-                                        <span className="text-[10px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded font-mono border border-slate-700/50">
-                                            Live Preview
-                                        </span>
-                                    </div>
-                                    
-                                    <div className="text-xs space-y-3">
-                                        <p className="text-slate-400 text-center sm:text-left leading-relaxed">
-                                            &copy; {new Date().getFullYear()} <span className="text-slate-200 font-medium">{data.legal_foundation_name || 'Yayasan Peduli Insani Indonesia'}</span>. Hak cipta dilindungi.
-                                        </p>
-                                        <div>
-                                            {data.show_sk_in_footer === '1' ? (
-                                                <div className="inline-flex items-center gap-1.5 text-slate-300 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10">
-                                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                                                    <span>
-                                                        {data.legal_sk_label || 'SK Kemenkumham RI'}: <strong className="text-white font-medium">{data.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <div className="text-[11px] text-amber-400/90 bg-amber-950/40 border border-amber-800/50 px-2.5 py-1.5 rounded-lg italic">
-                                                    (Badge SK disembunyikan dari footer publik)
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* 2. Pratinjau Tanda Terima & E-Kwitansi Donatur */}
-                                <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700/80">
-                                    <div className="flex items-center justify-between gap-2 mb-3">
-                                        <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-800 dark:text-gray-200">
-                                            <FileCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                                            <span>Tampilan pada Kwitansi & E-Receipt</span>
-                                        </div>
-                                        <span className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                            <CheckCircle2 className="w-3 h-3" /> Sah Terverifikasi
-                                        </span>
-                                    </div>
-
-                                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200/70 dark:border-gray-700 shadow-2xs space-y-2 text-xs">
-                                        <div className="flex justify-between items-start gap-2">
-                                            <span className="text-gray-500 dark:text-gray-400 shrink-0">Nama Badan Hukum:</span>
-                                            <span className="font-semibold text-gray-900 dark:text-white text-right break-words">
-                                                {data.legal_foundation_name || 'Yayasan Peduli Insani Indonesia'}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-start gap-2">
-                                            <span className="text-gray-500 dark:text-gray-400 shrink-0">SK Kemenkumham:</span>
-                                            <span className="font-mono text-gray-800 dark:text-gray-200 text-right break-all">
-                                                {data.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}
-                                            </span>
-                                        </div>
-                                        {data.legal_operational_permit && (
-                                            <div className="flex justify-between items-start gap-2">
-                                                <span className="text-gray-500 dark:text-gray-400 shrink-0">Izin PUB/Kemensos:</span>
-                                                <span className="text-gray-800 dark:text-gray-200 text-right break-words">
-                                                    {data.legal_operational_permit}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {data.legal_npwp && (
-                                            <div className="flex justify-between items-start gap-2">
-                                                <span className="text-gray-500 dark:text-gray-400 shrink-0">NPWP:</span>
-                                                <span className="font-mono text-gray-800 dark:text-gray-200 text-right">
-                                                    {data.legal_npwp}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="mt-3 flex flex-wrap gap-1.5">
-                                        <span className="text-[10px] bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
-                                            ✓ Fat Footer Publik
-                                        </span>
-                                        <span className="text-[10px] bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
-                                            ✓ E-Kwitansi Donasi
-                                        </span>
-                                        <span className="text-[10px] bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-2 py-0.5 rounded">
-                                            ✓ Cetak PDF Tanda Terima
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Card 5: Pelacakan & Analitik */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-3">
-                            <div className="flex items-center gap-2">
-                                <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
-                                    <BarChart3 className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h2 className="text-base font-semibold text-gray-900 dark:text-white">Pelacakan & Analitik (GTM & Pixels)</h2>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Konfigurasi container tag dan piksel iklan untuk mengukur trafik dan konversi donasi.</p>
-                                </div>
-                            </div>
-                            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 px-2.5 py-1 rounded-full">
-                                <Sparkles className="w-3 h-3" /> Hanya aktif di halaman publik
-                            </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Google Tag Manager */}
-                            <div className="space-y-1.5">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="google_tag_manager_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                        Google Tag Manager (GTM) Container ID
-                                    </Label>
-                                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
-                                        Direkomendasikan
-                                    </span>
-                                </div>
-                                <Input
-                                    id="google_tag_manager_id"
-                                    value={data.google_tag_manager_id}
-                                    onChange={(e) => setData('google_tag_manager_id', e.target.value)}
-                                    placeholder="cth: GTM-XXXXXXX"
-                                    className="font-mono text-xs"
-                                />
-                                <p className="text-xs text-gray-400">
-                                    Jika GTM diisi, tag GA4 dan Meta Pixel cukup dikelola terpusat di dashboard GTM Anda.
-                                </p>
-                                {errors.google_tag_manager_id && (
-                                    <p className="text-xs text-red-500">{errors.google_tag_manager_id}</p>
-                                )}
-                            </div>
-
-                            {/* Google Analytics 4 */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="google_analytics_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                    Google Analytics 4 (GA4) Measurement ID
-                                </Label>
-                                <Input
-                                    id="google_analytics_id"
-                                    value={data.google_analytics_id}
-                                    onChange={(e) => setData('google_analytics_id', e.target.value)}
-                                    placeholder="cth: G-XXXXXXXXXX"
-                                    className="font-mono text-xs"
-                                />
-                                <p className="text-xs text-gray-400">
-                                    Digunakan langsung jika Anda tidak memasang container GTM di atas.
-                                </p>
-                                {errors.google_analytics_id && (
-                                    <p className="text-xs text-red-500">{errors.google_analytics_id}</p>
-                                )}
-                            </div>
-
-                            {/* Meta Pixel */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="meta_pixel_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                    Meta Pixel ID (Facebook / Instagram Ads)
-                                </Label>
-                                <Input
-                                    id="meta_pixel_id"
-                                    value={data.meta_pixel_id}
-                                    onChange={(e) => setData('meta_pixel_id', e.target.value)}
-                                    placeholder="cth: 123456789012345"
-                                    className="font-mono text-xs"
-                                />
-                                <p className="text-xs text-gray-400">
-                                    ID Piksel Meta untuk melacak konversi iklan dan retargeting donatur.
-                                </p>
-                                {errors.meta_pixel_id && (
-                                    <p className="text-xs text-red-500">{errors.meta_pixel_id}</p>
-                                )}
-                            </div>
-
-                            {/* TikTok Pixel */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="tiktok_pixel_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                    TikTok Pixel ID (Opsional)
-                                </Label>
-                                <Input
-                                    id="tiktok_pixel_id"
-                                    value={data.tiktok_pixel_id}
-                                    onChange={(e) => setData('tiktok_pixel_id', e.target.value)}
-                                    placeholder="cth: CXXXXXXXXXXXXXXX"
-                                    className="font-mono text-xs"
-                                />
-                                <p className="text-xs text-gray-400">
-                                    ID Piksel TikTok Ads untuk pelacakan iklan video TikTok.
-                                </p>
-                                {errors.tiktok_pixel_id && (
-                                    <p className="text-xs text-red-500">{errors.tiktok_pixel_id}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="mt-5 p-3.5 bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 rounded-lg flex items-start gap-2.5 text-xs text-blue-800 dark:text-blue-300">
-                            <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
-                            <span>
-                                <strong>Catatan Teknis SPA:</strong> Sistem Insani ID secara otomatis mengirimkan <em>Virtual Pageview</em> dan event e-commerce standar (<code>InitiateCheckout</code> dan <code>Purchase</code> / donasi sukses) setiap kali pengunjung berinteraksi dengan website.
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Card 6: Monetisasi & Google AdSense (Khusus Berita) */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-xs">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-gray-100 dark:border-gray-700/60 pb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
-                                    <Megaphone className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                                            Google AdSense (Monetisasi Khusus Berita)
-                                        </h2>
-                                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full">
-                                            Khusus /berita
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        Atur penayangan unit iklan Google AdSense dan file otorisasi publisher ads.txt.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/60 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
-                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                                    {data.adsense_enabled === '1' ? 'Iklan Aktif' : 'Iklan Nonaktif'}
-                                </span>
-                                <Switch
-                                    checked={data.adsense_enabled === '1'}
-                                    onCheckedChange={(checked) => setData('adsense_enabled', checked ? '1' : '0')}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-6">
-                            {/* Publisher Client ID */}
-                            <div className="space-y-1.5 max-w-xl">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="google_adsense_client_id" className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                        Google AdSense Publisher ID (Client ID)
-                                    </Label>
-                                    <span className="text-[10px] font-mono text-gray-500">format: ca-pub-XXXXXXXXXXXXXXXX</span>
-                                </div>
-                                <Input
-                                    id="google_adsense_client_id"
-                                    value={data.google_adsense_client_id}
-                                    onChange={(e) => setData('google_adsense_client_id', e.target.value)}
-                                    placeholder="ca-pub-1234567890123456"
-                                    className="font-mono text-xs"
-                                />
-                                <p className="text-xs text-gray-400">
-                                    Ditemukan di dashboard AdSense Anda (Akun &gt; Pengaturan &gt; Informasi akun).
-                                </p>
-                                {errors.google_adsense_client_id && (
-                                    <p className="text-xs text-red-500">{errors.google_adsense_client_id}</p>
-                                )}
-                            </div>
-
-                            {/* Slot IDs Grid */}
-                            <div>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
-                                    Unit Slot Iklan Berita (Ad Slots)
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {/* Slot 1: Blog Index */}
-                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
-                                        <Label htmlFor="adsense_slot_blog_index" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
-                                            1. Halaman Daftar Berita
-                                        </Label>
-                                        <p className="text-[11px] text-gray-400">Banner di atas daftar artikel (/berita)</p>
-                                        <Input
-                                            id="adsense_slot_blog_index"
-                                            value={data.adsense_slot_blog_index}
-                                            onChange={(e) => setData('adsense_slot_blog_index', e.target.value)}
-                                            placeholder="cth: 1234567890"
-                                            className="font-mono text-xs mt-1"
-                                        />
-                                        {errors.adsense_slot_blog_index && (
-                                            <p className="text-xs text-red-500">{errors.adsense_slot_blog_index}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Slot 2: Article Top */}
-                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
-                                        <Label htmlFor="adsense_slot_article_top" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
-                                            2. Atas Konten Artikel
-                                        </Label>
-                                        <p className="text-[11px] text-gray-400">Sebelum paragraf awal artikel</p>
-                                        <Input
-                                            id="adsense_slot_article_top"
-                                            value={data.adsense_slot_article_top}
-                                            onChange={(e) => setData('adsense_slot_article_top', e.target.value)}
-                                            placeholder="cth: 2345678901"
-                                            className="font-mono text-xs mt-1"
-                                        />
-                                        {errors.adsense_slot_article_top && (
-                                            <p className="text-xs text-red-500">{errors.adsense_slot_article_top}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Slot 3: Article Middle (In-Article) */}
-                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
-                                        <Label htmlFor="adsense_slot_article_middle" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
-                                            3. Tengah Paragraf (In-Article)
-                                        </Label>
-                                        <p className="text-[11px] text-gray-400">Disisipkan setelah paragraf ke-3</p>
-                                        <Input
-                                            id="adsense_slot_article_middle"
-                                            value={data.adsense_slot_article_middle}
-                                            onChange={(e) => setData('adsense_slot_article_middle', e.target.value)}
-                                            placeholder="cth: 3456789012"
-                                            className="font-mono text-xs mt-1"
-                                        />
-                                        {errors.adsense_slot_article_middle && (
-                                            <p className="text-xs text-red-500">{errors.adsense_slot_article_middle}</p>
-                                        )}
-                                    </div>
-
-                                    {/* Slot 4: Article Bottom */}
-                                    <div className="space-y-1.5 p-3.5 rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
-                                        <Label htmlFor="adsense_slot_article_bottom" className="text-xs font-semibold text-gray-800 dark:text-gray-200 block">
-                                            4. Bawah Konten Artikel
-                                        </Label>
-                                        <p className="text-[11px] text-gray-400">Sebelum kotak Bagikan Berita</p>
-                                        <Input
-                                            id="adsense_slot_article_bottom"
-                                            value={data.adsense_slot_article_bottom}
-                                            onChange={(e) => setData('adsense_slot_article_bottom', e.target.value)}
-                                            placeholder="cth: 4567890123"
-                                            className="font-mono text-xs mt-1"
-                                        />
-                                        {errors.adsense_slot_article_bottom && (
-                                            <p className="text-xs text-red-500">{errors.adsense_slot_article_bottom}</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* ads.txt Editor */}
-                            <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700/60">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                                    <Label htmlFor="ads_txt_content" className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                                        <Globe className="w-4 h-4 text-emerald-600" />
-                                        Isi File ads.txt (Otorisasi Publisher)
-                                    </Label>
-                                    <a 
-                                        href="/ads.txt" 
-                                        target="_blank" 
-                                        rel="noreferrer" 
-                                        className="text-xs text-brand-600 dark:text-brand-400 hover:underline inline-flex items-center gap-1 font-medium"
-                                    >
-                                        Buka domain.com/ads.txt <ExternalLink className="w-3 h-3" />
-                                    </a>
-                                </div>
-                                <Textarea
-                                    id="ads_txt_content"
-                                    rows={3}
-                                    value={data.ads_txt_content}
-                                    onChange={(e) => setData('ads_txt_content', e.target.value)}
-                                    placeholder="google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0"
-                                    className="font-mono text-xs leading-relaxed"
-                                />
-                                <p className="text-xs text-gray-400">
-                                    Jika dikosongkan namun <em>Publisher ID</em> di atas diisi, sistem akan otomatis menghasilkan baris standar Google AdSense saat file diakses.
-                                </p>
-                                {errors.ads_txt_content && (
-                                    <p className="text-xs text-red-500">{errors.ads_txt_content}</p>
-                                )}
-                            </div>
-
-                            {/* Isolation Protection Guarantee Notice */}
-                            <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-lg flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
-                                <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
-                                <span>
-                                    <strong>Jaminan Isolasi Kebaikan:</strong> Iklan Google AdSense hanya akan dimuat dan ditampilkan pada rute <code>/berita</code> dan <code>/berita/&#123;slug&#125;</code>. Seluruh halaman program, donasi, checkout pembayaran, formulir campaigner, dan dashboard admin dijamin 100% bebas dari script dan tayangan iklan.
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bottom Action Bar */}
-                    <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-800">
-                        <Button 
-                            type="submit" 
-                            disabled={processing}
-                            size="lg"
-                            className="bg-brand-600 hover:bg-brand-700 text-white font-medium px-8 shadow-xs"
-                        >
-                            <Save className="w-4 h-4 mr-2" />
-                            {processing ? 'Menyimpan...' : 'Simpan Seluruh Pengaturan'}
-                        </Button>
-                    </div>
+                {/* Segmented Tab Navigation */}
+                <SettingsTabNav
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                    errors={errors}
+                />
+
+                {/* Form Container */}
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Tab 1: Umum & Kontak */}
+                    {activeTab === 'general' && (
+                        <GeneralContactTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            errors={errors}
+                        />
+                    )}
+
+                    {/* Tab 2: Identitas & Media */}
+                    {activeTab === 'branding' && (
+                        <BrandingMediaTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            settings={settings}
+                            errors={errors}
+                            previews={{
+                                logo: logoPreview,
+                                logoWhite: logoWhitePreview,
+                                favicon: faviconPreview,
+                                qris: qrisPreview,
+                            }}
+                            onFileChange={handleFileChange}
+                            onTranslateFooter={handleTranslateFooter}
+                            isTranslatingFooter={isTranslatingFooter}
+                        />
+                    )}
+
+                    {/* Tab 3: Profil Lembaga */}
+                    {activeTab === 'profile' && (
+                        <AboutProfileTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            errors={errors}
+                            onTranslateAbout={handleTranslateAbout}
+                            isTranslatingAbout={isTranslatingAbout}
+                        />
+                    )}
+
+                    {/* Tab 4: Legalitas & Kwitansi */}
+                    {activeTab === 'legal' && (
+                        <LegalReceiptTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            settings={settings}
+                            errors={errors}
+                            previews={{
+                                stamp: stampPreview,
+                                signature: signaturePreview,
+                            }}
+                            onFileChange={handleFileChange}
+                        />
+                    )}
+
+                    {/* Tab 5: Pengumuman Global */}
+                    {activeTab === 'announcement' && (
+                        <AnnouncementTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            errors={errors}
+                            onTranslateAnnouncement={handleTranslateAnnouncement}
+                            isTranslatingAnnouncement={isTranslatingAnnouncement}
+                        />
+                    )}
+
+                    {/* Tab 6: Integrasi & Iklan */}
+                    {activeTab === 'marketing' && (
+                        <MarketingIntegrationTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            errors={errors}
+                        />
+                    )}
                 </form>
             </div>
         </>
