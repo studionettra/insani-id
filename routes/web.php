@@ -96,6 +96,8 @@ Route::group([
     // Smart Redirect for "Galang Dana" / Create Program
     Route::get('/buat-program', function () {
         if (! auth()->check()) {
+            session()->put('url.intended', route('buat-program'));
+
             return redirect()->route('login');
         }
 
@@ -110,6 +112,33 @@ Route::group([
 
         return redirect()->route('akun.programs.create');
     })->name('buat-program');
+
+    // Smart Redirect for "/campaigner" & "/campaigners"
+    Route::get('/campaigner', function () {
+        if (! auth()->check()) {
+            session()->put('url.intended', url('/campaigner'));
+
+            return redirect()->route('campaigner.register');
+        }
+
+        $user = auth()->user();
+        if ($user->can('campaigner.verify') || $user->hasAnyRole(['Administrator', 'Program Officer', 'Verifikator', 'Keuangan', 'Superadmin', 'admin'])) {
+            return redirect()->route('admin.campaigners.index');
+        }
+
+        $profile = $user->campaignerProfile;
+        if ($profile && $profile->verification_status === 'verified') {
+            return redirect()->route('akun.programs.index');
+        }
+
+        if ($profile) {
+            return redirect()->route('campaigner.status');
+        }
+
+        return redirect()->route('campaigner.register');
+    })->name('campaigner.index');
+
+    Route::get('/campaigners', fn () => redirect()->route('campaigner.index'));
 
     // Static Legal & Help Pages (Clean URL Aliases)
     Route::get('/pusat-bantuan', [PublicPageController::class, 'pusatBantuan'])->name('page.pusat-bantuan');
@@ -183,7 +212,9 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
 
     // Campaigner Registration
     Route::get('/campaigner/register', [CampaignerRegistrationController::class, 'create'])->name('campaigner.register');
-    Route::post('/campaigner/register', [CampaignerRegistrationController::class, 'store'])->name('campaigner.register.store');
+    Route::post('/campaigner/register', [CampaignerRegistrationController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('campaigner.register.store');
     Route::get('/campaigner/status', [CampaignerRegistrationController::class, 'status'])->name('campaigner.status');
     Route::get('/campaigner/documents/{id}', [CampaignerRegistrationController::class, 'viewDocument'])->name('campaigner.document');
 
@@ -270,7 +301,9 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
             Route::post('/slot-requests/{slotRequest}/reject', [AdminCampaignSlotRequestController::class, 'reject'])->name('slot-requests.reject');
         });
 
-        Route::get('/fundraisers', [AdminFundraiserController::class, 'index'])->name('fundraisers.index');
+        Route::middleware('permission:fundraiser.view')->group(function () {
+            Route::get('/fundraisers', [AdminFundraiserController::class, 'index'])->name('fundraisers.index');
+        });
 
         Route::middleware('permission:program.view')->group(function () {
             Route::resource('programs', ProgramController::class);

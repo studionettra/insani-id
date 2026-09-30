@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { LogOut, Settings, LayoutGrid, CheckCircle } from 'lucide-react';
+import { LogOut, Settings, LayoutGrid, CheckCircle, Clock } from 'lucide-react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -19,6 +19,7 @@ type Props = {
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
     const { auth } = usePage<any>().props;
+    const campaignerStatus = (auth?.user as any)?.campaigner_status ?? (user as any)?.campaigner_status;
 
     const handleLogout = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -60,17 +61,43 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
-                    <Link
-                        className="block w-full cursor-pointer"
-                        href="/campaigner/register"
-                        prefetch
-                        onClick={cleanup}
-                    >
-                        <CheckCircle className="mr-2" />
-                        Verifikasi Akun
-                    </Link>
-                </DropdownMenuItem>
+                {campaignerStatus === 'verified' ? (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer"
+                            href="/akun/programs"
+                            prefetch
+                            onClick={cleanup}
+                        >
+                            <LayoutGrid className="mr-2 h-4 w-4" />
+                            Program Saya
+                        </Link>
+                    </DropdownMenuItem>
+                ) : campaignerStatus ? (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer"
+                            href="/campaigner/status"
+                            prefetch
+                            onClick={cleanup}
+                        >
+                            <Clock className="mr-2 h-4 w-4" />
+                            Status Campaigner
+                        </Link>
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem asChild>
+                        <Link
+                            className="block w-full cursor-pointer"
+                            href="/campaigner/register"
+                            prefetch
+                            onClick={cleanup}
+                        >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Daftar Jadi Campaigner
+                        </Link>
+                    </DropdownMenuItem>
+                )}
                 
 
                 <DropdownMenuItem asChild>

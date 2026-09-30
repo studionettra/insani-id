@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user() ? array_merge($request->user()->toArray(), [
                     'permissions' => $request->user()->getAllPermissions()->pluck('name'),
                     'roles' => $request->user()->getRoleNames(),
+                    'campaigner_status' => $request->user()->campaignerProfile?->verification_status,
                 ]) : null,
             ],
             'notifications' => $request->user() ? [
