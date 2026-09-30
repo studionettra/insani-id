@@ -5,6 +5,8 @@ use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Program;
 use App\Models\User;
+use App\Notifications\ProgramUpdateSubmittedNotification;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -65,7 +67,13 @@ beforeEach(function () {
     ]);
 });
 
-it('allows campaigner to create program update', function () {
+it('allows campaigner to create program update and notifies admin', function () {
+    $adminRole = Role::firstOrCreate(['name' => 'Administrator']);
+    $admin = User::factory()->create();
+    $admin->assignRole('Administrator');
+
+    Notification::fake();
+
     $response = $this->actingAs($this->campaigner)
         ->post(route('akun.programs.updates.store', $this->program->id), [
             'title' => 'Update 1',
@@ -77,8 +85,14 @@ it('allows campaigner to create program update', function () {
     $this->assertDatabaseHas('program_updates', [
         'program_id' => $this->program->id,
         'title->id' => 'Update 1',
-        'is_published' => true,
+        'is_published' => false,
+        'moderation_status' => 'pending',
     ]);
+
+    Notification::assertSentTo($admin, ProgramUpdateSubmittedNotification::class, function ($n) {
+        return $n->program->id === $this->program->id
+            && $n->update->moderation_status === 'pending';
+    });
 });
 
 it('does not allow direct comments without donation', function () {
