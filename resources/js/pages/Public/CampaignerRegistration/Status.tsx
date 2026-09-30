@@ -84,6 +84,12 @@ export default function Status({ profile }: any) {
                             <Button asChild variant="outline">
                                 <Link href="/dashboard">Kembali ke Dashboard</Link>
                             </Button>
+
+                            {profile.verification_status === 'rejected' && (
+                                <Button asChild className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">
+                                    <Link href="/campaigner/register">Perbaiki Berkas & Ajukan Ulang</Link>
+                                </Button>
+                            )}
                             
                             {profile.verification_status === 'verified' && (
                                 <Button asChild className="bg-[#1A56DB] hover:bg-[#1e40af] text-white">

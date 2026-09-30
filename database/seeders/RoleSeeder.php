@@ -24,6 +24,7 @@ class RoleSeeder extends Seeder
                 'program.view', 'program.create', 'program.update', 'program.publish', 'program.reject', 'program.close',
                 'update-post.view', 'update-post.create', 'update-post.update', 'update-post.delete',
                 'category.view',
+                'fundraiser.view',
                 'manage_pages', 'manage_faqs', 'manage_management',
                 'manage_partners', 'manage_impact_stats', 'manage_banners',
                 'manage_legal_documents',
@@ -84,7 +85,6 @@ class RoleSeeder extends Seeder
 
             'Fundraiser' => [
                 'dashboard.view',
-                'fundraiser.view',
                 'fundraiser.create_link',
             ],
         ];

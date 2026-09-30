@@ -100,16 +100,12 @@ class CampaignerVerificationController extends Controller
 
     public function viewDocument($id, $docId)
     {
-        $document = VerificationDocument::where('campaigner_profile_id', $id)->findOrFail($docId);
+        $document = VerificationDocument::where('campaigner_profile_id', $id)->find($docId);
 
-        if (Storage::disk('local')->exists($document->file_path)) {
-            return Storage::disk('local')->response($document->file_path);
+        if (! $document || ! Storage::disk('local')->exists($document->file_path)) {
+            abort(404, 'Dokumen verifikasi tidak ditemukan.');
         }
 
-        if (Storage::disk('public')->exists($document->file_path)) {
-            return Storage::disk('public')->response($document->file_path);
-        }
-
-        abort(404, 'Dokumen verifikasi tidak ditemukan.');
+        return Storage::disk('local')->response($document->file_path);
     }
 }

@@ -8,8 +8,9 @@ use App\Models\Fundraiser;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
 
@@ -29,6 +30,9 @@ beforeEach(function () {
 });
 
 test('user can register as fundraiser for a published program and role is assigned', function () {
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
+
     $user = User::factory()->create(['name' => 'Ahmad Dahlan']);
 
     $response = $this->actingAs($user)
@@ -53,7 +57,10 @@ test('user can register as fundraiser for a published program and role is assign
     expect($fundraiser)->not->toBeNull()
         ->and($fundraiser->referral_code)->not->toBeEmpty();
 
-    expect($user->fresh()->hasRole('Fundraiser'))->toBeTrue();
+    $freshUser = $user->fresh();
+    expect($freshUser->hasRole('Fundraiser'))->toBeTrue();
+    expect($freshUser->hasPermissionTo('fundraiser.view'))->toBeFalse();
+    expect($freshUser->getAllPermissions()->pluck('name')->contains('fundraiser.view'))->toBeFalse();
 });
 
 test('fundraiser cannot register twice for the same program and gets redirected with info', function () {
@@ -170,25 +177,56 @@ test('guest cannot access my fundraisers area', function () {
     $response->assertRedirect(route('login'));
 });
 
-test('admin can access admin fundraisers overview and non-admin is forbidden', function () {
-    $adminRole = Role::firstOrCreate(['name' => 'Administrator', 'guard_name' => 'web']);
+test('admin and program officer can access admin fundraisers overview while non-admin and fundraiser roles are forbidden', function () {
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
+
     $admin = User::factory()->create();
-    $admin->assignRole($adminRole);
+    $admin->assignRole('Administrator');
+
+    $programOfficer = User::factory()->create();
+    $programOfficer->assignRole('Program Officer');
 
     $regularUser = User::factory()->create();
+
+    $fundraiserUser = User::factory()->create();
+    $fundraiserUser->assignRole('Fundraiser');
+
+    $campaignerFundraiserUser = User::factory()->create();
+    $campaignerFundraiserUser->assignRole(['Campaigner Individu', 'Fundraiser']);
 
     // Regular user forbidden
     $this->actingAs($regularUser)
         ->get(route('admin.fundraisers.index'))
         ->assertForbidden();
 
+    // Fundraiser user forbidden
+    $this->actingAs($fundraiserUser)
+        ->get(route('admin.fundraisers.index'))
+        ->assertForbidden();
+
+    // Campaigner who is also fundraiser forbidden
+    $this->actingAs($campaignerFundraiserUser)
+        ->get(route('admin.fundraisers.index'))
+        ->assertForbidden();
+
+    // Program Officer allowed
+    $this->actingAs($programOfficer)
+        ->get(route('admin.fundraisers.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Fundraisers/Index')
+            ->has('fundraisers')
+            ->has('stats')
+        );
+
     // Admin allowed
-    $response = $this->actingAs($admin)
-        ->get(route('admin.fundraisers.index'));
-    $response->assertOk();
-    $response->assertInertia(fn ($page) => $page
-        ->component('Admin/Fundraisers/Index')
-        ->has('fundraisers')
-        ->has('stats')
-    );
+    $this->actingAs($admin)
+        ->get(route('admin.fundraisers.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Admin/Fundraisers/Index')
+            ->has('fundraisers')
+            ->has('stats')
+        );
 });

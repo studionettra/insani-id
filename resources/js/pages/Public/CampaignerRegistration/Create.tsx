@@ -8,17 +8,23 @@ import { Textarea } from '@/components/ui/textarea';
 
 import campaigner from '@/routes/campaigner';
 
-export default function Create() {
+interface CreateProps {
+    existingProfile?: any;
+}
+
+export default function Create({ existingProfile }: CreateProps) {
+    const isReapplying = Boolean(existingProfile);
+
     const { data, setData, post, processing, errors } = useForm({
-        type: 'individu',
-        nama_lembaga: '',
-        nomor_sk: '',
-        npwp: '',
-        bank_name: '',
-        bank_account_number: '',
-        bank_account_name: '',
-        address: '',
-        phone: '',
+        type: existingProfile?.type || 'individu',
+        nama_lembaga: existingProfile?.nama_lembaga || '',
+        nomor_sk: existingProfile?.nomor_sk || '',
+        npwp: existingProfile?.npwp || '',
+        bank_name: existingProfile?.bank_name || '',
+        bank_account_number: existingProfile?.bank_account_number || '',
+        bank_account_name: existingProfile?.bank_account_name || '',
+        address: existingProfile?.address || '',
+        phone: existingProfile?.phone || '',
         ktp: null as File | null,
         selfie_ktp: null as File | null,
         buku_rekening: null as File | null,
@@ -33,13 +39,26 @@ export default function Create() {
 
     return (
         <>
-            <Head title="Pendaftaran Campaigner" />
+            <Head title={isReapplying ? "Perbaikan Berkas Campaigner" : "Pendaftaran Campaigner"} />
             
             <div className="flex h-full flex-1 flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
                 <div className="mb-2">
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Pendaftaran Campaigner</h1>
-                    <p className="text-sm text-gray-500">Lengkapi data berikut untuk bergabung sebagai penggalang dana.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">
+                        {isReapplying ? "Perbaikan Berkas Pendaftaran" : "Pendaftaran Campaigner"}
+                    </h1>
+                    <p className="text-sm text-gray-500">
+                        {isReapplying
+                            ? "Pengajuan sebelumnya belum disetujui. Silakan periksa kembali data Anda dan unggah berkas yang perlu diperbaiki."
+                            : "Lengkapi data berikut untuk bergabung sebagai penggalang dana."}
+                    </p>
                 </div>
+
+                {isReapplying && (
+                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                        <p className="font-semibold mb-1">Catatan Pengajuan Ulang:</p>
+                        <p>Anda dapat memperbarui informasi di bawah. Untuk berkas dokumen, Anda hanya wajib mengunggah kembali berkas yang sebelumnya ditolak. Berkas yang tidak diunggah ulang akan menggunakan dokumen yang telah ada.</p>
+                    </div>
+                )}
 
                 <div className="bg-white shadow-sm rounded-lg border border-gray-200 p-6 sm:p-8">
                     <form onSubmit={submit} className="space-y-8">
@@ -158,7 +177,7 @@ export default function Create() {
                         </div>
 
                         <Button type="submit" className="w-full bg-[#1A56DB] hover:bg-[#1e40af] text-white" disabled={processing}>
-                            {processing ? 'Menyimpan...' : 'Ajukan Pendaftaran'}
+                            {processing ? 'Menyimpan...' : (isReapplying ? 'Kirim Ulang Pengajuan' : 'Ajukan Pendaftaran')}
                         </Button>
                     </form>
                 </div>
