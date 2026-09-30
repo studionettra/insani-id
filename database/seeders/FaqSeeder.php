@@ -258,6 +258,19 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => [
+                    'id' => 'Apakah Kabar Terbaru / Laporan Penyaluran yang sudah diterbitkan dapat diubah atau dihapus?',
+                    'en' => 'Can published Campaign Updates / Disbursement Reports be edited or deleted?',
+                ],
+                'answer_html' => [
+                    'id' => '<p><strong>Tidak dapat diubah maupun dihapus.</strong></p><p>Demi menjaga integritas riwayat donasi, mencegah manipulasi dokumen pertanggungjawaban, dan melindungi hak transparansi para donatur, setiap Kabar Terbaru yang telah disetujui (<em>approved</em>) dan dipublikasikan (<em>published</em>) bersifat <strong>permanen dan terkunci</strong>.</p><p>Apabila terdapat kekeliruan penulisan atau informasi tambahan pasca penerbitan, Campaigner diwajibkan menerbitkan postingan Kabar Terbaru susulan sebagai bentuk klarifikasi atau revisi terbuka kepada donatur.</p>',
+                    'en' => '<p><strong>They cannot be edited or deleted.</strong></p><p>To safeguard donation audit integrity, prevent alterations to accountability records, and protect donor transparency, all updates that have been approved and published are <strong>permanent and locked</strong>.</p><p>If there are typographical errors or supplementary information after publishing, Campaigners are required to post a follow-up Update as an open clarification to donors.</p>',
+                ],
+                'category' => 'campaigner',
+                'keywords' => 'edit kabar, hapus kabar, ubah kabar, integritas, permanen, transparansi, revisi kabar',
+                'sort_order' => 19,
+            ],
+            [
+                'question' => [
                     'id' => 'Bagaimana jika batas kuota program aktif (slot kampanye) saya sudah habis?',
                     'en' => 'What should I do if my active campaign quota (slot limit) has been reached?',
                 ],
