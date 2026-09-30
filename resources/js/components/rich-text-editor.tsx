@@ -1,5 +1,6 @@
 import React, { useRef, useMemo, useState, useEffect, Suspense } from 'react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import 'react-quill-new/dist/quill.snow.css';
 
 const ReactQuill = React.lazy(() => import('react-quill-new'));
@@ -8,9 +9,10 @@ interface RichTextEditorProps {
     value: string;
     onChange: (value: string) => void;
     placeholder?: string;
+    className?: string;
 }
 
-export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
     const quillRef = useRef<any>(null);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -97,7 +99,7 @@ return;
     }
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-md">
+        <div className={cn("bg-white dark:bg-gray-900 rounded-md min-w-0 [&_.ql-toolbar]:flex [&_.ql-toolbar]:flex-wrap [&_.ql-editor]:min-h-[160px]", className)}>
             <Suspense fallback={<div className="h-[250px] w-full bg-slate-50 dark:bg-gray-800 animate-pulse rounded-md border border-slate-200 dark:border-gray-700"></div>}>
                 <ReactQuill
                     ref={quillRef}
