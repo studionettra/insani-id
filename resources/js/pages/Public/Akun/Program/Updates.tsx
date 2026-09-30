@@ -3,7 +3,7 @@ import { Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
-import { Plus } from 'lucide-react';
+import { Plus, ShieldCheck, Lock, AlertCircle, Info, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { getLocalizedValue } from '@/lib/utils';
 
@@ -23,15 +22,49 @@ const UpdateCard = ({ update }: { update: any }) => {
             <CardContent className="p-6">
                 <div className="flex justify-between items-start gap-4">
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg mb-1 truncate text-slate-900 dark:text-white">{update.title}</h3>
-                        <p className="text-sm text-slate-500 dark:text-gray-400 mb-4">
-                            {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: id })}
-                            {!update.is_published && ' • (Draf)'}
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 className="font-bold text-lg truncate text-slate-900 dark:text-white">{getLocalizedValue(update.title)}</h3>
+                            {update.moderation_status === 'approved' || update.is_published ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                    <CheckCircle2 className="w-3 h-3" /> Disetujui &amp; Terbit
+                                </span>
+                            ) : update.moderation_status === 'rejected' ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                                    <XCircle className="w-3 h-3" /> Ditolak
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                    <Clock className="w-3 h-3" /> Menunggu Peninjauan Admin
+                                </span>
+                            )}
+                        </div>
+
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mb-3 flex items-center gap-1.5">
+                            <span>{format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: id })}</span>
+                            {(update.moderation_status === 'approved' || update.is_published) && (
+                                <span className="text-slate-400 dark:text-gray-500 italic flex items-center gap-1">
+                                    • <Lock className="w-3 h-3" /> Terkunci Permanen
+                                </span>
+                            )}
                         </p>
+
+                        {update.moderation_status === 'rejected' && update.rejection_reason && (
+                            <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-xl text-xs text-rose-800 dark:text-rose-300">
+                                <p className="font-bold flex items-center gap-1.5 mb-1">
+                                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                                    Catatan Penolakan dari Admin:
+                                </p>
+                                <p className="leading-relaxed pl-5.5">{update.rejection_reason}</p>
+                                <p className="mt-2 text-slate-600 dark:text-gray-400 pl-5.5">
+                                    Silakan gunakan tombol "Tambah Update" di atas untuk mengunggah kabar baru yang telah memuat perbaikan bukti penyaluran.
+                                </p>
+                            </div>
+                        )}
+
                         <div className="relative">
                             <div 
                                 className={`prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-gray-300 break-words overflow-hidden transition-all duration-300 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md ${expanded ? '' : 'max-h-40'}`}
-                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(update.content)) }}
                             />
                             {!expanded && (
                                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
@@ -40,7 +73,7 @@ const UpdateCard = ({ update }: { update: any }) => {
                         <div className="mt-2">
                             <button 
                                 onClick={() => setExpanded(!expanded)} 
-                                className="text-blue-600 dark:text-blue-400 font-medium text-sm hover:underline focus:outline-none"
+                                className="text-blue-600 dark:text-blue-400 font-medium text-sm hover:underline focus:outline-none cursor-pointer"
                             >
                                 {expanded ? 'Tutup' : 'Baca Selengkapnya'}
                             </button>
@@ -54,9 +87,11 @@ const UpdateCard = ({ update }: { update: any }) => {
 
 interface Update {
     id: number;
-    title: string;
-    content: string;
+    title: string | Record<string, string>;
+    content: string | Record<string, string>;
     is_published: boolean;
+    moderation_status?: 'pending' | 'approved' | 'rejected';
+    rejection_reason?: string | null;
     created_at: string;
 }
 
@@ -97,7 +132,7 @@ export default function Updates({ program, updates }: Props) {
             <Head title={`Kabar Terbaru: ${getLocalizedValue(program.title, 'Program')}`} />
             
             <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6 mx-auto w-full max-w-4xl">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-2">
                     <div>
                         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Kabar Terbaru</h1>
                         <p className="text-slate-500 dark:text-gray-400">{getLocalizedValue(program.title, 'Program')}</p>
@@ -105,6 +140,15 @@ export default function Updates({ program, updates }: Props) {
                     <Button onClick={openCreateDialog} className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs">
                         <Plus className="mr-2 h-4 w-4" /> Tambah Update
                     </Button>
+                </div>
+
+                {/* Policy Notice */}
+                <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/60 dark:bg-blue-950/30 p-4 text-xs text-blue-900 dark:text-blue-200 flex items-start gap-3">
+                    <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                        <p className="font-bold text-blue-950 dark:text-blue-100 mb-0.5">Komitmen Integritas Laporan Penyaluran</p>
+                        Setiap Kabar Terbaru yang telah disetujui admin akan dipublikasikan secara permanen ke donatur dan tidak dapat diubah maupun dihapus. Pastikan dokumentasi, nota, dan bukti penyaluran yang Anda unggah sudah akurat dan lengkap.
+                    </div>
                 </div>
 
                 <div className="space-y-4">
@@ -169,13 +213,11 @@ export default function Updates({ program, updates }: Props) {
                                 {errors.content && <p className="text-sm text-destructive mt-1">{errors.content}</p>}
                             </div>
 
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="is_published"
-                                    checked={data.is_published}
-                                    onCheckedChange={(checked) => setData('is_published', checked)}
-                                />
-                                <Label htmlFor="is_published">Publikasikan (Tampil ke publik)</Label>
+                            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 p-3 text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2">
+                                <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                                <p className="leading-relaxed">
+                                    Laporan ini akan ditinjau oleh Tim Kepatuhan Insani Indonesia sebelum diterbitkan ke publik. Setelah disetujui, kabar bersifat <strong>permanen dan tidak dapat diubah</strong> demi menjaga integritas dan akuntabilitas dana publik.
+                                </p>
                             </div>
 
                             <div className="flex justify-end pt-4">

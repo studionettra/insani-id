@@ -8,6 +8,7 @@ use App\Models\ContactMessage;
 use App\Models\Disbursement;
 use App\Models\Donation;
 use App\Models\Program;
+use App\Models\ProgramUpdate;
 use App\Models\User;
 use App\Notifications\CampaignerRegisteredNotification;
 use App\Notifications\CampaignerStatusUpdatedNotification;
@@ -18,6 +19,8 @@ use App\Notifications\DonationConfirmedNotification;
 use App\Notifications\DonationReceivedNotification;
 use App\Notifications\ProgramStatusUpdatedNotification;
 use App\Notifications\ProgramSubmittedNotification;
+use App\Notifications\ProgramUpdateReviewedNotification;
+use App\Notifications\ProgramUpdateSubmittedNotification;
 use App\Services\NotificationGatewayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -672,4 +675,102 @@ test('prune notifications menghapus notifikasi dibaca lebih dari 60 hari dan mem
     expect($this->admin->notifications()->where('id', $oldReadNotif->id)->exists())->toBeFalse();
     expect($this->admin->notifications()->where('id', $recentReadNotif->id)->exists())->toBeTrue();
     expect($this->admin->notifications()->where('id', $unreadNotif->id)->exists())->toBeTrue();
+});
+
+test('pengajuan kabar program baru dari campaigner memicu notifikasi ProgramUpdateSubmittedNotification ke admin', function () {
+    Notification::fake();
+
+    $category = Category::create(['name' => ['id' => 'Kemanusiaan'], 'slug' => 'kemanusiaan']);
+    $campaigner = User::factory()->create(['email' => 'campaigner@test.com']);
+    $profile = CampaignerProfile::create([
+        'user_id' => $campaigner->id,
+        'type' => 'individu',
+        'nama_lengkap' => 'Relawan Baik',
+        'nik' => '3201123456780001',
+        'phone_number' => '081234567890',
+        'bank_name' => 'BCA',
+        'bank_account_name' => 'Relawan Baik',
+        'bank_account_number' => '1234567890',
+        'verification_status' => 'verified',
+    ]);
+
+    $program = Program::create([
+        'title' => ['id' => 'Bantuan Korban Gempa'],
+        'slug' => 'bantuan-korban-gempa',
+        'program_code' => 'PRG-NOTIF-01',
+        'story' => ['id' => 'Cerita bantuan gempa'],
+        'cover_image' => 'cover.jpg',
+        'campaigner_type' => 'individual',
+        'category_id' => $category->id,
+        'campaigner_profile_id' => $profile->id,
+        'created_by' => $campaigner->id,
+        'status' => 'published',
+        'target_amount' => 50000000,
+    ]);
+
+    $this->actingAs($campaigner)
+        ->post(route('akun.programs.updates.store', $program->id), [
+            'title' => 'Distribusi Selimut dan Tenda Selesai',
+            'content' => '<p>Alhamdulillah tenda dan selimut telah dibagikan.</p>',
+            'is_published' => true,
+        ])
+        ->assertRedirect();
+
+    Notification::assertSentTo([$this->admin], ProgramUpdateSubmittedNotification::class, function ($notification) use ($program) {
+        return $notification->program->id === $program->id
+            && $notification->update->moderation_status === 'pending';
+    });
+});
+
+test('moderasi kabar program oleh admin memicu notifikasi ProgramUpdateReviewedNotification ke campaigner', function () {
+    Notification::fake();
+
+    $category = Category::create(['name' => ['id' => 'Pendidikan'], 'slug' => 'pendidikan']);
+    $campaigner = User::factory()->create(['email' => 'guru@test.com']);
+    $program = Program::create([
+        'title' => ['id' => 'Beasiswa Anak Pelosok'],
+        'slug' => 'beasiswa-anak-pelosok',
+        'program_code' => 'PRG-NOTIF-02',
+        'story' => ['id' => 'Cerita beasiswa anak pelosok'],
+        'cover_image' => 'cover.jpg',
+        'campaigner_type' => 'individual',
+        'category_id' => $category->id,
+        'created_by' => $campaigner->id,
+        'status' => 'published',
+        'target_amount' => 30000000,
+    ]);
+
+    $update = ProgramUpdate::create([
+        'program_id' => $program->id,
+        'title' => 'Penyaluran Beasiswa Semester Ganjil',
+        'content' => '<p>Beasiswa telah diterima oleh 20 siswa.</p>',
+        'is_published' => false,
+        'moderation_status' => 'pending',
+        'created_by' => $campaigner->id,
+    ]);
+
+    // 1. Rejected
+    $this->actingAs($this->admin)
+        ->put(route('admin.programs.updates.moderation', [$program->id, $update->id]), [
+            'moderation_status' => 'rejected',
+            'rejection_reason' => 'Foto kwitansi pembayaran sekolah terpotong.',
+        ])
+        ->assertRedirect();
+
+    Notification::assertSentTo($campaigner, ProgramUpdateReviewedNotification::class, function ($n) {
+        return $n->update->moderation_status === 'rejected'
+            && $n->update->rejection_reason === 'Foto kwitansi pembayaran sekolah terpotong.';
+    });
+
+    // 2. Approved
+    $this->actingAs($this->admin)
+        ->put(route('admin.programs.updates.moderation', [$program->id, $update->id]), [
+            'moderation_status' => 'approved',
+        ])
+        ->assertRedirect();
+
+    Notification::assertSentTo($campaigner, ProgramUpdateReviewedNotification::class, function ($n) {
+        return $n->update->moderation_status === 'approved'
+            && $n->update->is_published === true;
+    });
 });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Program;
 use App\Models\ProgramUpdate;
+use App\Notifications\ProgramUpdateReviewedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ class ProgramUpdateController extends Controller
      */
     public function index(Program $program): Response
     {
-        $this->authorizeCreator($program);
+        $this->authorizeAccess($program);
 
         $updates = $program->updates()->latest()->paginate(10);
 
@@ -87,7 +88,7 @@ class ProgramUpdateController extends Controller
      */
     public function update(Request $request, Program $program, ProgramUpdate $update): RedirectResponse
     {
-        $this->authorizeCreator($program);
+        $this->authorizeEditor($program);
 
         if ($update->program_id !== $program->id) {
             abort(404);
@@ -122,10 +123,45 @@ class ProgramUpdateController extends Controller
             }
         }
 
+        $isApprovedOrPublished = $update->is_published || $update->moderation_status === 'approved';
+
+        if ($isApprovedOrPublished) {
+            $existingTitleId = $update->getTranslation('title', 'id');
+            $existingContentId = Purifier::clean($update->getTranslation('content', 'id'));
+
+            $newTitleId = $validated['title']['id'] ?? '';
+            $newContentId = $cleanedContent['id'] ?? '';
+
+            $titleChanged = trim((string) $newTitleId) !== trim((string) $existingTitleId);
+            $contentChanged = trim((string) $newContentId) !== trim((string) $existingContentId);
+
+            if ($titleChanged || $contentChanged) {
+                abort(403, 'Sesuai kebijakan integritas platform, naskah utama kabar (Bahasa Indonesia) yang telah disetujui bersifat permanen dan tidak dapat diubah. Anda hanya diperkenankan menambahkan atau memperbarui terjemahan bahasa asing (EN/AR).');
+            }
+
+            $titleTranslations = $update->getTranslations('title');
+            $contentTranslations = $update->getTranslations('content');
+
+            $titleTranslations['en'] = $validated['title']['en'] ?? null;
+            $titleTranslations['ar'] = $validated['title']['ar'] ?? null;
+            $contentTranslations['en'] = $cleanedContent['en'] ?? null;
+            $contentTranslations['ar'] = $cleanedContent['ar'] ?? null;
+
+            $titleTranslations = array_filter($titleTranslations, fn ($v) => ! is_null($v) && $v !== '');
+            $contentTranslations = array_filter($contentTranslations, fn ($v) => ! is_null($v) && $v !== '');
+
+            $update->update([
+                'title' => $titleTranslations,
+                'content' => $contentTranslations,
+            ]);
+
+            return back()->with('success', 'Terjemahan kabar terbaru berhasil diperbarui.');
+        }
+
         $update->update([
             'title' => $validated['title'],
             'content' => $cleanedContent,
-            'is_published' => $validated['is_published'] ?? true,
+            'is_published' => $validated['is_published'] ?? false,
         ]);
 
         return back()->with('success', 'Kabar terbaru berhasil diperbarui.');
@@ -140,6 +176,10 @@ class ProgramUpdateController extends Controller
 
         if ($update->program_id !== $program->id) {
             abort(404);
+        }
+
+        if ($update->is_published || $update->moderation_status === 'approved') {
+            abort(403, 'Sesuai kebijakan integritas platform, kabar terbaru yang telah disetujui dan dipublikasikan bersifat permanen dan tidak dapat dihapus.');
         }
 
         $update->delete();
@@ -169,7 +209,49 @@ class ProgramUpdateController extends Controller
             'is_published' => $validated['moderation_status'] === 'approved',
         ]);
 
+        if (in_array($validated['moderation_status'], ['approved', 'rejected'])) {
+            $recipient = $update->creator ?? $program->creator;
+            if ($recipient) {
+                $recipient->notify(new ProgramUpdateReviewedNotification($program, $update));
+            }
+        }
+
         return back()->with('success', 'Status moderasi laporan kabar terbaru berhasil diperbarui.');
+    }
+
+    /**
+     * Authorize that the authenticated user has permission to edit/translate updates of this program.
+     */
+    protected function authorizeEditor(Program $program): void
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('Administrator') || $user->can('program.update')) {
+            return;
+        }
+
+        if ((int) $program->created_by === (int) $user->id) {
+            return;
+        }
+
+        abort(403, 'Akses Ditolak: Anda tidak memiliki wewenang untuk menyunting kabar program ini.');
+    }
+
+    /**
+     * Authorize that the authenticated user has access to view updates of this program.
+     */
+    protected function authorizeAccess(Program $program): void
+    {
+        $user = auth()->user();
+        if ($user->hasRole('Administrator') || $user->can('program.view')) {
+            return;
+        }
+
+        if ((int) $program->created_by === (int) $user->id) {
+            return;
+        }
+
+        abort(403, 'Akses Ditolak: Anda tidak memiliki wewenang untuk melihat kabar program ini.');
     }
 
     /**
@@ -177,7 +259,9 @@ class ProgramUpdateController extends Controller
      */
     protected function authorizeCreator(Program $program): void
     {
-        if ((int) $program->created_by !== (int) auth()->id()) {
+        $user = auth()->user();
+
+        if ((int) $program->created_by !== (int) $user->id) {
             abort(403, 'Akses Ditolak: Anda hanya memiliki hak untuk mengelola kabar pada program yang Anda buat sendiri.');
         }
     }

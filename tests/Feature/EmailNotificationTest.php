@@ -5,6 +5,7 @@ use App\Models\CampaignSlotRequest;
 use App\Models\ContactMessage;
 use App\Models\Disbursement;
 use App\Models\Program;
+use App\Models\ProgramUpdate;
 use App\Models\User;
 use App\Notifications\CampaignerRegisteredNotification;
 use App\Notifications\CampaignSlotRequestedNotification;
@@ -14,6 +15,8 @@ use App\Notifications\DisbursementRequestedNotification;
 use App\Notifications\DisbursementStatusUpdatedNotification;
 use App\Notifications\ProgramStatusUpdatedNotification;
 use App\Notifications\ProgramSubmittedNotification;
+use App\Notifications\ProgramUpdateReviewedNotification;
+use App\Notifications\ProgramUpdateSubmittedNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 
 it('renders CampaignSlotRequestedNotification mail correctly', function () {
@@ -133,7 +136,8 @@ it('renders DisbursementStatusUpdatedNotification mail for transferred status', 
 
     $mail = $notification->toMail($campaigner);
     expect($mail)->toBeInstanceOf(MailMessage::class)
-        ->and($mail->subject)->toContain('Alhamdulillah! Dana Pencairan Telah Ditransfer - Renovasi Masjid Pelosok')
+        ->and($mail->subject)->toContain('Alhamdulillah! Dana Pencairan Telah Ditransfer')
+        ->and($mail->subject)->toContain('Renovasi Masjid Pelosok')
         ->and($mail->actionUrl)->toBe(route('akun.programs.disbursements.index', $program->id));
 });
 
@@ -192,4 +196,46 @@ it('renders CampaignerRegisteredNotification and ContactMessageReceivedNotificat
     $contactMail = $contactNotif->toMail($admin);
     expect($contactMail->subject)->toContain('[Insani Hubungi Kami] Pertanyaan Kerjasama Penyaluran Logistik')
         ->and($contactMail->actionUrl)->toBe(route('admin.contact-messages.show', $contact->id));
+});
+
+it('renders ProgramUpdateSubmittedNotification and ProgramUpdateReviewedNotification mail correctly', function () {
+    $admin = User::factory()->make(['email' => 'admin@insani.id', 'name' => 'Tim Admin']);
+    $campaigner = User::factory()->make(['email' => 'campaigner@insani.id', 'name' => 'Relawan Kebaikan']);
+    $program = new Program([
+        'title' => 'Renovasi Jembatan Desa',
+        'slug' => 'renovasi-jembatan-desa',
+    ]);
+    $program->id = 101;
+    $program->setRelation('creator', $campaigner);
+
+    $update = new ProgramUpdate([
+        'program_id' => $program->id,
+        'title' => 'Pemasangan Tiang Pancang Selesai',
+        'content' => 'Alhamdulillah tiang pancang jembatan telah terpasang dengan kokoh.',
+        'moderation_status' => 'pending',
+    ]);
+    $update->id = 55;
+    $update->setRelation('program', $program);
+    $update->setRelation('creator', $campaigner);
+
+    // 1. ProgramUpdateSubmittedNotification to Admin
+    $subNotif = new ProgramUpdateSubmittedNotification($program, $update);
+    $subMail = $subNotif->toMail($admin);
+    expect($subMail->subject)->toContain('Peninjauan Kabar Program Baru - Renovasi Jembatan Desa')
+        ->and($subMail->actionUrl)->toBe(route('admin.programs.updates.index', $program->id));
+
+    // 2. ProgramUpdateReviewedNotification (approved) to Campaigner
+    $update->moderation_status = 'approved';
+    $revApprovedNotif = new ProgramUpdateReviewedNotification($program, $update);
+    $appMail = $revApprovedNotif->toMail($campaigner);
+    expect($appMail->subject)->toContain('Alhamdulillah! Kabar Program Anda Telah Diterbitkan - Renovasi Jembatan Desa')
+        ->and($appMail->actionUrl)->toBe(route('akun.programs.updates.index', $program->id));
+
+    // 3. ProgramUpdateReviewedNotification (rejected) to Campaigner
+    $update->moderation_status = 'rejected';
+    $update->rejection_reason = 'Bukti foto penyaluran buram.';
+    $revRejectedNotif = new ProgramUpdateReviewedNotification($program, $update);
+    $rejMail = $revRejectedNotif->toMail($campaigner);
+    expect($rejMail->subject)->toContain('Pemberitahuan Moderasi Kabar Program - Renovasi Jembatan Desa')
+        ->and($rejMail->actionUrl)->toBe(route('akun.programs.updates.index', $program->id));
 });

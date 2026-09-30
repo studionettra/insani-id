@@ -111,7 +111,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'notifikasi@insani.id'),
+        'address' => env('MAIL_FROM_ADDRESS', 'sapa@insani.id'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Insani Indonesia')),
     ],
 
