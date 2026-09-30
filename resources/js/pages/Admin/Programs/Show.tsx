@@ -1,4 +1,6 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { format } from 'date-fns';
+import { id as dateId } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
 import {
     ArrowLeft,
@@ -71,6 +73,68 @@ interface Program {
 interface Props {
     program: Program;
 }
+
+const AdminProgramUpdateCard = ({ update, programId }: { update: any; programId: number }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    let formattedDate = '';
+    try {
+        formattedDate = format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: dateId });
+    } catch {
+        formattedDate = formatDate(update.created_at);
+    }
+
+    return (
+        <div className="border border-gray-200 dark:border-gray-800 rounded-xl p-5 hover:border-brand-500/30 transition-all bg-white dark:bg-gray-900/90 shadow-xs">
+            <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                    <Calendar className="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" />
+                    <span>{formattedDate}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    {update.is_published ? (
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 text-[10px] py-0 border-emerald-200 dark:border-emerald-800">
+                            Terbit
+                        </Badge>
+                    ) : (
+                        <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 text-[10px] py-0 border-amber-200 dark:border-amber-800">
+                            Draf
+                        </Badge>
+                    )}
+                    <Button asChild variant="ghost" size="sm" className="h-7 px-2.5 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-950/40">
+                        <Link href={`/admin/programs/${programId}/updates`}>
+                            Kelola
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+
+            <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-3 leading-snug">
+                {getLocalizedValue(update.title)}
+            </h4>
+
+            <div className="relative">
+                <div
+                    className={`text-gray-600 dark:text-gray-300 text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden transition-all duration-300 ${expanded ? '' : 'max-h-40'}`}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(update.content)) }}
+                />
+                {!expanded && (
+                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none" />
+                )}
+            </div>
+
+            <div className="mt-3 text-center">
+                <button
+                    type="button"
+                    onClick={() => setExpanded(!expanded)}
+                    className="text-brand-600 dark:text-brand-400 font-medium text-sm hover:underline focus:outline-none cursor-pointer"
+                >
+                    {expanded ? 'Tutup' : 'Baca Selengkapnya'}
+                </button>
+            </div>
+        </div>
+    );
+};
 
 export default function ProgramShow({ program }: Props) {
     const { errors, auth } = usePage().props as any;
@@ -387,82 +451,50 @@ export default function ProgramShow({ program }: Props) {
                                     </div>
                                 </div>
 
-                                {isCreator && (
-                                    <Button asChild size="sm" className="bg-brand-600 hover:bg-brand-700 text-white shadow-xs self-start sm:self-auto">
-                                        <Link href={`/admin/programs/${program.id}/updates`}>
-                                            <Plus className="w-4 h-4 mr-1.5" /> Kelola Kabar ({program.updates?.length || 0})
-                                        </Link>
-                                    </Button>
-                                )}
+                                <Button asChild size="sm" variant={isCreator ? "default" : "outline"} className={isCreator ? "bg-brand-600 hover:bg-brand-700 text-white shadow-xs self-start sm:self-auto" : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 self-start sm:self-auto"}>
+                                    <Link href={`/admin/programs/${program.id}/updates`}>
+                                        <Plus className="w-4 h-4 mr-1.5" /> Kelola Kabar ({program.updates?.length || 0})
+                                    </Link>
+                                </Button>
                             </div>
 
-                            <div className="p-6">
-                                {!isCreator ? (
-                                    <div className="space-y-4">
-                                        <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 flex items-start gap-3">
-                                            <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                                            <div className="text-xs leading-relaxed">
-                                                <p className="font-bold text-amber-950 dark:text-amber-100 mb-0.5">Pengelolaan Kabar Mandiri</p>
-                                                Program ini dibuat oleh Campaigner <strong className="text-amber-950 dark:text-amber-100">{program.creator?.name || 'Eksternal'}</strong>. Sesuai kebijakan integritas platform, kabar terbaru dan laporan penyaluran dikelola secara independen oleh Campaigner yang bersangkutan.
-                                            </div>
+                            <div className="p-6 space-y-5">
+                                {!isCreator && (
+                                    <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 flex items-start gap-3">
+                                        <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                        <div className="text-xs leading-relaxed">
+                                            <p className="font-bold text-amber-950 dark:text-amber-100 mb-0.5">Pengelolaan Kabar Mandiri</p>
+                                            Program ini dibuat oleh Campaigner <strong className="text-amber-950 dark:text-amber-100">{program.creator?.name || 'Eksternal'}</strong>. Sesuai kebijakan integritas platform, kabar terbaru dan laporan penyaluran dikelola secara independen oleh Campaigner yang bersangkutan.
                                         </div>
-
-                                        {(!program.updates || program.updates.length === 0) ? (
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 italic text-center py-4">
-                                                Campaigner belum mempublikasikan kabar terbaru untuk program ini.
-                                            </p>
-                                        ) : (
-                                            <div className="space-y-3">
-                                                {program.updates.map((update: any) => (
-                                                    <div key={update.id} className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60 space-y-1.5">
-                                                        <div className="flex items-center justify-between gap-2 flex-wrap">
-                                                            <h5 className="font-semibold text-sm text-gray-900 dark:text-white">{update.title}</h5>
-                                                            <span className="text-[11px] text-gray-500 dark:text-gray-400">{formatDate(update.created_at)}</span>
-                                                        </div>
-                                                        <div 
-                                                            className="text-xs text-gray-600 dark:text-gray-300 line-clamp-3 prose prose-xs dark:prose-invert"
-                                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(update.content) }}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
                                     </div>
-                                ) : (
-                                    (!program.updates || program.updates.length === 0) ? (
-                                        <div className="text-center py-6">
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                                                Anda belum menambahkan kabar terbaru atau dokumentasi penyaluran untuk program ini.
-                                            </p>
+                                )}
+
+                                {(!program.updates || program.updates.length === 0) ? (
+                                    <div className="text-center py-8 px-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
+                                        <Megaphone className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2 opacity-50" />
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                            {isCreator
+                                                ? 'Anda belum menambahkan kabar terbaru atau dokumentasi penyaluran.'
+                                                : 'Campaigner belum mempublikasikan kabar terbaru untuk program ini.'}
+                                        </p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+                                            Dokumentasi penyaluran membantu meningkatkan transparansi dan kepercayaan donatur.
+                                        </p>
+                                        {isCreator && (
                                             <Button asChild variant="outline" size="sm" className="border-brand-300 dark:border-brand-700 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40">
                                                 <Link href={`/admin/programs/${program.id}/updates`}>
                                                     <Plus className="w-4 h-4 mr-1.5" /> Tambah Kabar Sekarang
                                                 </Link>
                                             </Button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {program.updates.slice(0, 3).map((update: any) => (
-                                                <div key={update.id} className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/60 flex items-start justify-between gap-4">
-                                                    <div className="space-y-1 min-w-0 flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <h5 className="font-semibold text-sm text-gray-900 dark:text-white truncate">{update.title}</h5>
-                                                            {update.is_published ? (
-                                                                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 text-[10px] py-0 border-emerald-200 dark:border-emerald-800">Terbit</Badge>
-                                                            ) : (
-                                                                <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 text-[10px] py-0 border-amber-200 dark:border-amber-800">Draf</Badge>
-                                                            )}
-                                                        </div>
-                                                        <p className="text-[11px] text-gray-400 dark:text-gray-500">{formatDate(update.created_at)}</p>
-                                                    </div>
-                                                    <Button asChild variant="ghost" size="sm" className="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 shrink-0">
-                                                        <Link href={`/admin/programs/${program.id}/updates`}>
-                                                            Kelola
-                                                        </Link>
-                                                    </Button>
-                                                </div>
-                                            ))}
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {program.updates.slice(0, 3).map((update: any) => (
+                                            <AdminProgramUpdateCard key={update.id} update={update} programId={program.id} />
+                                        ))}
 
+                                        {program.updates.length > 3 && (
                                             <div className="pt-2 text-center">
                                                 <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                                                     <Link href={`/admin/programs/${program.id}/updates`}>
@@ -470,8 +502,8 @@ export default function ProgramShow({ program }: Props) {
                                                     </Link>
                                                 </Button>
                                             </div>
-                                        </div>
-                                    )
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -665,17 +697,33 @@ export default function ProgramShow({ program }: Props) {
                                 ) : (
                                     <>
                                         <div>
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Penggalang</p>
+                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                                {((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga') ? 'Nama Lembaga' : 'Nama Penggalang'}
+                                            </p>
                                             <p className="font-medium text-gray-900 dark:text-gray-100">
-                                                {program.campaignerProfile?.type === 'lembaga'
-                                                    ? program.campaignerProfile.institution_name
+                                                {((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga')
+                                                    ? ((program as any).campaigner_profile?.nama_lembaga || (program as any).campaigner_profile?.institution_name || program.campaignerProfile?.institution_name || program.creator?.name)
                                                     : program.creator?.name}
                                             </p>
                                         </div>
+                                        {((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga') && program.creator?.name && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">PIC Lembaga</p>
+                                                <p className="font-medium text-gray-900 dark:text-gray-100">{program.creator.name}</p>
+                                            </div>
+                                        )}
                                         <div>
                                             <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Email Kontak</p>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100">{program.creator?.email}</p>
+                                            <p className="font-medium text-gray-900 dark:text-gray-100">{program.creator?.email || 'N/A'}</p>
                                         </div>
+                                        {(program.creator?.phone || (program as any).campaigner_profile?.phone) && (
+                                            <div>
+                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. Telepon / WhatsApp</p>
+                                                <p className="font-medium text-gray-900 dark:text-gray-100">
+                                                    {(program as any).campaigner_profile?.phone || program.creator?.phone}
+                                                </p>
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </div>

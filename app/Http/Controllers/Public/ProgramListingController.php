@@ -58,7 +58,9 @@ class ProgramListingController extends Controller
             'creator',
             'campaignerProfile',
             'updates' => function ($query) {
-                $query->where('is_published', true)->latest();
+                $query->where('is_published', true)
+                    ->where('moderation_status', 'approved')
+                    ->latest();
             },
             'comments' => function ($query) {
                 $query->with('donation:id,amount')->where('is_hidden', false)->latest();

@@ -286,12 +286,7 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Manajemen Program</h1>
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                                {programs.total} Total
-                            </span>
-                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Manajemen Program</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                             Kelola program resmi yayasan dan kampanye galang dana dari mitra lembaga maupun individu.
                         </p>
