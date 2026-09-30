@@ -298,24 +298,42 @@ return;
 
             {/* Modal Tambah */}
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                <DialogContent className="sm:max-w-[500px] border-gray-200 dark:border-gray-800 dark:bg-gray-900">
-                    <form onSubmit={submitCreate}>
-                        <DialogHeader>
-                            <DialogTitle className="text-gray-900 dark:text-white">Tambah Anggota Manajemen</DialogTitle>
+                <DialogContent className="sm:max-w-[560px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl">
+                    <form onSubmit={submitCreate} className="flex flex-col h-full overflow-hidden">
+                        <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 shrink-0">
+                            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">Tambah Anggota Manajemen</DialogTitle>
+                            <DialogDescription className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Tambahkan profil dan informasi anggota tim manajemen baru.
+                            </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
+
+                        <div className="px-6 py-4 space-y-4 overflow-y-auto">
                             <div className="grid gap-2">
-                                <Label htmlFor="name" className="text-gray-700 dark:text-gray-300">Nama Lengkap *</Label>
+                                <Label htmlFor="name" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Nama Lengkap *</Label>
                                 <Input
                                     id="name"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
+                                    placeholder="Contoh: Dr. H. Ahmad Fauzi, M.Si"
                                     className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     required
                                 />
-                                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
                             </div>
-                            
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="position_id" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Jabatan (ID) *</Label>
+                                <Input
+                                    id="position_id"
+                                    value={data.position.id}
+                                    onChange={(e) => setData('position', { ...data.position, id: e.target.value })}
+                                    placeholder="Contoh: Direktur Utama"
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    required
+                                />
+                                {errors['position.id'] && <p className="text-xs text-red-500">{errors['position.id']}</p>}
+                            </div>
+
                             <TranslationStatusCard
                                 hasId={Boolean(data.position.id)}
                                 hasEn={Boolean(data.position.en)}
@@ -326,42 +344,32 @@ return;
                                 description="Terjemahkan jabatan anggota manajemen ke bahasa Inggris dan Arab secara otomatis."
                             />
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="position_id" className="text-gray-700 dark:text-gray-300">Jabatan (ID) *</Label>
-                                <Input
-                                    id="position_id"
-                                    value={data.position.id}
-                                    onChange={(e) => setData('position', { ...data.position, id: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                    required
-                                />
-                                {errors['position.id'] && <p className="text-sm text-red-500">{errors['position.id']}</p>}
-                            </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="position_en" className="text-gray-700 dark:text-gray-300">Jabatan (EN)</Label>
+                                    <Label htmlFor="position_en" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Jabatan (EN)</Label>
                                     <Input
                                         id="position_en"
                                         value={data.position.en}
                                         onChange={(e) => setData('position', { ...data.position, en: e.target.value })}
+                                        placeholder="Contoh: President Director"
                                         className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="position_ar" className="text-gray-700 dark:text-gray-300">Jabatan (AR)</Label>
+                                    <Label htmlFor="position_ar" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Jabatan (AR)</Label>
                                     <Input
                                         id="position_ar"
                                         value={data.position.ar}
                                         onChange={(e) => setData('position', { ...data.position, ar: e.target.value })}
                                         dir="rtl"
+                                        placeholder="Contoh: المدير العام"
                                         className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="image" className="text-gray-700 dark:text-gray-300">Foto Profil</Label>
+                                <Label htmlFor="image" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Foto Profil</Label>
                                 <Input
                                     id="image"
                                     type="file"
@@ -369,12 +377,12 @@ return;
                                     accept="image/*"
                                     className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white file:text-gray-900 dark:file:text-white"
                                 />
-                                {errors.image_url && <p className="text-sm text-red-500">{errors.image_url}</p>}
+                                {errors.image_url && <p className="text-xs text-red-500">{errors.image_url}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
+                                    <Label htmlFor="sort_order" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Urutan Tampil</Label>
                                     <Input
                                         id="sort_order"
                                         type="number"
@@ -384,11 +392,11 @@ return;
                                     />
                                 </div>
                             </div>
-                            
-                            <div className="flex flex-col gap-3 mt-2">
+
+                            <div className="flex flex-col gap-3 pt-1">
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id="is_active" 
+                                    <Checkbox
+                                        id="is_active"
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
@@ -398,7 +406,8 @@ return;
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
+
+                        <DialogFooter className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                             <Button type="button" variant="outline" className="border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" onClick={() => setIsCreateModalOpen(false)}>
                                 Batal
                             </Button>
@@ -412,24 +421,42 @@ return;
 
             {/* Modal Edit */}
             <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="sm:max-w-[500px] border-gray-200 dark:border-gray-800 dark:bg-gray-900">
-                    <form onSubmit={submitEdit}>
-                        <DialogHeader>
-                            <DialogTitle className="text-gray-900 dark:text-white">Edit Anggota Manajemen</DialogTitle>
+                <DialogContent className="sm:max-w-[560px] max-h-[90vh] flex flex-col p-0 overflow-hidden border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl">
+                    <form onSubmit={submitEdit} className="flex flex-col h-full overflow-hidden">
+                        <DialogHeader className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 shrink-0">
+                            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">Edit Anggota Manajemen</DialogTitle>
+                            <DialogDescription className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Perbarui data dan profil anggota tim manajemen.
+                            </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
+
+                        <div className="px-6 py-4 space-y-4 overflow-y-auto">
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_name" className="text-gray-700 dark:text-gray-300">Nama Lengkap *</Label>
+                                <Label htmlFor="edit_name" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Nama Lengkap *</Label>
                                 <Input
                                     id="edit_name"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
+                                    placeholder="Contoh: Dr. H. Ahmad Fauzi, M.Si"
                                     className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     required
                                 />
                                 {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                             </div>
-                            
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="edit_position_id" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Jabatan (ID) *</Label>
+                                <Input
+                                    id="edit_position_id"
+                                    value={data.position.id}
+                                    onChange={(e) => setData('position', { ...data.position, id: e.target.value })}
+                                    placeholder="Contoh: Direktur Utama"
+                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                                    required
+                                />
+                                {errors['position.id'] && <p className="text-sm text-red-500">{errors['position.id']}</p>}
+                            </div>
+
                             <TranslationStatusCard
                                 hasId={Boolean(data.position.id)}
                                 hasEn={Boolean(data.position.en)}
@@ -440,45 +467,35 @@ return;
                                 description="Terjemahkan jabatan anggota manajemen ke bahasa Inggris dan Arab secara otomatis."
                             />
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="edit_position_id" className="text-gray-700 dark:text-gray-300">Jabatan (ID) *</Label>
-                                <Input
-                                    id="edit_position_id"
-                                    value={data.position.id}
-                                    onChange={(e) => setData('position', { ...data.position, id: e.target.value })}
-                                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
-                                    required
-                                />
-                                {errors['position.id'] && <p className="text-sm text-red-500">{errors['position.id']}</p>}
-                            </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_position_en" className="text-gray-700 dark:text-gray-300">Jabatan (EN)</Label>
+                                    <Label htmlFor="edit_position_en" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Jabatan (EN)</Label>
                                     <Input
                                         id="edit_position_en"
                                         value={data.position.en}
                                         onChange={(e) => setData('position', { ...data.position, en: e.target.value })}
+                                        placeholder="Contoh: President Director"
                                         className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_position_ar" className="text-gray-700 dark:text-gray-300">Jabatan (AR)</Label>
+                                    <Label htmlFor="edit_position_ar" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Jabatan (AR)</Label>
                                     <Input
                                         id="edit_position_ar"
                                         value={data.position.ar}
                                         onChange={(e) => setData('position', { ...data.position, ar: e.target.value })}
                                         dir="rtl"
+                                        placeholder="Contoh: المدير العام"
                                         className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="edit_image" className="text-gray-700 dark:text-gray-300">Ganti Foto Profil</Label>
+                                <Label htmlFor="edit_image" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Ganti Foto Profil</Label>
                                 {editingMember?.image_url && (
                                     <div className="mb-2">
-                                        <img src={`/storage/${editingMember.image_url}`} alt="Current" className="h-16 w-16 object-cover rounded-full border border-gray-200 dark:border-gray-700" />
+                                        <img src={`/storage/${editingMember.image_url}`} alt="Current" className="h-16 w-16 object-cover rounded-full border border-gray-200 dark:border-gray-700 shadow-xs" />
                                     </div>
                                 )}
                                 <Input
@@ -493,7 +510,7 @@ return;
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300">Urutan Tampil</Label>
+                                    <Label htmlFor="edit_sort_order" className="text-gray-700 dark:text-gray-300 text-sm font-medium">Urutan Tampil</Label>
                                     <Input
                                         id="edit_sort_order"
                                         type="number"
@@ -503,11 +520,11 @@ return;
                                     />
                                 </div>
                             </div>
-                            
-                            <div className="flex flex-col gap-3 mt-2">
+
+                            <div className="flex flex-col gap-3 pt-1">
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox 
-                                        id="edit_is_active" 
+                                    <Checkbox
+                                        id="edit_is_active"
                                         checked={data.is_active}
                                         onCheckedChange={(checked) => setData('is_active', checked === true)}
                                     />
@@ -517,7 +534,8 @@ return;
                                 </div>
                             </div>
                         </div>
-                        <DialogFooter>
+
+                        <DialogFooter className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 shrink-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                             <Button type="button" variant="outline" className="border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800" onClick={() => setIsEditModalOpen(false)}>
                                 Batal
                             </Button>
