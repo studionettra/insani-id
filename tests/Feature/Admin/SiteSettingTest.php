@@ -73,24 +73,38 @@ it('allows administrator to update tracking and analytics pixel settings', funct
     actingAs($this->admin)
         ->post(route('admin.site-settings.update'), [
             'google_tag_manager_id' => 'GTM-TEST1234',
+            'tracking_mode_gtm' => 'hybrid',
             'google_analytics_id' => 'G-ABC123XYZ',
+            'google_ads_id' => 'AW-987654321',
+            'google_site_verification' => 'google-site-verification=abc123xyz',
             'meta_pixel_id' => '9876543210',
+            'meta_domain_verification' => 'facebook-domain-verification=meta12345',
+            'meta_capi_enabled' => '1',
+            'meta_capi_access_token' => 'EAAtesttoken12345',
+            'meta_capi_test_event_code' => 'TEST99999',
             'tiktok_pixel_id' => 'TIKTOK12345',
         ])
         ->assertRedirect()
         ->assertSessionHas('success');
 
     expect(AppSetting::get('google_tag_manager_id'))->toBe('GTM-TEST1234');
+    expect(AppSetting::get('tracking_mode_gtm'))->toBe('hybrid');
     expect(AppSetting::get('google_analytics_id'))->toBe('G-ABC123XYZ');
+    expect(AppSetting::get('google_ads_id'))->toBe('AW-987654321');
+    expect(AppSetting::get('google_site_verification'))->toBe('google-site-verification=abc123xyz');
     expect(AppSetting::get('meta_pixel_id'))->toBe('9876543210');
+    expect(AppSetting::get('meta_domain_verification'))->toBe('facebook-domain-verification=meta12345');
+    expect(AppSetting::get('meta_capi_enabled'))->toBe('1');
+    expect(AppSetting::get('meta_capi_access_token'))->toBe('EAAtesttoken12345');
+    expect(AppSetting::get('meta_capi_test_event_code'))->toBe('TEST99999');
     expect(AppSetting::get('tiktok_pixel_id'))->toBe('TIKTOK12345');
 });
 
-it('allows administrator to update google adsense and ads.txt settings', function () {
+it('allows administrator to update google adsense and ads.txt settings with auto normalization', function () {
     actingAs($this->admin)
         ->post(route('admin.site-settings.update'), [
             'adsense_enabled' => '1',
-            'google_adsense_client_id' => 'ca-pub-9998887776665554',
+            'google_adsense_client_id' => '9998887776665554', // Without ca-pub- prefix
             'adsense_slot_blog_index' => '111222333',
             'adsense_slot_article_top' => '222333444',
             'adsense_slot_article_middle' => '333444555',
@@ -101,7 +115,7 @@ it('allows administrator to update google adsense and ads.txt settings', functio
         ->assertSessionHas('success');
 
     expect(AppSetting::get('adsense_enabled'))->toBe('1');
-    expect(AppSetting::get('google_adsense_client_id'))->toBe('ca-pub-9998887776665554');
+    expect(AppSetting::get('google_adsense_client_id'))->toBe('ca-pub-9998887776665554'); // Automatically prepended
     expect(AppSetting::get('adsense_slot_blog_index'))->toBe('111222333');
     expect(AppSetting::get('adsense_slot_article_top'))->toBe('222333444');
     expect(AppSetting::get('adsense_slot_article_middle'))->toBe('333444555');

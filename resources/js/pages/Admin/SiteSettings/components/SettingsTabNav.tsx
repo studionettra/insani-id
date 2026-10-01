@@ -67,7 +67,9 @@ export const SITE_SETTINGS_TABS: TabDefinition[] = [
         description: 'Google Analytics, Meta Pixel, TikTok, AdSense, & ads.txt',
         icon: BarChart3,
         fields: [
-            'google_tag_manager_id', 'google_analytics_id', 'meta_pixel_id', 'tiktok_pixel_id',
+            'google_tag_manager_id', 'tracking_mode_gtm', 'google_analytics_id', 'google_ads_id',
+            'google_site_verification', 'meta_pixel_id', 'meta_domain_verification', 'meta_capi_enabled',
+            'meta_capi_access_token', 'meta_capi_test_event_code', 'tiktok_pixel_id',
             'adsense_enabled', 'google_adsense_client_id', 'adsense_slot_blog_index',
             'adsense_slot_article_top', 'adsense_slot_article_middle', 'adsense_slot_article_bottom',
             'ads_txt_content'

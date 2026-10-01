@@ -46,8 +46,15 @@ class SiteSettingController extends Controller
             'social_threads' => 'nullable|string|max:255',
             'qris_image' => 'nullable|image|max:3072',
             'google_tag_manager_id' => 'nullable|string|max:50',
+            'tracking_mode_gtm' => 'nullable|string|in:gtm_only,hybrid',
             'google_analytics_id' => 'nullable|string|max:50',
+            'google_ads_id' => 'nullable|string|max:50',
+            'google_site_verification' => 'nullable|string|max:150',
             'meta_pixel_id' => 'nullable|string|max:50',
+            'meta_domain_verification' => 'nullable|string|max:150',
+            'meta_capi_enabled' => 'nullable|string|in:0,1',
+            'meta_capi_access_token' => 'nullable|string|max:500',
+            'meta_capi_test_event_code' => 'nullable|string|max:50',
             'tiktok_pixel_id' => 'nullable|string|max:50',
             'adsense_enabled' => 'nullable|string|in:0,1',
             'google_adsense_client_id' => 'nullable|string|max:100',
@@ -153,8 +160,15 @@ class SiteSettingController extends Controller
             'announcement_link',
             'announcement_bg_color',
             'google_tag_manager_id',
+            'tracking_mode_gtm',
             'google_analytics_id',
+            'google_ads_id',
+            'google_site_verification',
             'meta_pixel_id',
+            'meta_domain_verification',
+            'meta_capi_enabled',
+            'meta_capi_access_token',
+            'meta_capi_test_event_code',
             'tiktok_pixel_id',
             'adsense_enabled',
             'google_adsense_client_id',
@@ -171,6 +185,20 @@ class SiteSettingController extends Controller
                 if (array_key_exists($field, $translatableFields) && is_array($val)) {
                     $val = json_encode($val, JSON_UNESCAPED_UNICODE);
                 }
+
+                // Normalize Google AdSense Publisher ID to ca-pub-XXXXXXXXXXXXXXXX
+                if ($field === 'google_adsense_client_id' && ! empty($val)) {
+                    $trimmed = trim((string) $val);
+                    if (! str_starts_with($trimmed, 'ca-pub-')) {
+                        $digits = preg_replace('/[^0-9]/', '', $trimmed);
+                        if (! empty($digits)) {
+                            $val = 'ca-pub-'.$digits;
+                        }
+                    } else {
+                        $val = $trimmed;
+                    }
+                }
+
                 AppSetting::updateOrCreate(
                     ['key' => $field],
                     ['value' => $val]

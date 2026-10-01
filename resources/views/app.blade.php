@@ -2,9 +2,14 @@
 @php
     $isAdminOrDashboard = request()->is('dashboard*', 'admin*', 'akun*', 'settings*');
     $gtmId = !$isAdminOrDashboard ? \App\Models\AppSetting::get('google_tag_manager_id') : null;
-    $gaId = (!$isAdminOrDashboard && empty($gtmId)) ? \App\Models\AppSetting::get('google_analytics_id') : null;
-    $metaPixelId = (!$isAdminOrDashboard && empty($gtmId)) ? \App\Models\AppSetting::get('meta_pixel_id') : null;
-    $tiktokPixelId = (!$isAdminOrDashboard && empty($gtmId)) ? \App\Models\AppSetting::get('tiktok_pixel_id') : null;
+    $trackingMode = \App\Models\AppSetting::get('tracking_mode_gtm', 'hybrid');
+    $suppressDirect = !empty($gtmId) && $trackingMode === 'gtm_only';
+
+    $gaId = (!$isAdminOrDashboard && !$suppressDirect) ? \App\Models\AppSetting::get('google_analytics_id') : null;
+    $metaPixelId = (!$isAdminOrDashboard && !$suppressDirect) ? \App\Models\AppSetting::get('meta_pixel_id') : null;
+    $tiktokPixelId = (!$isAdminOrDashboard && !$suppressDirect) ? \App\Models\AppSetting::get('tiktok_pixel_id') : null;
+    $googleSiteVerification = !$isAdminOrDashboard ? \App\Models\AppSetting::get('google_site_verification') : null;
+    $metaDomainVerification = !$isAdminOrDashboard ? \App\Models\AppSetting::get('meta_domain_verification') : null;
     $siteFavicon = \App\Models\AppSetting::get('site_favicon');
     $faviconUrl = $siteFavicon ? asset('storage/' . $siteFavicon) : asset('favicon-insani.svg');
 @endphp
@@ -14,6 +19,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    @if ($googleSiteVerification)
+        <meta name="google-site-verification" content="{{ $googleSiteVerification }}">
+    @endif
+    @if ($metaDomainVerification)
+        <meta name="facebook-domain-verification" content="{{ $metaDomainVerification }}">
+    @endif
 
     @if ($gtmId)
         {{-- Google Tag Manager --}}
