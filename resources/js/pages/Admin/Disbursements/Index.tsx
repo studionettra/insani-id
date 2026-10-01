@@ -34,15 +34,15 @@ export default function Index({ disbursements, filters }: any) {
             <div className="flex h-full flex-1 flex-col gap-6 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Penyaluran Dana (Disbursements)</h1>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Penyaluran Dana</h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola permohonan pencairan dana, validasi transfer BI-Fast, dan terbitkan kuitansi resmi.</p>
                     </div>
                 </div>
 
                 <Tabs defaultValue={filters.status || 'pending'} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                        <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Menunggu Review</TabsTrigger>
-                        <TabsTrigger value="approved" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Disetujui (Siap Transfer)</TabsTrigger>
+                        <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Menunggu Peninjauan</TabsTrigger>
+                        <TabsTrigger value="approved" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Disetujui</TabsTrigger>
                         <TabsTrigger value="transferred" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditransfer</TabsTrigger>
                         <TabsTrigger value="rejected" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditolak</TabsTrigger>
                         <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Semua</TabsTrigger>

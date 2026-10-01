@@ -96,13 +96,13 @@ export default function Show({ disbursement }: any) {
                             <div className="border-b border-gray-100 bg-gray-50/50 py-3.5 px-6 flex items-center justify-between">
                                 <h3 className="font-semibold text-gray-900 text-sm">Rincian Finansial Pencairan</h3>
                                 <span className="text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200">
-                                    Metode Payout: BI-Fast Manual
+                                    Metode Penyaluran: BI-Fast Manual
                                 </span>
                             </div>
                             <div className="p-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                                     <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                                        <p className="text-xs text-gray-500 mb-1">Nominal Diajukan (Gross)</p>
+                                        <p className="text-xs text-gray-500 mb-1">Nominal Diajukan</p>
                                         <p className="text-xl font-bold text-gray-900">{formatRupiah(disbursement.requested_amount)}</p>
                                     </div>
                                     <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100 relative">

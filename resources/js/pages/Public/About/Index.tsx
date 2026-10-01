@@ -26,14 +26,14 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
     const { t } = useTranslation();
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-    const defaultVision = "Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya, mandiri, dan sejahtera dalam naungan nilai-nilai kemanusiaan yang universal.";
+    const defaultVision = "Berkontribusi mewujudkan dunia tanpa krisis kemanusiaan yang menghadirkan keadilan sosial bagi segenap insan.";
     const localizedVision = getLocalizedValue(siteSettings?.about_vision, locale);
     const visionText = localizedVision || defaultVision;
 
     const defaultMissions = [
-        "Menggalang kepedulian masyarakat untuk turut serta dalam program pengentasan krisis kemanusiaan.",
-        "Memberikan bantuan tepat sasaran dan terukur melalui kolaborasi dengan berbagai mitra terpercaya.",
-        "Mengedukasi masyarakat mengenai isu-isu kemanusiaan di dalam dan luar negeri."
+        "Membangun kapasitas dan kompetensi organisasi yang efektif, inovatif, dan akuntabel.",
+        "Menjalin kemitraan dan kolaborasi dengan institusi, perusahaan, lembaga, komunitas, dan individu dalam kerja-kerja sosial dan kemanusiaan.",
+        "Mengembangkan sumber daya yang ada, guna mendorong kemandirian dan kesejahteraan."
     ];
     const rawMission = getLocalizedValue(siteSettings?.about_mission, locale);
     const missions: string[] = rawMission
@@ -41,9 +41,12 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
         : defaultMissions;
 
     const defaultValues = [
-        { title: "Integritas", desc: "Transparan dan akuntabel dalam pengelolaan amanah donatur." },
-        { title: "Kolaborasi", desc: "Bersinergi dengan semua pihak untuk dampak yang lebih luas." },
-        { title: "Empati", desc: "Bergerak dari panggilan hati nurani untuk meringankan beban sesama." }
+        { title: "Initiative", desc: "Semangat untuk menjadi yang pertama dan terdepan dalam menghadirkan kebermanfaatan." },
+        { title: "Nationalism", desc: "Kesadaran bahwa misi perjuangan kemanusiaan Insani didasarkan oleh cita-cita kemerdekaan Indonesia." },
+        { title: "Sustainability", desc: "Kesadaran mendalam bahwa menghadirkan keadilan sosial merupakan perjuangan yang panjang dan berkelanjutan." },
+        { title: "Accountability", desc: "Semangat untuk menghadirkan tata kelola organisasi yang terukur dan efektif." },
+        { title: "Networking", desc: "Semangat berjejaring demi mewujudkan komitmen menjadi wadah kolaborasi bagi seluruh potensi kebaikan." },
+        { title: "Inspire", desc: "Semangat untuk senantiasa bekerja secara optimal, sehingga perjuangan Insani dapat menginspirasi dunia." }
     ];
     const rawValues = getLocalizedValue(siteSettings?.about_values, locale);
     const values = rawValues

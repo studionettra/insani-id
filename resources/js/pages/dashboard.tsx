@@ -698,7 +698,7 @@ export default function Dashboard({
                                     {formatCurrency(stats.totalDisbursed)}
                                 </div>
                                 <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 truncate">
-                                    {formatCurrency(stats.pendingDisbursements)} {stats.pendingDisbursementsCount ? `(${stats.pendingDisbursementsCount} pending)` : 'pending'}
+                                    {formatCurrency(stats.pendingDisbursements)} {stats.pendingDisbursementsCount ? `(${stats.pendingDisbursementsCount} menunggu)` : 'menunggu'}
                                 </div>
                             </div>
 

@@ -127,7 +127,7 @@ export default function AboutProfileTab({
                                 ...data.about_vision,
                                 [activeLang]: e.target.value
                             })}
-                            placeholder={activeLang === 'ar' ? 'رؤية المؤسسة...' : activeLang === 'en' ? 'Foundation vision...' : 'Menjadi pelopor kolaborasi kebaikan lintas batas demi mewujudkan masyarakat yang berdaya...'}
+                            placeholder={activeLang === 'ar' ? 'رؤية المؤسسة...' : activeLang === 'en' ? 'Foundation vision...' : 'Berkontribusi mewujudkan dunia tanpa krisis kemanusiaan yang menghadirkan keadilan sosial bagi segenap insan.'}
                             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                         />
                         {activeLang === 'id' && (
@@ -152,7 +152,7 @@ export default function AboutProfileTab({
                                 ...data.about_mission,
                                 [activeLang]: e.target.value
                             })}
-                            placeholder={activeLang === 'ar' ? 'رسالة المؤسسة...' : activeLang === 'en' ? 'Foundation mission points (one per line)...' : 'Menggalang kepedulian masyarakat...\nMemberikan bantuan tepat sasaran...\nMengedukasi masyarakat...'}
+                            placeholder={activeLang === 'ar' ? 'رسالة المؤسسة...' : activeLang === 'en' ? 'Foundation mission points (one per line)...' : 'Membangun kapasitas dan kompetensi organisasi yang efektif...\nMenjalin kemitraan dan kolaborasi...\nMengembangkan sumber daya yang ada...'}
                             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                         />
                         <p className="text-[11px] text-gray-400">Gunakan baris baru (Enter) untuk setiap butir misi. Setiap baris otomatis dirender sebagai poin terpisah.</p>
@@ -175,10 +175,10 @@ export default function AboutProfileTab({
                                 ...data.about_values,
                                 [activeLang]: e.target.value
                             })}
-                            placeholder={activeLang === 'ar' ? 'القيم الأساسية...' : activeLang === 'en' ? 'Core Values (Format: Title: Description per line)...' : 'Integritas: Transparan dan akuntabel dalam pengelolaan amanah donatur.\nKolaborasi: Bersinergi dengan semua pihak untuk dampak yang lebih luas.\nEmpati: Bergerak dari panggilan hati nurani untuk meringankan beban sesama.'}
+                            placeholder={activeLang === 'ar' ? 'القيم الأساسية...' : activeLang === 'en' ? 'Core Values (Format: Title: Description per line)...' : 'Initiative: Semangat untuk menjadi yang pertama dan terdepan...\nNationalism: Kesadaran bahwa misi perjuangan kemanusiaan...\nSustainability: Kesadaran mendalam bahwa menghadirkan keadilan...'}
                             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:bg-gray-900"
                         />
-                        <p className="text-[11px] text-gray-400">Format: <code>Judul: Keterangan</code> per baris (contoh: <code>Integritas: Transparan dan akuntabel...</code>).</p>
+                        <p className="text-[11px] text-gray-400">Format: <code>Judul: Keterangan</code> per baris (contoh: <code>Initiative: Semangat untuk menjadi yang pertama...</code>).</p>
                         {errors[`about_values.${activeLang}`] && (
                             <p className="text-xs text-red-500 mt-1">{errors[`about_values.${activeLang}`]}</p>
                         )}

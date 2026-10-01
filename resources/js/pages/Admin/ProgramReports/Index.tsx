@@ -307,7 +307,7 @@ export default function ProgramReportsIndex({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-xs">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-gray-500">Menunggu Review</span>
+                        <span className="text-xs font-semibold text-gray-500">Menunggu Peninjauan</span>
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
                     </div>
                     <p className="text-2xl font-bold text-amber-600 mt-2">{statusCounts.pending}</p>
@@ -669,10 +669,10 @@ export default function ProgramReportsIndex({
                                         onChange={(e: any) => setStatusData('status', e.target.value)}
                                         className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs font-semibold focus:outline-hidden"
                                     >
-                                        <option value="pending">Menunggu Review (Pending)</option>
-                                        <option value="investigating">Sedang Diperiksa (Investigating)</option>
-                                        <option value="resolved">Terbukti Melanggar / Selesai (Resolved)</option>
-                                        <option value="dismissed">Ditolak / Laporan Gugur (Dismissed)</option>
+                                        <option value="pending">Menunggu Peninjauan</option>
+                                        <option value="investigating">Dalam Investigasi</option>
+                                        <option value="resolved">Selesai / Tindak Lanjut</option>
+                                        <option value="dismissed">Ditolak / Laporan Gugur</option>
                                     </select>
                                 </div>
 

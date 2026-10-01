@@ -188,7 +188,7 @@ export default function CampaignerShow({ campaigner }: any) {
                                                 <SelectValue placeholder="Pilih keputusan" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="pending">Pending (Menunggu)</SelectItem>
+                                                <SelectItem value="pending">Menunggu Verifikasi</SelectItem>
                                                 <SelectItem value="verified">Verifikasi Disetujui</SelectItem>
                                                 <SelectItem value="rejected">Tolak Pengajuan</SelectItem>
                                                 <SelectItem value="suspended">Suspend Akun</SelectItem>

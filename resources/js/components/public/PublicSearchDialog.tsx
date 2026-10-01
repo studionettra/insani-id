@@ -471,7 +471,7 @@ export default function PublicSearchDialog() {
                                                     <div className="flex items-center justify-between mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                                                             <Newspaper className="w-3.5 h-3.5 text-amber-500" />
-                                                            {t('Berita & Cerita')}
+                                                            {t('Berita')}
                                                         </span>
                                                         <span className="text-[11px] font-medium text-zinc-400">
                                                             {results.blogs.length} {t('artikel')}

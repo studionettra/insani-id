@@ -55,7 +55,7 @@ export default function CampaignersIndex({ campaigners, filters }: any) {
                                 <SelectValue placeholder="Filter Status" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="pending">Menunggu (Pending)</SelectItem>
+                                <SelectItem value="pending">Menunggu Verifikasi</SelectItem>
                                 <SelectItem value="verified">Terverifikasi</SelectItem>
                                 <SelectItem value="rejected">Ditolak</SelectItem>
                                 <SelectItem value="suspended">Dibekukan</SelectItem>

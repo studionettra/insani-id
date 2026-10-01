@@ -88,7 +88,7 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Manajemen Berita & Kabar
+                            Manajemen Berita
                         </h2>
                         <p className="text-muted-foreground text-sm mt-1">
                             Tulis, sunting, dan kelola seluruh artikel berita kegiatan dan penyaluran program Insani.
