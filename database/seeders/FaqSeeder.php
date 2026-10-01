@@ -29,8 +29,8 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => [
-                    'id' => 'Apakah saya bisa berdonasi tanpa mendaftar akun terlebih dahulu (Guest Donatur)?',
-                    'en' => 'Can I donate without creating an account first (Guest Donor)?',
+                    'id' => 'Apakah saya bisa berdonasi tanpa mendaftar akun terlebih dahulu?',
+                    'en' => 'Can I donate without creating an account first?',
                 ],
                 'answer_html' => [
                     'id' => '<p><strong>Ya, tentu saja!</strong> Anda dapat langsung berdonasi sebagai donatur tamu (guest) tanpa perlu registrasi atau login akun.</p><p>Cukup cantumkan alamat email dan nomor WhatsApp aktif Anda. Sistem kami akan secara otomatis mengirimkan rincian pembayaran, notifikasi penerimaan donasi, serta tautan kuitansi resmi ke kontak Anda.</p>',
@@ -217,8 +217,9 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => [
-                    'id' => 'Bagaimana mekanisme dan syarat pencairan dana (Disbursement)?',
+                    'id' => 'Bagaimana mekanisme dan syarat pencairan dana?',
                     'en' => 'What are the mechanisms and requirements for fund disbursement?',
+                    'ar' => 'ما هي آلية وشروط صرف أموال التبرعات؟',
                 ],
                 'answer_html' => [
                     'id' => '<p>Campaigner dapat mengajukan pencairan donasi yang telah terkumpul melalui menu Pencairan Dana di dasbor program dengan ketentuan:</p><ul><li>Nominal pencairan minimal adalah <strong>Rp 10.000</strong> dan tidak melebihi sisa saldo bersih donasi yang tersedia.</li><li>Pencairan hanya ditransfer ke <strong>rekening bank terdaftar yang telah lolos verifikasi akun</strong>.</li><li>Campaigner <strong>wajib mengisi rincian rencana alokasi penggunaan dana</strong> agar dipublikasikan di modal transparansi publik.</li><li>Proses transfer perbankan memerlukan waktu 1–3 hari kerja setelah permohonan disetujui tim finance.</li></ul>',
@@ -235,7 +236,7 @@ class FaqSeeder extends Seeder
                     'ar' => 'كم تبلغ رسوم تشغيل المنصة المفروضة على البرامج؟',
                 ],
                 'answer_html' => [
-                    'id' => '<p>Insani Indonesia beroperasi secara transparan sesuai UU No. 9 Tahun 1961 dan ketentuan Kementerian Sosial RI:</p><ul><li>Sebesar <strong>5%</strong> (maksimal 10% sesuai undang-undang) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform dan verifikasi, yang <strong>dipotong saat pencairan dana (disbursement)</strong>.</li><li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li><li>Biaya transaksi pembayaran digital pihak ketiga (payment gateway perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li></ul>',
+                    'id' => '<p>Insani Indonesia beroperasi secara transparan sesuai UU No. 9 Tahun 1961 dan ketentuan Kementerian Sosial RI:</p><ul><li>Sebesar <strong>5%</strong> (maksimal 10% sesuai undang-undang) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform dan verifikasi, yang <strong>dipotong saat pencairan dana</strong>.</li><li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li><li>Biaya transaksi pembayaran digital pihak ketiga (payment gateway perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li></ul>',
                     'en' => '<p>Insani Indonesia operates transparently in compliance with Indonesian Law No. 9/1961 and Social Ministry regulations:</p><ul><li><strong>5%</strong> (up to the legal ceiling of 10%) for social, humanitarian, and healthcare campaigns for platform operations, field verification, and maintenance, <strong>deducted only upon disbursement</strong>.</li><li><strong>0% (zero platform fee)</strong> for designated emergency disaster relief programs.</li><li>Third-party digital payment transaction fees (banking/QRIS payment gateways) are deducted at Bank Indonesia official standard rates.</li></ul>',
                     'ar' => '<p>تعمل إنساني إندونيسيا بشفافية تامة وفقاً للقانون رقم 9 لسنة 1961 ولوائح وزارة الشؤون الاجتماعية الإندونيسية:</p><ul><li>نسبة <strong>5%</strong> (بحد أقصى 10% وفقاً للقانون) للبرامج الاجتماعية والإنسانية العامة والصحية كرسوم لتشغيل المنصة والتحقق الميداني، والتي <strong>تُخصم عند صرف الأموال (Disbursement)</strong>.</li><li><strong>0% (معفاة تماماً من رسوم المنصة)</strong> لبرامج الإغاثة الطارئة المحددة للكوارث الطبيعية.</li><li>تُخصم رسوم معاملات الدفع الرقمي لأطراف خارجية (بوابات الدفع المصرفية وQRIS) وفقاً للأسعار الرسمية القياسية لبنك إندونيسيا.</li></ul>',
                 ],
@@ -420,7 +421,7 @@ class FaqSeeder extends Seeder
             ],
             [
                 'question' => [
-                    'id' => 'Apakah donasi yang sudah dibayarkan dapat dibatalkan atau dikembalikan (Refund)?',
+                    'id' => 'Apakah donasi yang sudah dibayarkan dapat dibatalkan atau dikembalikan?',
                     'en' => 'Can donations already made be canceled or refunded?',
                 ],
                 'answer_html' => [
@@ -564,7 +565,10 @@ class FaqSeeder extends Seeder
 
         foreach ($faqs as $item) {
             $questionId = is_array($item['question']) ? $item['question']['id'] : $item['question'];
-            $existing = Faq::where('question->id', $questionId)->first();
+            $existing = Faq::where('category', $item['category'])
+                ->where('sort_order', $item['sort_order'])
+                ->first()
+                ?? Faq::where('question->id', $questionId)->first();
 
             $questionData = is_array($item['question']) ? $item['question'] : [
                 'id' => $item['question'],

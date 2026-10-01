@@ -36,6 +36,25 @@ class AppSettingSeeder extends Seeder
             ['key' => 'social_x', 'value' => 'https://x.com/officialinsani', 'locale' => null],
             ['key' => 'social_youtube', 'value' => 'https://www.youtube.com/@insaniindonesia', 'locale' => null],
 
+            // Profil & Visi Misi Yayasan Multibahasa
+            ['key' => 'about_vision', 'value' => json_encode([
+                'id' => 'Berkontribusi mewujudkan dunia tanpa krisis kemanusiaan yang menghadirkan keadilan sosial bagi segenap insan.',
+                'en' => 'Contributing to realizing a world without humanitarian crises that brings social justice to all humanity.',
+                'ar' => 'المساهمة في تحقيق عالم خالٍ من الأزمات الإنسانية يرسخ العدالة الاجتماعية لجميع البشر.',
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+
+            ['key' => 'about_mission', 'value' => json_encode([
+                'id' => "Membangun kapasitas dan kompetensi organisasi yang efektif, inovatif, dan akuntabel.\nMenjalin kemitraan dan kolaborasi dengan institusi, perusahaan, lembaga, komunitas, dan individu dalam kerja-kerja sosial dan kemanusiaan.\nMengembangkan sumber daya yang ada, guna mendorong kemandirian dan kesejahteraan.",
+                'en' => "Building effective, innovative, and accountable organizational capacity and competence.\nForging partnerships and collaboration with institutions, corporations, organizations, communities, and individuals in social and humanitarian endeavors.\nDeveloping available resources to foster self-reliance and community welfare.",
+                'ar' => "بناء قدرات وكفاءات مؤسسية تتسم بالفاعلية والابتكار والمساءلة.\nإقامة شراكات وتعاون مع المؤسسات والشركات والهيئات والمجتمعات والأفراد في العمل الاجتماعي والإنساني.\nتنمية الموارد المتاحة لتعزيز الاعتماد على الذات والازدهار المجتمعي.",
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+
+            ['key' => 'about_values', 'value' => json_encode([
+                'id' => "Initiative: Semangat untuk menjadi yang pertama dan terdepan dalam menghadirkan kebermanfaatan.\nNationalism: Kesadaran bahwa misi perjuangan kemanusiaan Insani didasarkan oleh cita-cita kemerdekaan Indonesia.\nSustainability: Kesadaran mendalam bahwa menghadirkan keadilan sosial merupakan perjuangan yang panjang dan berkelanjutan.\nAccountability: Semangat untuk menghadirkan tata kelola organisasi yang terukur dan efektif.\nNetworking: Semangat berjejaring demi mewujudkan komitmen menjadi wadah kolaborasi bagi seluruh potensi kebaikan.\nInspire: Semangat untuk senantiasa bekerja secara optimal, sehingga perjuangan Insani dapat menginspirasi dunia.",
+                'en' => "Initiative: The drive to be first and foremost in delivering meaningful impact.\nNationalism: The conviction that Insani's humanitarian mission is rooted in the ideals of Indonesian independence.\nSustainability: The profound awareness that achieving social justice is an enduring and sustainable journey.\nAccountability: The commitment to delivering measurable, transparent, and effective organizational governance.\nNetworking: The spirit of forging alliances to serve as an inclusive collaborative platform for all goodness.\nInspire: The dedication to optimal excellence, ensuring Insani's journey inspires the world.",
+                'ar' => "المبادرة: العزيمة لأن نكون في طليعة وصدارة صناعة الأثر النافع.\nالوطنية: الإيمان الراسخ بأن رسالة إنساني الإنسانية تنبع من مبادئ وقيم استقلال إندونيسيا.\nالاستدامة: الوعي العميق بأن إرساء العدالة الاجتماعية مسيرة ممتدة ومستدامة.\nالمساءلة: الالتزام بتقديم حوكمة مؤسسية شفافة وفعالة وقابلة للقياس.\nالتشبيك والتحالف: روح بناء الشراكات لتكون المنصة مظلة تعاون جامعة لكل طاقات الخير.\nالإلهام: التفاني في العمل بأعلى معايير الإتقان لتكون مسيرة إنساني ملهمة للعالم.",
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+
             // Deskripsi Footer Multibahasa
             ['key' => 'footer_description', 'value' => json_encode([
                 'id' => 'Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan universal.',

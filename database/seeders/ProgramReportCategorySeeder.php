@@ -31,7 +31,7 @@ class ProgramReportCategorySeeder extends Seeder
                 'slug' => 'sudah-di-cover-pihak-lain',
                 'sort_order' => 2,
                 'name' => [
-                    'id' => 'Sudah di cover pihak lain (BPJS, Asuransi)',
+                    'id' => 'Sudah ditanggung pihak lain (BPJS / Asuransi)',
                     'en' => 'Already covered by other parties (BPJS, Insurance)',
                     'ar' => 'مغطى بالفعل من قبل أطراف أخرى (التأمين)',
                 ],
@@ -59,7 +59,7 @@ class ProgramReportCategorySeeder extends Seeder
                 'slug' => 'beneficiary-sudah-meninggal',
                 'sort_order' => 4,
                 'name' => [
-                    'id' => 'Beneficiary sudah meninggal',
+                    'id' => 'Penerima manfaat sudah meninggal',
                     'en' => 'Beneficiary has passed away',
                     'ar' => 'المستفيد قد توفي بالفعل',
                 ],
@@ -87,8 +87,8 @@ class ProgramReportCategorySeeder extends Seeder
                 'slug' => 'galang-dana-tidak-relevan',
                 'sort_order' => 6,
                 'name' => [
-                    'id' => 'Galang dana tidak relevan (jokes, terlalu singkat)',
-                    'en' => 'Irrelevant campaign (jokes, too brief)',
+                    'id' => 'Galang dana tidak relevan atau lelucon',
+                    'en' => 'Irrelevant or Joke Campaign',
                     'ar' => 'حملة غير ملائمة (مزاح أو قصيرة جداً)',
                 ],
                 'description' => [
@@ -115,8 +115,8 @@ class ProgramReportCategorySeeder extends Seeder
                 'slug' => 'spamming-cyber-begger',
                 'sort_order' => 8,
                 'name' => [
-                    'id' => 'Spamming (Cyber begger)',
-                    'en' => 'Spamming (Cyber begging)',
+                    'id' => 'Spam dan Mengemis Online',
+                    'en' => 'Spamming and Online Begging',
                     'ar' => 'التسول الإلكتروني أو البريد العشوائي',
                 ],
                 'description' => [
@@ -171,8 +171,8 @@ class ProgramReportCategorySeeder extends Seeder
                 'slug' => 'target-tidak-sesuai-penyakit',
                 'sort_order' => 12,
                 'name' => [
-                    'id' => 'Target tidak sesuai dengan tipe penyakit (target terlalu tinggi)',
-                    'en' => 'Target does not match disease severity (too high)',
+                    'id' => 'Target donasi tidak wajar atau terlalu tinggi',
+                    'en' => 'Unreasonable or Excessive Donation Target',
                     'ar' => 'المبلغ المستهدف لا يتناسب مع طبيعة المرض',
                 ],
                 'description' => [
