@@ -52,6 +52,20 @@ class RoleSeeder extends Seeder
                 'manage_contact_messages',
             ],
 
+            'Content Editor' => [
+                'dashboard.view',
+                'manage_pages',
+                'manage_faqs',
+                'manage_management',
+                'manage_partners',
+                'manage_impact_stats',
+                'manage_banners',
+                'manage_popups',
+                'manage_contact_messages',
+                'manage_blog',
+                'category.view',
+            ],
+
             'Campaigner Individu' => [
                 'program.create', 'program.update-own',
                 'update-post.create',

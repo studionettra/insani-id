@@ -152,9 +152,14 @@ class UserController extends Controller
             'is_active' => true,
         ]);
 
+        $user->forceFill([
+            'email_verified_at' => now(),
+            'must_change_password' => true,
+        ])->save();
+
         $user->assignRole($validated['role']);
 
-        return redirect()->back()->with('success', 'User berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Akun pengelola sistem berhasil ditambahkan. Staf akan diminta membuat kata sandi baru saat pertama kali login.');
     }
 
     /**

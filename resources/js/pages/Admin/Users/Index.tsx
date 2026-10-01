@@ -22,8 +22,10 @@ import {
     FileCheck,
     UserCheck,
     Power,
-    Sparkles,
+    Copy,
+    Check,
 } from 'lucide-react';
+import PasswordInput from '@/components/password-input';
 import { useState, useEffect, useRef } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -232,9 +234,60 @@ export default function UsersIndex({
         (filters.role && filters.role !== 'semua') ||
         Boolean(filters.search);
 
+    const [isPasswordCopied, setIsPasswordCopied] = useState(false);
+    const [isEditPasswordCopied, setIsEditPasswordCopied] = useState(false);
+
+    // Generator Kata Sandi Acak Aman (Memenuhi kriteria Password::defaults())
+    const generateSecureRandomPassword = () => {
+        const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        const lowercase = 'abcdefghjkmnpqrstuvwxyz';
+        const symbols = '!@#$%^&*';
+
+        const randNum = Math.floor(1000 + Math.random() * 9000);
+        const randUpper = uppercase[Math.floor(Math.random() * uppercase.length)];
+        const randLower = lowercase[Math.floor(Math.random() * lowercase.length)];
+        const randSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+        const randExtra = uppercase[Math.floor(Math.random() * uppercase.length)] + lowercase[Math.floor(Math.random() * lowercase.length)];
+
+        return `Insani#${randNum}${randUpper}${randLower}${randSymbol}${randExtra}`;
+    };
+
+    const handleGenerateRandomPassword = () => {
+        const generated = generateSecureRandomPassword();
+        createForm.setData((prev) => ({
+            ...prev,
+            password: generated,
+            password_confirmation: generated,
+        }));
+    };
+
+    const handleCopyPassword = () => {
+        if (!createForm.data.password) return;
+        navigator.clipboard.writeText(createForm.data.password);
+        setIsPasswordCopied(true);
+        setTimeout(() => setIsPasswordCopied(false), 2000);
+    };
+
+    const handleGenerateEditPassword = () => {
+        const generated = generateSecureRandomPassword();
+        editForm.setData((prev) => ({
+            ...prev,
+            password: generated,
+            password_confirmation: generated,
+        }));
+    };
+
+    const handleCopyEditPassword = () => {
+        if (!editForm.data.password) return;
+        navigator.clipboard.writeText(editForm.data.password);
+        setIsEditPasswordCopied(true);
+        setTimeout(() => setIsEditPasswordCopied(false), 2000);
+    };
+
     const openCreateModal = () => {
         createForm.clearErrors();
         createForm.reset();
+        setIsPasswordCopied(false);
         if (internalRoles.length > 0) {
             createForm.setData('role', internalRoles[0]);
         }
@@ -244,6 +297,7 @@ export default function UsersIndex({
     const openEditModal = (user: UserItem) => {
         editForm.clearErrors();
         editForm.reset();
+        setIsEditPasswordCopied(false);
         setEditingUser(user);
         editForm.setData({
             name: user.name,
@@ -499,14 +553,9 @@ export default function UsersIndex({
             {/* Header Utama */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                            Manajemen Pengguna
-                        </h1>
-                        <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                            {users.total} Pengguna
-                        </span>
-                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        Manajemen Pengguna
+                    </h1>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         Kelola data staf pengelola sistem yayasan, mitra lembaga, campaigner individu, dan donatur terdaftar.
                     </p>
@@ -1391,7 +1440,7 @@ export default function UsersIndex({
                                     id="create-name"
                                     value={createForm.data.name}
                                     onChange={(e) => createForm.setData('name', e.target.value)}
-                                    placeholder="Contoh: Ahmad Dahlan"
+                                    placeholder="Contoh: Imam Rama Hermawan"
                                     required
                                     className="border-gray-200 focus-visible:ring-[#1A56DB] dark:border-gray-700 dark:bg-gray-800"
                                 />
@@ -1409,7 +1458,7 @@ export default function UsersIndex({
                                     type="email"
                                     value={createForm.data.email}
                                     onChange={(e) => createForm.setData('email', e.target.value)}
-                                    placeholder="staf@insani.or.id"
+                                    placeholder="staf@insani.id"
                                     required
                                     className="border-gray-200 focus-visible:ring-[#1A56DB] dark:border-gray-700 dark:bg-gray-800"
                                 />
@@ -1459,15 +1508,52 @@ export default function UsersIndex({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label htmlFor="create-password" className="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                    Password
-                                </Label>
-                                <Input
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="create-password" className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                        Password Sementara
+                                    </Label>
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={handleGenerateRandomPassword}
+                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#1A56DB] hover:text-[#1e40af] dark:text-blue-400 dark:hover:text-blue-300 transition-colors group"
+                                            title="Buat kata sandi acak otomatis yang memenuhi seluruh syarat keamanan"
+                                        >
+                                            <RotateCcw className="w-3.5 h-3.5 text-[#1A56DB] dark:text-blue-400 transition-transform duration-300 group-hover:-rotate-90 group-active:-rotate-180" />
+                                            Buat Password Acak
+                                        </button>
+                                        {createForm.data.password && (
+                                            <>
+                                                <span className="text-gray-300 dark:text-gray-600 text-xs">•</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCopyPassword}
+                                                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                                                    title="Salin password ke clipboard"
+                                                >
+                                                    {isPasswordCopied ? (
+                                                        <>
+                                                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                                            <span className="text-emerald-600 font-bold">Tersalin!</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Copy className="w-3.5 h-3.5" />
+                                                            Salin
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <PasswordInput
                                     id="create-password"
-                                    type="password"
+                                    name="password"
+                                    autoComplete="new-password"
                                     value={createForm.data.password}
                                     onChange={(e) => createForm.setData('password', e.target.value)}
-                                    placeholder="Minimal 8 karakter"
+                                    placeholder="Minimal 8 karakter atau klik 'Buat Password Acak'"
                                     required
                                     className="border-gray-200 focus-visible:ring-[#1A56DB] dark:border-gray-700 dark:bg-gray-800"
                                 />
@@ -1481,20 +1567,25 @@ export default function UsersIndex({
 
                             <div className="space-y-1.5">
                                 <Label htmlFor="create-password_confirmation" className="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                    Konfirmasi Password
+                                    Konfirmasi Password Sementara
                                 </Label>
-                                <Input
+                                <PasswordInput
                                     id="create-password_confirmation"
-                                    type="password"
+                                    name="password_confirmation"
+                                    autoComplete="new-password"
                                     value={createForm.data.password_confirmation}
                                     onChange={(e) => createForm.setData('password_confirmation', e.target.value)}
-                                    placeholder="Ulangi password"
+                                    placeholder="Ulangi password sementara"
                                     required
                                     className="border-gray-200 focus-visible:ring-[#1A56DB] dark:border-gray-700 dark:bg-gray-800"
                                 />
                                 {createForm.errors.password_confirmation && (
                                     <p className="text-xs text-red-500 font-medium">{createForm.errors.password_confirmation}</p>
                                 )}
+                            </div>
+
+                            <div className="rounded-lg bg-amber-50/80 dark:bg-amber-950/40 p-3 text-xs text-amber-900 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800 leading-relaxed">
+                                🔒 <span className="font-semibold">Kebijakan Keamanan:</span> Password ini bersifat sementara. Demi menjaga privasi akun, staf akan otomatis diwajibkan membuat password pribadi saat pertama kali masuk ke sistem.
                             </div>
 
                             <div className="rounded-lg bg-blue-50/70 dark:bg-blue-950/40 p-3 text-xs text-blue-900 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800">
@@ -1628,12 +1719,49 @@ export default function UsersIndex({
                             </div>
 
                             <div className="space-y-1.5 pt-2 border-t border-gray-100 dark:border-gray-800">
-                                <Label htmlFor="edit-password" className="text-xs font-semibold text-gray-700 dark:text-gray-200">
-                                    Password Baru (Opsional)
-                                </Label>
-                                <Input
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="edit-password" className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                                        Password Baru (Opsional)
+                                    </Label>
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            type="button"
+                                            onClick={handleGenerateEditPassword}
+                                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#1A56DB] hover:text-[#1e40af] dark:text-blue-400 dark:hover:text-blue-300 transition-colors group"
+                                            title="Buat kata sandi acak otomatis"
+                                        >
+                                            <RotateCcw className="w-3.5 h-3.5 text-[#1A56DB] dark:text-blue-400 transition-transform duration-300 group-hover:-rotate-90 group-active:-rotate-180" />
+                                            Buat Password Acak
+                                        </button>
+                                        {editForm.data.password && (
+                                            <>
+                                                <span className="text-gray-300 dark:text-gray-600 text-xs">•</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCopyEditPassword}
+                                                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                                                    title="Salin password ke clipboard"
+                                                >
+                                                    {isEditPasswordCopied ? (
+                                                        <>
+                                                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                                            <span className="text-emerald-600 font-bold">Tersalin!</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Copy className="w-3.5 h-3.5" />
+                                                            Salin
+                                                        </>
+                                                    )}
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                <PasswordInput
                                     id="edit-password"
-                                    type="password"
+                                    name="password"
+                                    autoComplete="new-password"
                                     value={editForm.data.password}
                                     onChange={(e) => editForm.setData('password', e.target.value)}
                                     placeholder="Kosongkan jika tidak ingin mengubah password"
@@ -1651,9 +1779,10 @@ export default function UsersIndex({
                                 <Label htmlFor="edit-password_confirmation" className="text-xs font-semibold text-gray-700 dark:text-gray-200">
                                     Konfirmasi Password Baru
                                 </Label>
-                                <Input
+                                <PasswordInput
                                     id="edit-password_confirmation"
-                                    type="password"
+                                    name="password_confirmation"
+                                    autoComplete="new-password"
                                     value={editForm.data.password_confirmation}
                                     onChange={(e) => editForm.setData('password_confirmation', e.target.value)}
                                     placeholder="Ulangi password baru"

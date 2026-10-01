@@ -73,9 +73,9 @@ class DonationController extends Controller
 
     public function confirm(Request $request, Donation $donation)
     {
-        // Only authorized staff (Administrator or Keuangan) can confirm manual donations
-        if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga']) || ! auth()->user()->hasAnyRole(['Administrator', 'Keuangan', 'Program Officer'])) {
-            abort(403, 'Hanya tim Keuangan atau Administrator yang berwenang mengonfirmasi donasi manual.');
+        // Only authorized staff with permission donation.confirm-manual or Administrator can confirm manual donations
+        if (auth()->user()->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga']) || (! auth()->user()->can('donation.confirm-manual') && ! auth()->user()->hasRole('Administrator'))) {
+            abort(403, 'Anda tidak memiliki wewenang untuk mengonfirmasi donasi manual.');
         }
 
         if ($donation->status === 'paid' || $donation->channel !== 'offline') {
