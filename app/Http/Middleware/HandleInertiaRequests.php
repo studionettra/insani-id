@@ -28,7 +28,11 @@ class HandleInertiaRequests extends Middleware
      */
     public function version(Request $request): ?string
     {
-        return parent::version($request);
+        if (file_exists(public_path('hot')) || app()->environment('local', 'testing')) {
+            return '';
+        }
+
+        return parent::version($request) ?? '';
     }
 
     /**

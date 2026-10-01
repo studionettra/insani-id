@@ -124,6 +124,9 @@ export function initAnalyticsHeartbeat(): void {
     }, 15000);
 }
 
+let lastTrackedUrl = '';
+let lastTrackedTime = 0;
+
 /**
  * Track virtual pageviews across SPA route changes in Inertia
  */
@@ -131,6 +134,13 @@ export function trackPageView(url: string, title?: string): void {
     if (typeof window === 'undefined') {
         return;
     }
+
+    const now = Date.now();
+    if (url === lastTrackedUrl && now - lastTrackedTime < 1200) {
+        return;
+    }
+    lastTrackedUrl = url;
+    lastTrackedTime = now;
 
     const pageTitle = title || document.title;
     const pageLocation = window.location.href;

@@ -77,4 +77,12 @@ if (typeof window !== 'undefined') {
             trackPageView(url, document.title);
         }
     });
+
+    // Track initial cold pageview on first load
+    const initialPath = window.location.pathname;
+    if (!initialPath.startsWith('/admin') && !initialPath.startsWith('/dashboard') && !initialPath.startsWith('/settings')) {
+        setTimeout(() => {
+            trackPageView(window.location.pathname + window.location.search, document.title);
+        }, 150);
+    }
 }
