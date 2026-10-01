@@ -452,6 +452,9 @@ class AnalyticsService
         $ga4Id = AppSetting::get('google_analytics_id');
         $gtmId = AppSetting::get('google_tag_manager_id');
         $tiktokId = AppSetting::get('tiktok_pixel_id');
+        $metaCapiEnabled = AppSetting::get('meta_capi_enabled') === '1';
+        $metaCapiToken = AppSetting::get('meta_capi_access_token');
+        $metaCapiConfigured = $metaCapiEnabled && ! empty($metaCapiToken) && ! empty($metaPixelId);
 
         return [
             'config' => [
@@ -460,6 +463,8 @@ class AnalyticsService
                 'google_tag_manager_id' => $gtmId,
                 'tiktok_pixel_id' => $tiktokId,
                 'has_pixel_configured' => ! empty($metaPixelId) || ! empty($ga4Id),
+                'meta_capi_enabled' => $metaCapiEnabled,
+                'meta_capi_configured' => $metaCapiConfigured,
             ],
             'summary_counts' => [
                 'PageView' => $eventCounts['PageView'] ?? 0,

@@ -101,6 +101,8 @@ test('events endpoint returns meta pixel diagnostics json', function () {
                 'google_tag_manager_id',
                 'tiktok_pixel_id',
                 'has_pixel_configured',
+                'meta_capi_enabled',
+                'meta_capi_configured',
             ],
             'summary_counts',
             'recent_events',

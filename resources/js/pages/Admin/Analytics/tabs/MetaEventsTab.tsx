@@ -29,6 +29,8 @@ export interface MetaEventsData {
         google_tag_manager_id: string | null;
         tiktok_pixel_id: string | null;
         has_pixel_configured: boolean;
+        meta_capi_enabled?: boolean;
+        meta_capi_configured?: boolean;
     };
     summary_counts: {
         PageView: number;
@@ -90,22 +92,32 @@ export default function MetaEventsTab({ data }: Props) {
                         <Target className="w-6 h-6" />
                     </div>
                     <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="font-bold text-gray-900 dark:text-white text-base">
                                 Diagnostik & Event Stream Meta Pixel
                             </h3>
                             {data.config.meta_pixel_id ? (
                                 <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300 flex items-center gap-1 text-[11px]">
-                                    <CheckCircle className="w-3 h-3" /> Aktif
+                                    <CheckCircle className="w-3 h-3" /> Pixel Browser Aktif
                                 </Badge>
                             ) : (
                                 <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-[11px]">
-                                    ID Belum Diatur
+                                    Pixel Belum Diatur
                                 </Badge>
                             )}
+
+                            {data.config.meta_capi_configured ? (
+                                <Badge className="bg-purple-100 text-purple-800 border-purple-300 flex items-center gap-1 text-[11px]">
+                                    <CheckCircle className="w-3 h-3" /> CAPI Server Aktif
+                                </Badge>
+                            ) : data.config.meta_capi_enabled ? (
+                                <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-[11px]">
+                                    Token CAPI Belum Diisi
+                                </Badge>
+                            ) : null}
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Memantau kesehatan pengiriman sinyal konversi ke Facebook Ads, Instagram Ads, dan Google Analytics.
+                            Memantau kesehatan pengiriman sinyal konversi ke Facebook Ads, Instagram Ads (Browser & Server CAPI), dan Google Analytics.
                         </p>
                     </div>
                 </div>
@@ -118,16 +130,16 @@ export default function MetaEventsTab({ data }: Props) {
                         </span>
                     </div>
                     <div className="px-3 py-1.5 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700">
-                        <span className="text-gray-400 block text-[10px]">Google Analytics ID</span>
-                        <span className="font-mono font-semibold text-gray-800 dark:text-gray-200">
-                            {data.config.google_analytics_id || 'Tidak Terpasang'}
+                        <span className="text-gray-400 block text-[10px]">Meta CAPI Server</span>
+                        <span className={`font-semibold ${data.config.meta_capi_configured ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500'}`}>
+                            {data.config.meta_capi_configured ? 'Aktif (Kebal AdBlock)' : (data.config.meta_capi_enabled ? 'Token Kosong' : 'Nonaktif')}
                         </span>
                     </div>
                     <a
                         href="/admin/site-settings"
                         className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center gap-1.5"
                     >
-                        <span>Atur ID Pixel</span>
+                        <span>Pengaturan Integrasi</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                 </div>
@@ -225,9 +237,19 @@ export default function MetaEventsTab({ data }: Props) {
                                                 {!evt.payload && '-'}
                                             </td>
                                             <td className="py-2.5 whitespace-nowrap">
-                                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-                                                    <CheckCircle className="w-3 h-3" /> Dispatched
-                                                </span>
+                                                {evt.meta_status === 'capi_sent' ? (
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 dark:bg-purple-950/50 dark:text-purple-300 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
+                                                        <CheckCircle className="w-3 h-3 text-purple-600" /> Server CAPI
+                                                    </span>
+                                                ) : evt.meta_status === 'capi_failed' || evt.meta_status === 'capi_error' ? (
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 dark:bg-rose-950/50 dark:text-rose-300 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800">
+                                                        <AlertCircle className="w-3 h-3 text-rose-600" /> CAPI Gagal
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
+                                                        <CheckCircle className="w-3 h-3" /> Browser Sinyal
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="py-2.5 text-right whitespace-nowrap">
                                                 <Button

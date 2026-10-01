@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Jobs\SendDonationPaidNotification;
+use App\Jobs\SendMetaCapiPurchaseEvent;
 use App\Models\Comment;
 use App\Models\Donation;
 use App\Models\Fundraiser;
@@ -91,6 +92,9 @@ class PaymentObserver
 
             // Dispatch notification job to queue after the transaction commits
             SendDonationPaidNotification::dispatch($donation)->afterCommit();
+
+            // Dispatch Meta Conversions API (CAPI) server event if configured
+            SendMetaCapiPurchaseEvent::dispatch($donation)->afterCommit();
         }
 
         if (in_array($gatewayStatus, ['EXPIRED', 'FAILED'])) {
