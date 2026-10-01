@@ -1,6 +1,6 @@
-import { useForm, Head, usePage } from '@inertiajs/react';
+import { useForm, Head, usePage, Link } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { ArrowRight, Lock, LoaderCircle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Lock, LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,6 +85,16 @@ export default function ConfirmPassword() {
                             Konfirmasi Password
                             {!processing && <ArrowRight className="ml-2 h-4 w-4" />}
                         </Button>
+
+                        <div className="mt-4 text-center">
+                            <Link
+                                href="/dashboard"
+                                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors py-2 px-3 rounded-lg hover:bg-gray-50"
+                            >
+                                <ArrowLeft className="w-4 h-4" />
+                                Batal & Kembali ke Dashboard
+                            </Link>
+                        </div>
                     </form>
                 </div>
             </div>

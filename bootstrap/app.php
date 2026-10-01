@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\EnsureCampaignerVerified;
+use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoCache;
@@ -46,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'localeCookieRedirect' => LocaleCookieRedirect::class,
             'localeViewPath' => LaravelLocalizationViewPath::class,
             'campaigner.verified' => EnsureCampaignerVerified::class,
+            'force.password.change' => EnsurePasswordIsChanged::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,

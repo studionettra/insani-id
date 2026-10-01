@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -65,4 +67,11 @@ test('password confirmation fails with incorrect password', function () {
     ]);
 
     $response->assertSessionHasErrors('password');
+});
+
+test('inertia version returns null in local and testing environment to avoid 409 conflict', function () {
+    $middleware = new HandleInertiaRequests;
+    $request = Request::create('/');
+
+    expect($middleware->version($request))->toBeNull();
 });

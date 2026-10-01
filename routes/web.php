@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\TranslationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Api\AnalyticsCollectorController;
 use App\Http\Controllers\Api\ImageUploadController;
+use App\Http\Controllers\Auth\ForcePasswordChangeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Public\AboutController;
@@ -195,7 +196,12 @@ Route::post('/analytics/heartbeat', [AnalyticsCollectorController::class, 'heart
     ->middleware('throttle:60,1')
     ->name('analytics.heartbeat');
 
-Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
+Route::middleware(['auth', 'no-cache'])->group(function () {
+    Route::get('/force-password-change', [ForcePasswordChangeController::class, 'show'])->name('password.force-change');
+    Route::post('/force-password-change', [ForcePasswordChangeController::class, 'update'])->name('password.force-change.update');
+});
+
+Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Notifications
@@ -222,7 +228,7 @@ Route::middleware(['auth', 'verified', 'no-cache'])->group(function () {
     Route::post('/program/{program:slug}/fundraiser', [FundraiserController::class, 'store'])->name('program.fundraiser.store');
     Route::get('/akun/fundraiser', [FundraiserController::class, 'myFundraisers'])->name('akun.fundraiser.index');
 
-    Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service|Content Editor')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('role:Administrator|Program Officer|Verifikator|Keuangan|Customer Service|Content Editor|Eksekutif')->group(function () {
         Route::get('/', fn () => redirect()->route('dashboard'))->name('dashboard');
         Route::post('/auto-translate', [TranslationController::class, 'translate'])->name('auto-translate');
 
