@@ -194,7 +194,7 @@ test('it marks program completed when target amount is reached', function () {
         ->and($program->status)->toBe('completed');
 });
 
-test('it handles anonymous donations by creating comment under Hamba Allah', function () {
+test('it handles anonymous donations by creating comment under Inisiator Kebaikan', function () {
     Queue::fake();
 
     $program = Program::factory()->create();
@@ -228,7 +228,7 @@ test('it handles anonymous donations by creating comment under Hamba Allah', fun
 
     $comment = Comment::where('donation_id', $donation->id)->first();
     expect($comment)->not->toBeNull()
-        ->and($comment->name)->toBe('Hamba Allah')
+        ->and($comment->name)->toBe('Inisiator Kebaikan')
         ->and($comment->body)->toBe('Doa terbaik untuk semua');
 });
 

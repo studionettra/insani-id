@@ -2,7 +2,6 @@ import { Head, useForm, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Save, FileText, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
@@ -128,14 +127,6 @@ export default function PagesEdit({ page }: any) {
                 <form onSubmit={submit} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     {/* Main Content (8 cols) */}
                     <div className="lg:col-span-8 flex flex-col gap-6">
-                        <AutoTranslateBar
-                            activeLocale={contentLocale}
-                            onLocaleChange={setContentLocale}
-                            onAutoTranslate={handleAutoTranslate}
-                            isTranslating={isTranslating}
-                            hasTranslations={Boolean(hasEn && hasAr)}
-                        />
-
                         {/* Kolom Informasi Dasar */}
                         <div className="flex flex-col gap-4 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
                             <h3 className="font-semibold text-lg text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-3">
@@ -238,6 +229,8 @@ export default function PagesEdit({ page }: any) {
                             hasAr={hasAr}
                             onTranslate={handleAutoTranslate}
                             isTranslating={isTranslating}
+                            activeLocale={contentLocale}
+                            onLocaleChange={setContentLocale}
                             description="Status kesiapan konten halaman statis dalam 3 bahasa."
                         />
 

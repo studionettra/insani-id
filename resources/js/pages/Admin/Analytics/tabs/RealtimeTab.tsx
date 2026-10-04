@@ -1,6 +1,6 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
-import { Activity, Eye, Radio, Sparkles, Smartphone, Monitor } from 'lucide-react';
+import { Activity, Eye, Radio, ShieldCheck, Smartphone, Monitor } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ActivePage {
@@ -125,7 +125,7 @@ export default function RealtimeTab({ data, onRefresh, isRefreshing }: Props) {
                     <div className="mt-6 pt-4 border-t border-white/20 text-xs text-emerald-100 flex items-center justify-between">
                         <span>Pembaruan otomatis tiap 10 detik</span>
                         <span className="flex items-center gap-1">
-                            <Sparkles className="w-3.5 h-3.5" /> First-Party Tracker
+                            <ShieldCheck className="w-3.5 h-3.5" /> First-Party Tracker
                         </span>
                     </div>
                 </div>

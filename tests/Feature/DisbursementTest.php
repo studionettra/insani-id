@@ -262,7 +262,7 @@ test('admin keuangan can approve and transfer disbursement', function () {
     $this->assertEquals($admin->id, $disbursement->fresh()->approved_by);
 
     // Test Transfer
-    Storage::fake('public');
+    Storage::fake('local');
     $file = UploadedFile::fake()->image('proof.jpg');
 
     $response2 = $this->actingAs($admin)
@@ -274,6 +274,7 @@ test('admin keuangan can approve and transfer disbursement', function () {
     $response2->assertRedirect();
     $this->assertEquals('transferred', $disbursement->fresh()->status);
     $this->assertNotNull($disbursement->fresh()->transfer_proof);
+    Storage::disk('local')->assertExists($disbursement->fresh()->transfer_proof);
     $this->assertNotNull($disbursement->fresh()->receipt_number);
     $this->assertStringStartsWith('KW-DISB-', $disbursement->fresh()->receipt_number);
 });
@@ -458,7 +459,7 @@ test('cannot transfer disbursement if its status is not approved', function () {
         'status' => 'pending',
     ]);
 
-    Storage::fake('public');
+    Storage::fake('local');
     $file = UploadedFile::fake()->image('proof.jpg');
 
     $response = $this->actingAs($admin)

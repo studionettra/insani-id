@@ -1,15 +1,14 @@
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Upload, X, Calendar, Sparkles, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Upload, X, Calendar, ExternalLink, CaseSensitive, RotateCcw } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { getLocalizedValue } from '@/lib/utils';
+import { getLocalizedValue, toTitleCase } from '@/lib/utils';
 
 interface BlogEditProps {
     blog: any;
@@ -123,6 +122,28 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
             .replace(/^-+|-+$/g, '');
     };
 
+    const handleFormatTitleCase = () => {
+        const current = titles[contentLocale] || '';
+        if (!current.trim() || contentLocale === 'ar') return;
+        const formatted = toTitleCase(current, contentLocale);
+        setTitles(prev => ({ ...prev, [contentLocale]: formatted }));
+        if (contentLocale === 'id' && !data.slug) {
+            setData('slug', slugify(formatted));
+        }
+    };
+
+    const handleTitleBlur = () => {
+        const current = titles[contentLocale] || '';
+        if (!current.trim() || contentLocale === 'ar') return;
+        const formatted = toTitleCase(current, contentLocale);
+        if (formatted !== current) {
+            setTitles(prev => ({ ...prev, [contentLocale]: formatted }));
+            if (contentLocale === 'id' && !data.slug) {
+                setData('slug', slugify(formatted));
+            }
+        }
+    };
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         if (file) {
@@ -138,10 +159,16 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const formattedTitles = {
+            id: toTitleCase(titles.id || '', 'id'),
+            en: toTitleCase(titles.en || '', 'en'),
+            ar: titles.ar || '',
+        };
+
         router.post(`/admin/blogs/${blog.id}`, {
             ...data,
             _method: 'put',
-            title: titles,
+            title: formattedTitles,
             excerpt: excerpts,
             content_html: contents,
         });
@@ -196,30 +223,78 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
-                    <div className="lg:col-span-12">
-                        <AutoTranslateBar
-                            activeLocale={contentLocale}
-                            onLocaleChange={setContentLocale}
-                            onAutoTranslate={handleAutoTranslate}
-                            isTranslating={isTranslating}
-                            hasTranslations={Boolean(titles.en && titles.ar)}
-                        />
-                    </div>
-
                     {/* Main Column (8 cols) */}
                     <div className="lg:col-span-8 flex flex-col gap-6">
                         
                         {/* Title & Slug Card */}
                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col gap-4">
+                            {/* Language Switcher Tabs */}
+                            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        Bahasa Naskah:
+                                    </span>
+                                    <p className="text-[11px] text-slate-400">
+                                        Pilih bahasa untuk menyunting judul, ringkasan, dan isi berita
+                                    </p>
+                                </div>
+                                <div className="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-800 text-xs">
+                                    <button
+                                        type="button"
+                                        onClick={() => setContentLocale('id')}
+                                        className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                                            contentLocale === 'id'
+                                                ? 'bg-insani-blue text-white shadow-xs'
+                                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                    >
+                                        🇮🇩 Indonesia
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setContentLocale('en')}
+                                        className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                                            contentLocale === 'en'
+                                                ? 'bg-insani-blue text-white shadow-xs'
+                                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                    >
+                                        🇬🇧 English
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setContentLocale('ar')}
+                                        className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                                            contentLocale === 'ar'
+                                                ? 'bg-insani-blue text-white shadow-xs'
+                                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                    >
+                                        🇸🇦 العربية
+                                    </button>
+                                </div>
+                            </div>
                             <div dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
-                                <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center justify-between">
-                                    <span>Judul Berita ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span></span>
-                                    {contentLocale !== 'id' && (
-                                        <span className="text-[11px] text-slate-400 font-normal lowercase">
-                                            bisa diedit manual atau digenerate otomatis
-                                        </span>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                        <span>Judul Berita ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span></span>
+                                        {contentLocale !== 'id' && (
+                                            <span className="text-[11px] text-slate-400 font-normal lowercase">
+                                                (opsional)
+                                            </span>
+                                        )}
+                                    </Label>
+                                    {contentLocale !== 'ar' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleFormatTitleCase}
+                                            className="text-[11px] text-insani-blue hover:underline flex items-center gap-1 font-medium transition-colors"
+                                            title="Kapitalkan setiap kata sesuai kaidah EYD/Title Case"
+                                        >
+                                            <CaseSensitive className="w-3.5 h-3.5" /> Format Title Case
+                                        </button>
                                     )}
-                                </Label>
+                                </div>
                                 <Input
                                     id="title"
                                     type="text"
@@ -231,10 +306,22 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
                                             setData('slug', slugify(val));
                                         }
                                     }}
+                                    onBlur={handleTitleBlur}
                                     placeholder={contentLocale === 'id' ? 'Masukkan judul artikel berita...' : `Judul berita (${contentLocale.toUpperCase()})...`}
                                     className="mt-1.5 text-lg font-semibold h-12"
                                     required={contentLocale === 'id'}
                                 />
+                                {titles[contentLocale]?.trim() && contentLocale !== 'ar' && (
+                                    <div className="mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-insani-blue/10 text-insani-blue tracking-wider shrink-0 uppercase">
+                                            <CaseSensitive className="w-3 h-3" />
+                                            Pratinjau EYD
+                                        </span>
+                                        <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                                            {toTitleCase(titles[contentLocale], contentLocale)}
+                                        </span>
+                                    </div>
+                                )}
                                 {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
                             </div>
 
@@ -248,7 +335,7 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
                                         onClick={() => setData('slug', slugify(titles.id || ''))}
                                         className="text-[11px] text-insani-blue hover:underline flex items-center gap-1"
                                     >
-                                        <Sparkles className="w-3 h-3" /> Sinkronkan dengan judul
+                                        <RotateCcw className="w-3.5 h-3.5" /> Sinkronkan dengan judul
                                     </button>
                                 </div>
                                 <div className="mt-1 flex rounded-lg shadow-xs">
@@ -270,7 +357,7 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
 
                             <div dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
                                 <Label htmlFor="excerpt" className="text-xs font-semibold text-slate-500">
-                                    Ringkasan / Excerpt ({contentLocale.toUpperCase()}) (Opsional)
+                                    Ringkasan ({contentLocale.toUpperCase()}) (Opsional)
                                 </Label>
                                 <Textarea
                                     id="excerpt"
@@ -315,6 +402,8 @@ export default function BlogEdit({ blog, categories = [] }: BlogEditProps) {
                             hasAr={Boolean(titles.ar && (excerpts.ar || contents.ar))}
                             onTranslate={handleAutoTranslate}
                             isTranslating={isTranslating}
+                            activeLocale={contentLocale}
+                            onLocaleChange={setContentLocale}
                             description="Status kesiapan judul, ringkasan, dan isi naskah artikel berita dalam 3 bahasa."
                         />
 

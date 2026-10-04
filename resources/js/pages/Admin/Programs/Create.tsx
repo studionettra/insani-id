@@ -1,15 +1,14 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, CaseSensitive, ShieldCheck } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import AutoTranslateBar from '@/components/admin/AutoTranslateBar';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getLocalizedValue } from '@/lib/utils';
+import { getLocalizedValue, toTitleCase } from '@/lib/utils';
 
 interface Category {
     id: number;
@@ -98,11 +97,33 @@ export default function ProgramCreate({ categories }: Props) {
         }
     };
 
+    const handleFormatTitleCase = () => {
+        const current = titles[contentLocale] || '';
+        if (!current.trim() || contentLocale === 'ar') return;
+        const formatted = toTitleCase(current, contentLocale);
+        setTitles(prev => ({ ...prev, [contentLocale]: formatted }));
+    };
+
+    const handleTitleBlur = () => {
+        const current = titles[contentLocale] || '';
+        if (!current.trim() || contentLocale === 'ar') return;
+        const formatted = toTitleCase(current, contentLocale);
+        if (formatted !== current) {
+            setTitles(prev => ({ ...prev, [contentLocale]: formatted }));
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const formattedTitles = {
+            id: toTitleCase(titles.id || '', 'id'),
+            en: toTitleCase(titles.en || '', 'en'),
+            ar: titles.ar || '',
+        };
+
         router.post('/admin/programs', {
             ...data,
-            title: titles,
+            title: formattedTitles,
             story: stories,
         }, {
             forceFormData: true,
@@ -137,49 +158,144 @@ export default function ProgramCreate({ categories }: Props) {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     <div className="lg:col-span-8 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">
-                                Informasi Program Utama
-                            </h3>
+                        <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-3.5 px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">
+                                    Informasi Program Utama
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    Pilih bahasa untuk menyunting judul dan cerita program.
+                                </p>
+                            </div>
+                            <div className="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-800 text-xs shrink-0 self-start sm:self-auto">
+                                <button
+                                    type="button"
+                                    onClick={() => setContentLocale('id')}
+                                    className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                                        contentLocale === 'id'
+                                            ? 'bg-[#1A56DB] text-white shadow-xs'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    🇮🇩 Indonesia
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setContentLocale('en')}
+                                    className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                                        contentLocale === 'en'
+                                            ? 'bg-[#1A56DB] text-white shadow-xs'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    🇬🇧 English
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setContentLocale('ar')}
+                                    className={`px-3 py-1 font-semibold rounded-lg transition-all ${
+                                        contentLocale === 'ar'
+                                            ? 'bg-[#1A56DB] text-white shadow-xs'
+                                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                                    }`}
+                                >
+                                    🇸🇦 العربية
+                                </button>
+                            </div>
                         </div>
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                        <Alert className="bg-blue-50/50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border-blue-200/60 dark:border-blue-900 mb-6">
-                            <AlertDescription>
-                                Program yang dibuat oleh Admin/Program Officer akan langsung berstatus <strong>Aktif</strong> tanpa melalui antrian verifikasi.
+                        <Alert
+                            className={`border-blue-200/80 bg-blue-50/60 dark:border-blue-900/60 dark:bg-blue-950/25 text-blue-900 dark:text-blue-200 mb-6 rounded-xl transition-all duration-200 shadow-2xs ${
+                                contentLocale === 'ar' ? 'text-right' : 'text-left'
+                            }`}
+                            dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}
+                        >
+                            <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                            <AlertTitle className="text-xs font-semibold text-blue-950 dark:text-blue-100 tracking-wide uppercase">
+                                {contentLocale === 'id' && 'Publikasi Langsung'}
+                                {contentLocale === 'en' && 'Instant Publication'}
+                                {contentLocale === 'ar' && 'نشر فوري'}
+                            </AlertTitle>
+                            <AlertDescription className="text-xs text-blue-800/90 dark:text-blue-300/90">
+                                <p className="leading-relaxed">
+                                    {contentLocale === 'id' && (
+                                        <>
+                                            Program yang dibuat oleh Admin/Program Officer akan langsung berstatus{' '}
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 mx-1 align-baseline shadow-2xs">
+                                                Aktif
+                                            </span>{' '}
+                                            tanpa melalui antrean verifikasi.
+                                        </>
+                                    )}
+                                    {contentLocale === 'en' && (
+                                        <>
+                                            Programs created by Admin/Program Officer will be directly published with status{' '}
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 mx-1 align-baseline shadow-2xs">
+                                                Active
+                                            </span>{' '}
+                                            without passing through the verification queue.
+                                        </>
+                                    )}
+                                    {contentLocale === 'ar' && (
+                                        <>
+                                            البرامج المنشأة بواسطة المشرف أو مسؤول البرامج ستحصل مباشرة على حالة{' '}
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60 mx-1 align-baseline shadow-2xs">
+                                                نشط
+                                            </span>{' '}
+                                            دون الحاجة للانتظار في طابور المراجعة والتحقق.
+                                        </>
+                                    )}
+                                </p>
                             </AlertDescription>
                         </Alert>
-
-                        <AutoTranslateBar
-                            activeLocale={contentLocale}
-                            onLocaleChange={setContentLocale}
-                            onAutoTranslate={handleAutoTranslate}
-                            isTranslating={isTranslating}
-                            hasTranslations={Boolean(titles.en && titles.ar)}
-                        />
 
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             {/* Judul Program */}
                             <div className="md:col-span-2 space-y-1.5" dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
-                                <Label htmlFor="title" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
-                                    <span>
-                                        Judul Program ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
-                                    </span>
-                                    {contentLocale !== 'id' && (
-                                        <span className="text-[11px] text-slate-400 font-normal">
-                                            Dapat diedit manual atau digenerate otomatis
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="title" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                                        <span>
+                                            Judul Program ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
                                         </span>
+                                        {contentLocale !== 'id' && (
+                                            <span className="text-[11px] text-slate-400 font-normal">
+                                                (opsional / terjemahan)
+                                            </span>
+                                        )}
+                                    </Label>
+                                    {contentLocale !== 'ar' && (
+                                        <button
+                                            type="button"
+                                            onClick={handleFormatTitleCase}
+                                            className="text-[11px] text-[#1A56DB] hover:underline flex items-center gap-1 font-medium transition-colors"
+                                            title="Kapitalkan setiap kata sesuai kaidah EYD/Title Case"
+                                        >
+                                            <CaseSensitive className="w-3.5 h-3.5" /> Format Title Case
+                                        </button>
                                     )}
-                                </Label>
+                                </div>
                                 <Input
                                     id="title"
                                     type="text"
                                     placeholder={contentLocale === 'id' ? 'Contoh: Bantuan Sembako untuk Lansia Dhuafa' : `Judul Program (${contentLocale.toUpperCase()})`}
                                     value={titles[contentLocale] || ''}
                                     onChange={(e) => setTitles(prev => ({ ...prev, [contentLocale]: e.target.value }))}
+                                    onBlur={handleTitleBlur}
                                     className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB]"
                                     required={contentLocale === 'id'}
                                 />
+                                {titles[contentLocale]?.trim() && contentLocale !== 'ar' && (
+                                    <div className="mt-2 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#1A56DB]/10 text-[#1A56DB] tracking-wider shrink-0 uppercase">
+                                            <CaseSensitive className="w-3 h-3" />
+                                            Pratinjau EYD
+                                        </span>
+                                        <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                                            {toTitleCase(titles[contentLocale], contentLocale)}
+                                        </span>
+                                    </div>
+                                )}
                                 {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
                             </div>
 

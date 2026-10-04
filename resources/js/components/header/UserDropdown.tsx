@@ -2,7 +2,7 @@ import { Link, usePage, router } from "@inertiajs/react";
 import { 
   Shield, 
   Briefcase, 
-  Sparkles, 
+  HandHelping, 
   UserCheck, 
   Globe, 
   ExternalLink, 
@@ -113,7 +113,7 @@ export default function UserDropdown() {
     if (isFundraiser) {
       return (
         <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-teal-700 bg-teal-50 rounded-md border border-teal-200/60 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60">
-          <Sparkles className="w-2.5 h-2.5" /> Fundraiser
+          <HandHelping className="w-2.5 h-2.5" /> Fundraiser
         </span>
       );
     }

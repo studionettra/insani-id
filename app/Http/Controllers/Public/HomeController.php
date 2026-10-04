@@ -30,6 +30,7 @@ class HomeController extends Controller
         $focusPrograms = Category::where('is_focus_program', true)
             ->where('is_active', true)
             ->orderBy('sort_order')
+            ->take(6)
             ->get()
             ->map(function ($cat) {
                 $cat->name_translations = $cat->getTranslations('name');

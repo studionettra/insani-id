@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Search, Sparkles, Users, Heart, ExternalLink } from 'lucide-react';
+import { Search, Users, Heart, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
+import { UserGroup } from '@/components/icons/user-group';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,49 +43,79 @@ export default function AdminFundraisersIndex({ fundraisers, stats, filters }: a
 
                 {/* Summary Metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
-                        <CardContent className="p-5 flex items-center justify-between">
-                            <div>
-                                <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider">
+                    {/* Card 1: Total Fundraiser */}
+                    <Card className="border border-slate-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-2xl shadow-xs hover:shadow-sm transition-all">
+                        <CardContent className="p-5 flex items-start justify-between gap-3">
+                            <div className="space-y-1.5 min-w-0">
+                                <span className="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">
                                     Total Fundraiser
                                 </span>
-                                <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">
-                                    {stats.totalFundraisers} <span className="text-sm font-normal text-slate-500">relawan</span>
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                    <span className="text-2xl sm:text-3xl font-black tracking-tight text-purple-600 dark:text-purple-400">
+                                        {Number(stats.totalFundraisers || 0).toLocaleString('id-ID')}
+                                    </span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60">
+                                        Relawan
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-1.5 pt-0.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                                    Relawan aktif terdaftar
                                 </p>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                                <Sparkles className="w-6 h-6" />
+                            <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-100 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 shadow-2xs">
+                                <UserGroup className="w-6 h-6" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
-                        <CardContent className="p-5 flex items-center justify-between">
-                            <div>
-                                <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider">
+                    {/* Card 2: Total Dihimpun Relawan */}
+                    <Card className="border border-slate-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-2xl shadow-xs hover:shadow-sm transition-all">
+                        <CardContent className="p-5 flex items-start justify-between gap-3">
+                            <div className="space-y-1.5 min-w-0">
+                                <span className="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">
                                     Total Dihimpun Relawan
                                 </span>
-                                <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                                    {formatCurrency(stats.totalCollected)}
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                    <span className="text-2xl sm:text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">
+                                        {formatCurrency(stats.totalCollected)}
+                                    </span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60">
+                                        Terkumpul
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-1.5 pt-0.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                    Akumulasi donasi lewat relawan
                                 </p>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-2xs">
                                 <Heart className="w-6 h-6" />
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs">
-                        <CardContent className="p-5 flex items-center justify-between">
-                            <div>
-                                <span className="text-xs font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider">
+                    {/* Card 3: Total Donatur Diajak */}
+                    <Card className="border border-slate-200/80 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-2xl shadow-xs hover:shadow-sm transition-all">
+                        <CardContent className="p-5 flex items-start justify-between gap-3">
+                            <div className="space-y-1.5 min-w-0">
+                                <span className="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">
                                     Total Donatur Diajak
                                 </span>
-                                <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">
-                                    {stats.totalDonors} <span className="text-sm font-normal text-slate-500">donatur</span>
+                                <div className="flex items-baseline gap-2 flex-wrap">
+                                    <span className="text-2xl sm:text-3xl font-black tracking-tight text-blue-600 dark:text-blue-400">
+                                        {Number(stats.totalDonors || 0).toLocaleString('id-ID')}
+                                    </span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
+                                        Donatur
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-500 dark:text-gray-400 flex items-center gap-1.5 pt-0.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                                    Donatur berpartisipasi
                                 </p>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
                                 <Users className="w-6 h-6" />
                             </div>
                         </CardContent>

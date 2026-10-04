@@ -218,7 +218,7 @@ export default function Show({ disbursement }: any) {
                                     <div className="pt-3 border-t border-gray-100">
                                         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Dokumen Pendukung (RAB / Proposal)</h4>
                                         <a
-                                            href={`/storage/${disbursement.supporting_document}`}
+                                            href={`/admin/disbursements/${disbursement.id}/supporting-document`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100 text-xs font-medium text-gray-700 transition-colors"
@@ -256,7 +256,7 @@ export default function Show({ disbursement }: any) {
                                 <div className="border-b border-gray-100 bg-gray-50/50 py-3.5 px-6 flex items-center justify-between">
                                     <h3 className="font-semibold text-gray-900 text-sm">Bukti Transfer Resmi</h3>
                                     <a
-                                        href={`/storage/${disbursement.transfer_proof}`}
+                                        href={`/admin/disbursements/${disbursement.id}/proof`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-xs text-blue-600 hover:underline flex items-center gap-1"
@@ -265,7 +265,7 @@ export default function Show({ disbursement }: any) {
                                     </a>
                                 </div>
                                 <div className="p-6 flex flex-col items-center">
-                                    <img src={`/storage/${disbursement.transfer_proof}`} alt="Bukti Transfer" className="rounded-lg border border-gray-200 max-w-full h-auto max-h-[420px] object-contain shadow-sm" />
+                                    <img src={`/admin/disbursements/${disbursement.id}/proof`} alt="Bukti Transfer" className="rounded-lg border border-gray-200 max-w-full h-auto max-h-[420px] object-contain shadow-sm" />
                                     <p className="text-xs text-gray-500 mt-2">
                                         Ditransfer pada {disbursement.transferred_at ? formatDate(disbursement.transferred_at) : '-'}
                                     </p>

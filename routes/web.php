@@ -52,8 +52,10 @@ use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PageController as PublicPageController;
 use App\Http\Controllers\Public\ProgramListingController;
 use App\Http\Controllers\Public\ProgramReportController as PublicProgramReportController;
+use App\Http\Controllers\Public\PublicCampaignerProfileController;
 use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\SitemapController;
+use App\Http\Controllers\Webhook\MidtransWebhookController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use App\Models\AppSetting;
 use Illuminate\Support\Facades\Route;
@@ -72,9 +74,17 @@ Route::group([
     Route::post('/program/{program:slug}/donasi', [DonationController::class, 'store'])
         ->middleware('throttle:15,1')
         ->name('donation.store');
-    Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])->name('donation.status');
+    Route::get('/donasi/status/{donationCode}', [DonationController::class, 'status'])
+        ->middleware('throttle:60,1')
+        ->name('donation.status');
+    Route::post('/donasi/{donationCode}/batal', [DonationController::class, 'cancel'])
+        ->middleware('throttle:15,1')
+        ->name('donation.cancel');
+    Route::get('/donasi/{donation}/proof', [DonationController::class, 'viewProof'])->middleware('signed')->name('donation.proof');
     Route::get('/donasi/kwitansi/{donationCode}', [DonationReceiptController::class, 'show'])->name('donation.receipt');
-    Route::get('/cek-donasi', [DonationController::class, 'lookup'])->name('donation.lookup');
+    Route::get('/cek-donasi', [DonationController::class, 'lookup'])
+        ->middleware('throttle:30,1')
+        ->name('donation.lookup');
     Route::get('/program/{slug}/lapor', [PublicProgramReportController::class, 'create'])->name('program.report.create');
     Route::post('/program/{slug}/lapor', [PublicProgramReportController::class, 'store'])
         ->middleware('throttle:5,1')
@@ -140,6 +150,10 @@ Route::group([
     })->name('campaigner.index');
 
     Route::get('/campaigners', fn () => redirect()->route('campaigner.index'));
+    Route::get('/campaigner/{campaignerProfile}', [PublicCampaignerProfileController::class, 'show'])
+        ->whereNumber('campaignerProfile')
+        ->name('campaigner.profile');
+    Route::get('/penggalang/{campaignerProfile}', fn ($campaignerProfile) => redirect()->route('campaigner.profile', $campaignerProfile));
 
     // Static Legal & Help Pages (Clean URL Aliases)
     Route::get('/pusat-bantuan', [PublicPageController::class, 'pusatBantuan'])->name('page.pusat-bantuan');
@@ -147,6 +161,8 @@ Route::group([
     Route::get('/syarat-ketentuan', [PublicPageController::class, 'syaratKetentuan'])->name('page.syarat-ketentuan');
     Route::get('/kebijakan-privasi', [PublicPageController::class, 'kebijakanPrivasi'])->name('page.kebijakan-privasi');
     Route::get('/cara-donasi', [PublicPageController::class, 'caraDonasi'])->name('page.cara-donasi');
+    Route::get('/logo', [PublicPageController::class, 'logoGuideline'])->name('page.logo');
+    Route::get('/panduan-logo', fn () => redirect()->route('page.logo'));
 
     // Dynamic Public Pages (Catch-all inside locale)
     Route::get('/halaman/{slug}', [PublicPageController::class, 'show'])->name('page.show');
@@ -185,8 +201,11 @@ Route::get('/api/public/search', [SearchController::class, 'search'])
 
 // Webhooks
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle'])
-    ->middleware('verify.xendit-callback-token')
+    ->middleware(['throttle:120,1', 'verify.xendit-callback-token'])
     ->name('webhooks.xendit');
+Route::post('/webhooks/midtrans', [MidtransWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1')
+    ->name('webhooks.midtrans');
 
 // First-Party Analytics Collector
 Route::post('/analytics/collect', [AnalyticsCollectorController::class, 'collect'])
@@ -290,9 +309,11 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::resource('blogs', AdminBlogController::class)->except(['show']);
         });
 
-        Route::middleware('permission:donation.view')->group(function () {
+        Route::middleware('permission:donation.view|settings.view')->group(function () {
             Route::get('/donations', [App\Http\Controllers\Admin\DonationController::class, 'index'])->name('donations.index');
+            Route::get('/donations/{donation}/proof', [App\Http\Controllers\Admin\DonationController::class, 'viewProof'])->name('donations.proof');
             Route::post('/donations/{donation}/confirm', [App\Http\Controllers\Admin\DonationController::class, 'confirm'])->name('donations.confirm');
+            Route::patch('bank-accounts/{bank_account}/toggle', [BankAccountController::class, 'toggleActive'])->name('bank-accounts.toggle');
             Route::resource('bank-accounts', BankAccountController::class)->except(['show', 'create', 'edit']);
         });
 
@@ -322,6 +343,8 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         Route::middleware('permission:disbursement.view')->group(function () {
             Route::resource('disbursements', DisbursementController::class)->only(['index', 'show']);
             Route::get('disbursements/{disbursement}/receipt', [DisbursementController::class, 'receipt'])->name('disbursements.receipt');
+            Route::get('disbursements/{disbursement}/supporting-document', [DisbursementController::class, 'supportingDocument'])->name('disbursements.supporting-document');
+            Route::get('disbursements/{disbursement}/proof', [DisbursementController::class, 'proof'])->name('disbursements.proof');
             Route::put('disbursements/{disbursement}/status', [DisbursementController::class, 'updateStatus'])->name('disbursements.update-status');
         });
 
@@ -335,6 +358,7 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::resource('program-report-categories', ProgramReportCategoryController::class)->except(['show', 'create', 'edit']);
 
             Route::get('program-reports', [ProgramReportController::class, 'index'])->name('program-reports.index');
+            Route::get('program-reports/{program_report}/evidence/{index}', [ProgramReportController::class, 'viewEvidence'])->name('program-reports.evidence');
             Route::put('program-reports/{program_report}/status', [ProgramReportController::class, 'updateStatus'])->name('program-reports.update-status');
             Route::post('program-reports/{program_report}/takedown', [ProgramReportController::class, 'actionTakeDown'])->name('program-reports.takedown');
             Route::delete('program-reports/{program_report}', [ProgramReportController::class, 'destroy'])->name('program-reports.destroy');
@@ -353,6 +377,7 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         Route::middleware('permission:settings.view')->group(function () {
             Route::get('site-settings', [SiteSettingController::class, 'index'])->name('site-settings.index');
             Route::post('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
+            Route::post('site-settings/test-midtrans', [SiteSettingController::class, 'testMidtrans'])->name('site-settings.test-midtrans');
         });
     });
 
@@ -369,6 +394,8 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::resource('programs', CampaignerProgramController::class);
             Route::resource('programs.disbursements', CampaignerDisbursementController::class)->only(['index', 'create', 'store']);
             Route::get('programs/{program}/disbursements/{disbursement}/receipt', [CampaignerDisbursementController::class, 'receipt'])->name('programs.disbursements.receipt');
+            Route::get('programs/{program}/disbursements/{disbursement}/supporting-document', [CampaignerDisbursementController::class, 'supportingDocument'])->name('programs.disbursements.supporting-document');
+            Route::get('programs/{program}/disbursements/{disbursement}/proof', [CampaignerDisbursementController::class, 'proof'])->name('programs.disbursements.proof');
             Route::resource('programs.updates', CampaignerProgramUpdateController::class)->only(['index', 'store']);
             Route::post('slot-requests', [CampaignerSlotRequestController::class, 'store'])->name('slot-requests.store');
         });

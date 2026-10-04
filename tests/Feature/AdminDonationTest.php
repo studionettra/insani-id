@@ -110,7 +110,7 @@ test('admin can confirm offline donation with transfer proof', function () {
     expect($donation->fresh()->status)->toBe('paid');
     expect($payment->fresh()->transfer_proof)->not->toBeNull();
 
-    Storage::disk('public')->assertExists($payment->fresh()->transfer_proof);
+    Storage::disk('local')->assertExists($payment->fresh()->transfer_proof);
 
     // Check program collected amount updated
     expect($this->program->fresh()->collected_amount)->toEqual(100000);

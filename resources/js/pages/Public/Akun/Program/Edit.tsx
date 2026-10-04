@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save, AlertCircle, Target, Infinity, Info, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle, Target, Infinity, Info, CheckCircle2, CaseSensitive } from 'lucide-react';
 import React, { useState } from 'react';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { cn, getLocalizedValue } from '@/lib/utils';
+import { cn, getLocalizedValue, toTitleCase } from '@/lib/utils';
 
 interface Category {
     id: number;
@@ -51,8 +51,23 @@ export default function AkunProgramEdit({ categories, program }: Props) {
         program.cover_image ? `/storage/${program.cover_image}` : null
     );
 
+    const handleFormatTitleCase = () => {
+        if (!data.title?.trim()) return;
+        setData('title', toTitleCase(data.title as string, 'id'));
+    };
+
+    const handleTitleBlur = () => {
+        if (!data.title?.trim()) return;
+        const formatted = toTitleCase(data.title as string, 'id');
+        if (formatted !== data.title) {
+            setData('title', formatted);
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const formattedTitle = toTitleCase((data.title as string) || '', 'id');
+        data.title = formattedTitle;
         import('@inertiajs/react').then(({ router }) => {
             router.post(`/akun/programs/${program.id}`, {
                 _method: 'put',
@@ -107,13 +122,39 @@ export default function AkunProgramEdit({ categories, program }: Props) {
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                    <Label htmlFor="title" className="mb-2 block">Judul Program <span className="text-red-500">*</span></Label>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <Label htmlFor="title" className="text-sm font-medium text-slate-900 dark:text-white">
+                                            Judul Program <span className="text-red-500">*</span>
+                                        </Label>
+                                        <button
+                                            type="button"
+                                            onClick={handleFormatTitleCase}
+                                            className="text-[11px] text-insani-blue hover:underline flex items-center gap-1 font-medium transition-colors"
+                                            title="Rapikan setiap kata sesuai kaidah huruf kapital EYD"
+                                        >
+                                            <CaseSensitive className="w-3.5 h-3.5" /> Rapikan Judul (EYD)
+                                        </button>
+                                    </div>
                                     <Input
                                         id="title"
                                         value={data.title as string}
                                         onChange={e => setData('title', e.target.value)}
+                                        onBlur={handleTitleBlur}
+                                        placeholder="Contoh: Bantuan Sembako untuk Lansia Dhuafa"
+                                        className="text-base"
                                         required
                                     />
+                                    {data.title && (data.title as string).trim() && (
+                                        <div className="mt-2 p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-600 text-white tracking-wider shrink-0 uppercase">
+                                                <CaseSensitive className="w-3 h-3" />
+                                                Pratinjau EYD
+                                            </span>
+                                            <span className="font-medium text-slate-900 dark:text-slate-100 truncate">
+                                                {toTitleCase(data.title as string, 'id')}
+                                            </span>
+                                        </div>
+                                    )}
                                     {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                                 </div>
 

@@ -353,7 +353,7 @@ Page: `Admin/Programs/Index.jsx` (filter tab: Semua / Menunggu Verifikasi / Akti
 ```php
 // POST /admin/donations/offline — input donasi tunai/manual di luar sistem
 {
-  "program_id": 10, "donor_name": "Hamba Allah", "amount": 500000,
+  "program_id": 10, "donor_name": "Inisiator Kebaikan", "amount": 500000,
   "channel": "offline"
   // status langsung 'paid', tidak melalui payments/Xendit
 }

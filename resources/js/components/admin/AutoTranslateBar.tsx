@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Globe, Check } from 'lucide-react';
+import { Languages, Globe, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface AutoTranslateBarProps {
@@ -87,8 +87,8 @@ export default function AutoTranslateBar({
                     disabled={isTranslating}
                     className="h-8 text-xs font-semibold border-insani-blue/40 text-insani-blue hover:bg-insani-blue hover:text-white transition-colors gap-1.5 shadow-xs bg-white dark:bg-slate-900"
                 >
-                    <Sparkles className={`w-3.5 h-3.5 text-amber-500 ${isTranslating ? 'animate-spin' : ''}`} />
-                    {isTranslating ? 'Menerjemahkan...' : '✨ Auto-Translate'}
+                    <Languages className={`w-3.5 h-3.5 text-insani-blue ${isTranslating ? 'animate-spin' : ''}`} />
+                    {isTranslating ? 'Menerjemahkan...' : 'Terjemahkan Otomatis'}
                 </Button>
             </div>
         </div>

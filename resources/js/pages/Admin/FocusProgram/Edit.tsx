@@ -3,7 +3,8 @@ import {
     ArrowLeft, 
     Save, 
     ExternalLink, 
-    Sparkles, 
+    Palette, 
+    HandHeart, 
     ImageIcon, 
     Video, 
     BarChart2, 
@@ -376,7 +377,7 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                             >
-                                <Sparkles className="w-4 h-4" />
+                                <Palette className="w-4 h-4" />
                                 <span>1. Identitas Publik</span>
                             </button>
 
@@ -479,7 +480,7 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                             </>
                                         ) : (
                                             <>
-                                                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                                <Languages className="w-3.5 h-3.5 text-amber-500" />
                                                 <span>Auto-Translate</span>
                                             </>
                                         )}
@@ -929,7 +930,7 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                                                     2. Dokumentasi Aksi & Penyaluran Bantuan Insani
                                                 </h4>
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-bold rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-900">
-                                                    <Sparkles className="w-3.5 h-3.5 text-[#1A56DB]" />
+                                                    <HandHeart className="w-3.5 h-3.5 text-[#1A56DB]" />
                                                     <span>Ikhtiar Insani</span>
                                                 </span>
                                             </div>
@@ -1183,7 +1184,7 @@ export default function FocusProgramEdit({ category, relatedPrograms }: Props) {
                         {/* Summary & Save Trigger */}
                         <div className="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 space-y-4 shadow-xs">
                             <h4 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-[#1A56DB]" />
+                                <Compass className="w-4 h-4 text-[#1A56DB]" />
                                 <span>Ringkasan Fokus Program</span>
                             </h4>
 

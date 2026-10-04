@@ -57,13 +57,18 @@ test('DonationFactory creates valid model', function () {
         ->and($donation->donor_email)->toContain('@')
         ->and($donation->amount)->toBeGreaterThan(0)
         ->and($donation->channel)->toBeIn(['online', 'offline'])
-        ->and($donation->status)->toBeIn(['pending', 'paid', 'expired', 'failed', 'refunded']);
+        ->and($donation->status)->toBeIn(['pending', 'paid', 'expired', 'failed', 'refunded', 'cancelled']);
 });
 
 test('DonationFactory paid state', function () {
     $donation = Donation::factory()->paid()->create();
     expect($donation->status)->toBe('paid')
         ->and($donation->paid_at)->not->toBeNull();
+});
+
+test('DonationFactory cancelled state', function () {
+    $donation = Donation::factory()->cancelled()->create();
+    expect($donation->status)->toBe('cancelled');
 });
 
 test('PaymentFactory creates valid model', function () {

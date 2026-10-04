@@ -96,7 +96,7 @@ test('public user can submit a valid report with file attachments and turnstile 
         ->and($report->evidence_files)->toBeArray()
         ->and(count($report->evidence_files))->toBe(1);
 
-    Storage::disk('public')->assertExists($report->evidence_files[0]['path']);
+    Storage::disk('local')->assertExists($report->evidence_files[0]['path']);
 });
 
 test('report submission fails validation if turnstile token is missing', function () {

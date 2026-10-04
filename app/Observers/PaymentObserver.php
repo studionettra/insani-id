@@ -35,66 +35,72 @@ class PaymentObserver
             return;
         }
 
-        if (in_array($gatewayStatus, ['PAID', 'SETTLED']) && $donation->status !== 'paid') {
-            DB::transaction(function () use ($donation, $payment) {
-                $donation->update([
-                    'status' => 'paid',
-                    'paid_at' => $payment->paid_at ?? now(),
-                ]);
+        if (in_array($gatewayStatus, ['PAID', 'SETTLED', 'SETTLEMENT', 'CAPTURE'])) {
+            $isNewlyPaid = ($donation->status !== 'paid');
 
-                // Copy donation message to comments table if it exists
-                if (! empty($donation->message)) {
-                    Comment::create([
-                        'program_id' => $donation->program_id,
-                        'donation_id' => $donation->id,
-                        'user_id' => $donation->donor_user_id,
-                        'name' => $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name,
-                        'body' => $donation->message,
-                        'is_hidden' => false,
+            DB::transaction(function () use ($donation, $payment, $isNewlyPaid) {
+                if ($isNewlyPaid) {
+                    $donation->update([
+                        'status' => 'paid',
+                        'paid_at' => $payment->paid_at ?? now(),
                     ]);
-                }
 
-                // Recalculate program's collected amount with row locking to avoid race condition
-                $program = Program::whereKey($donation->program_id)->lockForUpdate()->first();
-                if ($program) {
-                    $totalCollected = Donation::where('program_id', $program->id)
+                    // Record donor in comments table so they appear in Tab Donatur
+                    Comment::firstOrCreate(
+                        ['donation_id' => $donation->id],
+                        [
+                            'program_id' => $donation->program_id,
+                            'user_id' => $donation->donor_user_id,
+                            'name' => $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name,
+                            'body' => ! empty($donation->message) ? $donation->message : '',
+                            'is_hidden' => false,
+                        ]
+                    );
+
+                    // Recalculate program's collected amount using indexed lookup without pessimistic row locks
+                    $totalCollected = Donation::where('program_id', $donation->program_id)
                         ->where('status', 'paid')
                         ->sum('amount');
 
-                    $updates = ['collected_amount' => $totalCollected];
+                    $program = Program::whereKey($donation->program_id)->first();
+                    if ($program) {
+                        $updates = ['collected_amount' => $totalCollected];
 
-                    // Check if program reached its target amount (only if not continuous)
-                    if (! $program->is_continuous && $program->target_amount && $totalCollected >= $program->target_amount && $program->status === 'published') {
-                        $updates['status'] = 'completed';
+                        // Check if program reached its target amount (only if not continuous)
+                        if (! $program->is_continuous && $program->target_amount && $totalCollected >= $program->target_amount && $program->status === 'published') {
+                            $updates['status'] = 'completed';
+                        }
+
+                        $program->update($updates);
                     }
 
-                    $program->update($updates);
-                }
+                    // Recalculate fundraiser's collected amount and donors count if referred
+                    if ($donation->fundraiser_id) {
+                        $fundraiser = Fundraiser::whereKey($donation->fundraiser_id)->first();
+                        if ($fundraiser) {
+                            $fundraiserCollected = Donation::where('fundraiser_id', $fundraiser->id)
+                                ->where('status', 'paid')
+                                ->sum('amount');
+                            $fundraiserDonors = Donation::where('fundraiser_id', $fundraiser->id)
+                                ->where('status', 'paid')
+                                ->count();
 
-                // Recalculate fundraiser's collected amount and donors count if referred
-                if ($donation->fundraiser_id) {
-                    $fundraiser = Fundraiser::whereKey($donation->fundraiser_id)->lockForUpdate()->first();
-                    if ($fundraiser) {
-                        $fundraiserCollected = Donation::where('fundraiser_id', $fundraiser->id)
-                            ->where('status', 'paid')
-                            ->sum('amount');
-                        $fundraiserDonors = Donation::where('fundraiser_id', $fundraiser->id)
-                            ->where('status', 'paid')
-                            ->count();
-
-                        $fundraiser->update([
-                            'collected_amount' => $fundraiserCollected,
-                            'donors_count' => $fundraiserDonors,
-                        ]);
+                            $fundraiser->update([
+                                'collected_amount' => $fundraiserCollected,
+                                'donors_count' => $fundraiserDonors,
+                            ]);
+                        }
                     }
                 }
             });
 
-            // Dispatch notification job to queue after the transaction commits
-            SendDonationPaidNotification::dispatch($donation)->afterCommit();
+            if ($isNewlyPaid) {
+                // Dispatch notification job to queue after the transaction commits
+                SendDonationPaidNotification::dispatch($donation)->afterCommit();
 
-            // Dispatch Meta Conversions API (CAPI) server event if configured
-            SendMetaCapiPurchaseEvent::dispatch($donation)->afterCommit();
+                // Dispatch Meta Conversions API (CAPI) server event if configured
+                SendMetaCapiPurchaseEvent::dispatch($donation)->afterCommit();
+            }
         }
 
         if (in_array($gatewayStatus, ['EXPIRED', 'FAILED'])) {

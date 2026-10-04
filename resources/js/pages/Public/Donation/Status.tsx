@@ -6,18 +6,29 @@ import {
     AlertCircle, 
     Copy, 
     RefreshCw, 
-    ExternalLink,
-    ChevronRight,
-    ArrowRight,
-    Sparkles,
-    ShieldCheck,
-    Printer,
-    Eye,
-    FileCheck
+    ExternalLink, 
+    ChevronRight, 
+    ArrowRight, 
+    UserRoundPlus, 
+    ShieldCheck, 
+    Printer, 
+    Eye, 
+    FileCheck,
+    QrCode,
+    Download,
+    Smartphone,
+    CreditCard,
+    Check,
+    ChevronDown,
+    ChevronUp,
+    Timer,
+    Info,
+    Landmark
 } from 'lucide-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import DonationReceiptModal from '@/components/donation/DonationReceiptModal';
+import BankLogo from '@/components/ui/bank-logo';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -31,18 +42,229 @@ import useTranslation from '@/hooks/use-translation';
 import { trackDonationSuccess } from '@/lib/analytics';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
-export default function Status({ donation, selectedBankAccount }: any) {
+interface BankInstruction {
+    mobile: string[];
+    atm: string[];
+    ibanking: string[];
+}
+
+function getBankInstructions(channelCode: string, vaNumber: string, billerCode?: string, billKey?: string): BankInstruction {
+    const code = (channelCode || '').toUpperCase().replace('MANUAL_', '');
+
+    if (code.includes('MANDIRI')) {
+        return {
+            mobile: [
+                'Buka aplikasi Livin\' by Mandiri, login dan pilih menu "Bayar".',
+                `Ketik nama penyedia jasa atau masukkan Kode Perusahaan: ${billerCode || '70012'}.`,
+                `Masukkan Nomor Pelanggan / Tagihan: ${billKey || vaNumber}.`,
+                'Konfirmasi detail tagihan donasi dan pastikan nama penerima sesuai.',
+                'Masukkan PIN Livin\' Mandiri Anda untuk menyelesaikan pembayaran.'
+            ],
+            atm: [
+                'Masukkan kartu ATM Mandiri dan 6 digit PIN Anda.',
+                'Pilih menu "Bayar / Beli" -> "Lainnya" -> "Multi Payment".',
+                `Masukkan Kode Perusahaan: ${billerCode || '70012'}, lalu tekan "Benar".`,
+                `Masukkan Nomor Pelanggan / Tagihan: ${billKey || vaNumber}, lalu tekan "Benar".`,
+                'Konfirmasi pembayaran dan simpan struk sebagai bukti transaksi.'
+            ],
+            ibanking: [
+                'Login ke Mandiri Internet Banking.',
+                'Pilih menu "Pembayaran" -> "Multi Payment".',
+                `Pilih penyedia jasa dengan kode ${billerCode || '70012'}.`,
+                `Masukkan Nomor Pelanggan: ${billKey || vaNumber}.`,
+                'Konfirmasi dan otorisasi dengan Token Mandiri Anda.'
+            ]
+        };
+    }
+
+    if (code.includes('BSI')) {
+        return {
+            mobile: [
+                'Buka aplikasi BSI Mobile, login dan pilih menu "Bayar".',
+                'Pilih menu "Virtual Account" atau "Institusi / Akademik".',
+                `Masukkan Nomor BSI Virtual Account: ${vaNumber}.`,
+                'Periksa nominal donasi dan nama penerima di layar konfirmasi.',
+                'Masukkan PIN BSI Mobile Anda dan selesaikan transaksi.'
+            ],
+            atm: [
+                'Masukkan kartu ATM BSI dan PIN Anda.',
+                'Pilih menu "Pembayaran / Pembelian" -> "Virtual Account".',
+                `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+                'Pastikan detail pembayaran sesuai, lalu pilih "Ya / Lanjutkan".',
+                'Simpan struk transaksi pembayaran.'
+            ],
+            ibanking: [
+                'Login ke BSI Net Banking.',
+                'Pilih menu "Pembayaran" -> "Virtual Account".',
+                `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+                'Periksa rincian donasi dan selesaikan dengan otorisasi TAN / Token.'
+            ]
+        };
+    }
+
+    if (code.includes('BRI')) {
+        return {
+            mobile: [
+                'Buka aplikasi BRImo, login dan pilih menu "Tagihan" -> "BRIVA".',
+                'Pilih "Tambah Transaksi Baru".',
+                `Masukkan Nomor BRIVA: ${vaNumber}.`,
+                'Periksa detail donasi yang tampil di layar konfirmasi.',
+                'Klik "Lanjutkan" dan masukkan PIN BRImo Anda.'
+            ],
+            atm: [
+                'Masukkan kartu ATM BRI dan PIN Anda.',
+                'Pilih menu "Transaksi Lain" -> "Pembayaran" -> "Lainnya" -> "BRIVA".',
+                `Masukkan Nomor BRIVA: ${vaNumber}, lalu tekan "Benar".`,
+                'Periksa rincian pembayaran, lalu pilih "Ya".',
+                'Simpan struk transaksi sebagai bukti donasi.'
+            ],
+            ibanking: [
+                'Login ke Internet Banking BRI.',
+                'Pilih menu "Pembayaran" -> "BRIVA".',
+                `Masukkan Nomor BRIVA: ${vaNumber}.`,
+                'Konfirmasi data dan masukkan password & mToken untuk menyelesaikan.'
+            ]
+        };
+    }
+
+    if (code.includes('BNI')) {
+        return {
+            mobile: [
+                'Buka aplikasi BNI Mobile Banking, login dan pilih menu "Pembayaran".',
+                'Pilih menu "Virtual Account Billing", lalu pilih tab "Input Baru".',
+                `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+                'Periksa rincian tagihan donasi di layar validasi.',
+                'Masukkan Password Transaksi BNI Mobile Banking Anda.'
+            ],
+            atm: [
+                'Masukkan kartu ATM BNI dan PIN Anda.',
+                'Pilih menu "Menu Lain" -> "Transfer" -> "Virtual Account Billing".',
+                `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+                'Periksa nominal dan konfirmasi pembayaran.',
+                'Ambil struk transaksi pembayaran.'
+            ],
+            ibanking: [
+                'Login ke BNI Internet Banking.',
+                'Pilih menu "Transaksi" -> "Pembayaran Tagihan" -> "Virtual Account Billing".',
+                `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+                'Otorisasi transaksi menggunakan BNI e-Secure token.'
+            ]
+        };
+    }
+
+    if (code.includes('BCA')) {
+        return {
+            mobile: [
+                'Buka aplikasi BCA mobile (m-BCA), login dan pilih menu "m-Transfer".',
+                'Pilih menu "BCA Virtual Account".',
+                `Masukkan Nomor BCA Virtual Account: ${vaNumber}.`,
+                'Periksa rincian tagihan donasi dan pastikan nominal sesuai.',
+                'Masukkan PIN m-BCA Anda untuk menyelesaikan pembayaran.'
+            ],
+            atm: [
+                'Masukkan kartu ATM BCA dan 6 digit PIN Anda.',
+                'Pilih menu "Transaksi Lainnya" -> "Transfer" -> "ke Rekening BCA Virtual Account".',
+                `Masukkan Nomor BCA Virtual Account: ${vaNumber}.`,
+                'Periksa konfirmasi pembayaran, lalu pilih "Ya".',
+                'Ambil kartu ATM dan simpan bukti transfer.'
+            ],
+            ibanking: [
+                'Login ke KlikBCA Individual.',
+                'Pilih menu "Transfer Dana" -> "Transfer ke BCA Virtual Account".',
+                `Masukkan Nomor BCA Virtual Account: ${vaNumber}.`,
+                'Masukkan respon KeyBCA Appli 1 dan klik "Kirim".'
+            ]
+        };
+    }
+
+    if (code.includes('PERMATA')) {
+        return {
+            mobile: [
+                'Buka aplikasi PermataMobile X, login dan pilih menu "Bayar Tagihan".',
+                'Pilih menu "Virtual Account".',
+                `Masukkan Nomor Permata Virtual Account: ${vaNumber}.`,
+                'Periksa nominal donasi dan konfirmasi transaksi dengan Mobile PIN.'
+            ],
+            atm: [
+                'Masukkan kartu ATM Permata dan PIN Anda.',
+                'Pilih menu "Transaksi Lainnya" -> "Pembayaran" -> "Virtual Account".',
+                `Masukkan Nomor Permata Virtual Account: ${vaNumber}.`,
+                'Pilih "Benar" untuk memproses pembayaran.'
+            ],
+            ibanking: [
+                'Login ke PermataNet.',
+                'Pilih menu "Pembayaran" -> "Virtual Account".',
+                `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+                'Konfirmasi pembayaran dan otorisasi dengan SMS Token.'
+            ]
+        };
+    }
+
+    return {
+        mobile: [
+            'Buka aplikasi Mobile Banking bank Anda dan login.',
+            'Pilih menu "Transfer" atau "Pembayaran" -> "Virtual Account".',
+            `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+            'Periksa nama dan nominal donasi pada layar konfirmasi.',
+            'Masukkan PIN transaksi untuk menyelesaikan donasi.'
+        ],
+        atm: [
+            'Masukkan kartu ATM dan PIN Anda di mesin ATM.',
+            'Pilih menu "Transaksi Lain" -> "Pembayaran" -> "Virtual Account".',
+            `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+            'Periksa nominal pembayaran dan tekan "Ya" untuk menyelesaikan.',
+            'Simpan struk transaksi pembayaran.'
+        ],
+        ibanking: [
+            'Login ke layanan Internet Banking bank Anda.',
+            'Pilih menu "Pembayaran Tagihan" -> "Virtual Account".',
+            `Masukkan Nomor Virtual Account: ${vaNumber}.`,
+            'Verifikasi data dan otorisasi dengan token keamanan Anda.'
+        ]
+    };
+}
+
+export default function Status({ donation, selectedBankAccount, proofUrl: propProofUrl }: any) {
     const { t } = useTranslation();
     const { auth, siteSettings, bankAccounts } = usePage().props as any;
     const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
     const [isChecking, setIsChecking] = useState(false);
     const [showReceipt, setShowReceipt] = useState(false);
     const [showProofModal, setShowProofModal] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [instructionTab, setInstructionTab] = useState<'mobile' | 'atm' | 'ibanking'>('mobile');
+    const [isInstructionsOpen, setIsInstructionsOpen] = useState(false);
 
     const title = donation.program?.title?.id || donation.program?.title || 'Program Donasi';
     const latestPayment = donation.payments && donation.payments.length > 0 ? donation.payments[0] : null;
-    const proofUrl = latestPayment?.transfer_proof_url 
-        || (latestPayment?.transfer_proof ? `/storage/${latestPayment.transfer_proof}` : null);
+    const proofUrl = propProofUrl || latestPayment?.transfer_proof_url || null;
+
+    const isMidtrans = latestPayment?.gateway === 'midtrans';
+    const paymentMethod = (latestPayment?.payment_method || donation.payment_method || '').toLowerCase();
+    const paymentChannel = (latestPayment?.payment_channel || '').toUpperCase();
+    const rawPayload = latestPayment?.raw_payload || {};
+    const actions: Array<{ name: string; url: string; method?: string }> = Array.isArray(rawPayload?.actions) ? rawPayload.actions : [];
+
+    // Midtrans extraction
+    const qrCodeUrl = actions.find((a) => a.name === 'generate-qr-code')?.url 
+        || (paymentMethod === 'qris' ? latestPayment?.checkout_url : null);
+
+    const deeplinkUrl = actions.find((a) => a.name === 'deeplink-redirect')?.url 
+        || (paymentMethod === 'ewallet' ? latestPayment?.checkout_url : null);
+
+    const rawVaCandidate = rawPayload?.va_numbers?.[0]?.va_number 
+        || rawPayload?.permata_va_number 
+        || rawPayload?.bill_key 
+        || latestPayment?.payment_destination 
+        || null;
+
+    // Pastikan nomor VA benar-benar memiliki digit angka (bukan string nama channel seperti 'BSI')
+    const vaNumber = rawVaCandidate && /\d/.test(rawVaCandidate) ? rawVaCandidate : null;
+
+    const billerCode = rawPayload?.biller_code || null;
+    const billKey = rawPayload?.bill_key || null;
 
     const selectedBank = useMemo(() => {
         if (selectedBankAccount) {
@@ -111,6 +333,7 @@ export default function Status({ donation, selectedBankAccount }: any) {
         return accounts[0] || null;
     }, [selectedBankAccount, donation.channel, latestPayment, bankAccounts, foundationName]);
 
+    // Analytics tracking when paid
     useEffect(() => {
         if (donation.status === 'paid') {
             const trackKey = `tracked_donation_${donation.donation_code}`;
@@ -127,6 +350,63 @@ export default function Status({ donation, selectedBankAccount }: any) {
         }
     }, [donation.status, donation.donation_code, donation.amount, title, latestPayment, donation.payment_method]);
 
+    // Real-time auto-polling for pending online payments (Midtrans & Xendit)
+    useEffect(() => {
+        if (donation.status !== 'pending' || donation.channel !== 'online') {
+            return;
+        }
+
+        const pollInterval = setInterval(() => {
+            router.reload({
+                only: ['donation'],
+            });
+        }, 5000);
+
+        return () => clearInterval(pollInterval);
+    }, [donation.status, donation.channel]);
+
+    // Countdown timer for expiry
+    useEffect(() => {
+        if (donation.status !== 'pending' || donation.channel !== 'online') {
+            setTimeLeft(null);
+            return;
+        }
+
+        let expiryTimestamp: number | null = null;
+        const rawExpiry = rawPayload?.expiry_time;
+
+        if (rawExpiry) {
+            // Midtrans format: "YYYY-MM-DD HH:mm:ss"
+            const iso = String(rawExpiry).replace(' ', 'T');
+            expiryTimestamp = new Date(iso).getTime();
+        } else if (donation.created_at) {
+            const durationMinutes = paymentMethod === 'virtual_account' ? 24 * 60 : 30;
+            expiryTimestamp = new Date(donation.created_at).getTime() + durationMinutes * 60 * 1000;
+        }
+
+        if (!expiryTimestamp || isNaN(expiryTimestamp)) return;
+
+        const updateTimer = () => {
+            const remaining = Math.max(0, Math.floor((expiryTimestamp! - Date.now()) / 1000));
+            setTimeLeft(remaining);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+        return () => clearInterval(interval);
+    }, [donation.status, donation.channel, rawPayload?.expiry_time, donation.created_at, paymentMethod]);
+
+    const formatCountdown = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        if (hours > 0) {
+            return `${hours} jam ${mins} menit ${secs} dtk`;
+        }
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
+
     const getPaymentMethodDisplay = () => {
         if (donation.channel === 'offline') {
             if (selectedBank?.bank_name) {
@@ -137,13 +417,16 @@ export default function Status({ donation, selectedBankAccount }: any) {
 
         const channel = latestPayment?.payment_channel?.toUpperCase();
         if (channel === 'QRIS') return 'QRIS (E-Wallet & M-Banking)';
-        if (channel === 'BCA') return 'BCA Virtual Account';
-        if (channel === 'MANDIRI') return 'Mandiri Virtual Account';
+        if (channel === 'BSI') return 'BSI Virtual Account';
         if (channel === 'BRI') return 'BRI Virtual Account';
         if (channel === 'BNI') return 'BNI Virtual Account';
+        if (channel === 'MANDIRI') return 'Mandiri Virtual Account';
+        if (channel === 'BCA') return 'BCA Virtual Account';
         if (channel === 'PERMATA') return 'Permata Virtual Account';
         if (channel === 'CIMB') return 'CIMB Niaga Virtual Account';
+        if (channel === 'DANAMON') return 'Danamon Virtual Account';
         if (channel === 'SHOPEEPAY') return 'ShopeePay';
+        if (channel === 'GOPAY') return 'GoPay';
         if (channel === 'OVO') return 'OVO';
         if (channel === 'DANA') return 'DANA';
         if (channel === 'ASTRAPAY') return 'AstraPay';
@@ -168,6 +451,16 @@ export default function Status({ donation, selectedBankAccount }: any) {
             };
         }
         
+        if (status === 'cancelled') {
+            return {
+                icon: <XCircle className="w-16 h-16 text-rose-500 mx-auto" />,
+                title: 'Donasi Dibatalkan',
+                color: 'text-rose-500',
+                desc: 'Tagihan donasi ini telah dibatalkan dan tidak lagi aktif. Anda dapat berdonasi kembali kapan saja.',
+                bg: 'bg-rose-50 border-rose-100'
+            };
+        }
+
         if (status === 'expired' || status === 'failed') {
             return {
                 icon: <XCircle className="w-16 h-16 text-red-500 mx-auto" />,
@@ -200,18 +493,62 @@ export default function Status({ donation, selectedBankAccount }: any) {
     const info = getStatusInfo(donation.status, donation.channel);
 
     const copyToClipboard = (text: string) => {
+        if (!text) return;
         navigator.clipboard.writeText(text);
         toast.success('Berhasil disalin ke clipboard');
     };
 
     const handleCheckStatus = () => {
         setIsChecking(true);
-        toast.info('Memeriksa status pembayaran ke Xendit...');
+        toast.info('Memeriksa status pembayaran...');
         router.reload({
             only: ['donation'],
             onFinish: () => {
                 setIsChecking(false);
                 toast.success('Pemeriksaan status selesai');
+            }
+        });
+    };
+
+    const handleDownloadQr = () => {
+        if (!qrCodeUrl) return;
+        const filename = `QRIS-${donation.donation_code}.png`;
+
+        fetch(qrCodeUrl)
+            .then((res) => res.blob())
+            .then((blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                toast.success('Kode QR berhasil diunduh');
+            })
+            .catch(() => {
+                window.open(qrCodeUrl, '_blank');
+            });
+    };
+
+    const vaInstructions = useMemo(() => {
+        return getBankInstructions(paymentChannel, vaNumber || '', billerCode, billKey);
+    }, [paymentChannel, vaNumber, billerCode, billKey]);
+
+    const handleCancelDonation = () => {
+        setIsCancelling(true);
+        router.post(`/donasi/${donation.donation_code}/batal`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setShowCancelModal(false);
+                toast.success('Tagihan donasi berhasil dibatalkan.');
+            },
+            onError: () => {
+                toast.error('Gagal membatalkan donasi. Silakan coba kembali.');
+            },
+            onFinish: () => {
+                setIsCancelling(false);
             }
         });
     };
@@ -242,47 +579,377 @@ export default function Status({ donation, selectedBankAccount }: any) {
                                 </p>
                                 <div className="text-3xl sm:text-4xl font-extrabold text-slate-800 flex items-center justify-center gap-2">
                                     {formatCurrency(Number(donation.amount))}
-                                    {donation.channel === 'offline' && donation.status === 'pending' && (
-                                        <button 
-                                            onClick={() => copyToClipboard(donation.amount.toString())} 
-                                            title="Salin nominal"
-                                            className="text-slate-400 hover:text-insani-blue transition-colors p-1"
-                                        >
-                                            <Copy className="w-5 h-5" />
-                                        </button>
-                                    )}
+                                    <button 
+                                        onClick={() => copyToClipboard(donation.amount.toString())} 
+                                        title="Salin nominal"
+                                        className="text-slate-400 hover:text-insani-blue transition-colors p-1"
+                                    >
+                                        <Copy className="w-5 h-5" />
+                                    </button>
                                 </div>
                             </div>
 
-                            {/* Action Buttons when Pending Online */}
+                            {/* NATIVE ONLINE PAYMENT SECTION (Midtrans Core API & Fallback) */}
                             {donation.channel === 'online' && donation.status === 'pending' && (
-                                <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-3">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        {latestPayment?.checkout_url && (
+                                <div className="space-y-4">
+                                    
+                                    {/* 1. NATIVE DYNAMIC QRIS */}
+                                    {(paymentMethod === 'qris' || paymentChannel === 'QRIS') && (
+                                        <div className="bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-200 p-5 sm:p-6 text-center space-y-4 shadow-2xs">
+                                            
+                                            {/* QRIS Header Badge & Expiry Countdown */}
+                                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                                                <div className="flex items-center gap-2.5">
+                                                    <BankLogo code="qris" size="sm" />
+                                                    <span className="text-xs font-bold text-slate-800">
+                                                        QRIS Standar Nasional
+                                                    </span>
+                                                </div>
+                                                {timeLeft !== null && (
+                                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-full text-xs font-semibold">
+                                                        <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                                                        <span>Sisa waktu: {formatCountdown(timeLeft)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* QR Code Container */}
+                                            <div className="py-2 flex flex-col items-center justify-center">
+                                                <div className="p-4 bg-white rounded-2xl border-2 border-slate-800 shadow-md inline-block max-w-[280px]">
+                                                    {qrCodeUrl ? (
+                                                        <img 
+                                                            src={qrCodeUrl} 
+                                                            alt={`QRIS Donasi ${donation.donation_code}`}
+                                                            className="w-56 h-56 sm:w-60 sm:h-60 object-contain mx-auto rounded-lg"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-56 h-56 flex flex-col items-center justify-center bg-slate-50 text-slate-400 gap-2">
+                                                            <QrCode className="w-12 h-12" />
+                                                            <span className="text-xs">Memuat kode QR...</span>
+                                                        </div>
+                                                    )}
+                                                    <p className="text-[11px] font-bold text-slate-500 mt-2 tracking-wide uppercase">
+                                                        NMID: ID1020021198704
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons for QRIS */}
+                                            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 max-w-md mx-auto">
+                                                {qrCodeUrl && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleDownloadQr}
+                                                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 active:bg-black text-white text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-2xs cursor-pointer"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                        <span>Unduh Gambar QR</span>
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyToClipboard(donation.amount.toString())}
+                                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 active:bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-2xs cursor-pointer"
+                                                >
+                                                    <Copy className="w-4 h-4 text-slate-500" />
+                                                    <span>Salin Nominal: {formatCurrency(Number(donation.amount))}</span>
+                                                </button>
+                                            </div>
+
+                                            {/* QRIS Supported Badges & Instructions */}
+                                            <div className="pt-2 text-left bg-blue-50/60 rounded-xl p-3.5 border border-blue-100 text-xs space-y-2">
+                                                <p className="font-semibold text-blue-950 flex items-center gap-1.5">
+                                                    <ShieldCheck className="w-4 h-4 text-insani-blue" />
+                                                    <span>Mendukung Semua Aplikasi Pembayaran Indonesia:</span>
+                                                </p>
+                                                <p className="text-slate-600 leading-relaxed text-[11px] sm:text-xs">
+                                                    BCA mobile, Livin' Mandiri, BRImo, BNI Mobile, BSI Mobile, GoPay, OVO, DANA, ShopeePay, LinkAja, dan seluruh aplikasi yang memiliki fitur <strong>Scan QRIS</strong>.
+                                                </p>
+                                                <ol className="list-decimal list-inside space-y-1 text-slate-700 text-[11px] sm:text-xs pt-1">
+                                                    <li>Buka aplikasi m-Banking atau E-Wallet di smartphone Anda.</li>
+                                                    <li>Pilih menu <strong>Scan / Bayar / QRIS</strong>.</li>
+                                                    <li>Arahkan kamera ke kode QR di atas (atau unggah foto QR jika diunduh).</li>
+                                                    <li>Periksa nominal donasi dan masukkan PIN Anda.</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 2. NATIVE E-WALLET (ShopeePay & GoPay) */}
+                                    {paymentMethod === 'ewallet' && (
+                                        <div className="bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-4 shadow-2xs">
+                                            
+                                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                                                <div className="flex items-center gap-2.5">
+                                                    <BankLogo code={paymentChannel} size="sm" />
+                                                    <span className="font-bold text-sm text-slate-800">
+                                                        Pembayaran {paymentChannel === 'SHOPEEPAY' ? 'ShopeePay' : 'GoPay'}
+                                                    </span>
+                                                </div>
+                                                {timeLeft !== null && (
+                                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-full text-xs font-semibold">
+                                                        <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                                                        <span>Sisa waktu: {formatCountdown(timeLeft)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Mobile App Deeplink Button */}
+                                            {deeplinkUrl && (
+                                                <div className="space-y-2">
+                                                    <a
+                                                        href={deeplinkUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className={`w-full min-h-[50px] inline-flex items-center justify-center gap-2.5 font-bold py-3.5 px-4 rounded-xl text-white shadow-sm transition-all text-sm sm:text-base ${
+                                                            paymentChannel === 'SHOPEEPAY' 
+                                                                ? 'bg-[#EE4D2D] hover:bg-[#D73211] active:bg-[#B8280B]' 
+                                                                : 'bg-[#00880C] hover:bg-[#00700A] active:bg-[#005508]'
+                                                        }`}
+                                                    >
+                                                        <Smartphone className="w-5 h-5" />
+                                                        <span>
+                                                            Buka Aplikasi {paymentChannel === 'SHOPEEPAY' ? 'ShopeePay' : 'Gojek / GoPay'}
+                                                        </span>
+                                                        <ExternalLink className="w-4 h-4 ml-1" />
+                                                    </a>
+                                                    <p className="text-center text-xs text-slate-500">
+                                                        Klik tombol di atas untuk membuka aplikasi secara langsung di ponsel Anda.
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Desktop Fallback QR Code */}
+                                            {qrCodeUrl && (
+                                                <div className="pt-3 border-t border-slate-100 text-center space-y-3">
+                                                    <p className="text-xs font-semibold text-slate-600">
+                                                        Atau pindai kode QR menggunakan kamera ponsel Anda:
+                                                    </p>
+                                                    <div className="p-3 bg-white rounded-xl border border-slate-200 inline-block shadow-xs">
+                                                        <img 
+                                                            src={qrCodeUrl} 
+                                                            alt={`${paymentChannel} QR`}
+                                                            className="w-44 h-44 object-contain mx-auto"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* E-Wallet Steps */}
+                                            <div className="bg-slate-50 rounded-xl p-3.5 text-xs text-slate-700 space-y-1.5 border border-slate-100">
+                                                <p className="font-semibold text-slate-900">Cara Pembayaran:</p>
+                                                <ol className="list-decimal list-inside space-y-1 text-[11px] sm:text-xs">
+                                                    <li>Buka aplikasi melalui tombol di atas atau scan QR code.</li>
+                                                    <li>Periksa detail donasi sebesar <strong>{formatCurrency(Number(donation.amount))}</strong>.</li>
+                                                    <li>Masukkan PIN keamanan {paymentChannel === 'SHOPEEPAY' ? 'ShopeePay' : 'GoPay'} Anda.</li>
+                                                    <li>Setelah selesai, status donasi akan otomatis diperbarui dalam hitungan detik.</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 3. NATIVE VIRTUAL ACCOUNT */}
+                                    {paymentMethod === 'virtual_account' && (
+                                        <div className="bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-200 p-5 sm:p-6 space-y-5 shadow-2xs">
+                                            
+                                            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                                                <div className="flex items-center gap-2.5">
+                                                    <BankLogo code={paymentChannel} size="sm" />
+                                                    <span className="font-bold text-sm text-slate-800">
+                                                        {getPaymentMethodDisplay()}
+                                                    </span>
+                                                </div>
+                                                {timeLeft !== null && (
+                                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded-full text-xs font-semibold">
+                                                        <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                                                        <span>Berlaku: {formatCountdown(timeLeft)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Mandiri Multi-payment Dual Fields (Biller Code + Bill Key) */}
+                                            {billerCode && billKey ? (
+                                                <div className="space-y-3">
+                                                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+                                                        <div>
+                                                            <span className="block text-xs text-slate-500 font-medium">Kode Perusahaan (Biller Code)</span>
+                                                            <span className="font-mono text-lg sm:text-xl font-extrabold text-slate-800 tracking-wider">
+                                                                {billerCode}
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => copyToClipboard(billerCode)}
+                                                            className="p-2.5 bg-blue-50 text-insani-blue hover:bg-blue-100 rounded-lg transition-colors"
+                                                            title="Salin Kode Perusahaan"
+                                                        >
+                                                            <Copy className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+                                                        <div>
+                                                            <span className="block text-xs text-slate-500 font-medium">Nomor Tagihan / Pelanggan (Bill Key)</span>
+                                                            <span className="font-mono text-lg sm:text-xl font-extrabold text-slate-800 tracking-wider">
+                                                                {billKey}
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => copyToClipboard(billKey)}
+                                                            className="p-2.5 bg-blue-50 text-insani-blue hover:bg-blue-100 rounded-lg transition-colors"
+                                                            title="Salin Nomor Tagihan"
+                                                        >
+                                                            <Copy className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                !vaNumber ? (
+                                                    <div className="bg-amber-50/90 border border-amber-200 rounded-2xl p-4 sm:p-5 text-left space-y-3 shadow-xs">
+                                                        <div className="flex items-start gap-3">
+                                                            <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                                            <div className="space-y-1">
+                                                                <h4 className="font-bold text-xs sm:text-sm text-amber-950">
+                                                                    Layanan {getPaymentMethodDisplay()} Sedang Integrasi Perbankan
+                                                                </h4>
+                                                                <p className="text-xs text-amber-900/90 leading-relaxed">
+                                                                    Nomor Virtual Account belum dapat diterbitkan otomatis karena saluran bank {paymentChannel} sedang dalam integrasi berkala oleh penyedia perbankan. Anda dapat berdonasi instan menggunakan <strong>Virtual Account BCA / BNI / Mandiri</strong>, <strong>QRIS</strong>, atau <strong>Transfer Manual</strong>.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        {donation.program?.slug && (
+                                                            <div className="pt-1 flex flex-wrap items-center gap-2">
+                                                                <Link
+                                                                    href={`/program/${donation.program.slug}/donasi?replace=${donation.donation_code}`}
+                                                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-insani-blue text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors shadow-2xs"
+                                                                >
+                                                                    Pilih Metode Pembayaran Lain
+                                                                </Link>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="bg-white p-4 sm:p-5 rounded-2xl border-2 border-blue-200 shadow-xs space-y-3">
+                                                        <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                                                            Nomor Virtual Account
+                                                        </span>
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <span className="font-mono text-xl sm:text-2xl font-extrabold text-slate-900 tracking-wider select-all">
+                                                                {vaNumber}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => copyToClipboard(vaNumber)}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-2 bg-insani-blue text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+                                                            >
+                                                                <Copy className="w-4 h-4" />
+                                                                <span>Salin VA</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )}
+
+                                            {/* Bank Transfer Guide Accordion */}
+                                            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white text-xs">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsInstructionsOpen(!isInstructionsOpen)}
+                                                    className="w-full p-3.5 flex items-center justify-between text-left font-semibold text-slate-800 bg-slate-50/80 hover:bg-slate-100 transition-colors"
+                                                >
+                                                    <span>Petunjuk Cara Pembayaran {getPaymentMethodDisplay()}</span>
+                                                    {isInstructionsOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                </button>
+
+                                                {isInstructionsOpen && (
+                                                    <div className="p-4 space-y-3 border-t border-slate-100">
+                                                        {/* Tab Buttons */}
+                                                        <div className="flex rounded-lg bg-slate-100 p-1 text-center font-medium">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setInstructionTab('mobile')}
+                                                                className={`flex-1 py-1.5 rounded-md transition-all text-xs ${
+                                                                    instructionTab === 'mobile' 
+                                                                        ? 'bg-white text-insani-blue shadow-xs font-bold' 
+                                                                        : 'text-slate-600 hover:text-slate-900'
+                                                                }`}
+                                                            >
+                                                                Mobile Banking
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setInstructionTab('atm')}
+                                                                className={`flex-1 py-1.5 rounded-md transition-all text-xs ${
+                                                                    instructionTab === 'atm' 
+                                                                        ? 'bg-white text-insani-blue shadow-xs font-bold' 
+                                                                        : 'text-slate-600 hover:text-slate-900'
+                                                                }`}
+                                                            >
+                                                                ATM
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setInstructionTab('ibanking')}
+                                                                className={`flex-1 py-1.5 rounded-md transition-all text-xs ${
+                                                                    instructionTab === 'ibanking' 
+                                                                        ? 'bg-white text-insani-blue shadow-xs font-bold' 
+                                                                        : 'text-slate-600 hover:text-slate-900'
+                                                                }`}
+                                                            >
+                                                                Internet Banking
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Steps List */}
+                                                        <ol className="list-decimal list-inside space-y-1.5 text-slate-700 leading-relaxed text-[11px] sm:text-xs pt-1">
+                                                            {vaInstructions[instructionTab]?.map((step, idx) => (
+                                                                <li key={idx} className="pl-1">
+                                                                    {step}
+                                                                </li>
+                                                            ))}
+                                                        </ol>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 4. LEGACY XENDIT FALLBACK BUTTON (If invoice URL is present and not Midtrans) */}
+                                    {!isMidtrans && latestPayment?.checkout_url && (
+                                        <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-3">
                                             <a 
                                                 href={latestPayment.checkout_url} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer"
                                                 className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 bg-insani-blue hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-4 rounded-xl shadow-xs transition-all text-sm"
                                             >
-                                                <span>Lanjutkan Pembayaran</span>
+                                                <span>Lanjutkan ke Pembayaran</span>
                                                 <ExternalLink className="w-4 h-4 shrink-0" />
                                             </a>
-                                        )}
-                                        <Button
-                                            type="button"
-                                            onClick={handleCheckStatus}
-                                            disabled={isChecking}
-                                            variant="outline"
-                                            className="w-full min-h-[48px] py-3 px-4 rounded-xl border-blue-200 bg-white hover:bg-blue-50 text-insani-blue font-semibold gap-2 text-sm"
-                                        >
-                                            <RefreshCw className={`w-4 h-4 shrink-0 ${isChecking ? 'animate-spin' : ''}`} />
-                                            <span>{isChecking ? 'Memeriksa...' : 'Cek Status Pembayaran'}</span>
-                                        </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Real-time Status Check & Auto-sync Footer Notice */}
+                                    <div className="p-4 bg-blue-50/60 border border-blue-200/70 rounded-2xl space-y-3">
+                                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2 text-xs text-slate-600">
+                                                <RefreshCw className={`w-3.5 h-3.5 text-insani-blue shrink-0 ${isChecking ? 'animate-spin' : ''}`} />
+                                                <span>Sistem memverifikasi status otomatis setiap 5 detik.</span>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                onClick={handleCheckStatus}
+                                                disabled={isChecking}
+                                                variant="outline"
+                                                className="w-full sm:w-auto min-h-[40px] py-2 px-4 rounded-xl border-blue-200 bg-white hover:bg-blue-50 text-insani-blue font-semibold gap-2 text-xs sm:text-sm"
+                                            >
+                                                <RefreshCw className={`w-3.5 h-3.5 shrink-0 ${isChecking ? 'animate-spin' : ''}`} />
+                                                <span>{isChecking ? 'Memeriksa...' : 'Cek Status Sekarang'}</span>
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <p className="text-xs text-slate-500 text-center">
-                                        Sudah menyelesaikan pembayaran? Klik <strong>Cek Status Pembayaran</strong> untuk verifikasi instan.
-                                    </p>
+
                                 </div>
                             )}
 
@@ -298,7 +965,7 @@ export default function Status({ donation, selectedBankAccount }: any) {
                                 </div>
                                 <div className="flex justify-between items-center py-2.5 border-b border-dashed border-slate-200">
                                     <span className="text-slate-500">Nama Donatur</span>
-                                    <span className="font-medium text-slate-800">{donation.is_anonymous ? 'Hamba Allah' : donation.donor_name}</span>
+                                    <span className="font-medium text-slate-800">{donation.is_anonymous ? 'Inisiator Kebaikan' : donation.donor_name}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2.5 border-b border-dashed border-slate-200">
                                     <span className="text-slate-500">Metode Pembayaran</span>
@@ -383,17 +1050,7 @@ export default function Status({ donation, selectedBankAccount }: any) {
                                     {selectedBank && (
                                         <div className="flex justify-between items-center bg-white p-3.5 sm:p-4 rounded-xl border border-amber-200/80 shadow-xs">
                                             <div className="flex items-center gap-3 min-w-0">
-                                                {selectedBank.logo_url ? (
-                                                    <img 
-                                                        src={selectedBank.logo_url} 
-                                                        alt={selectedBank.bank_name} 
-                                                        className="w-11 h-11 object-contain bg-white rounded-lg p-1 border border-slate-100 shrink-0" 
-                                                    />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs shrink-0">
-                                                        BANK
-                                                    </div>
-                                                )}
+                                                <BankLogo code={selectedBank.bank_name || selectedBank.bank_code || 'bsi'} size="md" />
                                                 <div className="min-w-0">
                                                     <span className="block font-bold text-slate-800 text-sm sm:text-base truncate">{selectedBank.bank_name}</span>
                                                     <span className="text-slate-800 font-mono text-base sm:text-lg font-bold tracking-wider">{selectedBank.account_number}</span>
@@ -446,7 +1103,7 @@ export default function Status({ donation, selectedBankAccount }: any) {
                                 <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/40 to-slate-50 border border-blue-200/90 rounded-2xl p-5 sm:p-6 shadow-xs">
                                     <div className="flex flex-col sm:flex-row items-start gap-4">
                                         <div className="w-10 h-10 rounded-xl bg-insani-blue text-white flex items-center justify-center shrink-0 shadow-xs">
-                                            <Sparkles className="w-5 h-5" />
+                                            <UserRoundPlus className="w-5 h-5" />
                                         </div>
                                         <div className="space-y-1.5 flex-1">
                                             <h3 className="font-bold text-slate-900 text-base">
@@ -469,11 +1126,41 @@ export default function Status({ donation, selectedBankAccount }: any) {
                                 </div>
                             )}
 
-                            {/* Back to Program button */}
-                            <div className="pt-4">
+                            {/* Action Buttons for Pending Donation */}
+                            {donation.status === 'pending' && (
+                                <div className="pt-3 space-y-2.5">
+                                    {donation.program?.slug && (
+                                        <Link href={`/program/${donation.program.slug}/donasi?replace=${donation.donation_code}`} className="w-full block">
+                                            <Button 
+                                                type="button" 
+                                                variant="outline" 
+                                                className="w-full min-h-[46px] py-2.5 border-blue-200 text-insani-blue hover:bg-blue-50/80 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+                                            >
+                                                <RefreshCw className="w-4 h-4 mr-2" />
+                                                Pilih / Ganti Metode Pembayaran Lain
+                                            </Button>
+                                        </Link>
+                                    )}
+
+                                    <Button 
+                                        type="button" 
+                                        variant="ghost" 
+                                        onClick={() => setShowCancelModal(true)}
+                                        className="w-full min-h-[42px] py-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+                                    >
+                                        <XCircle className="w-4 h-4 mr-2" />
+                                        Batalkan Tagihan Donasi Ini
+                                    </Button>
+                                </div>
+                            )}
+
+                            {/* Back to Program / Donate Again button */}
+                            <div className="pt-2">
                                 <Link href={`/program/${donation.program?.slug || ''}`} className="w-full block">
                                     <Button className="w-full min-h-[50px] py-3.5 bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white rounded-xl text-sm sm:text-base font-semibold shadow-xs hover:shadow-md transition-all active:scale-[0.99]">
-                                        {t('Kembali ke Halaman Program')}
+                                        {['cancelled', 'expired', 'failed'].includes(donation.status)
+                                            ? 'Donasi ke Program Ini Lagi'
+                                            : t('Kembali ke Halaman Program')}
                                     </Button>
                                 </Link>
                             </div>
@@ -537,6 +1224,42 @@ export default function Status({ donation, selectedBankAccount }: any) {
                     </DialogContent>
                 </Dialog>
             )}
+
+            {/* Modal Konfirmasi Pembatalan Donasi */}
+            <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+                <DialogContent className="max-w-md p-6 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                            <span>Batalkan Tagihan Donasi?</span>
+                        </DialogTitle>
+                        <DialogDescription className="text-xs text-slate-600 dark:text-zinc-400 mt-2 leading-relaxed">
+                            Apakah Anda yakin ingin membatalkan tagihan donasi dengan kode <strong className="text-slate-800 dark:text-zinc-200 font-mono">{donation.donation_code}</strong> sebesar <strong className="text-slate-800 dark:text-zinc-200">{formatCurrency(Number(donation.amount))}</strong>?
+                            <br /><br />
+                            Tagihan yang dibatalkan tidak akan dapat dibayar lagi dan pengingat di dashboard donatur Anda akan langsung dibersihkan.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-5 flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowCancelModal(false)}
+                            disabled={isCancelling}
+                            className="text-xs rounded-xl"
+                        >
+                            Kembali
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={handleCancelDonation}
+                            disabled={isCancelling}
+                            className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-xs"
+                        >
+                            {isCancelling ? 'Membatalkan...' : 'Ya, Batalkan Donasi'}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </PublicLayout>
     );
 }

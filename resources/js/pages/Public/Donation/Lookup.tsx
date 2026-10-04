@@ -8,7 +8,7 @@ import {
     Clock, 
     AlertCircle, 
     ShieldCheck, 
-    Sparkles, 
+    HeartHandshake, 
     FileText,
     HelpCircle,
     UserCheck
@@ -258,7 +258,7 @@ export default function DonationLookup({ search = '', donations }: Props) {
                                                                         </Link>
                                                                     </h3>
                                                                     <div className="text-xs text-slate-500 mt-0.5">
-                                                                        Atas nama: <strong>{donation.is_anonymous ? 'Hamba Allah' : (donation.donor_name || 'Donatur')}</strong>
+                                                                        Atas nama: <strong>{donation.is_anonymous ? 'Inisiator Kebaikan' : (donation.donor_name || 'Donatur')}</strong>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -322,7 +322,7 @@ export default function DonationLookup({ search = '', donations }: Props) {
                                         <div className="bg-gradient-to-br from-blue-50 via-indigo-50/40 to-white border border-blue-200 rounded-3xl p-6 sm:p-8 shadow-xs">
                                             <div className="flex flex-col sm:flex-row items-start gap-4">
                                                 <div className="w-12 h-12 rounded-2xl bg-insani-blue text-white flex items-center justify-center shrink-0 shadow-sm">
-                                                    <Sparkles className="w-6 h-6" />
+                                                    <HeartHandshake className="w-6 h-6" />
                                                 </div>
                                                 <div className="space-y-2 flex-1">
                                                     <h3 className="font-bold text-slate-900 text-base sm:text-lg">

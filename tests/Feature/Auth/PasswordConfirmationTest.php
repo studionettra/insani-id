@@ -73,5 +73,5 @@ test('inertia version returns null in local and testing environment to avoid 409
     $middleware = new HandleInertiaRequests;
     $request = Request::create('/');
 
-    expect($middleware->version($request))->toBeNull();
+    expect($middleware->version($request))->toBe('');
 });

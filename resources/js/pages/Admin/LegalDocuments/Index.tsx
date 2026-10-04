@@ -52,9 +52,12 @@ const ICON_OPTIONS = [
 ];
 
 const PRESET_LOGOS = [
-    { label: 'Kemenkumham', path: '/images/about/Logo-Kumham.webp' },
-    { label: 'Notaris', path: '/images/about/Logo-Notaris-HD.webp' },
-    { label: 'Pemprov DKI', path: '/images/about/logo-Pmeprov-DKI.webp' },
+    { label: 'Kemenkumham RI', path: '/images/legal/kemenkumham.svg' },
+    { label: 'Kemensos RI (Izin PUB)', path: '/images/legal/kemensos.svg' },
+    { label: 'Pemprov DKI Jakarta', path: '/images/legal/pemprov-dki.svg' },
+    { label: 'DJP Pajak RI (NPWP)', path: '/images/legal/djp-pajak.svg' },
+    { label: 'Akta Otentik Notaris RI', path: '/images/legal/garuda-notaris.svg' },
+    { label: 'BAZNAS RI', path: '/images/legal/baznas.svg' },
 ];
 
 export default function LegalDocumentsIndex({ documents, filters }: any) {

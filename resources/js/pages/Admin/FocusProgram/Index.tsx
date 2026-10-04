@@ -4,7 +4,6 @@ import {
     Plus, 
     Search, 
     ExternalLink, 
-    Sparkles, 
     CheckCircle2, 
     AlertCircle, 
     Video, 
@@ -230,8 +229,8 @@ export default function FocusProgramIndex({ focusPrograms, availableCategories, 
 
                                             {customPublicName && (
                                                 <div className="mb-3">
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-[#1A56DB] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
-                                                        <Sparkles className="w-3 h-3" /> Nama Publik Kustom
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-[#1A56DB] dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+                                                        Nama Publik Kustom
                                                     </span>
                                                 </div>
                                             )}

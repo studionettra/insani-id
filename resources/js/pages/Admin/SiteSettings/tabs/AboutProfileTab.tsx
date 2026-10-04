@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Globe, Compass, CheckCircle2, Loader2, Info } from 'lucide-react';
+import { Languages, Globe, Compass, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
@@ -56,7 +56,7 @@ export default function AboutProfileTab({
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                                    <Languages className="w-3.5 h-3.5 text-indigo-500" />
                                     <span>Terjemahkan Otomatis (EN & AR)</span>
                                 </>
                             )}

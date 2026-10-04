@@ -27,9 +27,11 @@ test('it sends email and whatsapp notifications when donation is paid', function
 
     $donation = Donation::factory()->create([
         'program_id' => $program->id,
+        'donor_name' => 'Budi Santoso',
         'donor_email' => 'donor@example.com',
         'donor_phone' => '08123456789',
         'status' => 'paid',
+        'is_anonymous' => false,
     ]);
 
     $mockWaService = Mockery::mock(NotificationGatewayService::class);
@@ -49,8 +51,9 @@ test('it sends email and whatsapp notifications when donation is paid', function
     $job->handle($mockWaService);
 
     // Assert Emails sent
-    Mail::assertSent(DonationSuccessNotification::class, function ($mail) {
-        return $mail->hasTo('donor@example.com');
+    Mail::assertSent(DonationSuccessNotification::class, function ($mail) use ($donation) {
+        return $mail->hasTo('donor@example.com')
+            && $mail->envelope()->subject === "Terima kasih atas donasi Anda - Budi Santoso - {$donation->donation_code}";
     });
 
     Mail::assertQueued(NewDonationNotification::class, function ($mail) {
@@ -60,4 +63,14 @@ test('it sends email and whatsapp notifications when donation is paid', function
     // Assert Notification Logs created
     expect(NotificationLog::where('notifiable_id', $donation->id)->where('channel', 'email')->exists())->toBeTrue()
         ->and(NotificationLog::where('notifiable_id', $donation->id)->where('channel', 'whatsapp')->exists())->toBeTrue();
+});
+
+test('it formats email subject correctly for anonymous donor', function () {
+    $donation = Donation::factory()->create([
+        'donor_name' => 'Fulan',
+        'is_anonymous' => true,
+    ]);
+
+    $mailable = new DonationSuccessNotification($donation);
+    expect($mailable->envelope()->subject)->toBe("Terima kasih atas donasi Anda - Inisiator Kebaikan - {$donation->donation_code}");
 });

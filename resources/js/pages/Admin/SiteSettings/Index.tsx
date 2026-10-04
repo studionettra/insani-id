@@ -12,12 +12,14 @@ import AboutProfileTab from './tabs/AboutProfileTab';
 import LegalReceiptTab from './tabs/LegalReceiptTab';
 import AnnouncementTab from './tabs/AnnouncementTab';
 import MarketingIntegrationTab from './tabs/MarketingIntegrationTab';
+import PaymentGatewayTab, { BankAccount } from './tabs/PaymentGatewayTab';
 
 interface Props {
     settings: Record<string, string>;
+    bankAccounts?: BankAccount[];
 }
 
-export default function SiteSettingsIndex({ settings }: Props) {
+export default function SiteSettingsIndex({ settings, bankAccounts = [] }: Props) {
     const [activeTab, setActiveTab] = useState<TabKey>('general');
 
     const { data, setData, post, processing, errors, recentlySuccessful } = useForm({
@@ -77,6 +79,22 @@ export default function SiteSettingsIndex({ settings }: Props) {
         adsense_slot_article_middle: settings.adsense_slot_article_middle || '',
         adsense_slot_article_bottom: settings.adsense_slot_article_bottom || '',
         ads_txt_content: settings.ads_txt_content || '',
+        payment_gateway_provider: settings.payment_gateway_provider || 'midtrans',
+        midtrans_channel_qris: settings.midtrans_channel_qris ?? '1',
+        midtrans_channel_shopeepay: settings.midtrans_channel_shopeepay ?? '1',
+        midtrans_channel_gopay: settings.midtrans_channel_gopay ?? '1',
+        midtrans_channel_bsi_va: settings.midtrans_channel_bsi_va ?? '0',
+        midtrans_channel_bri_va: settings.midtrans_channel_bri_va ?? '0',
+        midtrans_channel_bni_va: settings.midtrans_channel_bni_va ?? '0',
+        midtrans_channel_mandiri_va: settings.midtrans_channel_mandiri_va ?? '0',
+        midtrans_channel_bca_va: settings.midtrans_channel_bca_va ?? '0',
+        midtrans_channel_permata_va: settings.midtrans_channel_permata_va ?? '0',
+        midtrans_channel_cimb_va: settings.midtrans_channel_cimb_va ?? '0',
+        midtrans_channel_danamon_va: settings.midtrans_channel_danamon_va ?? '0',
+        midtrans_channel_credit_card: settings.midtrans_channel_credit_card ?? '0',
+        manual_transfer_bsi_active: settings.manual_transfer_bsi_active ?? '1',
+        manual_transfer_bri_active: settings.manual_transfer_bri_active ?? '1',
+        midtrans_va_maintenance_notice: settings.midtrans_va_maintenance_notice || 'Layanan Virtual Account otomatis sedang dalam integrasi perbankan berkala. Anda dapat berdonasi secara instan menggunakan QRIS (mendukung semua M-Banking: BCA, Mandiri, BRI, BNI, BSI) atau melalui Transfer Manual BSI & BRI.',
     });
 
     // File Preview States
@@ -242,7 +260,7 @@ export default function SiteSettingsIndex({ settings }: Props) {
             <Head title="Pengaturan Website" />
 
             <div className="space-y-6 pb-8">
-                {/* Header */}
+                {/* Header Utama Halaman */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-gray-200/80 pb-5 dark:border-gray-800">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -271,14 +289,14 @@ export default function SiteSettingsIndex({ settings }: Props) {
                     </div>
                 </div>
 
-                {/* Segmented Tab Navigation */}
+                {/* Horizontal Modern Pill Tabs */}
                 <SettingsTabNav
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
                     errors={errors}
                 />
 
-                {/* Form Container */}
+                {/* Form Container (Full 12-Column Canvas) */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Tab 1: Umum & Kontak */}
                     {activeTab === 'general' && (
@@ -353,6 +371,28 @@ export default function SiteSettingsIndex({ settings }: Props) {
                             errors={errors}
                         />
                     )}
+
+                    {/* Tab 7: Payment Gateway (Midtrans Core API) */}
+                    {activeTab === 'payment' && (
+                        <PaymentGatewayTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            errors={errors}
+                            bankAccounts={bankAccounts}
+                        />
+                    )}
+
+                    {/* Floating Mobile Save Button */}
+                    <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+                        <Button 
+                            type="submit" 
+                            disabled={processing}
+                            className="bg-brand-600 hover:bg-brand-700 text-white shadow-xl rounded-full text-xs font-semibold h-11 px-5 flex items-center gap-2"
+                        >
+                            <Save className="w-4 h-4" />
+                            {processing ? 'Menyimpan...' : 'Simpan Pengaturan'}
+                        </Button>
+                    </div>
                 </form>
             </div>
         </>

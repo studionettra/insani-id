@@ -145,3 +145,18 @@ test('users are rate limited', function () {
 
     $response->assertTooManyRequests();
 });
+
+test('deactivated users cannot authenticate', function () {
+    $user = User::factory()->create([
+        'is_active' => false,
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+        'cf-turnstile-response' => 'test-token',
+    ]);
+
+    $this->assertGuest();
+    $response->assertSessionHasErrors('email');
+});

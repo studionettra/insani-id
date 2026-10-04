@@ -5,7 +5,6 @@ import {
     ChevronRight, 
     Heart, 
     Play, 
-    Sparkles, 
     ShieldCheck, 
     ImageIcon, 
     X, 
@@ -107,27 +106,20 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
 
                     <div className="max-w-3xl">
                         <FadeIn delay={0.1}>
-                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-insani-turquoise text-xs font-semibold uppercase tracking-wider mb-5 border border-white/15">
-                                <Sparkles className="w-3.5 h-3.5" />
-                                <span>{t('Fokus Program')}</span>
-                            </div>
-                        </FadeIn>
-
-                        <FadeIn delay={0.2}>
                             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
                                 {pillarTitle}
                             </h1>
                         </FadeIn>
 
                         {pillarDesc && (
-                            <FadeIn delay={0.3}>
+                            <FadeIn delay={0.2}>
                                 <p className="text-lg md:text-xl text-slate-200/90 leading-relaxed mb-8 max-w-2xl font-normal">
                                     {pillarDesc}
                                 </p>
                             </FadeIn>
                         )}
 
-                        <FadeIn delay={0.4}>
+                        <FadeIn delay={0.3}>
                             <div className="flex flex-wrap gap-4 items-center pt-2">
                                 <Button 
                                     size="lg" 
@@ -140,17 +132,13 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                     </a>
                                 </Button>
                                 {(realityTitle || realitaMetrics.length > 0) && (
-                                    <Button 
-                                        variant="outline" 
-                                        size="lg" 
-                                        asChild 
-                                        className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full font-medium px-6 h-12 backdrop-blur-md transition-all active:scale-[0.98]"
+                                    <a 
+                                        href="#realitas"
+                                        className="group inline-flex items-center justify-center border border-white/20 bg-white/10 hover:bg-white/20 text-white hover:text-white rounded-full font-medium px-6 h-12 backdrop-blur-md transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm text-sm md:text-base"
                                     >
-                                        <a href="#realitas">
-                                            {t('Pelajari Realitas')}
-                                            <ArrowRight className="w-4 h-4 ml-2 rtl:rotate-180" />
-                                        </a>
-                                    </Button>
+                                        <span>{t('Pelajari Realitas')}</span>
+                                        <ArrowRight className="w-4 h-4 ml-2 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" />
+                                    </a>
                                 )}
                             </div>
                         </FadeIn>
@@ -328,7 +316,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                             <div className="lg:col-span-5 lg:sticky lg:top-28">
                                 <FadeIn>
                                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-100">
-                                        <Sparkles className="w-3.5 h-3.5 text-[#1A56DB]" />
+                                        <HandHeart className="w-3.5 h-3.5 text-[#1A56DB]" />
                                         <span>{t('Ikhtiar Insani')}</span>
                                     </div>
 

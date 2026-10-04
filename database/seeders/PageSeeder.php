@@ -90,6 +90,25 @@ class PageSeeder extends Seeder
                     'ar' => 'مركز المساعدة والأسئلة الشائعة حول برامج وخدمات إنساني إندونيسيا.',
                 ],
             ],
+            [
+                'slug' => 'logo',
+                'title' => [
+                    'id' => 'Panduan Logo & Identitas Brand',
+                    'en' => 'Logo & Brand Guidelines',
+                    'ar' => 'دليل الشعار والهوية البصرية',
+                ],
+                'file' => base_path('docs/policy/panduan-logo.html'),
+                'meta_title' => [
+                    'id' => 'Logo Insani Indonesia - Panduan Identitas Visual Resmi',
+                    'en' => 'Insani Indonesia Logo - Official Brand Guidelines',
+                    'ar' => 'شعار إنساني إندونيسيا - دليل الهوية البصرية الرسمي',
+                ],
+                'meta_description' => [
+                    'id' => 'Panduan resmi penggunaan logo, filosofi warna, dan pusat unduhan aset logo resmi Yayasan Peduli Insani Indonesia.',
+                    'en' => 'Official logo usage guidelines, color philosophy, and official asset download center of Insani Indonesia.',
+                    'ar' => 'الدليل الرسمي لاستخدام الشعار وفلسفة الألوان وتنزيل أصول شعار إنساني إندونيسيا.',
+                ],
+            ],
         ];
 
         foreach ($pages as $item) {

@@ -40,6 +40,10 @@ class BankAccount extends Model
             return $this->logo_path;
         }
 
-        return asset('storage/'.$this->logo_path);
+        if (str_starts_with($this->logo_path, 'images/') || str_starts_with($this->logo_path, '/images/')) {
+            return asset(ltrim($this->logo_path, '/'));
+        }
+
+        return asset('storage/'.ltrim($this->logo_path, '/'));
     }
 }

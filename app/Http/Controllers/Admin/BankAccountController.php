@@ -46,6 +46,7 @@ class BankAccountController extends Controller
             'account_name' => 'required|string|max:255',
             'bank_type' => 'required|in:syariah,konvensional',
             'logo' => 'nullable|image|max:2048',
+            'preset_logo' => 'nullable|string|max:255',
             'instructions' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
@@ -53,6 +54,8 @@ class BankAccountController extends Controller
 
         if ($request->hasFile('logo')) {
             $validated['logo_path'] = $request->file('logo')->store('banks', 'public');
+        } elseif ($request->filled('preset_logo')) {
+            $validated['logo_path'] = $request->input('preset_logo');
         }
 
         $validated['is_active'] = $validated['is_active'] ?? true;
@@ -73,16 +76,28 @@ class BankAccountController extends Controller
             'account_name' => 'required|string|max:255',
             'bank_type' => 'required|in:syariah,konvensional',
             'logo' => 'nullable|image|max:2048',
+            'preset_logo' => 'nullable|string|max:255',
+            'remove_logo' => 'nullable|boolean',
             'instructions' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ]);
 
         if ($request->hasFile('logo')) {
-            if ($bank_account->logo_path) {
+            if ($bank_account->logo_path && str_starts_with($bank_account->logo_path, 'banks/')) {
                 Storage::disk('public')->delete($bank_account->logo_path);
             }
             $validated['logo_path'] = $request->file('logo')->store('banks', 'public');
+        } elseif ($request->filled('preset_logo')) {
+            if ($bank_account->logo_path && str_starts_with($bank_account->logo_path, 'banks/')) {
+                Storage::disk('public')->delete($bank_account->logo_path);
+            }
+            $validated['logo_path'] = $request->input('preset_logo');
+        } elseif ($request->boolean('remove_logo')) {
+            if ($bank_account->logo_path && str_starts_with($bank_account->logo_path, 'banks/')) {
+                Storage::disk('public')->delete($bank_account->logo_path);
+            }
+            $validated['logo_path'] = null;
         }
 
         $bank_account->update($validated);
@@ -93,12 +108,24 @@ class BankAccountController extends Controller
 
     public function destroy(BankAccount $bank_account): RedirectResponse
     {
-        if ($bank_account->logo_path) {
+        if ($bank_account->logo_path && str_starts_with($bank_account->logo_path, 'banks/')) {
             Storage::disk('public')->delete($bank_account->logo_path);
         }
         $bank_account->delete();
         Cache::forget('bank_accounts_public');
 
         return redirect()->back()->with('success', 'Rekening bank yayasan berhasil dihapus.');
+    }
+
+    public function toggleActive(BankAccount $bank_account): RedirectResponse
+    {
+        $bank_account->update([
+            'is_active' => ! $bank_account->is_active,
+        ]);
+        Cache::forget('bank_accounts_public');
+
+        $statusText = $bank_account->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        return redirect()->back()->with('success', "Rekening {$bank_account->bank_name} berhasil {$statusText}.");
     }
 }

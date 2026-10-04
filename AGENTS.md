@@ -192,4 +192,12 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
+=== design-and-ui rules ===
+
+# Design, Icons, and Asset Guidelines
+
+- **Larangan Icon Sparkles:** DILARANG menggunakan icon `Sparkles`, `PencilSparkles`, atau varian kilau/bintang sejenis di seluruh antarmuka aplikasi. Icon ini diasosiasikan dengan AI gimmick / cliché dan tidak cocok untuk citra lembaga filantropi & yayasan resmi.
+- **Pemilihan Icon Lucide:** Selalu gunakan icon yang representatif, fungsional, dan bermakna kontekstual dari katalog resmi [Lucide Icons](https://lucide.dev/icons/) (misalnya: `Info`, `ShieldCheck`, `CheckCircle2`, `Landmark`, `Building2`, `HelpCircle`, `HeartHandshake`, `TrendingUp`, dll).
+- **Aset Logo Resmi (Perbankan, E-Wallet, & Lembaga):** Seluruh logo lembaga pemerintahan, kementerian/regulator, perbankan, dan e-wallet wajib bersumber dari aset resmi SVG/vektor beresolusi tinggi, diutamakan dari [Wikimedia Commons](https://commons.wikimedia.org).
+
 </laravel-boost-guidelines>

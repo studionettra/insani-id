@@ -28,10 +28,37 @@ export const parseMultilingual = (val: any, defaultText = ''): MultilingualField
     return { id: val || defaultText, en: '', ar: '' };
 };
 
-export type TabKey = 'general' | 'branding' | 'profile' | 'legal' | 'announcement' | 'marketing';
+export type TabKey = 'general' | 'branding' | 'profile' | 'legal' | 'announcement' | 'marketing' | 'payment';
+
+export type TabCategoryKey = 'identity' | 'finance' | 'communications';
+
+export interface TabCategoryDefinition {
+    key: TabCategoryKey;
+    label: string;
+    description?: string;
+}
+
+export const SETTINGS_TAB_CATEGORIES: TabCategoryDefinition[] = [
+    {
+        key: 'identity',
+        label: 'Identitas & Profil',
+        description: 'Kontak resmi, branding media, visi-misi, dan dokumen hukum yayasan',
+    },
+    {
+        key: 'finance',
+        label: 'Keuangan & Transaksi',
+        description: 'Konfigurasi Midtrans Core API, QRIS, E-Wallet, dan rekening yayasan',
+    },
+    {
+        key: 'communications',
+        label: 'Publikasi & Pemasaran',
+        description: 'Banner pengumuman global, analitik pelacakan donatur, dan iklan',
+    },
+];
 
 export interface TabDefinition {
     key: TabKey;
+    category: TabCategoryKey;
     label: string;
     shortLabel: string;
     description: string;

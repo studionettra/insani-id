@@ -8,7 +8,6 @@ import {
     Rocket, 
     Users, 
     ShieldCheck, 
-    Sparkles, 
     Receipt, 
     CreditCard, 
     MessageCircle, 
@@ -44,7 +43,7 @@ const FAQ_DATA: FaqItem[] = [
                     <li>Buka katalog <Link href="/program" className="text-insani-blue font-semibold hover:underline">Program Donasi</Link> dan pilih kampanye yang ingin Anda bantu.</li>
                     <li>Klik tombol <strong>"Donasi Sekarang"</strong> pada halaman kampanye.</li>
                     <li>Tentukan nominal donasi (minimal Rp 10.000).</li>
-                    <li>Masukkan nama, email, dan nomor WhatsApp, atau centang <em>"Sembunyikan Nama Saya (Anonim)"</em> jika ingin berdonasi sebagai Hamba Allah.</li>
+                    <li>Masukkan nama, email, dan nomor WhatsApp, atau centang <em>"Sembunyikan Nama Saya (Anonim)"</em> jika ingin berdonasi sebagai Inisiator Kebaikan.</li>
                     <li>Pilih metode pembayaran otomatis (QRIS, VA Bank, E-Wallet) atau transfer manual bank (BSI / BRI).</li>
                     <li>Selesaikan pembayaran sesuai instruksi. Pelajari panduan visual selengkapnya di <Link href="/cara-donasi" className="text-insani-blue font-semibold hover:underline">Halaman Cara Berdonasi</Link>.</li>
                 </ol>
@@ -67,10 +66,10 @@ const FAQ_DATA: FaqItem[] = [
         id: 'donasi-anonim',
         category: 'donatur',
         question: 'Apa fungsi opsi "Sembunyikan Nama Saya (Anonim)"?',
-        keywords: ['anonim', 'sembunyikan nama', 'hamba allah', 'privasi nama', 'rahasia'],
+        keywords: ['anonim', 'sembunyikan nama', 'inisiator kebaikan', 'privasi nama', 'rahasia'],
         answer: (
             <div className="space-y-2 text-slate-600">
-                <p>Jika Anda mencentang opsi anonim saat melakukan donasi, nama Anda tidak akan pernah ditampilkan di daftar donatur publik halaman program. Sistem akan menampilkan donasi Anda sebagai <strong>"Hamba Allah"</strong>.</p>
+                <p>Jika Anda mencentang opsi anonim saat melakukan donasi, nama Anda tidak akan pernah ditampilkan di daftar donatur publik halaman program. Sistem akan menampilkan donasi Anda sebagai <strong>"Inisiator Kebaikan"</strong>.</p>
                 <p>Identitas asli Anda tetap tersimpan secara aman dan terenkripsi di sistem internal kami hanya untuk keperluan verifikasi pembayaran dan audit keuangan resmi sesuai ketentuan perbankan.</p>
             </div>
         )
@@ -100,7 +99,7 @@ const FAQ_DATA: FaqItem[] = [
             <div className="space-y-3 text-slate-600">
                 <ul className="list-disc pl-5 space-y-2">
                     <li>
-                        <strong>Pembayaran Otomatis (QRIS, Virtual Account, E-Wallet):</strong> Donasi diverifikasi secara <em>real-time</em> oleh payment gateway berlisensi Bank Indonesia (Xendit). Donasi terkonfirmasi lunas dalam beberapa detik tanpa perlu mengirimkan bukti transfer.
+                        <strong>Pembayaran Otomatis (QRIS, Virtual Account, E-Wallet):</strong> Donasi diverifikasi secara <em>real-time</em> oleh payment gateway berlisensi Bank Indonesia (Midtrans). Donasi terkonfirmasi lunas dalam beberapa detik tanpa perlu mengirimkan bukti transfer.
                     </li>
                     <li>
                         <strong>Transfer Manual Bank (BSI & BRI):</strong> Anda mentransfer dana langsung ke rekening resmi yayasan. Setelah transfer, Anda <strong>wajib mengonfirmasi</strong> dengan mengirimkan foto/screenshot bukti transfer ke WhatsApp Customer Service kami agar admin keuangan memverifikasinya.
@@ -148,7 +147,7 @@ const FAQ_DATA: FaqItem[] = [
                 <p>Fitur <strong>Rincian Penggunaan Dana</strong> adalah wujud transparansi finansial terbuka platform Insani Indonesia kepada para donatur dan masyarakat. Melalui modal rincian ini, Anda dapat memantau secara terbuka:</p>
                 <ul className="list-disc pl-5 space-y-1">
                     <li><strong>Total Donasi Masuk (Gross):</strong> Akumulasi donasi yang disalurkan donatur.</li>
-                    <li><strong>Biaya Transaksi Pembayaran Digital:</strong> Biaya transaksi resmi payment gateway (Xendit) untuk pemrosesan QRIS, VA, dan E-Wallet.</li>
+                    <li><strong>Biaya Transaksi Pembayaran Digital:</strong> Biaya transaksi resmi payment gateway (Midtrans) untuk pemrosesan QRIS, VA, dan E-Wallet.</li>
                     <li><strong>Biaya Operasional Platform (5% saat pencairan):</strong> Biaya operasional dan verifikasi yayasan yang hanya dipotong ketika penggalang dana mencairkan dana.</li>
                     <li><strong>Total Dana Telah Dicairkan:</strong> Akumulasi dana yang sudah ditransfer ke campaigner beserta rencana penggunaannya.</li>
                     <li><strong>Sisa Saldo Belum Dicairkan:</strong> Dana bersih donasi yang masih tersimpan aman dan siap dicairkan pada tahapan berikutnya.</li>
@@ -593,11 +592,36 @@ const FAQ_DATA: FaqItem[] = [
                 <p>Anda dapat mengakses, meninjau, dan mengunduh seluruh dokumen laporan keuangan tahunan tersebut secara bebas dalam format PDF melalui halaman <Link href="/laporan-keuangan" className="text-insani-blue font-semibold hover:underline"><strong>Laporan Keuangan Resmi</strong></Link>.</p>
             </div>
         )
+    },
+    {
+        id: 'panduan-logo-unduh',
+        category: 'lembaga',
+        question: 'Di mana saya bisa mengunduh logo resmi Insani Indonesia dan melihat panduan penggunaannya (brand guideline)?',
+        keywords: ['logo', 'panduan logo', 'download logo', 'unduh logo', 'brand guideline', 'aset visual', 'logo insani', 'logo resmi'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p>Yayasan Peduli Insani Indonesia menyediakan halaman khusus identitas visual dan pusat berkas master di <Link href="/logo" className="text-insani-blue font-semibold hover:underline"><strong>Panduan Logo Resmi Insani Indonesia</strong></Link>.</p>
+                <p>Di halaman tersebut, Anda dapat mempelajari filosofi logo (<em>Muda, Bertumbuh &amp; Bertanggung Jawab</em>), aturan penempatan (<em>clear space</em> &amp; batas aman), pedoman penggunaan yang dianjurkan dan dilarang (<em>Do's &amp; Don'ts</em>), kode warna resmi (HEX, RGB, CMYK), serta mengunduh berkas master resolusi tinggi (format Portrait dan Landscape dalam varian Warna Asli, Monokrom Hitam, dan Putih) langsung via Google Drive atau berkas PNG lokal.</p>
+            </div>
+        )
+    },
+    {
+        id: 'izin-penggunaan-logo',
+        category: 'lembaga',
+        question: 'Apakah mitra CSR, komunitas, atau media diizinkan menggunakan logo Insani Indonesia untuk publikasi bersama?',
+        keywords: ['izin logo', 'lisensi logo', 'kerjasama logo', 'media partner', 'co-branding', 'logo sponsor', 'aset vektor', 'press kit'],
+        answer: (
+            <div className="space-y-2 text-slate-600">
+                <p><strong>Ya, diizinkan dengan ketentuan mematuhi standar identitas brand resmi Insani Indonesia.</strong></p>
+                <p>Mitra korporasi CSR, penyelenggara kegiatan sosial, media massa, maupun sponsor bersama dipersilakan mencantumkan logo Insani Indonesia sesuai aturan di halaman <Link href="/logo" className="text-insani-blue font-semibold hover:underline"><strong>Panduan Logo</strong></Link>. Logo dilarang diubah warnanya, didistorsi proporsinya, atau ditambah efek visual berlebihan.</p>
+                <p>Untuk kebutuhan berkas vektor master (SVG/EPS), permohonan izin tertulis co-branding, atau media kit pers, silakan menghubungi tim komunikasi kami melalui email <a href="mailto:sapa@insani.id" className="text-insani-blue hover:underline font-medium">sapa@insani.id</a> atau WhatsApp Humas.</p>
+            </div>
+        )
     }
 ];
 
 const CATEGORIES = [
-    { key: 'all', label: 'Semua Topik', icon: Sparkles },
+    { key: 'all', label: 'Semua Topik', icon: HelpCircle },
     { key: 'donatur', label: 'Donatur & Pembayaran', icon: Heart },
     { key: 'campaigner', label: 'Penggalang Dana', icon: Rocket },
     { key: 'fundraiser', label: 'Relawan Fundraiser', icon: Users },
@@ -608,7 +632,13 @@ const CATEGORIES = [
 
 export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
     const { siteSettings } = usePage().props as any;
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('q') || params.get('search') || '';
+        }
+        return '';
+    });
     const [activeCategory, setActiveCategory] = useState<string>('all');
     const [openItem, setOpenItem] = useState<string | null>('cara-donasi');
 
@@ -659,6 +689,13 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
             return matchQuestion || matchKeywords;
         });
     }, [activeFaqList, activeCategory, searchQuery]);
+
+    // Auto-open first matching item when search query is present
+    React.useEffect(() => {
+        if (searchQuery.trim() && filteredFaqs.length > 0) {
+            setOpenItem(filteredFaqs[0].id);
+        }
+    }, [searchQuery, filteredFaqs]);
 
     const toggleItem = (id: string) => {
         setOpenItem(openItem === id ? null : id);
@@ -715,7 +752,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                         {/* Quick filter tags */}
                         <div className="flex flex-wrap items-center justify-center gap-2 mt-4 text-xs text-slate-300">
                             <span className="text-slate-400 font-medium">Topik Cepat:</span>
-                            {['Cara Donasi', 'Cek Status', 'Verifikasi', 'Fundraiser', 'Biaya Platform', 'Kuitansi'].map((tag) => (
+                            {['Cara Donasi', 'Cek Status', 'Verifikasi', 'Fundraiser', 'Panduan Logo', 'Biaya Platform', 'Kuitansi'].map((tag) => (
                                 <button
                                     key={tag}
                                     onClick={() => handleTagClick(tag)}

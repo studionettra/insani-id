@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Megaphone, Sparkles, Loader2, ExternalLink, ArrowRight } from 'lucide-react';
+import { Megaphone, Languages, Loader2, ExternalLink, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -151,7 +151,7 @@ export default function AnnouncementTab({
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                    <Languages className="w-3.5 h-3.5 text-amber-500" />
                                     <span>Terjemahkan Otomatis</span>
                                 </>
                             )}

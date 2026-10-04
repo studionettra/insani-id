@@ -48,30 +48,30 @@ export default function DonationReceiptModal({ receipt, onClose }: Props) {
                 className="w-full h-full max-w-4xl sm:h-[90vh] sm:rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden relative"
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+                <div className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-100 bg-slate-50">
                     <div>
-                        <h3 className="font-bold text-slate-800">Pratinjau Kuitansi Resmi</h3>
-                        <p className="text-xs text-slate-500">Gunakan tombol Cetak di dalam kuitansi untuk menyimpan PDF</p>
+                        <h3 className="font-bold text-slate-800 text-sm sm:text-base">Pratinjau Kuitansi Resmi</h3>
+                        <p className="text-xs text-slate-500 truncate sm:whitespace-normal">Gunakan tombol Cetak di dalam kuitansi untuk menyimpan PDF</p>
                     </div>
                     <Button 
                         onClick={onClose}
                         variant="ghost"
                         size="sm"
-                        className="h-10 w-10 p-0 rounded-full hover:bg-slate-200"
+                        className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full hover:bg-slate-200"
                     >
                         <X className="w-5 h-5 text-slate-500" />
                     </Button>
                 </div>
                 
                 {/* Iframe content */}
-                <div className="flex-1 bg-slate-200 p-2 sm:p-4 overflow-hidden relative">
+                <div className="flex-1 bg-slate-100 sm:bg-slate-200 p-1 sm:p-4 overflow-y-auto relative">
                     {/* Spinner placeholder */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-insani-blue"></div>
                     </div>
                     <iframe 
                         src={`/donasi/kwitansi/${receipt.donation_code}?hide_back_btn=1`}
-                        className="w-full h-full rounded-xl bg-white border-0 shadow-sm relative z-10"
+                        className="w-full h-full rounded-lg sm:rounded-xl bg-white border-0 shadow-sm relative z-10"
                         title="Kuitansi Donasi"
                         onLoad={(e) => {
                             (e.target as HTMLIFrameElement).style.opacity = '1';

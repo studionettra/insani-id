@@ -266,6 +266,11 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                         <span>{t('Legalitas & Perizinan')}</span>
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link href="/logo" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Panduan Logo & Brand')}</span>
+                                    </Link>
+                                </li>
                             </ul>
                         </div>
 
@@ -313,7 +318,11 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             
                             {/* QRIS Card with modern styling */}
                             <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl shadow-xl inline-block max-w-[220px]">
-                                <div className="bg-white p-2 rounded-xl">
+                                <div className="bg-white p-2.5 rounded-xl flex flex-col items-center">
+                                    <div className="w-full flex items-center justify-between px-1 pb-1.5 mb-1.5 border-b border-slate-100">
+                                        <img src="/images/payments/qris.svg" alt="QRIS" className="h-4 w-auto object-contain" />
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Resmi BI</span>
+                                    </div>
                                     <img 
                                         src={qrisImageUrl} 
                                         alt="QRIS Donasi Yayasan Peduli Insani Indonesia" 
@@ -340,16 +349,56 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                         </div>
                     </div>
                     
+                    {/* Trust Strip: Lembaga Resmi Negara & Pengawasan Finansial */}
+                    {/* <div className="mt-12 pt-8 border-t border-white/10">
+                        <div className="flex flex-col lg:flex-row items-center justify-between gap-5 text-center lg:text-left">
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">
+                                    {t('Kepatuhan Hukum & Standar Keuangan Resmi')}
+                                </p>
+                                <p className="text-[11px] text-slate-400">
+                                    {t('Insani Indonesia beroperasi legal di bawah pengawasan regulasi kementerian dan sistem pembayaran nasional.')}
+                                </p>
+                            </div>
+                            
+                            {/* Badges Pill Bar */}
+                            {/* <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2.5 sm:gap-3">
+                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Kementerian Hukum & HAM RI">
+                                    <img src="/images/legal/kemenkumham.svg" alt="Kemenkumham RI" className="h-6 w-auto object-contain" />
+                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">Kemenkumham RI</span>
+                                </div>
+                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Kementerian Sosial RI (Izin PUB)">
+                                    <img src="/images/legal/kemensos.svg" alt="Kemensos RI" className="h-5 w-auto object-contain" />
+                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">Kemensos RI</span>
+                                </div>
+                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Pemerintah Provinsi DKI Jakarta">
+                                    <img src="/images/legal/pemprov-dki.svg" alt="Pemprov DKI Jakarta" className="h-6 w-auto object-contain" />
+                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">Pemprov DKI</span>
+                                </div>
+                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Direktorat Jenderal Pajak (NPWP Terdaftar)">
+                                    <img src="/images/legal/djp-pajak.svg" alt="DJP Pajak" className="h-6 w-auto object-contain" />
+                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">DJP Pajak</span>
+                                </div>
+                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Quick Response Code Indonesian Standard">
+                                    <img src="/images/payments/qris.svg" alt="QRIS Nasional" className="h-5 w-auto object-contain" />
+                                </div>
+                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Bank Indonesia">
+                                    <img src="/images/payments/bi.svg" alt="Bank Indonesia" className="h-5 w-auto object-contain" />
+                                </div>
+                            </div> */}
+                        {/* </div> */}
+                    {/* </div> */}
+
                     {/* Bottom Bar: Copyright & SK Kemenkumham */}
-                    <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400">
+                    <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400">
                         <p className="text-center sm:text-left">
                             &copy; {new Date().getFullYear()} {siteSettings?.legal_foundation_name || t('Yayasan Peduli Insani Indonesia')}. {t('Hak cipta dilindungi.')}
                         </p>
                         {siteSettings?.show_sk_in_footer !== '0' && (
-                            <div className="flex items-center gap-1.5 text-slate-400">
-                                <ShieldCheck className="w-4 h-4 text-blue-300 shrink-0" />
-                                <span>
-                                    {siteSettings?.legal_sk_label || 'SK Kemenkumham RI'}: <strong>{siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
+                            <div className="flex items-center gap-2 text-slate-300 bg-white/10 px-3 py-1.5 rounded-full border border-white/15">
+                                <img src="/images/legal/kemenkumham.svg" alt="Kemenkumham" className="w-4 h-4 object-contain shrink-0" />
+                                <span className="text-[11px]">
+                                    {siteSettings?.legal_sk_label || 'SK Kemenkumham RI'}: <strong className="font-mono text-white">{siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
                                 </span>
                             </div>
                         )}

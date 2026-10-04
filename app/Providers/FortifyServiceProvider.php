@@ -7,6 +7,7 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Requests\CustomLoginRequest;
 use App\Http\Requests\CustomSendPasswordResetLinkRequest;
 use App\Http\Responses\LogoutResponse;
+use App\Models\User;
 use App\Rules\TurnstileRule;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Features;
@@ -59,6 +61,22 @@ class FortifyServiceProvider extends ServiceProvider
             ]);
 
             return Hash::check((string) $password, $user->password);
+        });
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where(Fortify::username(), $request->{Fortify::username()})->first();
+
+            if ($user && Hash::check((string) $request->password, $user->password)) {
+                if (! $user->is_active) {
+                    throw ValidationException::withMessages([
+                        Fortify::username() => 'Akun Anda telah dinonaktifkan. Silakan hubungi administrator.',
+                    ]);
+                }
+
+                return $user;
+            }
+
+            return null;
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\FormatsTitleCase;
 use App\Http\Controllers\Controller;
 use App\Jobs\TranslateProgramJob;
 use App\Models\Category;
@@ -15,6 +16,8 @@ use Mews\Purifier\Facades\Purifier;
 
 class ProgramController extends Controller
 {
+    use FormatsTitleCase;
+
     /**
      * Display a listing of the resource.
      */
@@ -117,6 +120,14 @@ class ProgramController extends Controller
             ? $titleInput
             : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
 
+        if (is_array($titleTranslations)) {
+            foreach ($titleTranslations as $loc => $val) {
+                if (is_string($val)) {
+                    $titleTranslations[$loc] = $this->formatTitleCase($val, (string) $loc);
+                }
+            }
+        }
+
         $storyTranslations = is_array($storyInput)
             ? $storyInput
             : ($translationService->translateFields(['story' => (string) $storyInput], ['en', 'ar'], 'id', ['story'])['story'] ?? ['id' => (string) $storyInput]);
@@ -209,6 +220,14 @@ class ProgramController extends Controller
         $titleTranslations = is_array($titleInput)
             ? $titleInput
             : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        if (is_array($titleTranslations)) {
+            foreach ($titleTranslations as $loc => $val) {
+                if (is_string($val)) {
+                    $titleTranslations[$loc] = $this->formatTitleCase($val, (string) $loc);
+                }
+            }
+        }
 
         $storyTranslations = is_array($storyInput)
             ? $storyInput

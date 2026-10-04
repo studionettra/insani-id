@@ -8,7 +8,7 @@ import {
   Heart,
   Inbox,
   Mail,
-  Sparkles,
+  Target,
   UserCheck,
   Volume2,
   VolumeX,
@@ -76,7 +76,7 @@ export default function NotificationDropdown() {
         };
       case "program":
         return {
-          icon: <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
+          icon: <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
           bg: "bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400 border border-purple-100 dark:border-purple-900/50",
         };
       default:

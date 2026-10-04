@@ -17,13 +17,14 @@ import {
     CheckCircle2,
     Clock,
     Languages,
-    Sparkles,
+    RefreshCcw,
     Loader2,
     Edit,
     ExternalLink
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -416,17 +417,8 @@ export default function ProgramShow({ program }: Props) {
                                                 disabled={isTranslating}
                                                 className="bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-brand-950/50 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800 shadow-xs"
                                             >
-                                                {isTranslating ? (
-                                                    <>
-                                                        <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-                                                        Memproses Terjemahan...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Sparkles className="w-4 h-4 mr-1.5 text-brand-600 dark:text-brand-400" />
-                                                        Terjemahkan ke EN & AR Sekarang
-                                                    </>
-                                                )}
+                                                <RefreshCcw className={`w-4 h-4 mr-1.5 text-brand-600 dark:text-brand-400 ${isTranslating ? 'animate-spin' : ''}`} />
+                                                {isTranslating ? 'Memproses Terjemahan...' : 'Terjemahkan ke EN & AR Sekarang'}
                                             </Button>
                                         </div>
                                     )}
@@ -576,74 +568,14 @@ export default function ProgramShow({ program }: Props) {
                         )}
 
                         {/* Translation Status Card */}
-                        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6 flex items-center justify-between">
-                                <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
-                                    <Languages className="mr-2 h-4 w-4 text-brand-600 dark:text-brand-400" />
-                                    Status Terjemahan
-                                </h3>
-                            </div>
-                            <div className="p-6 space-y-4">
-                                <div className="space-y-2.5">
-                                    <div className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800">
-                                        <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
-                                            <span>🇮🇩</span> Bahasa Indonesia
-                                        </span>
-                                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
-                                            Sumber ✓
-                                        </Badge>
-                                    </div>
-                                    <div className="flex items-center justify-between text-sm py-1 border-b border-gray-50 dark:border-gray-800">
-                                        <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
-                                            <span>🇬🇧</span> English
-                                        </span>
-                                        {hasEn ? (
-                                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
-                                                Tersedia ✓
-                                            </Badge>
-                                        ) : (
-                                            <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-xs font-semibold">
-                                                Belum Ada
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center justify-between text-sm py-1">
-                                        <span className="flex items-center gap-2 text-gray-700 dark:text-gray-300 font-medium">
-                                            <span>🇸🇦</span> العربية
-                                        </span>
-                                        {hasAr ? (
-                                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
-                                                Tersedia ✓
-                                            </Badge>
-                                        ) : (
-                                            <Badge variant="outline" className="bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-xs font-semibold">
-                                                Belum Ada
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleTranslate}
-                                    disabled={isTranslating}
-                                    className="w-full text-brand-700 dark:text-brand-300 hover:text-brand-800 dark:hover:text-brand-200 hover:bg-brand-50 dark:hover:bg-brand-950/40 border-brand-200 dark:border-brand-800"
-                                >
-                                    {isTranslating ? (
-                                        <>
-                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                            Memproses Antrean...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="w-4 h-4 mr-2 text-brand-600 dark:text-brand-400" />
-                                            {hasEn && hasAr ? 'Perbarui Terjemahan (Auto)' : 'Terjemahkan Sekarang (Auto)'}
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        </div>
+                        <TranslationStatusCard
+                            hasId={hasId}
+                            hasEn={hasEn}
+                            hasAr={hasAr}
+                            onTranslate={handleTranslate}
+                            isTranslating={isTranslating}
+                            description="Status kelengkapan terjemahan judul dan cerita program dalam 3 bahasa."
+                        />
 
                         <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
                             <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">

@@ -2,13 +2,15 @@ import { useForm, Head, usePage, Link } from '@inertiajs/react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { ArrowRight, ArrowLeft, Lock, LoaderCircle } from 'lucide-react';
 import InputError from '@/components/input-error';
+import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function ConfirmPassword() {
     const { siteSettings } = usePage().props as any;
-    const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
+    const siteLogo = siteSettings?.site_logo
+        ? `/storage/${siteSettings.site_logo}`
+        : '/images/logo/logo-landscape-color.png';
 
     const { data, setData, post, processing, errors } = useForm({
         password: '',
@@ -27,71 +29,81 @@ export default function ConfirmPassword() {
             {/* Kiri: Form Konfirmasi */}
             <div className="flex w-full flex-col justify-center px-4 sm:px-12 lg:w-1/2 lg:px-24 xl:px-32">
                 <div className="mx-auto w-full max-w-sm lg:mx-0">
-                    <img 
-                        src={siteLogo} 
-                        alt="Logo Insani" 
-                        className="h-10 w-auto mb-4 object-contain" 
+                    <img
+                        src={siteLogo}
+                        alt="Logo Insani"
+                        className="mb-4 h-10 w-auto object-contain"
                     />
-                    
+
                     <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
                         Area Aman
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600 leading-relaxed">
-                        Ini adalah area aplikasi yang aman. Mohon konfirmasi password Anda sebelum melanjutkan.
+                    <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                        Ini adalah area aplikasi yang aman. Mohon konfirmasi
+                        password Anda sebelum melanjutkan.
                     </p>
 
                     <form className="mt-8 space-y-5" onSubmit={submit}>
                         <div className="grid gap-2">
-                            <Label htmlFor="password" className="text-gray-900">Password</Label>
-                            <div className="relative">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <Label htmlFor="password" className="text-gray-900">
+                                Password
+                            </Label>
+                            <PasswordInput
+                                id="password"
+                                name="password"
+                                placeholder="••••••••"
+                                value={data.password}
+                                onChange={(e) =>
+                                    setData('password', e.target.value)
+                                }
+                                startIcon={
                                     <Lock className="h-4 w-4 text-gray-400" />
-                                </div>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    placeholder="••••••••"
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
-                                    className="pl-10 h-11 bg-white text-gray-900 border-gray-200 [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
-                                    required
-                                    autoFocus
-                                    autoComplete="current-password"
-                                />
-                            </div>
+                                }
+                                className="h-11 border-gray-200 bg-white text-gray-900 [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#111827]"
+                                required
+                                autoFocus
+                                autoComplete="current-password"
+                            />
                             <InputError message={errors.password} />
                         </div>
 
                         <div className="grid gap-2">
-                            <Turnstile 
-                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
-                                onSuccess={(token) => setData('cf-turnstile-response', token)}
+                            <Turnstile
+                                siteKey={
+                                    import.meta.env.VITE_TURNSTILE_SITE_KEY
+                                }
+                                onSuccess={(token) =>
+                                    setData('cf-turnstile-response', token)
+                                }
                                 options={{
                                     theme: 'light',
                                 }}
                             />
-                            <InputError message={errors['cf-turnstile-response']} />
+                            <InputError
+                                message={errors['cf-turnstile-response']}
+                            />
                         </div>
 
                         <Button
                             type="submit"
-                            className="w-full mt-2 bg-brand-600 hover:bg-brand-700 hover:-translate-y-[1px] transition-transform text-white h-11 text-base shadow-sm"
+                            className="mt-2 h-11 w-full bg-brand-600 text-base text-white shadow-sm transition-transform hover:-translate-y-[1px] hover:bg-brand-700"
                             disabled={processing}
                         >
                             {processing ? (
                                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
                             ) : null}
                             Konfirmasi Password
-                            {!processing && <ArrowRight className="ml-2 h-4 w-4" />}
+                            {!processing && (
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            )}
                         </Button>
 
                         <div className="mt-4 text-center">
                             <Link
                                 href="/dashboard"
-                                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors py-2 px-3 rounded-lg hover:bg-gray-50"
+                                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="h-4 w-4" />
                                 Batal & Kembali ke Dashboard
                             </Link>
                         </div>
@@ -100,7 +112,7 @@ export default function ConfirmPassword() {
             </div>
 
             {/* Kanan: Editorial Visual */}
-            <div className="hidden lg:relative lg:block lg:w-1/2 overflow-hidden">
+            <div className="hidden overflow-hidden lg:relative lg:block lg:w-1/2">
                 <div className="absolute inset-0 bg-gray-950">
                     <img
                         className="h-full w-full object-cover opacity-60 mix-blend-overlay"
@@ -109,15 +121,20 @@ export default function ConfirmPassword() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/40 to-transparent" />
                 </div>
-                
-                <div className="absolute bottom-16 left-16 right-16 max-w-lg">
+
+                <div className="absolute right-16 bottom-16 left-16 max-w-lg">
                     <blockquote className="space-y-6 text-white">
-                        <p className="text-3xl font-medium leading-snug tracking-tight">
-                            "Keamanan adalah prioritas utama kami untuk melindungi niat baik Anda."
+                        <p className="text-3xl leading-snug font-medium tracking-tight">
+                            "Keamanan adalah prioritas utama kami untuk
+                            melindungi niat baik Anda."
                         </p>
                         <footer className="text-sm">
-                            <p className="font-semibold text-white">Insani Indonesia</p>
-                            <p className="text-gray-400 mt-0.5">Sistem Keamanan Terintegrasi</p>
+                            <p className="font-semibold text-white">
+                                Insani Indonesia
+                            </p>
+                            <p className="mt-0.5 text-gray-400">
+                                Sistem Keamanan Terintegrasi
+                            </p>
                         </footer>
                     </blockquote>
                 </div>

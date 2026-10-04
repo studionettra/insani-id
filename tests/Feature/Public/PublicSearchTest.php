@@ -3,6 +3,7 @@
 use App\Models\BlogPostCache;
 use App\Models\Category;
 use App\Models\Program;
+use Database\Seeders\FaqSeeder;
 
 it('returns search results matching query', function () {
     $pillar = Category::create([
@@ -62,4 +63,43 @@ it('returns empty results for queries under 2 characters', function () {
     expect($response->json('programs'))->toBeEmpty();
     expect($response->json('focusPrograms'))->toBeEmpty();
     expect($response->json('blogs'))->toBeEmpty();
+    expect($response->json('pages'))->toBeEmpty();
+    expect($response->json('faqs'))->toBeEmpty();
 });
+
+it('finds logo guidelines and logo faqs when searching "logo"', function () {
+    $this->seed(FaqSeeder::class);
+
+    $response = $this->getJson('/api/public/search?q=logo');
+
+    $response->assertOk();
+    $data = $response->json();
+
+    // Pages should contain Logo Guideline
+    $pageSlugs = collect($data['pages'])->pluck('slug')->toArray();
+    expect($pageSlugs)->toContain('logo');
+
+    // FAQs should contain logo questions
+    $faqQuestions = collect($data['faqs'])->pluck('question')->implode(' ');
+    expect($faqQuestions)->toContain('logo resmi Insani Indonesia');
+});
+
+it('accommodates short keywords and acronyms to find matching content', function (string $keyword, string $expectedPageSlug) {
+    $response = $this->getJson('/api/public/search?q='.$keyword);
+
+    $response->assertOk();
+    $pageSlugs = collect($response->json('pages'))->pluck('slug')->toArray();
+
+    expect($pageSlugs)->toContain($expectedPageSlug);
+})->with([
+    ['cs', 'kontak'],
+    ['wa', 'kontak'],
+    ['sk', 'syarat-ketentuan'],
+    ['rek', 'cara-donasi'],
+    ['bca', 'cara-donasi'],
+    ['faq', 'pusat-bantuan'],
+    ['kap', 'laporan-keuangan'],
+    ['visi', 'tentang-kami'],
+    ['slot', 'buat-program'],
+    ['csr', 'kontak'],
+]);

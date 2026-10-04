@@ -92,16 +92,16 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             title: "Akta Pendirian",
             url: "https://drive.google.com/file/d/1npzpQZGq1MuGERZ9H8EdxmdV0vzgkIze/view",
             icon_type: "scale",
-            publisher_logo: "/images/about/Logo-Notaris-HD.webp",
-            issuer_name: "Notaris"
+            publisher_logo: "/images/legal/garuda-notaris.svg",
+            issuer_name: "Notaris RI"
         },
         {
             id: 2,
             title: "Akta Perubahan",
             url: "https://drive.google.com/file/d/1SJP9zp-gMofWmQcCHwMCyfjj8Y_v-k7F/view",
             icon_type: "scale",
-            publisher_logo: "/images/about/Logo-Notaris-HD.webp",
-            issuer_name: "Notaris"
+            publisher_logo: "/images/legal/garuda-notaris.svg",
+            issuer_name: "Notaris RI"
         },
         {
             id: 3,
@@ -109,7 +109,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             document_number: "AHU-0002557.AH.01.04.Tahun 2019",
             url: "https://drive.google.com/file/d/1_7BOWiP9SK-Me0GE178RAqx3g82_-5jh/view",
             icon_type: "shield",
-            publisher_logo: "/images/about/Logo-Kumham.webp",
+            publisher_logo: "/images/legal/kemenkumham.svg",
             issuer_name: "Kemenkumham RI"
         },
         {
@@ -117,7 +117,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             title: "SK Kemenkumham Perubahan",
             url: "https://drive.google.com/file/d/1qH6vEQBTO3ofYd0hY-8RSk090uR7I04C/view",
             icon_type: "shield",
-            publisher_logo: "/images/about/Logo-Kumham.webp",
+            publisher_logo: "/images/legal/kemenkumham.svg",
             issuer_name: "Kemenkumham RI"
         },
         {
@@ -125,7 +125,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             title: "Surat Tanda Daftar Yayasan & Izin Kegiatan",
             url: "https://drive.google.com/file/d/1qftGsDO7gkN3u_MgnWuLsHmpsHFAsyfa/view",
             icon_type: "building",
-            publisher_logo: "/images/about/logo-Pmeprov-DKI.webp",
+            publisher_logo: "/images/legal/pemprov-dki.svg",
             issuer_name: "Pemprov DKI Jakarta"
         },
         {
@@ -133,7 +133,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             title: "Surat Keterangan Domisili",
             url: "https://drive.google.com/file/d/1ebtt5z05du7B-EqYCbEddzDTwT8HY5wE/view",
             icon_type: "map-pin",
-            publisher_logo: "/images/about/logo-Pmeprov-DKI.webp",
+            publisher_logo: "/images/legal/pemprov-dki.svg",
             issuer_name: "Pemprov DKI Jakarta"
         }
     ];

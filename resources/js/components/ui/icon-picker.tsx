@@ -38,7 +38,7 @@ import {
     Briefcase,
     Lightbulb,
     Gift,
-    Sparkles,
+    HandHeart,
     AlertTriangle,
     Sprout,
     Moon,
@@ -50,6 +50,7 @@ import {
     ChevronUp,
     type LucideIcon,
 } from 'lucide-react';
+import { UserGroup } from '@/components/icons/user-group';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -63,6 +64,7 @@ export interface IconItem {
 
 export const ICONS_LIST: IconItem[] = [
     // Sosial & Kemanusiaan
+    { name: 'UserGroup', label: 'Komunitas / Tim Fundraiser', category: 'sosial', keywords: ['usergroup', 'group', 'tim', 'relawan', 'fundraiser', 'komunitas', 'kelompok'], component: UserGroup as any },
     { name: 'Users', label: 'Penerima / Relawan', category: 'sosial', keywords: ['users', 'orang', 'relawan', 'masyarakat', 'penerima', 'jamaah'], component: Users },
     { name: 'UserCheck', label: 'Donatur / Terverifikasi', category: 'sosial', keywords: ['user', 'donatur', 'verifikasi', 'anggota', 'member'], component: UserCheck },
     { name: 'Heart', label: 'Kepedulian / Kasih', category: 'sosial', keywords: ['heart', 'hati', 'cinta', 'kasih', 'peduli', 'keberkahan'], component: Heart },
@@ -114,14 +116,17 @@ export const ICONS_LIST: IconItem[] = [
     { name: 'Lightbulb', label: 'Inovasi / Pelatihan', category: 'pendidikan', keywords: ['lightbulb', 'ide', 'inovasi', 'pelatihan', 'kursus', 'ilmu'], component: Lightbulb },
     { name: 'Sprout', label: 'Pemberdayaan & Tani', category: 'pendidikan', keywords: ['sprout', 'tani', 'lingkungan', 'tanam', 'pemberdayaan', 'hijau', 'bibit'], component: Sprout },
     { name: 'Gift', label: 'Paket Kado / Bantuan', category: 'pendidikan', keywords: ['gift', 'kado', 'hadiah', 'bingkisan', 'paket', 'santunan'], component: Gift },
-    { name: 'Sparkles', label: 'Dampak & Manfaat', category: 'pendidikan', keywords: ['sparkles', 'bintang', 'cahaya', 'manfaat', 'keberkahan'], component: Sparkles },
+    { name: 'HandHeart', label: 'Dampak & Manfaat', category: 'pendidikan', keywords: ['handheart', 'tangan', 'manfaat', 'keberkahan', 'dampak', 'sosial'], component: HandHeart },
 ];
 
 const ICONS_MAP = new Map<string, IconItem>(ICONS_LIST.map((item) => [item.name.toLowerCase(), item]));
 
 export function renderStatIcon(iconName?: string | null, className: string = 'w-5 h-5') {
     if (!iconName) return null;
-    const cleanName = iconName.trim().toLowerCase();
+    let cleanName = iconName.trim().toLowerCase();
+    if (cleanName === 'sparkles') {
+        cleanName = 'handheart';
+    }
     const item = ICONS_MAP.get(cleanName);
     if (!item) return null;
     const IconComponent = item.component;
@@ -202,7 +207,6 @@ export function IconPicker({ value = '', onChange, id = 'icon' }: IconPickerProp
                         </>
                     ) : (
                         <div className="flex items-center gap-2 text-muted-foreground">
-                            <Sparkles className="w-4 h-4 text-gray-400 shrink-0" />
                             <span className="text-sm">Pilih ikon visual (opsional)...</span>
                         </div>
                     )}

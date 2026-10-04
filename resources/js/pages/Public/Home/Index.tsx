@@ -182,7 +182,7 @@ return;
                 </section>
             )}
 
-            {/* 3. Focus Programs Section (6 Columns 1 Row on Desktop) */}
+            {/* 3. Focus Programs Section (3 Columns 2 Rows on Desktop) */}
             {focusPrograms && focusPrograms.length > 0 && (
                 <section className="py-24 bg-zinc-50">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -204,11 +204,12 @@ return;
                             </div>
                         </FadeIn>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 xl:gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                             {focusPrograms.map((cat: any, index: number) => {
                                 const customName = getLocalizedValue(cat.public_name_translations || cat.public_name, locale);
                                 const defaultName = getLocalizedValue(cat.name_translations || cat.name, locale);
                                 const catTitle = t(customName || defaultName);
+                                const catDesc = getLocalizedValue(cat.description_translations || cat.description, locale);
 
                                 return (
                                     <FadeIn
@@ -218,31 +219,36 @@ return;
                                     >
                                         <Link 
                                             href={`/fokus-program/${cat.slug}`} 
-                                            className="group relative flex flex-col justify-between w-full aspect-[4/3] rounded-2xl overflow-hidden bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                                            className="group relative flex flex-col justify-between w-full aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-zinc-900/15"
                                         >
                                             {cat.pillar_image ? (
                                                 <img 
                                                     src={`/storage/${cat.pillar_image}`} 
                                                     alt={catTitle} 
-                                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                                                 />
                                             ) : (
                                                 <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-950" />
                                             )}
                                             
                                             {/* Gradient overlay to ensure title & arrow legibility without obscuring the cover image */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/20 to-zinc-950/30 group-hover:from-zinc-950/70 group-hover:via-transparent transition-all duration-300" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/30 to-zinc-950/20 group-hover:from-zinc-950/80 transition-all duration-300" />
                                             
-                                            <div className="relative z-10 p-5 sm:p-6 lg:p-4 xl:p-5 flex flex-col justify-between h-full">
-                                                <div className="flex justify-end">
-                                                    <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-8 lg:h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-80 group-hover:opacity-100 group-hover:bg-white group-hover:text-zinc-950 group-hover:scale-110 transition-all duration-300 shadow-sm">
-                                                        <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-4 lg:h-4 rtl:rotate-90" />
+                                            <div className="relative z-10 p-6 md:p-7 flex flex-col justify-between h-full">
+                                                <div className="flex items-center justify-end">
+                                                    <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-85 group-hover:opacity-100 group-hover:bg-white group-hover:text-zinc-950 group-hover:scale-105 transition-all duration-300 shadow-sm">
+                                                        <ArrowUpRight className="w-5 h-5 rtl:rotate-90 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <h3 className="text-xl sm:text-2xl lg:text-sm xl:text-base font-bold text-white tracking-tight leading-snug line-clamp-2">
+                                                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug line-clamp-2">
                                                         {catTitle}
                                                     </h3>
+                                                    {catDesc && (
+                                                        <p className="mt-1.5 text-xs sm:text-sm text-zinc-300 line-clamp-2 leading-relaxed">
+                                                            {t(catDesc)}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </Link>

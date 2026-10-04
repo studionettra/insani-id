@@ -28,8 +28,12 @@ class DonationSuccessNotification extends Mailable
      */
     public function envelope(): Envelope
     {
+        $donorName = $this->donation->is_anonymous
+            ? 'Inisiator Kebaikan'
+            : ($this->donation->donor_name ?: 'Donatur');
+
         return new Envelope(
-            subject: 'Terima Kasih atas Donasi Anda - '.config('app.name'),
+            subject: "Terima kasih atas donasi Anda - {$donorName} - {$this->donation->donation_code}",
         );
     }
 

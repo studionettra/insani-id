@@ -13,7 +13,7 @@ import {
   Monitor,
   RotateCcw,
   Search,
-  Sparkles,
+  Target,
   Trash2,
   UserCheck,
   Volume2,
@@ -222,7 +222,7 @@ export default function NotificationsIndex({
       case "program":
         return {
           label: "Program",
-          icon: <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
+          icon: <Target className="w-4 h-4 text-purple-600 dark:text-purple-400" />,
           bg: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800/60",
         };
       default:

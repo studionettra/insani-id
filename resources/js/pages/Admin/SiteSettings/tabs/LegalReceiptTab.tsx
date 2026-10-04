@@ -91,7 +91,10 @@ export default function LegalReceiptTab({
                             </div>
 
                             <div>
-                                <Label htmlFor="legal_sk_kemenkumham" className="text-xs font-semibold">Nomor SK Kemenkumham RI</Label>
+                                <Label htmlFor="legal_sk_kemenkumham" className="text-xs font-semibold flex items-center gap-1.5">
+                                    <img src="/images/legal/kemenkumham.svg" alt="Kemenkumham" className="w-4 h-4 object-contain shrink-0" />
+                                    <span>Nomor SK Kemenkumham RI</span>
+                                </Label>
                                 <Input
                                     id="legal_sk_kemenkumham"
                                     value={data.legal_sk_kemenkumham}
@@ -105,7 +108,10 @@ export default function LegalReceiptTab({
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="legal_operational_permit" className="text-xs font-semibold">Izin Operasional PUB Kemensos</Label>
+                                <Label htmlFor="legal_operational_permit" className="text-xs font-semibold flex items-center gap-1.5">
+                                    <img src="/images/legal/kemensos.svg" alt="Kemensos" className="h-3.5 w-auto object-contain shrink-0" />
+                                    <span>Izin Operasional PUB Kemensos</span>
+                                </Label>
                                 <Input
                                     id="legal_operational_permit"
                                     value={data.legal_operational_permit}
@@ -117,7 +123,10 @@ export default function LegalReceiptTab({
                             </div>
 
                             <div>
-                                <Label htmlFor="legal_npwp" className="text-xs font-semibold">NPWP Lembaga</Label>
+                                <Label htmlFor="legal_npwp" className="text-xs font-semibold flex items-center gap-1.5">
+                                    <img src="/images/legal/djp-pajak.svg" alt="DJP Pajak" className="w-4 h-4 object-contain shrink-0" />
+                                    <span>NPWP Lembaga</span>
+                                </Label>
                                 <Input
                                     id="legal_npwp"
                                     value={data.legal_npwp}
@@ -238,7 +247,7 @@ export default function LegalReceiptTab({
                         <div>
                             {data.show_sk_in_footer === '1' ? (
                                 <div className="inline-flex items-center gap-2 text-slate-300 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10 text-xs">
-                                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                    <img src="/images/legal/kemenkumham.svg" alt="Kemenkumham" className="w-4 h-4 object-contain shrink-0" />
                                     <span>
                                         {data.legal_sk_label || 'SK Kemenkumham RI'}: <strong className="text-white font-mono">{data.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
                                     </span>

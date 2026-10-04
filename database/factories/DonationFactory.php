@@ -33,7 +33,7 @@ class DonationFactory extends Factory
             'amount' => $amount + ($uniqueCode ?? 0),
             'unique_code' => $uniqueCode,
             'channel' => $channel,
-            'status' => fake()->randomElement(['pending', 'paid', 'expired', 'failed', 'refunded']),
+            'status' => fake()->randomElement(['pending', 'paid', 'expired', 'failed', 'refunded', 'cancelled']),
             'paid_at' => null,
         ];
     }
@@ -43,6 +43,13 @@ class DonationFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => 'paid',
             'paid_at' => now(),
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'cancelled',
         ]);
     }
 }

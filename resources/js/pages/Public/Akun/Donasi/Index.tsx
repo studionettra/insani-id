@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Heart, Calendar, ArrowRight, CheckCircle2, Clock, AlertCircle, ShieldCheck, ExternalLink, Filter } from 'lucide-react';
+import { Heart, Calendar, ArrowRight, CheckCircle2, Clock, AlertCircle, ShieldCheck, ExternalLink, Filter, XCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import DonationReceiptModal from '@/components/donation/DonationReceiptModal';
 import { Badge } from '@/components/ui/badge';
@@ -93,7 +93,7 @@ export default function DonorDonationsIndex({ donations }: Props) {
         if (statusFilter === 'all') return true;
         if (statusFilter === 'paid') return item.status === 'paid';
         if (statusFilter === 'pending') return item.status === 'pending';
-        if (statusFilter === 'expired') return ['expired', 'failed'].includes(item.status);
+        if (statusFilter === 'expired') return ['expired', 'failed', 'cancelled'].includes(item.status);
         return true;
     });
 
@@ -161,7 +161,7 @@ export default function DonorDonationsIndex({ donations }: Props) {
                                 : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 dark:bg-gray-900 dark:border-gray-800 dark:text-gray-300'
                         }`}
                     >
-                        Kedaluwarsa ({donations.data?.filter(d => ['expired', 'failed'].includes(d.status)).length || 0})
+                        Kedaluwarsa / Batal ({donations.data?.filter(d => ['expired', 'failed', 'cancelled'].includes(d.status)).length || 0})
                     </button>
                 </div>
 
@@ -199,6 +199,12 @@ export default function DonorDonationsIndex({ donations }: Props) {
                                                     <Badge className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800 hover:bg-amber-50 flex items-center gap-1">
                                                         <Clock className="w-3.5 h-3.5" />
                                                         Menunggu Pembayaran
+                                                    </Badge>
+                                                )}
+                                                {donation.status === 'cancelled' && (
+                                                    <Badge className="bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800 hover:bg-rose-50 flex items-center gap-1">
+                                                        <XCircle className="w-3.5 h-3.5" />
+                                                        Dibatalkan
                                                     </Badge>
                                                 )}
                                                 {['expired', 'failed'].includes(donation.status) && (

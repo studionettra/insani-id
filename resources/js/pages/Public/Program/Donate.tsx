@@ -11,6 +11,7 @@ import {
     QrCode
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import PublicLayout from '@/layouts/PublicLayout';
 import { trackInitiateDonation } from '@/lib/analytics';
 import { getLocalizedValue, formatCurrency } from '@/lib/utils';
+import BankLogo from '@/components/ui/bank-logo';
 
 interface PaymentChannel {
     code: string;
@@ -173,7 +175,7 @@ const DEFAULT_CHANNELS: PaymentChannel[] = [
     },
 ];
 
-export default function Donate({ program, onlinePaymentAvailable = true, paymentChannels }: any) {
+export default function Donate({ program, onlinePaymentAvailable = true, paymentChannels, vaMaintenanceNotice, replaceDonation }: any) {
     const { auth, flash, siteSettings } = usePage().props as any;
     const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
 
@@ -190,21 +192,23 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
     const { data, setData, post, processing, errors } = useForm({
-        amount: presets[2], // Default 50rb
-        donor_name: auth?.user?.name || '',
-        donor_email: auth?.user?.email || '',
-        donor_phone: '',
-        is_anonymous: false,
-        message: '',
+        amount: replaceDonation?.amount ? Number(replaceDonation.amount) : presets[2],
+        donor_name: replaceDonation?.donor_name || auth?.user?.name || '',
+        donor_email: replaceDonation?.donor_email || auth?.user?.email || '',
+        donor_phone: replaceDonation?.donor_phone || '',
+        is_anonymous: Boolean(replaceDonation?.is_anonymous),
+        message: replaceDonation?.message || '',
         website_url: '',
         channel: initialCategory,
         payment_method: initialMethod,
         payment_channel: initialChannel,
+        replace_donation_code: replaceDonation?.donation_code || '',
         utm_source: urlParams?.get('utm_source') || urlParams?.get('ref') || '',
         utm_medium: urlParams?.get('utm_medium') || '',
         utm_campaign: urlParams?.get('utm_campaign') || '',
         utm_term: urlParams?.get('utm_term') || '',
         utm_content: urlParams?.get('utm_content') || '',
+        'cf-turnstile-response': '',
     });
 
     const [activeTab, setActiveTab] = useState<'qris' | 'virtual_account' | 'ewallet' | 'manual'>(
@@ -258,6 +262,12 @@ return null;
             return;
         }
 
+        if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !data['cf-turnstile-response']) {
+            toast.error('Mohon selesaikan verifikasi keamanan (Captcha).');
+
+            return;
+        }
+
         trackInitiateDonation({
             programId: program.id,
             programTitle: title,
@@ -295,6 +305,20 @@ return null;
                             
                             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 md:p-8">
                                 <h1 className="text-2xl font-bold text-slate-800 mb-6">Masukkan Nominal Donasi</h1>
+
+                                {replaceDonation && (
+                                    <div className="mb-6 p-4 bg-blue-50/90 border border-blue-200 rounded-2xl flex items-start gap-3 shadow-2xs">
+                                        <Info className="w-5 h-5 text-insani-blue shrink-0 mt-0.5" />
+                                        <div className="text-xs space-y-1">
+                                            <p className="font-bold text-blue-950">
+                                                Mengganti Metode Pembayaran ({replaceDonation.donation_code})
+                                            </p>
+                                            <p className="text-blue-900/90 leading-relaxed">
+                                                Pilih saluran pembayaran baru di bawah ini. Tagihan donasi lama Anda (<strong>{replaceDonation.donation_code}</strong>) akan otomatis dibatalkan begitu tagihan baru ini berhasil dibuat.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                                 
                                 <form onSubmit={submit} className="space-y-8">
 
@@ -470,9 +494,7 @@ selectChannel(manualChannels[0]);
                                                                 }`}
                                                             >
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm ${isSelected ? 'bg-insani-blue text-white' : 'bg-slate-100 text-slate-700'}`}>
-                                                                        QRIS
-                                                                    </div>
+                                                                    <BankLogo code={channel.code} size="md" />
                                                                     <div>
                                                                         <div className="flex items-center gap-2">
                                                                             <span className="font-bold text-slate-800 text-sm sm:text-base">{channel.name}</span>
@@ -483,7 +505,7 @@ selectChannel(manualChannels[0]);
                                                                             )}
                                                                         </div>
                                                                         <span className="text-xs text-slate-500 block mt-0.5">{channel.subtitle}</span>
-                                                                        <span className="text-[11px] text-slate-400 block mt-0.5">
+                                                                        <span className="text-[11px] text-slate-400 block whitespace-nowrap mt-0.5">
                                                                             Maks. {formatCurrency(channel.max_amount)}
                                                                         </span>
                                                                     </div>
@@ -505,10 +527,99 @@ selectChannel(manualChannels[0]);
 
                                             {/* Tab 2: Virtual Account */}
                                             {activeTab === 'virtual_account' && (
-                                                <div className="space-y-2">
-                                                    <p className="text-xs text-slate-500 font-medium mb-3">Nomor Virtual Account terbit otomatis dan diverifikasi secara instan 24/7.</p>
+                                                <div className="space-y-3">
+                                                    {vaChannels.length === 0 ? (
+                                                        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-950 space-y-3.5 shadow-xs">
+                                                            <div className="flex items-start gap-3">
+                                                                <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                                                <div className="space-y-1">
+                                                                    <h4 className="font-bold text-xs sm:text-sm text-amber-900">
+                                                                        Layanan Virtual Account Sedang Integrasi Perbankan
+                                                                    </h4>
+                                                                    <p className="text-xs text-amber-800/90 leading-relaxed">
+                                                                        {vaMaintenanceNotice || 'Layanan Virtual Account otomatis sedang dalam integrasi perbankan berkala. Anda dapat berdonasi secara instan menggunakan QRIS (mendukung semua M-Banking: BCA, Mandiri, BRI, BNI, BSI) atau melalui Transfer Manual BSI & BRI.'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-200/60">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setActiveTab('qris');
+                                                                        if (qrisChannels[0]) selectChannel(qrisChannels[0]);
+                                                                    }}
+                                                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-insani-blue text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-all shadow-xs active:scale-[0.98]"
+                                                                >
+                                                                    <QrCode className="w-4 h-4" />
+                                                                    <span>Gunakan QRIS (Semua Bank)</span>
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setActiveTab('manual');
+                                                                        if (manualChannels[0]) selectChannel(manualChannels[0]);
+                                                                    }}
+                                                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-amber-300 text-amber-900 rounded-xl text-xs font-semibold hover:bg-amber-100 transition-all"
+                                                                >
+                                                                    <Landmark className="w-4 h-4" />
+                                                                    <span>Transfer Manual BSI / BRI</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-xs text-slate-500 font-medium mb-3">Nomor Virtual Account terbit otomatis dan diverifikasi secara instan 24/7.</p>
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                                {vaChannels.map((channel) => {
+                                                                    const isSelected = data.payment_channel.toUpperCase() === channel.code.toUpperCase();
+                                                                    const isNominalExceeded = data.amount > channel.max_amount;
+
+                                                                    return (
+                                                                        <div
+                                                                            key={channel.code}
+                                                                            onClick={() => !isNominalExceeded && selectChannel(channel)}
+                                                                            className={`p-2.5 sm:p-3 rounded-xl border-2 transition-all flex items-center justify-between min-h-[66px] ${
+                                                                                isNominalExceeded
+                                                                                    ? 'opacity-60 bg-slate-100 border-slate-200 cursor-not-allowed'
+                                                                                    : isSelected
+                                                                                        ? 'border-insani-blue bg-white shadow-xs cursor-pointer'
+                                                                                        : 'border-slate-200 bg-white hover:border-slate-300 cursor-pointer'
+                                                                            }`}
+                                                                        >
+                                                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                                                                <BankLogo code={channel.code} size="sm" />
+                                                                                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                                                                    <span className="font-bold text-slate-800 text-xs sm:text-[13px] block leading-snug">{channel.name}</span>
+                                                                                    <span className="text-[10px] sm:text-[11px] text-slate-400 block whitespace-nowrap mt-0.5">
+                                                                                        Maks. {formatCurrency(channel.max_amount)}
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="shrink-0 pl-1.5 sm:pl-2">
+                                                                                {isSelected ? (
+                                                                                    <div className="w-5 h-5 rounded-full bg-insani-blue text-white flex items-center justify-center">
+                                                                                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Tab 3: E-Wallets */}
+                                            {activeTab === 'ewallet' && (
+                                                <div className="space-y-3">
+                                                    <p className="text-xs text-slate-500 font-medium mb-1">Bayar langsung melalui aplikasi e-wallet Anda.</p>
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                                        {vaChannels.map((channel) => {
+                                                        {ewalletChannels.map((channel) => {
                                                             const isSelected = data.payment_channel.toUpperCase() === channel.code.toUpperCase();
                                                             const isNominalExceeded = data.amount > channel.max_amount;
 
@@ -516,7 +627,7 @@ selectChannel(manualChannels[0]);
                                                                 <div
                                                                     key={channel.code}
                                                                     onClick={() => !isNominalExceeded && selectChannel(channel)}
-                                                                    className={`p-3.5 rounded-xl border-2 transition-all flex items-center justify-between ${
+                                                                    className={`p-2.5 sm:p-3 rounded-xl border-2 transition-all flex items-center justify-between ${
                                                                         isNominalExceeded
                                                                             ? 'opacity-60 bg-slate-100 border-slate-200 cursor-not-allowed'
                                                                             : isSelected
@@ -524,13 +635,16 @@ selectChannel(manualChannels[0]);
                                                                                 : 'border-slate-200 bg-white hover:border-slate-300 cursor-pointer'
                                                                     }`}
                                                                 >
-                                                                    <div>
-                                                                        <span className="font-bold text-slate-800 text-sm block">{channel.name}</span>
-                                                                        <span className="text-[11px] text-slate-400 block mt-0.5">
-                                                                            Maks. {formatCurrency(channel.max_amount)}
-                                                                        </span>
+                                                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                                                        <BankLogo code={channel.code} size="sm" />
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <span className="font-bold text-slate-800 text-xs sm:text-sm block truncate leading-tight">{channel.name}</span>
+                                                                            <span className="text-[10.5px] sm:text-[11px] text-slate-400 block whitespace-nowrap mt-0.5">
+                                                                                Maks. {formatCurrency(channel.max_amount)}
+                                                                            </span>
+                                                                        </div>
                                                                     </div>
-                                                                    <div className="shrink-0 pl-2">
+                                                                    <div className="shrink-0 pl-1.5 sm:pl-2">
                                                                         {isSelected ? (
                                                                             <div className="w-5 h-5 rounded-full bg-insani-blue text-white flex items-center justify-center">
                                                                                 <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -543,48 +657,26 @@ selectChannel(manualChannels[0]);
                                                             );
                                                         })}
                                                     </div>
-                                                </div>
-                                            )}
 
-                                            {/* Tab 3: E-Wallets */}
-                                            {activeTab === 'ewallet' && (
-                                                <div className="space-y-2">
-                                                    <p className="text-xs text-slate-500 font-medium mb-3">Bayar langsung melalui aplikasi e-wallet Anda.</p>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                                        {ewalletChannels.map((channel) => {
-                                                            const isSelected = data.payment_channel.toUpperCase() === channel.code.toUpperCase();
-                                                            const isNominalExceeded = data.amount > channel.max_amount;
-
-                                                            return (
-                                                                <div
-                                                                    key={channel.code}
-                                                                    onClick={() => !isNominalExceeded && selectChannel(channel)}
-                                                                    className={`p-3.5 rounded-xl border-2 transition-all flex items-center justify-between ${
-                                                                        isNominalExceeded
-                                                                            ? 'opacity-60 bg-slate-100 border-slate-200 cursor-not-allowed'
-                                                                            : isSelected
-                                                                                ? 'border-insani-blue bg-white shadow-xs cursor-pointer'
-                                                                                : 'border-slate-200 bg-white hover:border-slate-300 cursor-pointer'
-                                                                    }`}
-                                                                >
-                                                                    <div>
-                                                                        <span className="font-bold text-slate-800 text-sm block">{channel.name}</span>
-                                                                        <span className="text-[11px] text-slate-400 block mt-0.5">
-                                                                            Maks. {formatCurrency(channel.max_amount)}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="shrink-0 pl-2">
-                                                                        {isSelected ? (
-                                                                            <div className="w-5 h-5 rounded-full bg-insani-blue text-white flex items-center justify-center">
-                                                                                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="w-5 h-5 rounded-full border-2 border-slate-300" />
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })}
+                                                    {/* Micro-Card Edukasi OVO & DANA */}
+                                                    <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-700">
+                                                        <div className="flex items-start sm:items-center gap-2.5">
+                                                            <div className="flex items-center gap-1.5 shrink-0 mt-0.5 sm:mt-0">
+                                                                <BankLogo code="ovo" size="xs" />
+                                                                <BankLogo code="dana" size="xs" />
+                                                            </div>
+                                                            <span>Untuk donasi via <strong>OVO & DANA</strong>, gunakan <strong>Tab QRIS</strong> untuk proses instan tanpa biaya.</span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setActiveTab('qris');
+                                                                if (qrisChannels[0]) selectChannel(qrisChannels[0]);
+                                                            }}
+                                                            className="shrink-0 self-start sm:self-auto px-3 py-1 bg-white border border-blue-300 text-insani-blue font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-2xs"
+                                                        >
+                                                            Pilih QRIS
+                                                        </button>
                                                     </div>
                                                 </div>
                                             )}
@@ -607,9 +699,7 @@ selectChannel(manualChannels[0]);
                                                                 }`}
                                                             >
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs ${isSelected ? 'bg-insani-blue text-white' : 'bg-slate-100 text-slate-700'}`}>
-                                                                        BANK
-                                                                    </div>
+                                                                    <BankLogo code={channel.code} size="md" />
                                                                     <div>
                                                                         <span className="font-bold text-slate-800 text-sm sm:text-base block">{channel.name}</span>
                                                                         <span className="text-xs text-slate-500 font-mono mt-0.5 block">{channel.account_number} ({channel.account_name})</span>
@@ -661,6 +751,7 @@ selectChannel(manualChannels[0]);
                                                 <Input 
                                                     id="donor_name" 
                                                     className="mt-1" 
+                                                    placeholder="Contoh: Budi Santoso"
                                                     value={data.donor_name}
                                                     onChange={e => setData('donor_name', e.target.value)}
                                                     required
@@ -700,7 +791,7 @@ selectChannel(manualChannels[0]);
                                                 checked={data.is_anonymous} 
                                                 onCheckedChange={(checked) => setData('is_anonymous', checked)} 
                                             />
-                                            <Label htmlFor="is_anonymous" className="cursor-pointer">Sembunyikan nama saya (Hamba Allah)</Label>
+                                            <Label htmlFor="is_anonymous" className="cursor-pointer">Sembunyikan nama saya (Inisiator Kebaikan)</Label>
                                         </div>
                                     </div>
 
@@ -730,6 +821,22 @@ selectChannel(manualChannels[0]);
                                             onChange={e => setData('website_url', e.target.value)}
                                         />
                                     </div>
+
+                                    {/* Cloudflare Turnstile */}
+                                    {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+                                        <div className="grid gap-2 my-4">
+                                            <Turnstile
+                                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                                                onSuccess={(token) => setData('cf-turnstile-response', token)}
+                                                options={{
+                                                    theme: 'light',
+                                                }}
+                                            />
+                                            {errors['cf-turnstile-response'] && (
+                                                <p className="text-red-500 text-sm mt-1">{errors['cf-turnstile-response']}</p>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <Button 
                                         type="submit" 

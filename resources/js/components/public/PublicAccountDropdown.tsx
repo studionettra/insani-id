@@ -14,7 +14,7 @@ import {
     LogOut,
     Shield,
     X,
-    Sparkles,
+    HandHelping,
 } from 'lucide-react';
 import useTranslation from '@/hooks/use-translation';
 
@@ -340,7 +340,7 @@ export default function PublicAccountDropdown({
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-zinc-800 hover:text-brand-700 hover:bg-brand-50/50 transition-colors"
                         >
-                            <Sparkles className="w-4 h-4 text-amber-500" />
+                            <HandHelping className="w-4 h-4 text-brand-600" />
                             <span>{t('Fundraiser Saya')}</span>
                         </Link>
 

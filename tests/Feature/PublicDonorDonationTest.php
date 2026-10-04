@@ -116,7 +116,10 @@ test('scheduled update reminder command runs successfully', function () {
 });
 
 test('online donation returns friendly error when Xendit API key is not configured', function () {
-    config(['services.xendit.api_key' => null]);
+    config([
+        'services.xendit.api_key' => null,
+        'services.midtrans.server_key' => null,
+    ]);
 
     $donor = User::factory()->create();
 
@@ -165,4 +168,75 @@ test('XenditPaymentService handles XenditSdkException with stdClass response obj
         'status' => 'error',
         'message' => 'No API Key detected.',
     ]);
+});
+
+test('donor can voluntarily cancel their pending donation', function () {
+    $donor = User::factory()->create();
+    $donation = Donation::factory()->create([
+        'program_id' => $this->program->id,
+        'donor_user_id' => $donor->id,
+        'donor_email' => $donor->email,
+        'status' => 'pending',
+    ]);
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'bank_transfer_manual',
+        'gateway' => 'manual',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $response = $this->actingAs($donor)
+        ->post(route('donation.cancel', $donation->donation_code));
+
+    $response->assertRedirect(route('donation.status', $donation->donation_code));
+    $response->assertSessionHas('success');
+
+    expect($donation->fresh()->status)->toBe('cancelled')
+        ->and($donation->payments()->first()->gateway_status)->toBe('CANCELLED');
+});
+
+test('donor cannot cancel an already paid donation', function () {
+    $donor = User::factory()->create();
+    $donation = Donation::factory()->paid()->create([
+        'program_id' => $this->program->id,
+        'donor_user_id' => $donor->id,
+        'donor_email' => $donor->email,
+    ]);
+
+    $response = $this->actingAs($donor)
+        ->post(route('donation.cancel', $donation->donation_code));
+
+    $response->assertSessionHas('error');
+    expect($donation->fresh()->status)->toBe('paid');
+});
+
+test('replacing a previous pending donation automatically cancels the old donation', function () {
+    $donor = User::factory()->create();
+    $oldDonation = Donation::factory()->create([
+        'program_id' => $this->program->id,
+        'donor_user_id' => $donor->id,
+        'donor_email' => $donor->email,
+        'status' => 'pending',
+    ]);
+    Payment::create([
+        'donation_id' => $oldDonation->id,
+        'payment_method' => 'virtual_account',
+        'gateway' => 'midtrans',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $response = $this->actingAs($donor)
+        ->post(route('donation.store', $this->program->slug), [
+            'amount' => 50000,
+            'donor_name' => $donor->name,
+            'donor_email' => $donor->email,
+            'donor_phone' => '081234567890',
+            'channel' => 'offline',
+            'payment_channel' => 'MANUAL_BSI',
+            'replace_donation_code' => $oldDonation->donation_code,
+        ]);
+
+    $response->assertRedirect();
+    expect($oldDonation->fresh()->status)->toBe('cancelled')
+        ->and($oldDonation->payments()->first()->gateway_status)->toBe('CANCELLED');
 });

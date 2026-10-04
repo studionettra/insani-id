@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MidtransCorePaymentService;
 use App\Services\XenditPaymentService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,7 +41,11 @@ class Payment extends Model
             return null;
         }
 
-        return asset('storage/'.$this->transfer_proof);
+        if (auth()->check() && (auth()->user()->can('donation.view') || auth()->user()->hasRole('Administrator'))) {
+            return route('admin.donations.proof', $this->donation_id);
+        }
+
+        return null;
     }
 
     public function getPaymentChannelLabelAttribute(): string
@@ -68,9 +73,10 @@ class Payment extends Model
             || ($paymentMethod === 'bank_transfer_manual')
             || str_starts_with($upperChannel, 'MANUAL_');
 
-        // 1. Try finding channel definition in XenditPaymentService
+        // 1. Try finding channel definition in MidtransCorePaymentService or XenditPaymentService
         if (! empty($cleanChannel)) {
-            $def = XenditPaymentService::findChannel($cleanChannel);
+            $def = MidtransCorePaymentService::findChannel($cleanChannel)
+                ?? XenditPaymentService::findChannel($cleanChannel);
             if ($def && ! empty($def['name'])) {
                 return $def['name'];
             }

@@ -739,7 +739,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                 <div className="flex items-center gap-1.5 text-xs font-medium text-gray-900 dark:text-white">
                                                     <span>
                                                         {donation.is_anonymous
-                                                            ? 'Hamba Allah'
+                                                            ? 'Inisiator Kebaikan'
                                                             : donation.donor_name}
                                                     </span>
                                                     {donation.is_anonymous && (
@@ -1076,7 +1076,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                         </div>
                                         <div className="text-sm font-semibold text-gray-900 dark:text-white">
                                             {selectedDonation.is_anonymous
-                                                ? 'Hamba Allah (Anonim)'
+                                                ? 'Inisiator Kebaikan'
                                                 : selectedDonation.donor_name}
                                         </div>
                                         <div className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
@@ -1164,7 +1164,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                         {selectedDonation.channel ===
                                                         'offline'
                                                             ? 'Manual Transfer (Offline)'
-                                                            : `Online Gateway (${payment?.gateway ? payment.gateway.toUpperCase() : 'Xendit'})`}
+                                                            : `Online Gateway (${payment?.gateway ? payment.gateway.toUpperCase() : 'Midtrans'})`}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1355,9 +1355,10 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                         selectedDonation.payments?.find(
                                             (p) => p.transfer_proof_url,
                                         )?.transfer_proof_url ||
-                                        (selectedDonation.payments?.[0]
-                                            ?.transfer_proof
-                                            ? `/storage/${selectedDonation.payments[0].transfer_proof}`
+                                        (selectedDonation.payments?.some(
+                                            (p) => p.transfer_proof,
+                                        )
+                                            ? `/admin/donations/${selectedDonation.id}/proof`
                                             : null);
 
                                     if (!selectedDonationProofUrl) return null;
@@ -1506,7 +1507,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                     </span>
                                     <span className="font-semibold text-zinc-800 dark:text-zinc-200">
                                         {confirmingDonation?.is_anonymous
-                                            ? 'Hamba Allah'
+                                            ? 'Inisiator Kebaikan'
                                             : confirmingDonation?.donor_name}
                                     </span>
                                 </div>

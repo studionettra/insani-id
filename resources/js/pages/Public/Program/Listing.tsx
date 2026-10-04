@@ -1,6 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Search } from 'lucide-react';
-import React from 'react';
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,6 +44,57 @@ interface Props {
 
 export default function ProgramListing({ programs, categories, filters }: Props) {
     const { t, locale } = useTranslation();
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const updateScrollButtons = useCallback(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        const { scrollLeft, scrollWidth, clientWidth } = el;
+        setCanScrollLeft(scrollLeft > 6);
+        setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 6);
+    }, []);
+
+    useEffect(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        updateScrollButtons();
+        el.addEventListener('scroll', updateScrollButtons, { passive: true });
+        window.addEventListener('resize', updateScrollButtons);
+
+        return () => {
+            el.removeEventListener('scroll', updateScrollButtons);
+            window.removeEventListener('resize', updateScrollButtons);
+        };
+    }, [updateScrollButtons, categories]);
+
+    const handleScroll = (direction: 'left' | 'right') => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        const scrollAmount = Math.min(el.clientWidth * 0.75, 260);
+        el.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth',
+        });
+    };
+
+    // Auto-scroll the active category button into view on load or when category filter changes
+    useEffect(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        if (!filters.category) {
+            el.scrollTo({ left: 0, behavior: 'smooth' });
+            return;
+        }
+
+        const activeItem = el.querySelector<HTMLElement>('[data-active="true"]');
+        if (activeItem) {
+            activeItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+    }, [filters.category]);
 
     const handleFilterChange = (key: string, value: string) => {
         const query = { ...filters, [key]: value || undefined };
@@ -68,14 +119,14 @@ export default function ProgramListing({ programs, categories, filters }: Props)
 
                 <div className="container mx-auto px-4 max-w-6xl py-12">
                     {/* Filters & Search Modern UI */}
-                    <div className="flex flex-col gap-6 mb-12 bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 items-center justify-center relative overflow-hidden">
+                    <div className="flex flex-col gap-5 mb-12 bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-[0_4px_24px_rgb(0,0,0,0.03)] border border-slate-100 relative">
                         
                         {/* Subtle Background Accent */}
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-insani-blue/20 via-insani-blue to-insani-blue/20"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-insani-blue/20 via-insani-blue to-insani-blue/20 rounded-t-2xl sm:rounded-t-3xl"></div>
 
-                        {/* Search & Sort Centered */}
-                        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-3xl justify-center z-10">
-                            <div className="relative flex-1">
+                        {/* Search & Sort Row */}
+                        <div className="flex flex-col sm:flex-row gap-3 w-full justify-between items-center z-10">
+                            <div className="relative flex-1 w-full">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 rtl:right-4 rtl:left-auto" />
                                 <Input 
                                     type="text"
@@ -90,7 +141,7 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                                 />
                             </div>
                             <select
-                                className="h-12 rounded-xl border border-slate-200 bg-slate-50/80 px-5 py-2.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-insani-blue/20 focus:bg-white focus:border-insani-blue transition-all cursor-pointer min-w-[180px] shadow-sm"
+                                className="h-12 w-full sm:w-auto rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-insani-blue/20 focus:bg-white focus:border-insani-blue transition-all cursor-pointer min-w-[170px] shadow-sm shrink-0"
                                 value={filters.sort || 'terbaru'}
                                 onChange={(e) => handleFilterChange('sort', e.target.value)}
                             >
@@ -101,36 +152,87 @@ export default function ProgramListing({ programs, categories, filters }: Props)
                         </div>
 
                         {/* Divider */}
-                        <div className="w-full max-w-4xl h-px bg-slate-100 my-1 z-10"></div>
+                        <div className="w-full h-px bg-slate-100 my-0.5 z-10"></div>
 
-                        {/* Categories Tabs (Wrap & Centered) */}
-                        <div className="w-full flex flex-wrap justify-center gap-3 z-10">
-                            <button 
-                                onClick={() => handleFilterChange('category', '')}
-                                className={`inline-flex items-center justify-center px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
-                                    !filters.category 
-                                        ? 'bg-insani-blue text-white shadow-md shadow-insani-blue/30 scale-100' 
-                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
+                        {/* Single-Row Horizontal Scrollable Categories */}
+                        <div className="relative w-full z-10 group/category-scroll">
+                            {/* Left Fade Gradient */}
+                            <div
+                                className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 sm:w-12 bg-gradient-to-r from-white via-white/80 to-transparent z-10 transition-opacity duration-300 ${
+                                    canScrollLeft ? 'opacity-100' : 'opacity-0'
                                 }`}
+                            />
+
+                            {/* Left Arrow Button (Desktop) */}
+                            {canScrollLeft && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleScroll('left')}
+                                    aria-label="Scroll left"
+                                    className="hidden sm:flex absolute -left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 items-center justify-center text-slate-600 hover:text-insani-blue hover:bg-slate-50 transition-all cursor-pointer"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                            )}
+
+                            {/* Horizontal Scroll Track */}
+                            <div
+                                ref={scrollContainerRef}
+                                className="flex items-center gap-2 overflow-x-auto scrollbar-none scroll-smooth py-1 px-1 -mx-2 px-2 sm:mx-0 sm:px-0"
                             >
-                                {t('Semua')}
-                            </button>
-                            {categories.map(cat => (
                                 <button 
-                                    key={cat.id}
-                                    onClick={() => handleFilterChange('category', cat.id.toString())}
-                                    className={`inline-flex items-center justify-center gap-2 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer ${
-                                        filters.category == cat.id.toString() 
-                                            ? 'bg-insani-blue text-white shadow-md shadow-insani-blue/30 scale-100' 
-                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/60 hover:border-insani-blue/30 scale-95 hover:scale-100'
+                                    type="button"
+                                    data-active={!filters.category ? 'true' : 'false'}
+                                    onClick={() => handleFilterChange('category', '')}
+                                    className={`inline-flex items-center justify-center shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+                                        !filters.category 
+                                            ? 'bg-insani-blue text-white shadow-sm shadow-insani-blue/25 font-semibold border border-insani-blue' 
+                                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/80 hover:border-insani-blue/30'
                                     }`}
                                 >
-                                    {cat.icon && (
-                                        <span className="shrink-0">{renderStatIcon(cat.icon, "w-4 h-4 text-current")}</span>
-                                    )}
-                                    <span>{t(getLocalizedValue(cat.name, locale))}</span>
+                                    {t('Semua')}
                                 </button>
-                            ))}
+                                {categories.map(cat => {
+                                    const isActive = filters.category === cat.id.toString();
+                                    return (
+                                        <button 
+                                            key={cat.id}
+                                            type="button"
+                                            data-active={isActive ? 'true' : 'false'}
+                                            onClick={() => handleFilterChange('category', cat.id.toString())}
+                                            className={`inline-flex items-center justify-center gap-2 shrink-0 px-4.5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.98] ${
+                                                isActive 
+                                                    ? 'bg-insani-blue text-white shadow-sm shadow-insani-blue/25 font-semibold border border-insani-blue' 
+                                                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-insani-blue border border-slate-200/80 hover:border-insani-blue/30'
+                                            }`}
+                                        >
+                                            {cat.icon && (
+                                                <span className="shrink-0">{renderStatIcon(cat.icon, "w-4 h-4 text-current")}</span>
+                                            )}
+                                            <span>{t(getLocalizedValue(cat.name, locale))}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Right Fade Gradient */}
+                            <div
+                                className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 sm:w-12 bg-gradient-to-l from-white via-white/80 to-transparent z-10 transition-opacity duration-300 ${
+                                    canScrollRight ? 'opacity-100' : 'opacity-0'
+                                }`}
+                            />
+
+                            {/* Right Arrow Button (Desktop) */}
+                            {canScrollRight && (
+                                <button 
+                                    type="button"
+                                    onClick={() => handleScroll('right')}
+                                    aria-label="Scroll right"
+                                    className="hidden sm:flex absolute -right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 items-center justify-center text-slate-600 hover:text-insani-blue hover:bg-slate-50 transition-all cursor-pointer"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            )}
                         </div>
                     </div>
 

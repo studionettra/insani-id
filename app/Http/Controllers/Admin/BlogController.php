@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\FormatsTitleCase;
 use App\Http\Controllers\Controller;
 use App\Models\BlogPostCache;
 use App\Services\TranslationService;
@@ -16,6 +17,8 @@ use Mews\Purifier\Facades\Purifier;
 
 class BlogController extends Controller
 {
+    use FormatsTitleCase;
+
     public function index(Request $request): Response
     {
         $blogs = BlogPostCache::query()
@@ -83,6 +86,14 @@ class BlogController extends Controller
         $titleTranslations = is_array($titleInput)
             ? $titleInput
             : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        if (is_array($titleTranslations)) {
+            foreach ($titleTranslations as $loc => $val) {
+                if (is_string($val)) {
+                    $titleTranslations[$loc] = $this->formatTitleCase($val, (string) $loc);
+                }
+            }
+        }
 
         $primaryTitle = is_array($titleInput) ? ($titleInput['id'] ?? reset($titleInput)) : (string) $titleInput;
 
@@ -174,6 +185,14 @@ class BlogController extends Controller
         $titleTranslations = is_array($titleInput)
             ? $titleInput
             : ($translationService->translateFields(['title' => (string) $titleInput])['title'] ?? ['id' => (string) $titleInput]);
+
+        if (is_array($titleTranslations)) {
+            foreach ($titleTranslations as $loc => $val) {
+                if (is_string($val)) {
+                    $titleTranslations[$loc] = $this->formatTitleCase($val, (string) $loc);
+                }
+            }
+        }
 
         $excerptTranslations = null;
         if (! empty($excerptInput)) {

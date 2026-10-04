@@ -1,5 +1,5 @@
-import React from 'react';
-import { Languages, Sparkles, Loader2, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Languages, RefreshCcw, Check } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,8 @@ export interface TranslationStatusCardProps {
     buttonText?: string;
     disabled?: boolean;
     compact?: boolean;
+    activeLocale?: 'id' | 'en' | 'ar';
+    onLocaleChange?: (locale: 'id' | 'en' | 'ar') => void;
 }
 
 export default function TranslationStatusCard({
@@ -34,6 +36,8 @@ export default function TranslationStatusCard({
     buttonText,
     disabled = false,
     compact = false,
+    activeLocale,
+    onLocaleChange,
 }: TranslationStatusCardProps) {
     let headerTitle = 'Status Terjemahan';
     let isIdReady = hasId;
@@ -60,6 +64,18 @@ export default function TranslationStatusCard({
 
     const isFullyTranslated = isEnReady && isArReady;
     const handleAction = onTranslate || onAutoTranslate || (() => {});
+    const [isPressed, setIsPressed] = useState(false);
+
+    const handleClick = async () => {
+        setIsPressed(true);
+        try {
+            await handleAction();
+        } finally {
+            setTimeout(() => {
+                setIsPressed(false);
+            }, 600);
+        }
+    };
 
     return (
         <div
@@ -92,10 +108,26 @@ export default function TranslationStatusCard({
                 {/* List of Languages */}
                 <div className="space-y-2">
                     {/* ID */}
-                    <div className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-gray-50/70 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800/60 text-xs">
-                        <div className="flex items-center gap-2.5">
+                    <div
+                        onClick={() => onLocaleChange?.('id')}
+                        className={cn(
+                            'flex items-center justify-between py-1.5 px-2.5 rounded-lg border text-xs transition-all',
+                            onLocaleChange && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/80',
+                            activeLocale === 'id'
+                                ? 'bg-blue-50/90 dark:bg-blue-950/40 border-[#1A56DB] dark:border-sky-500 ring-1 ring-[#1A56DB]/50 dark:ring-sky-500/50'
+                                : 'bg-gray-50/70 dark:bg-gray-800/40 border-gray-100 dark:border-gray-800/60'
+                        )}
+                    >
+                        <div className="flex items-center gap-2">
                             <span className="font-bold text-[11px] text-gray-500 dark:text-gray-400 w-5">ID</span>
-                            <span className="font-medium text-gray-800 dark:text-gray-200">Bahasa Indonesia</span>
+                            <span className={cn('font-medium', activeLocale === 'id' ? 'text-[#1A56DB] dark:text-sky-300 font-semibold' : 'text-gray-800 dark:text-gray-200')}>
+                                Bahasa Indonesia
+                            </span>
+                            {activeLocale === 'id' && (
+                                <span className="text-[10px] font-bold text-[#1A56DB] dark:text-sky-300 bg-blue-100/80 dark:bg-blue-900/60 px-1.5 py-0.5 rounded">
+                                    Aktif
+                                </span>
+                            )}
                         </div>
                         <Badge
                             variant="outline"
@@ -106,10 +138,26 @@ export default function TranslationStatusCard({
                     </div>
 
                     {/* EN */}
-                    <div className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-gray-50/70 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800/60 text-xs">
-                        <div className="flex items-center gap-2.5">
+                    <div
+                        onClick={() => onLocaleChange?.('en')}
+                        className={cn(
+                            'flex items-center justify-between py-1.5 px-2.5 rounded-lg border text-xs transition-all',
+                            onLocaleChange && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/80',
+                            activeLocale === 'en'
+                                ? 'bg-blue-50/90 dark:bg-blue-950/40 border-[#1A56DB] dark:border-sky-500 ring-1 ring-[#1A56DB]/50 dark:ring-sky-500/50'
+                                : 'bg-gray-50/70 dark:bg-gray-800/40 border-gray-100 dark:border-gray-800/60'
+                        )}
+                    >
+                        <div className="flex items-center gap-2">
                             <span className="font-bold text-[11px] text-gray-500 dark:text-gray-400 w-5">GB</span>
-                            <span className="font-medium text-gray-800 dark:text-gray-200">English</span>
+                            <span className={cn('font-medium', activeLocale === 'en' ? 'text-[#1A56DB] dark:text-sky-300 font-semibold' : 'text-gray-800 dark:text-gray-200')}>
+                                English
+                            </span>
+                            {activeLocale === 'en' && (
+                                <span className="text-[10px] font-bold text-[#1A56DB] dark:text-sky-300 bg-blue-100/80 dark:bg-blue-900/60 px-1.5 py-0.5 rounded">
+                                    Aktif
+                                </span>
+                            )}
                         </div>
                         {isEnReady ? (
                             <Badge
@@ -129,10 +177,26 @@ export default function TranslationStatusCard({
                     </div>
 
                     {/* AR */}
-                    <div className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-gray-50/70 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-800/60 text-xs">
-                        <div className="flex items-center gap-2.5">
+                    <div
+                        onClick={() => onLocaleChange?.('ar')}
+                        className={cn(
+                            'flex items-center justify-between py-1.5 px-2.5 rounded-lg border text-xs transition-all',
+                            onLocaleChange && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/80',
+                            activeLocale === 'ar'
+                                ? 'bg-blue-50/90 dark:bg-blue-950/40 border-[#1A56DB] dark:border-sky-500 ring-1 ring-[#1A56DB]/50 dark:ring-sky-500/50'
+                                : 'bg-gray-50/70 dark:bg-gray-800/40 border-gray-100 dark:border-gray-800/60'
+                        )}
+                    >
+                        <div className="flex items-center gap-2">
                             <span className="font-bold text-[11px] text-gray-500 dark:text-gray-400 w-5">SA</span>
-                            <span className="font-medium text-gray-800 dark:text-gray-200">العربية</span>
+                            <span className={cn('font-medium', activeLocale === 'ar' ? 'text-[#1A56DB] dark:text-sky-300 font-semibold' : 'text-gray-800 dark:text-gray-200')}>
+                                العربية
+                            </span>
+                            {activeLocale === 'ar' && (
+                                <span className="text-[10px] font-bold text-[#1A56DB] dark:text-sky-300 bg-blue-100/80 dark:bg-blue-900/60 px-1.5 py-0.5 rounded">
+                                    Aktif
+                                </span>
+                            )}
                         </div>
                         {isArReady ? (
                             <Badge
@@ -157,23 +221,21 @@ export default function TranslationStatusCard({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleAction}
+                    onClick={handleClick}
                     disabled={isTranslating || disabled}
-                    className="w-full h-10 text-xs font-semibold rounded-xl bg-white dark:bg-gray-950/70 border-blue-200 dark:border-sky-900/60 text-[#1A56DB] dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-700 dark:hover:text-sky-300 transition-all shadow-xs gap-2"
+                    className="w-full h-10 text-xs font-semibold rounded-xl bg-white dark:bg-gray-950/70 border-blue-200 dark:border-sky-900/60 text-[#1A56DB] dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-gray-800 hover:text-blue-700 dark:hover:text-sky-300 transition-all shadow-xs gap-2 active:scale-[0.98]"
                 >
-                    {isTranslating ? (
-                        <>
-                            <Loader2 className="w-4 h-4 animate-spin text-[#1A56DB] dark:text-sky-400" />
-                            <span>Menerjemahkan Otomatis...</span>
-                        </>
-                    ) : (
-                        <>
-                            <Sparkles className="w-4 h-4 text-[#1A56DB] dark:text-sky-400" />
-                            <span>
-                                {buttonText || (isFullyTranslated ? 'Perbarui Terjemahan (Auto)' : 'Terjemahkan Sekarang (Auto)')}
-                            </span>
-                        </>
-                    )}
+                    <RefreshCcw
+                        className={cn(
+                            'w-4 h-4 text-[#1A56DB] dark:text-sky-400 transition-transform duration-500',
+                            (isTranslating || isPressed) && 'animate-spin'
+                        )}
+                    />
+                    <span>
+                        {isTranslating
+                            ? 'Menerjemahkan...'
+                            : buttonText || (isFullyTranslated ? 'Perbarui Terjemahan' : 'Terjemahkan Sekarang')}
+                    </span>
                 </Button>
             </div>
         </div>

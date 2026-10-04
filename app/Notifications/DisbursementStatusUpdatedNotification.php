@@ -65,7 +65,7 @@ class DisbursementStatusUpdatedNotification extends Notification implements Shou
 
             if (! empty($this->disbursement->transfer_proof)) {
                 $ext = pathinfo($this->disbursement->transfer_proof, PATHINFO_EXTENSION) ?: 'jpg';
-                $mail->attachFromStorageDisk('public', $this->disbursement->transfer_proof, "Bukti_Transfer_{$receiptNo}.{$ext}");
+                $mail->attachFromStorageDisk('local', $this->disbursement->transfer_proof, "Bukti_Transfer_{$receiptNo}.{$ext}");
             }
 
             return $mail;

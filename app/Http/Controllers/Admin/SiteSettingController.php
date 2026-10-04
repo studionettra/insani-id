@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
+use App\Models\BankAccount;
+use App\Services\MidtransCorePaymentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -16,9 +19,11 @@ class SiteSettingController extends Controller
     public function index()
     {
         $settings = AppSetting::pluck('value', 'key')->toArray();
+        $bankAccounts = BankAccount::orderBy('sort_order')->orderBy('id')->get();
 
         return inertia('Admin/SiteSettings/Index', [
             'settings' => $settings,
+            'bankAccounts' => $bankAccounts,
         ]);
     }
 
@@ -79,6 +84,22 @@ class SiteSettingController extends Controller
             'site_logo' => 'nullable|image|max:2048',
             'site_logo_white' => 'nullable|image|max:2048',
             'site_favicon' => 'nullable|mimes:ico,png,svg,jpg,webp|max:1024',
+            'payment_gateway_provider' => 'nullable|string|in:midtrans,manual',
+            'midtrans_channel_qris' => 'nullable|string|in:0,1',
+            'midtrans_channel_shopeepay' => 'nullable|string|in:0,1',
+            'midtrans_channel_gopay' => 'nullable|string|in:0,1',
+            'midtrans_channel_bsi_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_bri_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_bni_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_mandiri_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_bca_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_permata_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_cimb_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_danamon_va' => 'nullable|string|in:0,1',
+            'midtrans_channel_credit_card' => 'nullable|string|in:0,1',
+            'manual_transfer_bsi_active' => 'nullable|string|in:0,1',
+            'manual_transfer_bri_active' => 'nullable|string|in:0,1',
+            'midtrans_va_maintenance_notice' => 'nullable|string|max:1000',
         ];
 
         $translatableFields = [
@@ -177,6 +198,22 @@ class SiteSettingController extends Controller
             'adsense_slot_article_middle',
             'adsense_slot_article_bottom',
             'ads_txt_content',
+            'payment_gateway_provider',
+            'midtrans_channel_qris',
+            'midtrans_channel_shopeepay',
+            'midtrans_channel_gopay',
+            'midtrans_channel_bsi_va',
+            'midtrans_channel_bri_va',
+            'midtrans_channel_bni_va',
+            'midtrans_channel_mandiri_va',
+            'midtrans_channel_bca_va',
+            'midtrans_channel_permata_va',
+            'midtrans_channel_cimb_va',
+            'midtrans_channel_danamon_va',
+            'midtrans_channel_credit_card',
+            'manual_transfer_bsi_active',
+            'manual_transfer_bri_active',
+            'midtrans_va_maintenance_notice',
         ];
 
         foreach ($textFields as $field) {
@@ -223,5 +260,13 @@ class SiteSettingController extends Controller
         Cache::forget('site_settings_public');
 
         return redirect()->back()->with('success', 'Pengaturan website berhasil disimpan.');
+    }
+
+    /**
+     * Test connection to Midtrans API.
+     */
+    public function testMidtrans(MidtransCorePaymentService $midtrans): JsonResponse
+    {
+        return response()->json($midtrans->testConnection());
     }
 }

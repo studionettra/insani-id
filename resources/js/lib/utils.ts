@@ -65,4 +65,78 @@ export function getLocalizedValue(val: any, locale = 'id', fallback = ''): strin
     return String(val || fallback);
 }
 
+const ID_LOWERCASE_WORDS = new Set([
+    'di', 'ke', 'dari', 'pada', 'dalam', 'untuk', 'dengan', 'dan', 'atau',
+    'serta', 'yang', 'oleh', 'tentang', 'sebagai', 'atas', 'terhadap',
+    'hingga', 'sampai', 'bagi', 'karena', 'agar', 'namun', 'tetapi',
+    'melalui', 'secara', 'per', 'pun', 'si', 'sang'
+]);
+
+const EN_LOWERCASE_WORDS = new Set([
+    'a', 'an', 'the', 'and', 'but', 'or', 'for', 'nor', 'on', 'at',
+    'to', 'from', 'by', 'with', 'in', 'of', 'as', 'into', 'onto'
+]);
+
+export function toTitleCase(text: string, locale: string = 'id'): string {
+    if (!text || typeof text !== 'string') return text || '';
+    if (locale === 'ar') return text;
+
+    const stopWords = locale === 'en' ? EN_LOWERCASE_WORDS : ID_LOWERCASE_WORDS;
+    const isAllUpper = text === text.toUpperCase() && text !== text.toLowerCase();
+
+    const capitalizeToken = (token: string, isFirstWord: boolean, isLastWord: boolean): string => {
+        if (!token) return token;
+
+        if (token.includes('-')) {
+            return token
+                .split('-')
+                .map((subToken, idx, arr) => capitalizeToken(subToken, isFirstWord && idx === 0, isLastWord && idx === arr.length - 1))
+                .join('-');
+        }
+
+        const cleanWord = token.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').toLowerCase();
+
+        if (!isAllUpper && token.length > 1 && token === token.toUpperCase() && /[A-Z]/.test(token)) {
+            return token;
+        }
+
+        if (!isFirstWord && !isLastWord && stopWords.has(cleanWord)) {
+            return token.replace(new RegExp(`\\b${cleanWord}\\b`, 'i'), cleanWord);
+        }
+
+        const firstLetterMatch = token.match(/[\p{L}]/u);
+        if (!firstLetterMatch || firstLetterMatch.index === undefined) {
+            return token;
+        }
+
+        const idx = firstLetterMatch.index;
+        const prefix = token.slice(0, idx);
+        const letter = token.charAt(idx).toUpperCase();
+        const suffix = token.slice(idx + 1).toLowerCase();
+
+        return `${prefix}${letter}${suffix}`;
+    };
+
+    const clauses = text.split(/([:–—])/);
+
+    return clauses.map((clause) => {
+        if (clause === ':' || clause === '–' || clause === '—') return clause;
+
+        const words = clause.split(/(\s+)/);
+        const wordTokens = words.filter(w => !/^\s*$/.test(w));
+        let wordCount = 0;
+        const totalWords = wordTokens.length;
+
+        return words.map(part => {
+            if (/^\s*$/.test(part)) return part;
+
+            const isFirst = wordCount === 0;
+            const isLast = wordCount === totalWords - 1;
+            wordCount++;
+
+            return capitalizeToken(part, isFirst, isLast);
+        }).join('');
+    }).join('');
+}
+
 

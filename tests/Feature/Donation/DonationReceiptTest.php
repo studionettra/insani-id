@@ -149,3 +149,35 @@ test('it displays QRIS cleanly on receipt for qris donations', function () {
     $response->assertOk();
     $response->assertSee('QRIS');
 });
+
+test('it displays legal details and handles receipt rendering properly', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-LEGAL-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donatur Langsung',
+        'donor_email' => 'direct@example.com',
+        'donor_phone' => '081299988877',
+        'amount' => 75000,
+        'channel' => 'online',
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'xendit',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 75000,
+        'paid_at' => now(),
+    ]);
+
+    $response = $this->get(route('donation.receipt', $donation->donation_code));
+
+    $response->assertOk();
+    $response->assertSee('Bantuan Peduli Bencana');
+    $response->assertSee('Verifikasi Kwitansi Resmi');
+    $response->assertSee('legal-text');
+    $response->assertSee('legal-foundation');
+});

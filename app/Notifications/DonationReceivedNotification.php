@@ -29,7 +29,7 @@ class DonationReceivedNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        $donorName = $this->donation->is_anonymous ? 'Hamba Allah' : ($this->donation->donor_name ?: 'Donatur');
+        $donorName = $this->donation->is_anonymous ? 'Inisiator Kebaikan' : ($this->donation->donor_name ?: 'Donatur');
         $formattedAmount = 'Rp '.number_format((float) $this->donation->amount, 0, ',', '.');
         $programTitle = $this->donation->program?->title ?? 'Program';
 

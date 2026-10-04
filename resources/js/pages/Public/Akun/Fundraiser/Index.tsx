@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Sparkles, Copy, Check, Share2, ExternalLink, Heart, Users, Target, ArrowRight } from 'lucide-react';
+import { HandHelping, Copy, Check, Share2, ExternalLink, Heart, Users, Target, ArrowRight } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -68,19 +68,14 @@ export default function AkunFundraiserIndex({ fundraisers, stats }: Props) {
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">Fundraiser Saya</h1>
-                            <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 hover:bg-emerald-100">
-                                Relawan
-                            </Badge>
-                        </div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">Fundraiser Saya</h1>
                         <p className="text-slate-500 dark:text-gray-400 mt-1 text-sm">
                             Kelola tautan kebaikan yang Anda sebarkan dan pantau donatur yang Anda ajak.
                         </p>
                     </div>
                     <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
                         <Link href="/program">
-                            <Sparkles className="mr-2 h-4 w-4" />
+                            <HandHelping className="mr-2 h-4 w-4" />
                             Cari Program Untuk Didukung
                         </Link>
                     </Button>
@@ -243,7 +238,7 @@ export default function AkunFundraiserIndex({ fundraisers, stats }: Props) {
                     ) : (
                         <Card className="border-dashed border-2 border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center">
                             <div className="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 mx-auto flex items-center justify-center mb-4 shadow-2xs">
-                                <Sparkles className="w-8 h-8" />
+                                <HandHelping className="w-8 h-8" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-800 dark:text-white">
                                 Anda Belum Memiliki Tautan Fundraiser

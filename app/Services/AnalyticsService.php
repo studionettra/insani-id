@@ -9,6 +9,7 @@ use App\Models\AppSetting;
 use App\Models\Donation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -224,92 +225,111 @@ class AnalyticsService
     {
         $startDate = Carbon::now()->subDays($days);
 
-        $sessions = AnalyticsSession::where('created_at', '>=', $startDate)->get();
+        return Cache::remember("analytics_acquisition_data_{$days}", 300, function () use ($startDate) {
+            $channelCounts = AnalyticsSession::where('created_at', '>=', $startDate)
+                ->selectRaw("
+                    SUM(CASE 
+                        WHEN LOWER(COALESCE(referrer_domain, '')) LIKE '%google%' 
+                          OR LOWER(COALESCE(referrer_domain, '')) LIKE '%bing%' 
+                          OR LOWER(COALESCE(referrer_domain, '')) LIKE '%yahoo%' 
+                          OR LOWER(COALESCE(referrer_domain, '')) LIKE '%duckduckgo%' 
+                          OR LOWER(COALESCE(utm_source, '')) LIKE '%google%' 
+                          OR LOWER(COALESCE(utm_source, '')) LIKE '%search%' 
+                        THEN 1 ELSE 0 END) as organic_search,
+                    SUM(CASE 
+                        WHEN (
+                            LOWER(COALESCE(referrer_domain, '')) NOT LIKE '%google%' 
+                            AND LOWER(COALESCE(referrer_domain, '')) NOT LIKE '%bing%' 
+                            AND LOWER(COALESCE(referrer_domain, '')) NOT LIKE '%yahoo%' 
+                            AND LOWER(COALESCE(referrer_domain, '')) NOT LIKE '%duckduckgo%' 
+                            AND LOWER(COALESCE(utm_source, '')) NOT LIKE '%google%' 
+                            AND LOWER(COALESCE(utm_source, '')) NOT LIKE '%search%'
+                        ) AND (
+                            LOWER(COALESCE(referrer_domain, '')) LIKE '%facebook%' 
+                            OR LOWER(COALESCE(referrer_domain, '')) LIKE '%instagram%' 
+                            OR LOWER(COALESCE(referrer_domain, '')) LIKE '%whatsapp%' 
+                            OR LOWER(COALESCE(referrer_domain, '')) LIKE '%tiktok%' 
+                            OR LOWER(COALESCE(referrer_domain, '')) LIKE '%twitter%' 
+                            OR LOWER(COALESCE(referrer_domain, '')) LIKE '%t.co%' 
+                            OR LOWER(COALESCE(referrer_domain, '')) LIKE '%telegram%' 
+                            OR LOWER(COALESCE(utm_source, '')) LIKE '%whatsapp%' 
+                            OR LOWER(COALESCE(utm_source, '')) LIKE '%facebook%' 
+                            OR LOWER(COALESCE(utm_source, '')) LIKE '%instagram%' 
+                            OR LOWER(COALESCE(utm_source, '')) LIKE '%tiktok%' 
+                            OR LOWER(COALESCE(utm_source, '')) LIKE '%fb%' 
+                            OR LOWER(COALESCE(utm_source, '')) LIKE '%ig%'
+                        ) THEN 1 ELSE 0 END) as social_media,
+                    SUM(CASE 
+                        WHEN (referrer_domain IS NULL OR referrer_domain = '') 
+                         AND (utm_source IS NULL OR utm_source = '') 
+                        THEN 1 ELSE 0 END) as direct
+                ")
+                ->first();
 
-        $channels = [
-            'Organic Search' => 0,
-            'Social Media' => 0,
-            'Direct' => 0,
-            'Referral' => 0,
-        ];
+            $totalSessions = AnalyticsSession::where('created_at', '>=', $startDate)->count();
+            $organicCount = (int) ($channelCounts->organic_search ?? 0);
+            $socialCount = (int) ($channelCounts->social_media ?? 0);
+            $directCount = (int) ($channelCounts->direct ?? 0);
+            $referralCount = max(0, $totalSessions - ($organicCount + $socialCount + $directCount));
 
-        foreach ($sessions as $s) {
-            $ref = strtolower($s->referrer_domain ?? '');
-            $utmSource = strtolower($s->utm_source ?? '');
+            $channels = [
+                'Organic Search' => $organicCount,
+                'Social Media' => $socialCount,
+                'Direct' => $directCount,
+                'Referral' => $referralCount,
+            ];
 
-            if (
-                str_contains($ref, 'google') || str_contains($ref, 'bing') ||
-                str_contains($ref, 'yahoo') || str_contains($ref, 'duckduckgo') ||
-                str_contains($utmSource, 'google') || str_contains($utmSource, 'search')
-            ) {
-                $channels['Organic Search']++;
-            } elseif (
-                str_contains($ref, 'facebook') || str_contains($ref, 'instagram') ||
-                str_contains($ref, 'whatsapp') || str_contains($ref, 'tiktok') ||
-                str_contains($ref, 'twitter') || str_contains($ref, 't.co') ||
-                str_contains($ref, 'telegram') || str_contains($utmSource, 'whatsapp') ||
-                str_contains($utmSource, 'facebook') || str_contains($utmSource, 'instagram') ||
-                str_contains($utmSource, 'tiktok') || str_contains($utmSource, 'fb') ||
-                str_contains($utmSource, 'ig')
-            ) {
-                $channels['Social Media']++;
-            } elseif (empty($ref) && empty($utmSource)) {
-                $channels['Direct']++;
-            } else {
-                $channels['Referral']++;
-            }
-        }
+            $utmCampaigns = AnalyticsSession::select(
+                'utm_source',
+                'utm_medium',
+                'utm_campaign',
+                DB::raw('count(*) as visitors_count')
+            )
+                ->where('created_at', '>=', $startDate)
+                ->whereNotNull('utm_source')
+                ->where('utm_source', '!=', '')
+                ->groupBy('utm_source', 'utm_medium', 'utm_campaign')
+                ->orderByDesc('visitors_count')
+                ->limit(10)
+                ->get()
+                ->map(function ($campaign) use ($startDate) {
+                    $donations = Donation::where('utm_source', $campaign->utm_source)
+                        ->when($campaign->utm_medium, fn ($q) => $q->where('utm_medium', $campaign->utm_medium))
+                        ->when($campaign->utm_campaign, fn ($q) => $q->where('utm_campaign', $campaign->utm_campaign))
+                        ->where('status', 'paid')
+                        ->where('created_at', '>=', $startDate)
+                        ->selectRaw('count(*) as count, sum(amount) as total_amount')
+                        ->first();
 
-        $utmCampaigns = AnalyticsSession::select(
-            'utm_source',
-            'utm_medium',
-            'utm_campaign',
-            DB::raw('count(*) as visitors_count')
-        )
-            ->where('created_at', '>=', $startDate)
-            ->whereNotNull('utm_source')
-            ->where('utm_source', '!=', '')
-            ->groupBy('utm_source', 'utm_medium', 'utm_campaign')
-            ->orderByDesc('visitors_count')
-            ->limit(10)
-            ->get()
-            ->map(function ($campaign) use ($startDate) {
-                $donations = Donation::where('utm_source', $campaign->utm_source)
-                    ->when($campaign->utm_medium, fn ($q) => $q->where('utm_medium', $campaign->utm_medium))
-                    ->when($campaign->utm_campaign, fn ($q) => $q->where('utm_campaign', $campaign->utm_campaign))
-                    ->where('status', 'paid')
-                    ->where('created_at', '>=', $startDate)
-                    ->selectRaw('count(*) as count, sum(amount) as total_amount')
-                    ->first();
+                    $paidCount = $donations->count ?? 0;
+                    $convRate = $campaign->visitors_count > 0 ? round(($paidCount / $campaign->visitors_count) * 100, 1) : 0;
 
-                $paidCount = $donations->count ?? 0;
-                $convRate = $campaign->visitors_count > 0 ? round(($paidCount / $campaign->visitors_count) * 100, 1) : 0;
+                    return [
+                        'source' => $campaign->utm_source,
+                        'medium' => $campaign->utm_medium ?: '-',
+                        'campaign' => $campaign->utm_campaign ?: '-',
+                        'visitors' => (int) $campaign->visitors_count,
+                        'donations_count' => (int) $paidCount,
+                        'total_amount' => (float) ($donations->total_amount ?? 0),
+                        'conversion_rate' => $convRate,
+                    ];
+                });
 
-                return [
-                    'source' => $campaign->utm_source,
-                    'medium' => $campaign->utm_medium ?: '-',
-                    'campaign' => $campaign->utm_campaign ?: '-',
-                    'visitors' => (int) $campaign->visitors_count,
-                    'donations_count' => (int) $paidCount,
-                    'total_amount' => (float) ($donations->total_amount ?? 0),
-                    'conversion_rate' => $convRate,
-                ];
-            });
+            $topReferrers = AnalyticsSession::select('referrer_domain', DB::raw('count(*) as visits'))
+                ->where('created_at', '>=', $startDate)
+                ->whereNotNull('referrer_domain')
+                ->where('referrer_domain', '!=', '')
+                ->groupBy('referrer_domain')
+                ->orderByDesc('visits')
+                ->limit(8)
+                ->get();
 
-        $topReferrers = AnalyticsSession::select('referrer_domain', DB::raw('count(*) as visits'))
-            ->where('created_at', '>=', $startDate)
-            ->whereNotNull('referrer_domain')
-            ->where('referrer_domain', '!=', '')
-            ->groupBy('referrer_domain')
-            ->orderByDesc('visits')
-            ->limit(8)
-            ->get();
-
-        return [
-            'channels' => $channels,
-            'campaigns' => $utmCampaigns,
-            'referrers' => $topReferrers,
-        ];
+            return [
+                'channels' => $channels,
+                'campaigns' => $utmCampaigns,
+                'referrers' => $topReferrers,
+            ];
+        });
     }
 
     /**

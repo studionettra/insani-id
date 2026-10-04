@@ -42,6 +42,11 @@ class PageController extends Controller
         return $this->show('cara-donasi');
     }
 
+    public function logoGuideline(): Response
+    {
+        return $this->show('logo');
+    }
+
     public function pusatBantuan(): Response
     {
         $page = Page::where('slug', 'pusat-bantuan')->first();

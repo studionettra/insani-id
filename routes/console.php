@@ -23,6 +23,9 @@ Schedule::call(function () {
         ->delete();
 })->dailyAt('03:30')->name('notifications:prune-read');
 
+// Prune prunable Eloquent models (AnalyticsSession, AnalyticsPageView, AnalyticsEvent)
+Schedule::command('model:prune')->dailyAt('04:00');
+
 // Drain queue jobs every minute for Hostinger shared hosting without Supervisor daemon
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=2')
     ->everyMinute()

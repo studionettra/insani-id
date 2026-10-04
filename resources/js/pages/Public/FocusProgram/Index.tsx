@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sprout } from 'lucide-react';
 import React from 'react';
 import { FadeIn } from '@/components/ui/fade-in';
 import PublicLayout from '@/layouts/PublicLayout';
@@ -19,7 +19,7 @@ export default function FocusProgramIndex({ pillars }: any) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                     <FadeIn>
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-blue-200 text-xs font-semibold mb-6 border border-white/10">
-                            <Sparkles className="w-3.5 h-3.5" />
+                            <Sprout className="w-3.5 h-3.5" />
                             <span>{t('Fokus Kebaikan Berkelanjutan')}</span>
                         </div>
                         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
@@ -64,9 +64,6 @@ export default function FocusProgramIndex({ pillars }: any) {
                                                 )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
                                                 <div className="absolute bottom-5 left-6 right-6">
-                                                    <span className="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold uppercase tracking-wider mb-2">
-                                                        {t('Fokus Program')}
-                                                    </span>
                                                     <h2 className="text-2xl font-bold text-white tracking-tight leading-tight group-hover:text-brand-300 transition-colors">
                                                         {catName}
                                                     </h2>

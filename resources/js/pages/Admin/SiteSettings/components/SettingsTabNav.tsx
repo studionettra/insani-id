@@ -2,20 +2,25 @@ import React from 'react';
 import { 
     Phone, 
     Palette, 
-    Sparkles, 
+    Compass, 
     ShieldCheck, 
     Megaphone, 
     BarChart3,
-    AlertCircle
+    CreditCard
 } from 'lucide-react';
-import { TabKey, TabDefinition } from '../types';
+import { 
+    TabKey, 
+    TabDefinition, 
+    SETTINGS_TAB_CATEGORIES 
+} from '../types';
 
 export const SITE_SETTINGS_TABS: TabDefinition[] = [
     {
         key: 'general',
+        category: 'identity',
         label: 'Umum & Kontak',
         shortLabel: 'Kontak',
-        description: 'Kontak resmi, jam kerja, alamat, & media sosial',
+        description: 'Kontak resmi, jam operasional kantor, alamat, & medsos',
         icon: Phone,
         fields: [
             'contact_whatsapp', 'contact_phone', 'contact_email', 'contact_finance_email',
@@ -26,25 +31,28 @@ export const SITE_SETTINGS_TABS: TabDefinition[] = [
     },
     {
         key: 'branding',
+        category: 'identity',
         label: 'Identitas & Media',
         shortLabel: 'Branding',
-        description: 'Logo lembaga, favicon, QRIS, & profil footer',
+        description: 'Logo lembaga resmi, favicon, QRIS, & narasi profil footer',
         icon: Palette,
         fields: ['site_logo', 'site_logo_white', 'site_favicon', 'qris_image', 'footer_description']
     },
     {
         key: 'profile',
+        category: 'identity',
         label: 'Profil Lembaga',
         shortLabel: 'Profil',
         description: 'Visi, misi, dan nilai-nilai perjuangan yayasan',
-        icon: Sparkles,
+        icon: Compass,
         fields: ['about_vision', 'about_mission', 'about_values']
     },
     {
         key: 'legal',
+        category: 'identity',
         label: 'Legalitas & Kwitansi',
         shortLabel: 'Legalitas',
-        description: 'SK Kemenkumham, izin PUB, NPWP, & stempel kwitansi',
+        description: 'SK Kemenkumham, izin PUB, NPWP, & stempel kwitansi resmi',
         icon: ShieldCheck,
         fields: [
             'legal_foundation_name', 'legal_sk_kemenkumham', 'legal_sk_label',
@@ -53,18 +61,37 @@ export const SITE_SETTINGS_TABS: TabDefinition[] = [
         ]
     },
     {
+        key: 'payment',
+        category: 'finance',
+        label: 'Payment Gateway & Bank',
+        shortLabel: 'Pembayaran',
+        description: 'Midtrans Core API, QRIS, E-Wallet, VA Bank, & rekening',
+        icon: CreditCard,
+        fields: [
+            'payment_gateway_provider',
+            'midtrans_channel_qris', 'midtrans_channel_shopeepay', 'midtrans_channel_gopay',
+            'midtrans_channel_bsi_va', 'midtrans_channel_bri_va', 'midtrans_channel_bni_va',
+            'midtrans_channel_mandiri_va', 'midtrans_channel_bca_va', 'midtrans_channel_permata_va',
+            'midtrans_channel_cimb_va', 'midtrans_channel_danamon_va', 'midtrans_channel_credit_card',
+            'manual_transfer_bsi_active', 'manual_transfer_bri_active',
+            'midtrans_va_maintenance_notice'
+        ]
+    },
+    {
         key: 'announcement',
+        category: 'communications',
         label: 'Pengumuman Global',
         shortLabel: 'Pengumuman',
-        description: 'Banner pengumuman dan peringatan darurat website',
+        description: 'Banner peringatan darurat & pengumuman di puncak web',
         icon: Megaphone,
         fields: ['announcement_enabled', 'announcement_text', 'announcement_link', 'announcement_bg_color']
     },
     {
         key: 'marketing',
+        category: 'communications',
         label: 'Integrasi & Iklan',
         shortLabel: 'Integrasi',
-        description: 'Google Analytics, Meta Pixel, TikTok, AdSense, & ads.txt',
+        description: 'Google Analytics, Meta CAPI, TikTok Pixel, & AdSense',
         icon: BarChart3,
         fields: [
             'google_tag_manager_id', 'tracking_mode_gtm', 'google_analytics_id', 'google_ads_id',
@@ -84,7 +111,7 @@ interface SettingsTabNavProps {
 }
 
 export default function SettingsTabNav({ activeTab, onTabChange, errors }: SettingsTabNavProps) {
-    // Count errors per tab
+    // Hitung jumlah error pada setiap tab
     const getTabErrorCount = (tab: TabDefinition) => {
         return tab.fields.reduce((count, field) => {
             const hasDirectError = Boolean(errors[field]);
@@ -94,8 +121,8 @@ export default function SettingsTabNav({ activeTab, onTabChange, errors }: Setti
     };
 
     return (
-        <div className="w-full bg-white dark:bg-gray-800/90 rounded-2xl p-1.5 border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
-            <nav className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1" aria-label="Tabs Pengaturan">
+        <div className="w-full bg-white dark:bg-gray-800/95 rounded-2xl p-1.5 border border-gray-200/80 dark:border-gray-700/80 shadow-xs">
+            <nav className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth" aria-label="Tabs Pengaturan Website">
                 {SITE_SETTINGS_TABS.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.key;
@@ -106,7 +133,7 @@ export default function SettingsTabNav({ activeTab, onTabChange, errors }: Setti
                             key={tab.key}
                             type="button"
                             onClick={() => onTabChange(tab.key)}
-                            className={`relative group flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                            className={`flex-1 min-w-max flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                                 isActive
                                     ? 'bg-brand-600 text-white shadow-xs'
                                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-700/50'
@@ -116,7 +143,7 @@ export default function SettingsTabNav({ activeTab, onTabChange, errors }: Setti
                                 isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200'
                             }`} />
                             
-                            <span className="truncate">{tab.shortLabel}</span>
+                            <span>{tab.label}</span>
 
                             {errorCount > 0 && (
                                 <span className={`inline-flex items-center justify-center min-w-4 h-4 px-1 text-[10px] font-bold rounded-full ${

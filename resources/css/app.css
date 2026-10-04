@@ -1021,6 +1021,17 @@ span.flatpickr-weekday,
   color: #6b7280 !important;
 }
 
+/* Cross-browser scrollbar hiding */
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Official Print Settings */
 @media print {
   @page {

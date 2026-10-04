@@ -120,3 +120,41 @@ test('it accepts clean valid donation with prayer message', function () {
         'status' => 'pending',
     ]);
 });
+
+test('it validates turnstile captcha when secret key is configured', function () {
+    config(['services.turnstile.secret_key' => 'test-secret-key']);
+    Http::fake([
+        'challenges.cloudflare.com/*' => Http::response(['success' => false]),
+    ]);
+
+    $response = $this->post(route('donation.store', ['program' => $this->program->slug]), [
+        'amount' => 50000,
+        'donor_name' => 'Ahmad Fauzi',
+        'donor_email' => 'ahmad@example.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'offline',
+        'payment_method' => 'bank_transfer_manual',
+        'cf-turnstile-response' => 'invalid-token',
+    ]);
+
+    $response->assertSessionHasErrors(['cf-turnstile-response']);
+});
+
+test('it passes turnstile captcha when token is verified successfully', function () {
+    config(['services.turnstile.secret_key' => 'test-secret-key']);
+    Http::fake([
+        'challenges.cloudflare.com/*' => Http::response(['success' => true]),
+    ]);
+
+    $response = $this->post(route('donation.store', ['program' => $this->program->slug]), [
+        'amount' => 50000,
+        'donor_name' => 'Ahmad Fauzi',
+        'donor_email' => 'ahmad@example.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'offline',
+        'payment_method' => 'bank_transfer_manual',
+        'cf-turnstile-response' => 'valid-token',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+});

@@ -6,7 +6,6 @@ import {
     ExternalLink, 
     ShieldCheck, 
     Info, 
-    Sparkles, 
     Server, 
     CheckCircle2, 
     Search, 
@@ -48,7 +47,7 @@ export default function MarketingIntegrationTab({
                     </div>
 
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-indigo-700 bg-indigo-50 dark:text-indigo-300 dark:bg-indigo-950/60 px-3 py-1 rounded-full self-start sm:self-auto">
-                        <Sparkles className="w-3 h-3" /> Hanya aktif di publik
+                        <Globe className="w-3 h-3" /> Hanya aktif di publik
                     </span>
                 </div>
 

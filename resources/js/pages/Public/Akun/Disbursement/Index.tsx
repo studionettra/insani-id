@@ -113,7 +113,7 @@ export default function Index({ program, disbursements }: any) {
                                                             </Button>
                                                             {item.transfer_proof && (
                                                                 <Button size="sm" variant="outline" asChild className="h-8 text-xs border-slate-200 dark:border-gray-700">
-                                                                    <a href={`/storage/${item.transfer_proof}`} target="_blank" rel="noopener noreferrer">
+                                                                    <a href={`/akun/programs/${program.id}/disbursements/${item.id}/proof`} target="_blank" rel="noopener noreferrer">
                                                                         Bukti Transfer
                                                                     </a>
                                                                 </Button>

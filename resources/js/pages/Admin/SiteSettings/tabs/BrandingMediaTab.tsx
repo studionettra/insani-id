@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, QrCode, FileText, Sparkles, Loader2, Languages, Globe } from 'lucide-react';
+import { Palette, QrCode, FileText, Loader2, Languages, Globe } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import ImageDropzone from '../components/ImageDropzone';
@@ -114,7 +114,7 @@ export default function BrandingMediaTab({
                                 </>
                             ) : (
                                 <>
-                                    <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                                    <Languages className="w-3.5 h-3.5 text-purple-500" />
                                     <span>Terjemahkan Otomatis</span>
                                 </>
                             )}

@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify';
 import HelpCenterView from '@/components/public/page/HelpCenterView';
 import HowToDonateView from '@/components/public/page/HowToDonateView';
 import LegalDocumentView from '@/components/public/page/LegalDocumentView';
+import LogoGuidelineView from '@/components/public/page/LogoGuidelineView';
 
 interface PageProps {
     page: {
@@ -21,6 +22,7 @@ export default function Show({ page, faqs }: PageProps) {
     const isPusatBantuan = page.slug === 'pusat-bantuan';
     const isCaraDonasi = page.slug === 'cara-donasi';
     const isLegalPage = page.slug === 'syarat-ketentuan' || page.slug === 'kebijakan-privasi';
+    const isLogoGuideline = page.slug === 'logo' || page.slug === 'panduan-logo';
 
     const rawTitle = page.meta_title || page.title || '';
     const cleanTitle = typeof rawTitle === 'string'
@@ -46,6 +48,8 @@ export default function Show({ page, faqs }: PageProps) {
                     contentHtml={page.content_html}
                     attachmentUrl={page.attachment_url}
                 />
+            ) : isLogoGuideline ? (
+                <LogoGuidelineView page={page} />
             ) : (
                 /* FALLBACK STANDARD CMS ARTICLE VIEW */
                 <div className="bg-slate-50/50 py-12 md:py-20 min-h-screen">

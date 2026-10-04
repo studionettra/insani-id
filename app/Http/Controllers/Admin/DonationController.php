@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DonationController extends Controller
 {
@@ -98,7 +99,7 @@ class DonationController extends Controller
             return back()->with('error', 'Data pembayaran manual tidak ditemukan atau sudah diproses.');
         }
 
-        $proofPath = $request->file('transfer_proof')->store('donation-proofs', 'public');
+        $proofPath = $request->file('transfer_proof')->store('donation-proofs', 'local');
 
         $payment->update([
             'gateway_status' => 'PAID',
@@ -111,5 +112,20 @@ class DonationController extends Controller
         // This will trigger the PaymentObserver to update Donation and send email.
 
         return back()->with('success', 'Donasi manual berhasil diverifikasi dan dikonfirmasi.');
+    }
+
+    public function viewProof(Donation $donation)
+    {
+        if (! auth()->user()->can('donation.view') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Anda tidak memiliki wewenang untuk melihat bukti transfer.');
+        }
+
+        $payment = $donation->payments()->whereNotNull('transfer_proof')->latest()->first();
+
+        if (! $payment || ! Storage::disk('local')->exists($payment->transfer_proof)) {
+            abort(404, 'Bukti transfer tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($payment->transfer_proof);
     }
 }

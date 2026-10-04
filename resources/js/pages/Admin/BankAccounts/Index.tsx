@@ -22,6 +22,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import BankLogo from '@/components/ui/bank-logo';
+import BankLogoPicker, { BankPreset } from '@/components/ui/bank-logo-picker';
 
 interface BankAccount {
     id: number;
@@ -58,6 +60,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
     const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [copiedId, setCopiedId] = useState<number | null>(null);
+    const [togglingId, setTogglingId] = useState<number | null>(null);
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         _method: 'post',
@@ -65,8 +68,10 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
         bank_code: '',
         account_number: '',
         account_name: '',
-        bank_type: 'syariah',
+        bank_type: 'syariah' as 'syariah' | 'konvensional',
         logo: null as File | null,
+        preset_logo: '' as string,
+        remove_logo: false as boolean,
         instructions: '',
         is_active: true,
         sort_order: 0,
@@ -100,6 +105,8 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
             account_name: 'Yayasan Peduli Insani Indonesia',
             bank_type: 'syariah',
             logo: null,
+            preset_logo: '',
+            remove_logo: false,
             instructions: 'Transfer tepat sesuai nominal yang tertera ke rekening resmi yayasan.',
             is_active: true,
             sort_order: (accounts.data?.length || 0) + 1,
@@ -110,6 +117,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
 
     const openEditModal = (account: BankAccount) => {
         setEditingAccount(account);
+        const isPreset = !!account.logo_path && (account.logo_path.startsWith('images/') || account.logo_path.startsWith('/images/'));
         setData({
             _method: 'put',
             bank_name: account.bank_name,
@@ -118,12 +126,49 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
             account_name: account.account_name,
             bank_type: account.bank_type,
             logo: null,
+            preset_logo: isPreset ? account.logo_path : '',
+            remove_logo: false,
             instructions: account.instructions || '',
             is_active: account.is_active,
             sort_order: account.sort_order,
         });
         clearErrors();
         setIsEditModalOpen(true);
+    };
+
+    const handlePresetSelect = (preset: BankPreset, isCreate = false) => {
+        setData((prev) => {
+            const next = {
+                ...prev,
+                preset_logo: preset.src,
+                logo: null,
+                remove_logo: false,
+            };
+            if (isCreate) {
+                next.bank_name = preset.name;
+                next.bank_code = preset.code;
+                next.bank_type = preset.type;
+            }
+            return next;
+        });
+    };
+
+    const handleCustomFileSelect = (file: File | null) => {
+        setData((prev) => ({
+            ...prev,
+            logo: file,
+            preset_logo: '',
+            remove_logo: false,
+        }));
+    };
+
+    const handleClearLogo = () => {
+        setData((prev) => ({
+            ...prev,
+            logo: null,
+            preset_logo: '',
+            remove_logo: true,
+        }));
     };
 
     const submitCreate = (e: React.FormEvent) => {
@@ -163,6 +208,18 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
         navigator.clipboard.writeText(text);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const handleToggle = (account: BankAccount) => {
+        setTogglingId(account.id);
+        router.patch(
+            `/admin/bank-accounts/${account.id}/toggle`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setTogglingId(null),
+            }
+        );
     };
 
     return (
@@ -241,9 +298,7 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                                         className="h-8 w-12 object-contain rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-0.5"
                                                     />
                                                 ) : (
-                                                    <div className="h-8 w-12 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700">
-                                                        <Building2 className="h-4 w-4" />
-                                                    </div>
+                                                    <BankLogo code={acc.bank_code || acc.bank_name} size="sm" />
                                                 )}
                                                 <div>
                                                     <span className="font-semibold text-gray-900 dark:text-white block">{acc.bank_name}</span>
@@ -286,15 +341,20 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggle(acc)}
+                                                disabled={togglingId === acc.id}
+                                                title={acc.is_active ? 'Klik untuk menonaktifkan rekening' : 'Klik untuk mengaktifkan rekening'}
+                                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                                                     acc.is_active
-                                                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
-                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                                                        ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-800 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/60 dark:text-emerald-300'
+                                                        : 'bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-400'
                                                 }`}
                                             >
-                                                {acc.is_active ? 'Aktif' : 'Nonaktif'}
-                                            </span>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${acc.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'}`} />
+                                                {togglingId === acc.id ? 'Memproses...' : (acc.is_active ? 'Aktif' : 'Nonaktif')}
+                                            </button>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-1">
@@ -416,12 +476,15 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="logo">Logo Bank (Opsional)</Label>
-                            <Input
-                                id="logo"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setData('logo', e.target.files ? e.target.files[0] : null)}
+                            <Label className="block mb-1.5 font-semibold text-xs text-gray-700 dark:text-gray-300">
+                                Logo Bank (Galeri Resmi SVG / Upload Kustom)
+                            </Label>
+                            <BankLogoPicker
+                                presetValue={data.preset_logo || null}
+                                customFileValue={data.logo}
+                                onSelectPreset={(preset) => handlePresetSelect(preset, true)}
+                                onSelectCustomFile={handleCustomFileSelect}
+                                onClear={handleClearLogo}
                             />
                             {errors.logo && <p className="text-red-500 text-xs mt-1">{errors.logo}</p>}
                         </div>
@@ -543,12 +606,16 @@ export default function BankAccountsIndex({ accounts, filters }: Props) {
                         </div>
 
                         <div>
-                            <Label htmlFor="edit_logo">Logo Bank (Ganti bila perlu)</Label>
-                            <Input
-                                id="edit_logo"
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setData('logo', e.target.files ? e.target.files[0] : null)}
+                            <Label className="block mb-1.5 font-semibold text-xs text-gray-700 dark:text-gray-300">
+                                Logo Bank (Galeri Resmi SVG / Upload Kustom)
+                            </Label>
+                            <BankLogoPicker
+                                presetValue={data.preset_logo || null}
+                                customFileValue={data.logo}
+                                existingLogoUrl={editingAccount?.logo_url}
+                                onSelectPreset={(preset) => handlePresetSelect(preset, false)}
+                                onSelectCustomFile={handleCustomFileSelect}
+                                onClear={handleClearLogo}
                             />
                             {errors.logo && <p className="text-red-500 text-xs mt-1">{errors.logo}</p>}
                         </div>

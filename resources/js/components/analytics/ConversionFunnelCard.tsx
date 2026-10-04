@@ -9,7 +9,6 @@ import {
     Flame,
     ArrowDownRight,
     Layers,
-    Sparkles,
 } from 'lucide-react';
 import React from 'react';
 import { formatCurrency } from '@/lib/utils';

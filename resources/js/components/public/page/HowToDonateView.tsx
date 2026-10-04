@@ -11,7 +11,8 @@ import {
     ShieldCheck, 
     MessageCircle, 
     ArrowRight,
-    Search
+    Search,
+    BookOpenText
 } from 'lucide-react';
 
 export default function HowToDonateView() {
@@ -37,12 +38,18 @@ export default function HowToDonateView() {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-insani-blue/10 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
                 <div className="container mx-auto max-w-4xl text-center relative z-10">
                     <nav className="flex items-center justify-center gap-2 text-xs md:text-sm text-blue-200 font-medium mb-4">
-                        <Link href="/" className="hover:underline text-slate-300">Beranda</Link>
+                        <Link href="/" className="hover:underline text-slate-300 transition-colors">Beranda</Link>
                         <span>/</span>
-                        <Link href="/pusat-bantuan" className="hover:underline text-slate-300">Pusat Bantuan</Link>
+                        <Link href="/pusat-bantuan" className="hover:underline text-slate-300 transition-colors">Pusat Bantuan</Link>
                         <span>/</span>
-                        <span className="text-white">Cara Berdonasi</span>
+                        <span className="text-white font-semibold">Cara Berdonasi</span>
                     </nav>
+
+                    {/* BADGE IDENTITY */}
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-blue-200 text-xs font-semibold backdrop-blur-md mb-4 shadow-xs">
+                        <BookOpenText className="w-3.5 h-3.5 text-cyan-300" />
+                        <span>Panduan &amp; Tata Cara Berdonasi Resmi</span>
+                    </div>
 
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
                         Panduan Cara Berdonasi
@@ -80,7 +87,7 @@ export default function HowToDonateView() {
                             </span>
                             <h3 className="font-bold text-slate-900 text-base mb-2">Isi Data & Nominal</h3>
                             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                Tentukan nominal donasi (min. Rp 10.000). Masukkan nama, email, dan WhatsApp. Anda dapat mencentang <em>"Sembunyikan Nama Saya (Anonim)"</em> untuk berdonasi sebagai Hamba Allah.
+                                Tentukan nominal donasi (min. Rp 10.000). Masukkan nama, email, dan WhatsApp. Anda dapat mencentang <em>"Sembunyikan Nama Saya (Anonim)"</em> untuk berdonasi sebagai Inisiator Kebaikan.
                             </p>
                         </div>
 
@@ -90,7 +97,7 @@ export default function HowToDonateView() {
                             </span>
                             <h3 className="font-bold text-slate-900 text-base mb-2">Bayar & Terkonfirmasi</h3>
                             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                                Pilih metode pembayaran otomatis (QRIS, VA Bank, E-Wallet). Sistem Xendit akan memverifikasi secara <em>real-time</em> tanpa perlu kirim bukti transfer.
+                                Pilih metode pembayaran otomatis (QRIS, VA Bank, E-Wallet). Sistem Midtrans akan memverifikasi secara <em>real-time</em> tanpa perlu kirim bukti transfer.
                             </p>
                         </div>
                     </div>

@@ -86,6 +86,30 @@ it('allows admin to store a new published blog with sanitized HTML and uploaded 
     Storage::disk('public')->assertExists($blog->featured_image_url);
 });
 
+it('automatically formats blog title to smart Title Case following EYD guidelines', function () {
+    actingAs($this->admin)
+        ->post('/admin/blogs', [
+            'title' => [
+                'id' => 'penyaluran bantuan pangan di wilayah pelosok dan pesisir',
+                'en' => 'how to help orphans in emergency situations',
+                'ar' => 'مساعدات إنسانية جديدة',
+            ],
+            'slug' => 'penyaluran-bantuan-pangan-di-wilayah-pelosok-dan-pesisir',
+            'excerpt' => 'Ringkasan berita.',
+            'content_html' => '<p>Konten berita.</p>',
+            'wp_category' => 'Kemanusiaan',
+            'status' => 'published',
+            'published_at' => now()->toDateString(),
+        ])
+        ->assertRedirect(route('admin.blogs.index'));
+
+    $blog = BlogPostCache::where('slug', 'penyaluran-bantuan-pangan-di-wilayah-pelosok-dan-pesisir')->first();
+    expect($blog)->not->toBeNull();
+    expect($blog->getTranslation('title', 'id'))->toBe('Penyaluran Bantuan Pangan di Wilayah Pelosok dan Pesisir');
+    expect($blog->getTranslation('title', 'en'))->toBe('How to Help Orphans in Emergency Situations');
+    expect($blog->getTranslation('title', 'ar'))->toBe('مساعدات إنسانية جديدة');
+});
+
 it('allows admin to edit and update an existing blog', function () {
     $blog = BlogPostCache::create([
         'title' => 'Judul Lama',

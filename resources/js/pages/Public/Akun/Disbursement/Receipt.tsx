@@ -25,7 +25,7 @@ export default function Receipt({ program, disbursement }: any) {
                     <div className="flex gap-2">
                         {disbursement.transfer_proof && (
                             <Button variant="outline" asChild className="border-slate-300">
-                                <a href={`/storage/${disbursement.transfer_proof}`} target="_blank" rel="noopener noreferrer">
+                                <a href={`/akun/programs/${program.id}/disbursements/${disbursement.id}/proof`} target="_blank" rel="noopener noreferrer">
                                     Lihat Slip Bukti Transfer
                                 </a>
                             </Button>

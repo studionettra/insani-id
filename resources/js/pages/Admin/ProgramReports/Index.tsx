@@ -626,7 +626,7 @@ export default function ProgramReportsIndex({
                                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                                         {selectedReport.evidence_files.map((file, idx) => {
                                             const isImage = file.mime_type.startsWith('image/');
-                                            const fileUrl = `/storage/${file.path}`;
+                                            const fileUrl = `/admin/program-reports/${selectedReport.id}/evidence/${idx}`;
 
                                             return (
                                                 <div

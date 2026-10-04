@@ -20,10 +20,10 @@ import {
   FileSpreadsheet,
   BadgeHelp,
   MessageSquareQuote,
-  Sparkles,
   Bell,
   Compass,
   ShieldAlert,
+  HandHelping,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -125,7 +125,7 @@ const AppSidebar: React.FC = () => {
           path: "/akun/programs",
         }] : []),
         {
-          icon: <Sparkles className="w-5 h-5" />,
+          icon: <HandHelping className="w-5 h-5" />,
           name: "Fundraiser Saya",
           path: "/akun/fundraiser",
         },

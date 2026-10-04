@@ -1,5 +1,5 @@
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
-import { Trash2, Edit, Plus, Search, X, Image as ImageIcon, Sparkles, Video, BarChart2 } from 'lucide-react';
+import { Trash2, Edit, Plus, Search, X, Image as ImageIcon, Layers, Compass, Video, BarChart2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
@@ -280,7 +280,7 @@ return;
                                         <TableCell className="font-medium text-gray-900 dark:text-white">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center shrink-0 text-[#1A56DB] dark:text-blue-400">
-                                                    {renderStatIcon(category.icon, "w-4 h-4 text-current") || <Sparkles className="w-4 h-4 text-gray-300 dark:text-gray-600" />}
+                                                    {renderStatIcon(category.icon, "w-4 h-4 text-current") || <Layers className="w-4 h-4 text-gray-300 dark:text-gray-600" />}
                                                 </div>
                                                 <div>
                                                     <div className="font-semibold text-gray-900 dark:text-white leading-tight">
@@ -675,7 +675,7 @@ return;
                             {data.is_focus_program && (
                                 <div className="mt-3 p-4 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50">
                                     <div className="flex items-start gap-3">
-                                        <Sparkles className="w-5 h-5 text-[#1A56DB] dark:text-blue-400 shrink-0 mt-0.5" />
+                                        <Compass className="w-5 h-5 text-[#1A56DB] dark:text-blue-400 shrink-0 mt-0.5" />
                                         <div className="space-y-1 text-left">
                                             <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                                                 Kategori ini aktif sebagai Fokus Program

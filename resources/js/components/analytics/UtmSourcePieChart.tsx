@@ -1,13 +1,11 @@
-import type { ApexOptions } from "apexcharts";
 import { Share2 } from "lucide-react";
-import React from "react";
-import Chart from "react-apexcharts";
+import React, { useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 
 interface Props {
-  labels: string[];
-  series: number[];
-  details: Array<{
+  labels?: string[];
+  series?: number[];
+  details?: Array<{
     name: string;
     raw_source: string;
     count: number;
@@ -15,118 +13,138 @@ interface Props {
   }>;
 }
 
-export default function UtmSourcePieChart({ labels = [], series = [], details = [] }: Props) {
+export default function UtmSourcePieChart({ details = [] }: Props) {
   const chartColors = ["#1A56DB", "#10B981", "#F59E0B", "#EC4899", "#8B5CF6", "#64748B"];
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  const options: ApexOptions = {
-    chart: {
-      type: "donut",
-      fontFamily: "inherit",
-    },
-    labels: labels.length > 0 ? labels : ["Belum ada data"],
-    colors: chartColors,
-    dataLabels: {
-      enabled: false,
-    },
-    legend: {
-      position: "bottom",
-      fontSize: "12px",
-      labels: {
-        colors: "#64748B",
-      },
-    },
-    stroke: {
-      width: 2,
-      colors: ["#fff"],
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: "70%",
-          labels: {
-            show: true,
-            total: {
-              show: true,
-              label: "Total Donasi",
-              fontSize: "12px",
-              fontWeight: 600,
-              color: "#64748B",
-              formatter: () => {
-                const total = series.reduce((acc, curr) => acc + curr, 0);
-
-                return `${total}`;
-              },
-            },
-          },
-        },
-      },
-    },
-    tooltip: {
-      y: {
-        formatter: (val) => `${val} transaksi`,
-      },
-    },
-  };
-
-  const hasData = series.length > 0 && series.some((val) => val > 0);
-  const chartSeries = hasData ? series : [1];
+  const totalCount = details.reduce((sum, item) => sum + item.count, 0);
+  const totalAmount = details.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const hasData = totalCount > 0 && details.length > 0;
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-gray-900 flex flex-col justify-between">
+    <div className="flex h-full flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-xs dark:border-gray-800 dark:bg-gray-900 transition-all">
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/50 flex items-center justify-center text-[#1A56DB] dark:text-blue-400">
-              <Share2 className="w-4 h-4" />
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3.5 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+              <Share2 className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                 Sebaran Sumber Kanal (UTM)
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
                 Atribusi asal donatur bertransaksi
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="w-full flex items-center justify-center py-2">
-          {typeof window !== "undefined" && (
-            <Chart
-              options={options}
-              series={chartSeries}
-              type="donut"
-              height={260}
-            />
-          )}
-        </div>
-      </div>
-
-      {details.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2">
-          {details.slice(0, 4).map((item, idx) => (
-            <div key={item.name} className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: chartColors[idx % chartColors.length] }}
-                />
-                <span className="font-medium text-gray-700 dark:text-gray-300 truncate max-w-[120px]">
-                  {item.name}
-                </span>
+          <div className="text-right">
+            {totalAmount > 0 ? (
+              <div className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                {formatCurrency(totalAmount)}
               </div>
-              <div className="text-right">
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {formatCurrency(item.amount)}
-                </span>
-                <span className="text-gray-400 ml-1.5">
-                  ({item.count})
-                </span>
+            ) : null}
+            <div className="text-[10.5px] font-medium text-gray-400 dark:text-gray-500">
+              {totalCount} Donasi
+            </div>
+          </div>
+        </div>
+
+        {hasData ? (
+          <div className="mt-4 space-y-4">
+            {/* Segmented Distribution Bar */}
+            <div className="space-y-1.5">
+              <div className="h-2.5 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden flex gap-0.5 p-0.5 shadow-inner">
+                {details.map((item, idx) => {
+                  const percent = totalCount > 0 ? (item.count / totalCount) * 100 : 0;
+                  if (percent <= 0) return null;
+                  const color = chartColors[idx % chartColors.length];
+                  const isHovered = hoveredIdx === idx;
+                  const isAnyHovered = hoveredIdx !== null;
+                  return (
+                    <div
+                      key={item.name}
+                      onMouseEnter={() => setHoveredIdx(idx)}
+                      onMouseLeave={() => setHoveredIdx(null)}
+                      className={`h-full rounded-full transition-all duration-300 cursor-pointer ${
+                        isHovered ? "brightness-110 scale-y-125" : isAnyHovered ? "opacity-40" : "opacity-100"
+                      }`}
+                      style={{
+                        width: `${percent}%`,
+                        backgroundColor: color,
+                        minWidth: details.length > 1 ? "6px" : "100%",
+                      }}
+                      title={`${item.name}: ${Math.round(percent)}% • ${formatCurrency(item.amount)} (${item.count} donasi)`}
+                    />
+                  );
+                })}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* Ranked Distribution List */}
+            <div className="space-y-2.5 pt-1">
+              {details.map((item, idx) => {
+                const percent = totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0;
+                const color = chartColors[idx % chartColors.length];
+                const isHovered = hoveredIdx === idx;
+                const isAnyHovered = hoveredIdx !== null;
+
+                return (
+                  <div
+                    key={item.name}
+                    onMouseEnter={() => setHoveredIdx(idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                    className={`group flex flex-col gap-1 rounded-lg p-1.5 -mx-1.5 transition-all duration-200 cursor-default ${
+                      isHovered ? "bg-blue-50/60 dark:bg-blue-950/20" : isAnyHovered ? "opacity-50" : "hover:bg-gray-50/80 dark:hover:bg-gray-800/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full shadow-xs"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="truncate font-medium text-gray-800 dark:text-gray-200" title={item.name}>
+                          {item.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {item.amount > 0 && (
+                          <span className="font-bold text-gray-900 dark:text-white">
+                            {formatCurrency(item.amount)}
+                          </span>
+                        )}
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                          {percent}%
+                        </span>
+                        <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                          ({item.count})
+                        </span>
+                      </div>
+                    </div>
+                    {/* Micro track bar */}
+                    <div className="h-1 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${percent}%`,
+                          backgroundColor: color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400 dark:text-gray-500">
+            <Share2 className="mb-2 h-8 w-8 opacity-30" />
+            <p className="text-xs">Belum ada data atribusi</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

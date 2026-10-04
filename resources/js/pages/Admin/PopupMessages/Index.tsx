@@ -8,7 +8,6 @@ import {
     Megaphone, 
     Calendar, 
     Clock, 
-    Sparkles, 
     Layers, 
     ExternalLink, 
     Monitor, 
@@ -1157,7 +1156,7 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                     {/* Header Toolbar Pratinjau */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/90 gap-3">
                         <div className="flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-amber-400" />
+                            <Eye className="w-5 h-5 text-amber-400" />
                             <div>
                                 <h3 className="font-semibold text-sm text-white">Pratinjau Pop-up Langsung</h3>
                                 <p className="text-xs text-zinc-400">Simulasi pengalaman visual pengunjung saat membuka website</p>

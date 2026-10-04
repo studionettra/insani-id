@@ -5,6 +5,8 @@ namespace App\Http\Requests;
 use App\Models\AppSetting;
 use App\Rules\NoProfanityRule;
 use App\Rules\NoUrlRule;
+use App\Rules\TurnstileRule;
+use App\Services\MidtransCorePaymentService;
 use App\Services\XenditPaymentService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,7 +53,7 @@ class StoreDonationRequest extends FormRequest
      */
     public function rules(): array
     {
-        $minAmount = (int) (AppSetting::where('key', 'min_donation_amount')->value('value') ?? 10000);
+        $minAmount = (int) AppSetting::get('min_donation_amount', 10000);
 
         return [
             'amount' => ['required', 'numeric', "min:{$minAmount}"],
@@ -72,6 +74,10 @@ class StoreDonationRequest extends FormRequest
             'referrer_url' => ['nullable', 'string', 'max:500'],
             'referral_code' => ['nullable', 'string', 'max:100'],
             'ref' => ['nullable', 'string', 'max:100'],
+            'replace_donation_code' => ['nullable', 'string', 'max:50'],
+            'cf-turnstile-response' => app()->environment('testing')
+                ? ['nullable', 'string', new TurnstileRule]
+                : ['required', 'string', new TurnstileRule],
         ];
     }
 
@@ -85,7 +91,8 @@ class StoreDonationRequest extends FormRequest
             $amount = (float) $this->input('amount');
 
             if (! empty($channelCode) && $amount > 0) {
-                $channelDef = XenditPaymentService::findChannel($channelCode, $this->input('channel'));
+                $channelDef = MidtransCorePaymentService::findChannel($channelCode, $this->input('channel'))
+                    ?? XenditPaymentService::findChannel($channelCode, $this->input('channel'));
                 if ($channelDef) {
                     if (isset($channelDef['min_amount']) && $amount < $channelDef['min_amount']) {
                         $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} minimal Rp ".number_format($channelDef['min_amount'], 0, ',', '.').'.');
@@ -105,7 +112,7 @@ class StoreDonationRequest extends FormRequest
      */
     public function messages(): array
     {
-        $minAmount = (int) (AppSetting::where('key', 'min_donation_amount')->value('value') ?? 10000);
+        $minAmount = (int) AppSetting::get('min_donation_amount', 10000);
 
         return [
             'amount.required' => 'Nominal donasi wajib diisi.',
@@ -119,6 +126,7 @@ class StoreDonationRequest extends FormRequest
             'channel.in' => 'Metode pembayaran tidak valid.',
             'payment_method.in' => 'Kategori pembayaran tidak valid.',
             'website_url.prohibited' => 'Terdeteksi aktivitas mencurigakan. Permintaan tidak dapat diproses.',
+            'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).',
         ];
     }
 }

@@ -76,8 +76,9 @@ export default function PagesIndex({ pages, filters }: any) {
                     <Table>
                         <TableHeader className="bg-gray-50/50 dark:bg-gray-800/50">
                             <TableRow>
-                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Judul (ID)</TableCell>
-                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Slug</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Judul Halaman</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400">Slug / Tautan Publik</TableCell>
+                                <TableCell className="font-medium text-gray-500 dark:text-gray-400 text-center">Status Terjemahan</TableCell>
                                 <TableCell className="font-medium text-gray-500 dark:text-gray-400 text-center">Status</TableCell>
                                 <TableCell className="text-right font-medium text-gray-500 dark:text-gray-400">Aksi</TableCell>
                             </TableRow>
@@ -85,61 +86,116 @@ export default function PagesIndex({ pages, filters }: any) {
                         <TableBody>
                             {pages.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center text-gray-500 dark:text-gray-400">
+                                    <TableCell colSpan={5} className="h-24 text-center text-gray-500 dark:text-gray-400">
                                         Tidak ada data halaman.
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                pages.data.map((page: any) => (
-                                    <TableRow key={page.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <TableCell>
-                                            <div className="font-medium text-gray-900 dark:text-white">
-                                                {typeof page.title === 'string' ? page.title : (page.title?.id || '')}
-                                            </div>
-                                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
-                                                {typeof page.meta_title === 'string' ? page.meta_title : (page.meta_title?.id || '')}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <a 
-                                                href={['syarat-ketentuan', 'kebijakan-privasi', 'cara-donasi', 'pusat-bantuan'].includes(page.slug) ? `/${page.slug}` : `/halaman/${page.slug}`} 
-                                                target="_blank" 
-                                                rel="noreferrer" 
-                                                className="text-[#1A56DB] dark:text-blue-400 hover:underline font-mono text-xs"
-                                            >
-                                                {['syarat-ketentuan', 'kebijakan-privasi', 'cara-donasi', 'pusat-bantuan'].includes(page.slug) ? `/${page.slug}` : `/halaman/${page.slug}`}
-                                            </a>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {page.is_active ? (
-                                                <span className="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-950/40 dark:text-green-300 dark:ring-green-800">
-                                                    Aktif
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                                    Nonaktif
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Link href={`/admin/pages/${page.id}/edit`}>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#1A56DB] dark:hover:text-blue-400">
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                </Link>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
-                                                    onClick={() => setPageToDelete(page)}
+                                pages.data.map((page: any) => {
+                                    const hasId = Boolean(page.title?.id || (typeof page.title === 'string' && page.title));
+                                    const hasEn = Boolean(page.title?.en && (page.content_html?.en || typeof page.content_html === 'string'));
+                                    const hasAr = Boolean(page.title?.ar && (page.content_html?.ar || typeof page.content_html === 'string'));
+                                    const isFullyTranslated = hasId && hasEn && hasAr;
+                                    const isCleanSlug = ['syarat-ketentuan', 'kebijakan-privasi', 'cara-donasi', 'pusat-bantuan', 'logo'].includes(page.slug);
+                                    const publicUrl = isCleanSlug ? `/${page.slug}` : `/halaman/${page.slug}`;
+
+                                    return (
+                                        <TableRow key={page.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                                            <TableCell>
+                                                <div className="font-semibold text-gray-900 dark:text-white">
+                                                    {typeof page.title === 'string' ? page.title : (page.title?.id || '')}
+                                                </div>
+                                                <div className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[240px] mt-0.5">
+                                                    {typeof page.meta_title === 'string' ? page.meta_title : (page.meta_title?.id || page.meta_description?.id || '')}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <a 
+                                                    href={publicUrl} 
+                                                    target="_blank" 
+                                                    rel="noreferrer" 
+                                                    className="inline-flex items-center gap-1 text-[#1A56DB] dark:text-blue-400 hover:underline font-mono text-xs bg-blue-50/70 dark:bg-blue-950/40 px-2 py-0.5 rounded border border-blue-100 dark:border-blue-900/60"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                                    {publicUrl}
+                                                </a>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <div className="inline-flex flex-col items-center gap-1">
+                                                    <div className="flex items-center justify-center gap-1 font-mono text-[11px]">
+                                                        <span 
+                                                            title={hasId ? 'Bahasa Indonesia: Tersedia' : 'Bahasa Indonesia: Belum'} 
+                                                            className={`px-1.5 py-0.5 rounded font-semibold ${
+                                                                hasId 
+                                                                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800' 
+                                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                                                            }`}
+                                                        >
+                                                            ID {hasId ? '✓' : '—'}
+                                                        </span>
+                                                        <span 
+                                                            title={hasEn ? 'Bahasa Inggris: Tersedia' : 'Bahasa Inggris: Belum'} 
+                                                            className={`px-1.5 py-0.5 rounded font-semibold ${
+                                                                hasEn 
+                                                                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800' 
+                                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                                                            }`}
+                                                        >
+                                                            EN {hasEn ? '✓' : '—'}
+                                                        </span>
+                                                        <span 
+                                                            title={hasAr ? 'Bahasa Arab: Tersedia' : 'Bahasa Arab: Belum'} 
+                                                            className={`px-1.5 py-0.5 rounded font-semibold ${
+                                                                hasAr 
+                                                                    ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800' 
+                                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                                                            }`}
+                                                        >
+                                                            AR {hasAr ? '✓' : '—'}
+                                                        </span>
+                                                    </div>
+                                                    {isFullyTranslated ? (
+                                                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                                                            3 Bahasa Siap
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                                                            Perlu Terjemahan
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                {page.is_active ? (
+                                                    <span className="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20 dark:bg-green-950/40 dark:text-green-300 dark:ring-green-800">
+                                                        Aktif
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                                        Nonaktif
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link href={`/admin/pages/${page.id}/edit`}>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-[#1A56DB] dark:hover:text-blue-400" title="Sunting Halaman">
+                                                            <Edit className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
+                                                        title="Hapus Halaman"
+                                                        onClick={() => setPageToDelete(page)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>

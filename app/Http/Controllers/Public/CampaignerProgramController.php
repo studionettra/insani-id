@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Concerns\FormatsTitleCase;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Program;
@@ -17,6 +18,8 @@ use Mews\Purifier\Facades\Purifier;
 
 class CampaignerProgramController extends Controller
 {
+    use FormatsTitleCase;
+
     /**
      * Display a listing of the resource.
      */
@@ -126,7 +129,7 @@ class CampaignerProgramController extends Controller
 
         $program = new Program;
         $program->program_code = 'PRG-'.date('Ymd').'-'.strtoupper(Str::random(4));
-        $program->title = $request->title;
+        $program->title = $this->formatTitleCase($request->title, 'id');
         $program->story = $cleanedStory;
         $program->slug = Str::slug($request->title).'-'.Str::random(4);
         $program->category_id = $request->category_id;
@@ -231,7 +234,7 @@ class CampaignerProgramController extends Controller
             ]);
         }
 
-        $program->title = $request->title;
+        $program->title = $this->formatTitleCase($request->title, 'id');
         $program->story = $cleanedStory;
         $program->category_id = $request->category_id;
         $program->is_continuous = $isContinuous;

@@ -102,7 +102,7 @@ class NotificationGatewayService
         }
 
         $amount = number_format($donation->amount, 0, ',', '.');
-        $donorName = $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name;
+        $donorName = $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name;
         $programTitle = $donation->program?->title ?? 'Program Anda';
 
         $message = "Kabar Baik dari Insani Indonesia!\n\n".

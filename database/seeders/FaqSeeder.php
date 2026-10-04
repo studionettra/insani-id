@@ -20,7 +20,7 @@ class FaqSeeder extends Seeder
                     'en' => 'How to donate on Insani Indonesia?',
                 ],
                 'answer_html' => [
-                    'id' => '<p>Berdonasi di Insani Indonesia sangat praktis dan aman:</p><ol><li>Buka katalog <strong>Program Donasi</strong> dan pilih kampanye yang ingin Anda bantu.</li><li>Klik tombol <strong>"Donasi Sekarang"</strong> pada halaman kampanye.</li><li>Tentukan nominal donasi (minimal Rp 10.000).</li><li>Masukkan nama, email, dan nomor WhatsApp, atau centang <em>"Sembunyikan Nama Saya (Anonim)"</em> jika ingin berdonasi sebagai Hamba Allah. Anda juga dapat menuliskan pesan doa dan dukungan.</li><li>Pilih metode pembayaran otomatis (QRIS, VA Bank, E-Wallet) atau transfer manual bank (BSI / BRI).</li><li>Selesaikan pembayaran sesuai instruksi.</li></ol>',
+                    'id' => '<p>Berdonasi di Insani Indonesia sangat praktis dan aman:</p><ol><li>Buka katalog <strong>Program Donasi</strong> dan pilih kampanye yang ingin Anda bantu.</li><li>Klik tombol <strong>"Donasi Sekarang"</strong> pada halaman kampanye.</li><li>Tentukan nominal donasi (minimal Rp 10.000).</li><li>Masukkan nama, email, dan nomor WhatsApp, atau centang <em>"Sembunyikan Nama Saya (Anonim)"</em> jika ingin berdonasi sebagai Inisiator Kebaikan. Anda juga dapat menuliskan pesan doa dan dukungan.</li><li>Pilih metode pembayaran otomatis (QRIS, VA Bank, E-Wallet) atau transfer manual bank (BSI / BRI).</li><li>Selesaikan pembayaran sesuai instruksi.</li></ol>',
                     'en' => '<p>Donating on Insani Indonesia is practical and secure:</p><ol><li>Browse the <strong>Donation Programs</strong> catalog and select a campaign you wish to support.</li><li>Click the <strong>"Donate Now"</strong> button on the campaign page.</li><li>Specify your donation amount (minimum Rp 10,000).</li><li>Enter your name, email, and WhatsApp number, or check <em>"Hide My Name (Anonymous)"</em> to donate anonymously. You can also write a prayer or message of support.</li><li>Select an automated payment method (QRIS, Bank Virtual Account, E-Wallet) or manual bank transfer (BSI / BRI).</li><li>Complete the payment according to the instructions.</li></ol>',
                 ],
                 'category' => 'donatur',
@@ -46,11 +46,11 @@ class FaqSeeder extends Seeder
                     'en' => 'What is the purpose of "Hide My Name (Anonymous)" option?',
                 ],
                 'answer_html' => [
-                    'id' => '<p>Jika Anda mencentang opsi anonim saat melakukan donasi, nama Anda tidak akan pernah ditampilkan di daftar donatur publik halaman program. Sistem akan menampilkan donasi Anda sebagai <strong>"Hamba Allah"</strong>.</p><p>Identitas asli Anda tetap tersimpan secara aman dan terenkripsi di sistem internal kami hanya untuk keperluan verifikasi pembayaran dan audit keuangan resmi sesuai ketentuan perbankan.</p>',
-                    'en' => '<p>If you check the anonymous option when donating, your name will never be displayed in the public donor list on the campaign page. The system will display your donation as <strong>"Hamba Allah (Servant of God)"</strong>.</p><p>Your real identity remains safely stored and encrypted in our internal database strictly for payment verification and statutory financial audits.</p>',
+                    'id' => '<p>Jika Anda mencentang opsi anonim saat melakukan donasi, nama Anda tidak akan pernah ditampilkan di daftar donatur publik halaman program. Sistem akan menampilkan donasi Anda sebagai <strong>"Inisiator Kebaikan"</strong>.</p><p>Identitas asli Anda tetap tersimpan secara aman dan terenkripsi di sistem internal kami hanya untuk keperluan verifikasi pembayaran dan audit keuangan resmi sesuai ketentuan perbankan.</p>',
+                    'en' => '<p>If you check the anonymous option when donating, your name will never be displayed in the public donor list on the campaign page. The system will display your donation as <strong>"Inisiator Kebaikan"</strong>.</p><p>Your real identity remains safely stored and encrypted in our internal database strictly for payment verification and statutory financial audits.</p>',
                 ],
                 'category' => 'donatur',
-                'keywords' => 'anonim, sembunyikan nama, hamba allah, privasi nama, rahasia',
+                'keywords' => 'anonim, sembunyikan nama, inisiator kebaikan, privasi nama, rahasia',
                 'sort_order' => 3,
             ],
             [
@@ -499,6 +499,36 @@ class FaqSeeder extends Seeder
                 'keywords' => 'laporan keuangan, audit kap, akuntabilitas, transparansi yayasan, download laporan keuangan',
                 'sort_order' => 35,
             ],
+            [
+                'question' => [
+                    'id' => 'Di mana saya bisa mengunduh logo resmi Insani Indonesia dan melihat panduan penggunaannya (brand guideline)?',
+                    'en' => 'Where can I download the official Insani Indonesia logo and view its brand guidelines?',
+                    'ar' => 'أين يمكنني تنزيل الشعار الرسمي لمؤسسة إنساني إندونيسيا والاطلاع على دليل الهوية البصرية؟',
+                ],
+                'answer_html' => [
+                    'id' => '<p>Yayasan Peduli Insani Indonesia menyediakan halaman khusus identitas visual dan pusat berkas master di <a href="/logo" class="text-insani-blue font-semibold hover:underline"><strong>Panduan Logo Resmi Insani Indonesia</strong></a>.</p><p>Di halaman tersebut, Anda dapat mempelajari filosofi logo (<em>Muda, Bertumbuh &amp; Bertanggung Jawab</em>), aturan penempatan (<em>clear space</em> &amp; batas aman), pedoman penggunaan yang dianjurkan dan dilarang (<em>Do\'s &amp; Don\'ts</em>), kode warna resmi (HEX, RGB, CMYK), serta mengunduh berkas master resolusi tinggi (format Portrait dan Landscape dalam varian Warna Asli, Monokrom Hitam, dan Putih) langsung via Google Drive atau unduh cepat format PNG lokal.</p>',
+                    'en' => '<p>Insani Indonesia provides a dedicated visual identity and master asset portal at <a href="/logo" class="text-insani-blue font-semibold hover:underline"><strong>Official Insani Indonesia Logo Guidelines</strong></a>.</p><p>On that page, you can learn about the brand philosophy (<em>Youth, Growth &amp; Responsible</em>), clear space &amp; minimum size standards, approved and prohibited usage (<em>Do\'s &amp; Don\'ts</em>), official color palettes (HEX, RGB, CMYK), and download high-resolution master assets (Portrait and Landscape in Full Color, Monochrome Black, and Pure White) directly via Google Drive or fast local PNG downloads.</p>',
+                    'ar' => '<p>توفر مؤسسة إنساني إندونيسيا صفحة مخصصة للهوية البصرية وملفات الشعار الأصلية عبر <a href="/logo" class="text-insani-blue font-semibold hover:underline"><strong>دليل الشعار الرسمي لإنساني إندونيسيا</strong></a>.</p><p>يمكنكم من خلال تلك الصفحة التعرف على فلسفة الشعار، وقواعد المسافات الآمنة والحد الأدنى للحجم، وإرشادات الاستخدام المسموح والمحظور، وأكواد الألوان الرسمية (HEX, RGB, CMYK)، بالإضافة إلى تنزيل ملفات الشعار عالية الدقة (الرأسي والأفقي بنسخ الألوان الكاملة والأسود والأبيض) مباشرة عبر جوجل درايف أو التحميل المباشر بصيغة PNG.</p>',
+                ],
+                'category' => 'lembaga',
+                'keywords' => 'logo, panduan logo, download logo, brand guideline, unduh logo, aset visual, logo insani, logo resmi, format logo, logo png',
+                'sort_order' => 36,
+            ],
+            [
+                'question' => [
+                    'id' => 'Apakah mitra CSR, komunitas, atau media diizinkan menggunakan logo Insani Indonesia untuk publikasi bersama?',
+                    'en' => 'Are CSR partners, communities, or media organizations permitted to use the Insani Indonesia logo for joint publications?',
+                    'ar' => 'هل يُسمح لشركاء المسؤولية المجتمعية والجمعيات ووسائل الإعلام استخدام شعار إنساني إندونيسيا في المواد المشتركة؟',
+                ],
+                'answer_html' => [
+                    'id' => '<p><strong>Ya, diizinkan dengan mematuhi standar identitas brand resmi Insani Indonesia.</strong></p><p>Mitra korporasi CSR, penyelenggara acara amal, media massa, maupun sponsor bersama dipersilakan mencantumkan logo Insani Indonesia sesuai aturan baku di halaman <a href="/logo" class="text-insani-blue font-semibold hover:underline"><strong>Panduan Logo</strong></a>. Logo tidak boleh diubah warna, dipipihkan/didistorsi proporsinya, atau ditambah efek visual berlebihan.</p><p>Untuk permohonan berkas vektor master (SVG/EPS), izin tertulis co-branding, atau materi pers/media kit, silakan menghubungi tim komunikasi kami melalui email <a href="mailto:sapa@insani.id" class="text-insani-blue hover:underline">sapa@insani.id</a> atau WhatsApp Humas.</p>',
+                    'en' => '<p><strong>Yes, permitted in compliance with Insani Indonesia official brand standards.</strong></p><p>Corporate CSR partners, charitable event organizers, press media, and co-sponsors are welcome to display the Insani Indonesia logo following the rules on our <a href="/logo" class="text-insani-blue font-semibold hover:underline"><strong>Logo Guidelines Page</strong></a>. Modifying colors, distorting proportions, or applying excessive visual effects is strictly prohibited.</p><p>For vector master formats (SVG/EPS), formal written co-branding permissions, or press media kits, please contact our communications team via email at <a href="mailto:sapa@insani.id" class="text-insani-blue hover:underline">sapa@insani.id</a> or official WhatsApp support.</p>',
+                    'ar' => '<p><strong>نعم، يُسمح بذلك شريطة الالتزام بمعايير الهوية البصرية الرسمية لمؤسسة إنساني إندونيسيا.</strong></p><p>نرحب بشركاء المسؤولية المجتمعية ومنظمي الفعاليات الخيرية والمؤسسات الإعلامية بإدراج الشعار وفق الضوابط الموضحة في <a href="/logo" class="text-insani-blue font-semibold hover:underline"><strong>دليل الشعار</strong></a>. يُمنع تغيير الألوان أو تشويه الأبعاد أو إضافة تأثيرات بصرية مفرطة.</p><p>للحصول على ملفات فيكتور متجهة (SVG/EPS) أو إذن كتابي رسمي للشراكات أو الملفات الصحفية، يُرجى التواصل مع فريق الإعلام والعلاقات العامة عبر البريد الإلكتروني <a href="mailto:sapa@insani.id" class="text-insani-blue hover:underline">sapa@insani.id</a> أو عبر الواتساب.</p>',
+                ],
+                'category' => 'lembaga',
+                'keywords' => 'izin logo, lisensi logo, kerjasama logo, media partner, co-branding, logo sponsor, aset vektor, press kit, hak cipta logo',
+                'sort_order' => 37,
+            ],
 
             // ==================== KONTAK (LAYANAN & NARAHUBUNG) ====================
             [
@@ -514,7 +544,7 @@ class FaqSeeder extends Seeder
                 ],
                 'category' => 'kontak',
                 'keywords' => 'respon cs, jam kerja, respon whatsapp, waktu operasional, hari libur',
-                'sort_order' => 36,
+                'sort_order' => 38,
             ],
             [
                 'question' => [
@@ -529,7 +559,7 @@ class FaqSeeder extends Seeder
                 ],
                 'category' => 'kontak',
                 'keywords' => 'konfirmasi donasi, transfer manual, bukti transfer, whatsapp finance, verifikasi donasi',
-                'sort_order' => 37,
+                'sort_order' => 39,
             ],
             [
                 'question' => [
@@ -544,7 +574,7 @@ class FaqSeeder extends Seeder
                 ],
                 'category' => 'kontak',
                 'keywords' => 'kunjungan kantor, audiensi, janji temu, alamat kantor, silaturahmi',
-                'sort_order' => 38,
+                'sort_order' => 40,
             ],
             [
                 'question' => [
@@ -559,16 +589,16 @@ class FaqSeeder extends Seeder
                 ],
                 'category' => 'kontak',
                 'keywords' => 'csr, kemitraan, proposal, kerjasama korporasi, sponsorship, kolaborasi',
-                'sort_order' => 39,
+                'sort_order' => 41,
             ],
         ];
 
         foreach ($faqs as $item) {
             $questionId = is_array($item['question']) ? $item['question']['id'] : $item['question'];
-            $existing = Faq::where('category', $item['category'])
-                ->where('sort_order', $item['sort_order'])
-                ->first()
-                ?? Faq::where('question->id', $questionId)->first();
+            $existing = Faq::where('question->id', $questionId)->first()
+                ?? Faq::where('category', $item['category'])
+                    ->where('sort_order', $item['sort_order'])
+                    ->first();
 
             $questionData = is_array($item['question']) ? $item['question'] : [
                 'id' => $item['question'],
