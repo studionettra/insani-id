@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Komparasi Payment Gateway: Xendit vs Midtrans | insani.id</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        },
+                        midtrans: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        },
+                        xendit: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js for Interactive SPA Reactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+    <!-- Chart.js for Dynamic Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .print-break { page-break-after: always; }
+            .shadow-xl, .shadow-lg, .shadow-md, .shadow-sm { box-shadow: none !important; }
+            .border { border: 1px solid #cbd5e1 !important; }
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen" x-data="calculatorData()">
+
+    <!-- Top Sticky Header -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <img src="data:image/png;base64,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" alt="Logo Insani" class="w-10 h-10 object-contain rounded-xl shadow-sm bg-white p-0.5 border border-slate-100">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-slate-900 tracking-tight text-lg">insani.id</span>
+                        <span class="text-xs bg-brand-50 text-brand-700 font-semibold px-2 py-0.5 rounded-full border border-brand-200">Executive Report</span>
+                    </div>
+                    <p class="text-xs text-slate-500">Kajian & Usulan Migrasi Payment Gateway</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="#kalkulator" class="text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">
+                    Simulasi Donasi
+                </a>
+                <a href="#perbandingan" class="text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">
+                    Tabel Komparasi
+                </a>
+                <a href="#rekomendasi" class="text-xs sm:text-sm font-semibold text-slate-700 hover:text-brand-600 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition">
+                    Rencana Aksi
+                </a>
+                <button onclick="window.print()" class="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-lg shadow-sm transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span>Cetak / Simpan PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <!-- Executive Hero Banner -->
+        <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden border border-slate-700">
+            <!-- Decorative Background glow -->
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-4xl">
+                <!-- <div class="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full mb-4"> -->
+                    <!-- <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> -->
+                    <!-- Pengajuan Persetujuan Direksi / Pengurus Yayasan -->
+                <!-- </div> -->
+                <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight mb-4">
+                    Kajian Dampak Kebijakan Biaya Baru Xendit & Usulan Pengalihan ke Midtrans
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                    Menindaklanjuti pemberlakuan kebijakan harga baru Xendit per <strong>1 Oktober 2026</strong> yang mengenakan biaya tetap <em>Processing Fee</em> sebesar <strong>Rp 4.000 / attempt</strong> dan denda <em>Legacy API</em> <strong>USD 250 / bulan</strong>, dokumen ini menyajikan evaluasi risiko finansial bagi <strong>insani.id</strong> serta studi kelayakan migrasi ke <strong>Midtrans</strong> di mana akun produksi resmi telah siap digunakan.
+                </p>
+
+                <!-- Header Metadata -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-700/60 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Ditujukan Kepada</span>
+                        <strong class="text-white font-medium">Pembina & Pengurus Yayasan</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Status Kesiapan Akun</span>
+                        <strong class="text-emerald-400 font-medium">Midtrans Production Ready</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Efisiensi Biaya Donasi</span>
+                        <strong class="text-emerald-400 font-medium">Hemat s/d 85% - 90%</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Tanggal Pengajuan</span>
+                        <strong class="text-white font-medium">Oktober 2026</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Highlights Grid -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md">Beban Xendit Baru</span>
+                    <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-black text-slate-900">+Rp 4.000</div>
+                <p class="text-xs text-slate-500 mt-1">Dikenakan untuk <strong>semua transaksi</strong>, bahkan jika donatur batal atau transaksi gagal!</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md">Risiko Legacy API</span>
+                    <div class="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-black text-slate-900">USD 250<span class="text-xs font-normal text-slate-500">/bln</span></div>
+                <p class="text-xs text-slate-500 mt-1">Denda pemeliharaan Xendit (~Rp 4 Juta/bln atau <strong>Rp 48 Juta/thn</strong>) jika tetap di `/v2/invoices/`.</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-2xl p-5 border border-emerald-200 shadow-sm hover:shadow-md transition bg-gradient-to-b from-white to-emerald-50/30">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-md">Prinsip Midtrans</span>
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-black text-brand-700">Rp 0 Biaya Batal</div>
+                <p class="text-xs text-slate-500 mt-1">Midtrans <strong>hanya memotong biaya dari transaksi yang sukses</strong>. Bebas biaya bulanan & legacy.</p>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="bg-white rounded-2xl p-5 border border-indigo-200 shadow-sm hover:shadow-md transition bg-gradient-to-b from-white to-indigo-50/30">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2.5 py-1 rounded-md">Kesiapan Akun</span>
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="text-2xl font-black text-indigo-900">API Siap Pakai</div>
+                <p class="text-xs text-slate-500 mt-1">insani.id sudah memegang <strong>API Production Midtrans</strong> aktif, tanpa perlu menunggu antrean verifikasi KYC baru.</p>
+            </div>
+        </section>
+
+        <!-- Section: Latar Belakang & Analisis Masalah -->
+        <section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2.5">
+                <span class="w-2.5 h-6 bg-brand-600 rounded-full inline-block"></span>
+                1. Latar Belakang & Urgensi Perubahan
+            </h2>
+            <p class="text-sm text-slate-600 mb-6">
+                Mengapa platform insani.id harus segera mengambil langkah strategis terkait integrasi payment gateway?
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                    <div class="text-brand-600 font-bold text-base mb-2">1. Karakteristik Donasi Mikro</div>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Sebagian besar program sosial dan keagamaan di insani.id (seperti <em>Sedekah Subuh</em>, <em>Beras Santri</em>, dll.) digerakkan oleh ribuan donatur dengan nominal Rp 10.000 – Rp 25.000 via QRIS. Penambahan biaya tetap Rp 4.000 dari Xendit memotong hingga <strong>45% dari nilai donasi donatur</strong>.
+                    </p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                    <div class="text-brand-600 font-bold text-base mb-2">2. Sistem Fee Absorption insani.id</div>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Sesuai arsitektur di sistem (`Program.php`), <strong>platform menyerap biaya payment gateway</strong> sehingga donatur membayar nominal bersih. Lonjakan biaya gateway langsung memangkas dana yang disalurkan kepada fakir miskin dan mustahik penerima manfaat.
+                    </p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
+                    <div class="text-brand-600 font-bold text-base mb-2">3. Transparansi Publik Terancam</div>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Halaman publik insani.id menampilkan rincian transparansi dana (Total Terkumpul dikurangi Biaya Payment Gateway). Jika potongan gateway melonjak tinggi, kredibilitas dan transparansi yayasan di mata publik dan donatur berisiko menurun.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Head-to-Head Comparison Table -->
+        <section id="perbandingan" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+                        <span class="w-2.5 h-6 bg-indigo-600 rounded-full inline-block"></span>
+                        2. Matriks Komparasi: Midtrans vs Xendit
+                    </h2>
+                    <p class="text-sm text-slate-600 mt-1">Perbandingan tarif dan regulasi operasional per Oktober 2026</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Midtrans Unggul
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">
+                        <span class="w-2 h-2 rounded-full bg-rose-500"></span> Xendit Kenaikan Biaya
+                    </span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-100/80 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="p-4">Kategori / Metode</th>
+                            <th class="p-4 text-indigo-900 bg-indigo-50/50">Midtrans (Usulan Baru)</th>
+                            <th class="p-4 text-rose-900 bg-rose-50/50">Xendit (Kebijakan 1 Okt 2026)</th>
+                            <th class="p-4">Dampak Langsung untuk insani.id</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <!-- QRIS -->
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-semibold text-slate-900">
+                                QRIS (Paling Populer)
+                                <span class="block text-xs font-normal text-slate-500">GoPay, OVO, DANA, BCA, Mandiri, dll</span>
+                            </td>
+                            <td class="p-4 font-bold text-indigo-700 bg-indigo-50/30">
+                                0,7% (All-in)
+                                <span class="block text-xs font-normal text-slate-600">Sudah termasuk PPN, tanpa biaya tetap</span>
+                            </td>
+                            <td class="p-4 font-bold text-rose-700 bg-rose-50/30">
+                                0,7% + Rp 4.000 <span class="text-xs font-normal text-slate-500">(+ PPN)</span>
+                                <span class="block text-xs font-normal text-rose-600">Total min. Rp 4.518 / transaksi</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                <strong class="text-emerald-700 font-bold">Midtrans hemat Rp 4.448 / transaksi</strong> pada donasi Rp 10.000. Donasi mikro terselamatkan!
+                            </td>
+                        </tr>
+
+                        <!-- Virtual Account -->
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-semibold text-slate-900">
+                                Virtual Account (Bank Transfer)
+                                <span class="block text-xs font-normal text-slate-500">BCA, Mandiri, BRI, BNI, Permata, CIMB</span>
+                            </td>
+                            <td class="p-4 font-bold text-indigo-700 bg-indigo-50/30">
+                                Rp 4.000 + PPN <span class="text-xs font-normal text-slate-600">(Net: Rp 4.440)</span>
+                                <span class="block text-xs font-normal text-slate-600">Flat tanpa biaya processing tambahan</span>
+                            </td>
+                            <td class="p-4 font-bold text-rose-700 bg-rose-50/30">
+                                Rp 8.000 s/d Rp 13.000 + PPN
+                                <span class="block text-xs font-normal text-rose-600">Metode Fee + Rp 4.000 Processing</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                <strong class="text-emerald-700 font-bold">Midtrans 50% - 65% lebih hemat</strong> per donasi via Virtual Account.
+                            </td>
+                        </tr>
+
+                        <!-- BSI Syariah -->
+                        <tr class="hover:bg-slate-50 transition bg-emerald-50/20">
+                            <td class="p-4 font-semibold text-slate-900">
+                                Virtual Account Bank Syariah (BSI)
+                                <span class="block text-xs font-normal text-slate-500">Sangat krusial untuk lembaga dakwah</span>
+                            </td>
+                            <td class="p-4 font-bold text-emerald-700 bg-emerald-50/40">
+                                Tersedia (Native BSI)
+                                <span class="block text-xs font-normal text-slate-600">Tarif standar Rp 4.440</span>
+                            </td>
+                            <td class="p-4 font-bold text-slate-700 bg-rose-50/30">
+                                Tersedia
+                                <span class="block text-xs font-normal text-slate-500">Tarif membengkak + Rp 4.000</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                Donatur muzakki yang ingin bertransaksi secara syariah terakomodasi di kedua platform, namun Midtrans jauh lebih hemat.
+                            </td>
+                        </tr>
+
+                        <!-- E-Wallet -->
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-semibold text-slate-900">
+                                E-Wallets
+                                <span class="block text-xs font-normal text-slate-500">GoPay, ShopeePay, DANA, OVO</span>
+                            </td>
+                            <td class="p-4 font-bold text-indigo-700 bg-indigo-50/30">
+                                1,5% - 2,0%
+                                <span class="block text-xs font-normal text-slate-600">GoPay 2%, DANA 1,5%, OVO 1,5%</span>
+                            </td>
+                            <td class="p-4 font-bold text-rose-700 bg-rose-50/30">
+                                1,5% - 3,0% + Rp 4.000
+                                <span class="block text-xs font-normal text-rose-600">Dikenakan fixed processing fee</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                Di Midtrans, ekosistem GoPay (GoTo) terintegrasi native dengan tingkat sukses transaksi sangat tinggi.
+                            </td>
+                        </tr>
+
+                        <!-- Transaksi Gagal / Expired -->
+                        <tr class="hover:bg-slate-50 transition bg-amber-50/20">
+                            <td class="p-4 font-semibold text-slate-900">
+                                Transaksi Batal / Expired (Gagal)
+                                <span class="block text-xs font-normal text-slate-500">Donatur generate invoice tapi batal bayar</span>
+                            </td>
+                            <td class="p-4 font-bold text-emerald-700 bg-emerald-50/40">
+                                GRATIS (Rp 0)
+                                <span class="block text-xs font-normal text-slate-600">Hanya bayar jika transaksi BERHASIL</span>
+                            </td>
+                            <td class="p-4 font-bold text-rose-700 bg-rose-50/30">
+                                Rp 4.000 / attempt
+                                <span class="block text-xs font-normal text-rose-600">Dikenakan meski donasi gagal/batal!</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                <strong class="text-rose-700 font-bold">Kritis:</strong> 100 invoice batal di Xendit = tagihan Rp 400.000 tanpa uang donasi masuk. Di Midtrans = Rp 0.
+                            </td>
+                        </tr>
+
+                        <!-- Maintenance Fee -->
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-semibold text-slate-900">
+                                Biaya Maintenance API Bulanan
+                                <span class="block text-xs font-normal text-slate-500">Pemeliharaan integrasi backend</span>
+                            </td>
+                            <td class="p-4 font-bold text-emerald-700 bg-indigo-50/30">
+                                Rp 0 / bulan
+                                <span class="block text-xs font-normal text-slate-600">Tidak ada biaya bulanan apapun</span>
+                            </td>
+                            <td class="p-4 font-bold text-rose-700 bg-rose-50/30">
+                                USD 250 / bulan
+                                <span class="block text-xs font-normal text-rose-600">~Rp 4.000.000 / bln untuk Legacy API</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                insani.id menghemat <strong>Rp 48 Juta / tahun</strong> biaya overhead pemeliharaan API dengan Midtrans.
+                            </td>
+                        </tr>
+
+                        <!-- User Experience (Checkout) -->
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-4 font-semibold text-slate-900">
+                                Pengalaman Donatur (UX Checkout)
+                                <span class="block text-xs font-normal text-slate-500">Alur pembayaran di browser</span>
+                            </td>
+                            <td class="p-4 font-medium text-slate-800 bg-indigo-50/30">
+                                Snap Popup & Redirect
+                                <span class="block text-xs text-slate-600">Bisa modal popup langsung di insani.id</span>
+                            </td>
+                            <td class="p-4 font-medium text-slate-800 bg-rose-50/30">
+                                Hosted Invoice URL
+                                <span class="block text-xs text-slate-600">Redirect ke checkout.xendit.co</span>
+                            </td>
+                            <td class="p-4 text-xs text-slate-700">
+                                Donatur tidak perlu meninggalkan situs insani.id jika memakai Snap Popup, meningkatkan rasio konversi donasi.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section: Interactive Donation Simulator SPA -->
+        <section id="kalkulator" class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-700">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 pb-6 border-b border-slate-700">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-300 border border-brand-400/30 mb-2">
+                        <span>⚡ Simulator Real-Time</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Kalkulator Simulasi Finansial Donasi</h2>
+                    <p class="text-sm text-slate-400 mt-1">Sesuaikan volume donasi bulanan insani.id untuk melihat komparasi biaya dan proyeksi penghematan riil</p>
+                </div>
+                <div class="bg-slate-800/80 px-4 py-3 rounded-2xl border border-slate-700 flex items-center gap-4 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Kenaikan Efisiensi:</span>
+                        <span class="text-lg font-bold text-emerald-400" x-text="efficiencyGain() + '%'">85%</span>
+                    </div>
+                    <div class="h-8 w-px bg-slate-700"></div>
+                    <div>
+                        <span class="text-slate-400 block">Selisih Penghematan/Bulan:</span>
+                        <span class="text-lg font-bold text-emerald-400" x-text="formatRupiah(monthlySavings())">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Sliders / Controls (Left Column) -->
+                <div class="lg:col-span-6 space-y-6">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Parameter Volume Donasi Bulanan</h3>
+
+                    <!-- QRIS Slider -->
+                    <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700">
+                        <div class="flex justify-between items-center text-sm font-semibold mb-2">
+                            <span>Donasi QRIS</span>
+                            <span class="text-brand-400 font-bold" x-text="qrisCount + ' transaksi @ ' + formatRupiah(qrisAvg)"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Jumlah Transaksi: <strong class="text-white" x-text="qrisCount"></strong></label>
+                                <input type="range" min="50" max="3000" step="50" x-model.number="qrisCount" class="w-full accent-brand-500 h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Rata-rata Nominal:</label>
+                                <select x-model.number="qrisAvg" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                    <option value="10000">Rp 10.000 (Mikro)</option>
+                                    <option value="15000">Rp 15.000</option>
+                                    <option value="20000">Rp 20.000</option>
+                                    <option value="50000">Rp 50.000</option>
+                                    <option value="100000">Rp 100.000</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VA Slider -->
+                    <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700">
+                        <div class="flex justify-between items-center text-sm font-semibold mb-2">
+                            <span>Virtual Account (BCA, BSI, Mandiri, BRI)</span>
+                            <span class="text-indigo-400 font-bold" x-text="vaCount + ' transaksi @ ' + formatRupiah(vaAvg)"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Jumlah Transaksi: <strong class="text-white" x-text="vaCount"></strong></label>
+                                <input type="range" min="10" max="1000" step="10" x-model.number="vaCount" class="w-full accent-indigo-500 h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Rata-rata Nominal:</label>
+                                <select x-model.number="vaAvg" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                    <option value="50000">Rp 50.000</option>
+                                    <option value="100000">Rp 100.000</option>
+                                    <option value="250000">Rp 250.000</option>
+                                    <option value="500000">Rp 500.000</option>
+                                    <option value="1000000">Rp 1.000.000</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- E-Wallet Slider -->
+                    <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700">
+                        <div class="flex justify-between items-center text-sm font-semibold mb-2">
+                            <span>E-Wallet (GoPay, ShopeePay, DANA)</span>
+                            <span class="text-sky-400 font-bold" x-text="ewalletCount + ' transaksi @ ' + formatRupiah(ewalletAvg)"></span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Jumlah Transaksi: <strong class="text-white" x-text="ewalletCount"></strong></label>
+                                <input type="range" min="10" max="1000" step="10" x-model.number="ewalletCount" class="w-full accent-sky-500 h-2 bg-slate-700 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400 block mb-1">Rata-rata Nominal:</label>
+                                <select x-model.number="ewalletAvg" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                    <option value="20000">Rp 20.000</option>
+                                    <option value="25000">Rp 25.000</option>
+                                    <option value="50000">Rp 50.000</option>
+                                    <option value="100000">Rp 100.000</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaksi Batal / Expired -->
+                    <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700">
+                        <div class="flex justify-between items-center text-sm font-semibold mb-2">
+                            <span>Estimasi Transaksi Kedaluwarsa / Batal</span>
+                            <span class="text-amber-400 font-bold" x-text="failedAttempts + ' invoice'"></span>
+                        </div>
+                        <input type="range" min="0" max="1000" step="25" x-model.number="failedAttempts" class="w-full accent-amber-500 h-2 bg-slate-700 rounded-lg cursor-pointer">
+                        <p class="text-[11px] text-slate-400 mt-2">
+                            *Xendit menagih <strong>Rp 4.000/attempt</strong> untuk setiap invoice batal ini. Midtrans menagih <strong>Rp 0</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Toggle Legacy API Fee -->
+                    <div class="bg-rose-950/40 p-4 rounded-2xl border border-rose-900/60 flex items-center justify-between gap-4">
+                        <div>
+                            <span class="text-sm font-bold text-rose-300 block">Sertakan Biaya Legacy API Xendit</span>
+                            <span class="text-xs text-slate-400">USD 250 (~Rp 4 Juta/bulan) jika belum migrasi dari `/v2/invoices/`</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" x-model="includeLegacyFee" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Live Results Comparison (Right Column) -->
+                <div class="lg:col-span-6 space-y-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Hasil Kalkulasi Komparatif</h3>
+
+                        <!-- Big Comparison Box -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <!-- Xendit Cost Box -->
+                            <div class="bg-rose-950/50 border border-rose-800/80 rounded-2xl p-5 text-center">
+                                <span class="text-xs uppercase tracking-wider text-rose-300 font-bold block mb-1">Total Biaya Xendit</span>
+                                <div class="text-2xl sm:text-3xl font-black text-rose-400" x-text="formatRupiah(calculateXenditTotal())">Rp 0</div>
+                                <span class="text-[11px] text-rose-300/80 block mt-1" x-text="xenditPercentage() + '% dari total donasi'"></span>
+                            </div>
+
+                            <!-- Midtrans Cost Box -->
+                            <div class="bg-emerald-950/50 border border-emerald-700/80 rounded-2xl p-5 text-center relative overflow-hidden">
+                                <span class="text-xs uppercase tracking-wider text-emerald-300 font-bold block mb-1">Total Biaya Midtrans</span>
+                                <div class="text-2xl sm:text-3xl font-black text-emerald-400" x-text="formatRupiah(calculateMidtransTotal())">Rp 0</div>
+                                <span class="text-[11px] text-emerald-300/80 block mt-1" x-text="midtransPercentage() + '% dari total donasi'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Savings Highlight Banner -->
+                        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-lg mb-6 flex items-center justify-between gap-4">
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wider text-emerald-100 block">Potensi Penghematan Dana Donasi</span>
+                                <div class="text-3xl sm:text-4xl font-extrabold tracking-tight" x-text="formatRupiah(monthlySavings()) + ' / bulan'">Rp 0</div>
+                                <span class="text-xs text-emerald-100/90 block mt-0.5" x-text="'Setara dengan ' + formatRupiah(monthlySavings() * 12) + ' per tahun terselamatkan!'"></span>
+                            </div>
+                            <div class="hidden sm:flex w-14 h-14 rounded-2xl bg-white/20 items-center justify-center text-white text-2xl font-bold">
+                                💰
+                            </div>
+                        </div>
+
+                        <!-- Breakdown Details -->
+                        <div class="bg-slate-800/80 rounded-2xl p-5 border border-slate-700 space-y-3 text-xs">
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span>Total Donasi Masuk (Kotor):</span>
+                                <strong class="text-white text-sm" x-text="formatRupiah(totalGrossDonation())">Rp 0</strong>
+                            </div>
+                            <div class="h-px bg-slate-700"></div>
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span>Dana Bersih Diterima via Xendit:</span>
+                                <strong class="text-rose-400 text-sm" x-text="formatRupiah(totalGrossDonation() - calculateXenditTotal())">Rp 0</strong>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span>Dana Bersih Diterima via Midtrans:</span>
+                                <strong class="text-emerald-400 text-sm font-bold" x-text="formatRupiah(totalGrossDonation() - calculateMidtransTotal())">Rp 0</strong>
+                            </div>
+                            <div class="h-px bg-slate-700"></div>
+                            <div class="flex justify-between items-center text-slate-400">
+                                <span>Biaya Invoice Batal di Xendit:</span>
+                                <span class="text-rose-400" x-text="formatRupiah(failedAttempts * 4000)">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-400">
+                                <span>Biaya Invoice Batal di Midtrans:</span>
+                                <span class="text-emerald-400 font-bold">Rp 0 (Gratis)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Chart Container -->
+                    <div class="bg-slate-800/40 p-4 rounded-2xl border border-slate-700">
+                        <canvas id="costComparisonChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Kesiapan Teknis & Arsitektur -->
+        <!-- <section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm"> -->
+            <!-- <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2.5"> -->
+                <!-- <span class="w-2.5 h-6 bg-emerald-600 rounded-full inline-block"></span> -->
+                <!-- 3. Analisis Kesiapan Teknis Sistem insani.id -->
+            <!-- </h2> -->
+            <!-- <p class="text-sm text-slate-600 mb-6"> -->
+                <!-- Pemeriksaan mendalam terhadap basis kode membuktikan sistem insani.id telah <strong>siap 100%</strong> untuk mengintegrasikan Midtrans tanpa perombakan besar: -->
+            <!-- </p> -->
+
+            <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6"> -->
+                <!-- Point 1 -->
+                <!-- <div class="flex gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-200"> -->
+                    <!-- <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0 font-bold"> -->
+                        <!-- 1 -->
+                    <!-- </div> -->
+                    <!-- <div> -->
+                        <!-- <h4 class="font-bold text-slate-900 text-base mb-1">Skema Database Sudah Modular (`payments.gateway`)</h4> -->
+                        <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                            <!-- Di tabel `payments`, kolom `gateway` bertipe <code>VARCHAR</code> bebas (bukan Enum kaku). Pada `PaymentFactory`, opsi <code>'midtrans'</code> bahkan sudah tersedia. Tidak diperlukan migrasi database struktur pembayaran. -->
+                        <!-- </p> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+
+                <!-- Point 2 -->
+                <!-- <div class="flex gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-200"> -->
+                    <!-- <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 font-bold"> -->
+                        <!-- 2 -->
+                    <!-- </div> -->
+                    <!-- <div> -->
+                        <!-- <h4 class="font-bold text-slate-900 text-base mb-1">API Key Production Midtrans Sudah Aktif</h4> -->
+                        <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                            <!-- insani.id telah memiliki kredensial resmi di Midtrans (`Server Key` & `Client Key` produksi). Langkah integrasi langsung melangkah ke pengujian live tanpa hambatan birokrasi verifikasi dokumen bisnis baru. -->
+                        <!-- </p> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+
+                <!-- Point 3 -->
+                <!-- <div class="flex gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-200"> -->
+                    <!-- <div class="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600 shrink-0 font-bold"> -->
+                        <!-- 3 -->
+                    <!-- </div> -->
+                    <!-- <div> -->
+                        <!-- <h4 class="font-bold text-slate-900 text-base mb-1">Pola Checkout Identik (`redirect_url`)</h4> -->
+                        <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                            <!-- Di `DonationController.php`, alur donasi online mengandalkan pengalihan ke URL tagihan. Midtrans Snap menghasilkan <code>redirect_url</code> yang berfungsi persis sebagai <em>drop-in replacement</em> untuk <code>invoice_url</code> Xendit. -->
+                        <!-- </p> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+
+                <!-- Point 4 -->
+                <!-- <div class="flex gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-200"> -->
+                    <!-- <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-bold"> -->
+                        <!-- 4 -->
+                    <!-- </div> -->
+                    <!-- <div> -->
+                        <!-- <h4 class="font-bold text-slate-900 text-base mb-1">Webhook Observer Otomatis Terhubung</h4> -->
+                        <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                            <!-- `PaymentObserver.php` di insani.id secara otomatis menangani pembaruan status `PAID` atau `SETTLED` untuk mentrigger notifikasi WhatsApp/Email, kalkulasi agregat program, dan sinyal Meta CAPI. -->
+                        <!-- </p> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+            <!-- </div> -->
+        <!-- </section> -->
+
+        <!-- Section: Rekomendasi & Roadmap Migrasi -->
+        <!-- <section id="rekomendasi" class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm print-break"> -->
+            <!-- <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2 flex items-center gap-2.5"> -->
+                <!-- <span class="w-2.5 h-6 bg-brand-600 rounded-full inline-block"></span> -->
+                <!-- 4. Rencana Aksi & Roadmap Eksekusi Bertahap -->
+            <!-- </h2> -->
+            <!-- <p class="text-sm text-slate-600 mb-6"> -->
+                <!-- Langkah strategis yang direkomendasikan untuk memitigasi risiko tanpa mengganggu operasional donasi yang sedang berjalan: -->
+            <!-- </p> -->
+
+            <!-- <div class="space-y-4"> -->
+                <!-- Tahap 1 -->
+                <!-- <div class="p-5 rounded-2xl border-l-4 border-l-amber-500 bg-amber-50/50 border border-slate-200"> -->
+                    <!-- <div class="flex items-center justify-between mb-2"> -->
+                        <!-- <span class="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">Fase 1: Tindakan Segera (Immediate Mitigation)</span> -->
+                        <!-- <span class="text-xs font-semibold text-slate-500">Estimasi: 1 Hari</span> -->
+                    <!-- </div> -->
+                    <!-- <h4 class="font-bold text-slate-900 text-base mb-1">Penyesuaian Batas Minimal Donasi & Rekomendasi Transfer Manual</h4> -->
+                    <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                        <!-- • Naikkan batas <code>min_amount</code> untuk Virtual Account di formulir web ke Rp 25.000 atau Rp 50.000 agar tidak tergerus biaya flat.<br> -->
+                        <!-- • Berikan <em>highlight badge</em> pada metode <strong>Transfer Bank Manual BSI / BRI</strong> untuk donasi di bawah Rp 50.000 (biaya Rp 0, 100% dana utuh). -->
+                    <!-- </p> -->
+                <!-- </div> -->
+
+                <!-- Tahap 2 -->
+                <!-- <div class="p-5 rounded-2xl border-l-4 border-l-indigo-500 bg-indigo-50/50 border border-slate-200"> -->
+                    <!-- <div class="flex items-center justify-between mb-2"> -->
+                        <!-- <span class="text-xs font-bold uppercase tracking-wider text-indigo-800 bg-indigo-100 px-2.5 py-0.5 rounded-full">Fase 2: Implementasi Teknis (Development & Staging)</span> -->
+                        <!-- <span class="text-xs font-semibold text-slate-500">Estimasi: 2 - 3 Hari Kerja</span> -->
+                    <!-- </div> -->
+                    <!-- <h4 class="font-bold text-slate-900 text-base mb-1">Membangun Midtrans Service & Webhook Handler di insani.id</h4> -->
+                    <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                        <!-- • Memasang SDK Midtrans atau HTTP Client Snap API.<br> -->
+                        <!-- • Membuat <code>App\Services\MidtransPaymentService.php</code>.<br> -->
+                        <!-- • Membuat endpoint <code>POST /webhooks/midtrans</code> dengan verifikasi SHA512 signature hash.<br> -->
+                        <!-- • Pengujian transaksi simulasi di Sandbox / Production test. -->
+                    <!-- </p> -->
+                <!-- </div> -->
+
+                <!-- Tahap 3 -->
+                <!-- <div class="p-5 rounded-2xl border-l-4 border-l-emerald-500 bg-emerald-50/50 border border-slate-200"> -->
+                    <!-- <div class="flex items-center justify-between mb-2"> -->
+                        <!-- <span class="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">Fase 3: Transisi Penuh (Full Rollout)</span> -->
+                        <!-- <span class="text-xs font-semibold text-slate-500">Estimasi: 1 Hari</span> -->
+                    <!-- </div> -->
+                    <!-- <h4 class="font-bold text-slate-900 text-base mb-1">Pengalihan Gateway Default ke Midtrans & Non-aktifkan Legacy Xendit</h4> -->
+                    <!-- <p class="text-xs sm:text-sm text-slate-600 leading-relaxed"> -->
+                        <!-- • Menjadikan Midtrans sebagai payment gateway utama untuk semua transaksi online baru.<br> -->
+                        <!-- • Menjaga webhook Xendit tetap menyala untuk menyelesaikan invoice lama yang masih pending.<br> -->
+                        <!-- • Menonaktifkan pemanggilan endpoint legacy `/v2/invoices/` untuk menghindari tagihan USD 250/bulan. -->
+                    <!-- </p> -->
+                <!-- </div> -->
+            <!-- </div> -->
+        <!-- </section> -->
+
+        <!-- Executive Sign-Off & Approval Box -->
+        <!-- <section class="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl"> -->
+            <!-- <h3 class="text-lg font-bold text-white mb-2">Lembar Persetujuan Manajemen</h3> -->
+            <!-- <p class="text-xs text-slate-400 mb-6"> -->
+                <!-- Dengan menyetujui usulan ini, Tim Teknis insani.id akan segera memulai konfigurasi dan integrasi Midtrans pada platform insani.id untuk melindungi efisiensi dana umat. -->
+            <!-- </p> -->
+
+            <!-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-800"> -->
+                <!-- <div class="border border-dashed border-slate-700 rounded-2xl p-5 bg-slate-800/40"> -->
+                    <!-- <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Diajukan Oleh:</span> -->
+                    <!-- <strong class="text-white block font-semibold">Tim IT & Operasional Platform insani.id</strong> -->
+                    <!-- <span class="text-xs text-slate-400 block mt-0.5">Tanggal: 02 Oktober 2026</span> -->
+                    <!-- <div class="mt-8 pt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400"> -->
+                        <!-- <span>Status: Diajukan</span> -->
+                        <!-- <span class="text-emerald-400 font-bold">Siap Implementasi</span> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+
+                <!-- <div class="border border-dashed border-slate-700 rounded-2xl p-5 bg-slate-800/40"> -->
+                    <!-- <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Disetujui Oleh:</span> -->
+                    <!-- <strong class="text-white block font-semibold">Direksi / Pengurus Yayasan Peduli Insani</strong> -->
+                    <!-- <span class="text-xs text-slate-400 block mt-0.5">Catatan / Arahan:</span> -->
+                    <!-- <div class="mt-8 pt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400"> -->
+                        <!-- <span>Tanda Tangan & Persetujuan: [ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ]</span> -->
+                    <!-- </div> -->
+                <!-- </div> -->
+            <!-- </div> -->
+        <!-- </section> -->
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-xs text-slate-500 border-t border-slate-200 mt-12 no-print">
+        <p>© 2026 Yayasan Peduli Insani Indonesia • Dokumen Internal Rahasia & Terbatas</p>
+    </footer>
+
+    <!-- Alpine.js Logic & Chart.js Initialization -->
+    <script>
+        function calculatorData() {
+            return {
+                qrisCount: 600,
+                qrisAvg: 15000,
+                vaCount: 200,
+                vaAvg: 50000,
+                ewalletCount: 150,
+                ewalletAvg: 25000,
+                failedAttempts: 200,
+                includeLegacyFee: true,
+                chartInstance: null,
+
+                init() {
+                    this.$nextTick(() => {
+                        this.initChart();
+                        this.$watch('qrisCount', () => this.updateChart());
+                        this.$watch('qrisAvg', () => this.updateChart());
+                        this.$watch('vaCount', () => this.updateChart());
+                        this.$watch('vaAvg', () => this.updateChart());
+                        this.$watch('ewalletCount', () => this.updateChart());
+                        this.$watch('ewalletAvg', () => this.updateChart());
+                        this.$watch('failedAttempts', () => this.updateChart());
+                        this.$watch('includeLegacyFee', () => this.updateChart());
+                    });
+                },
+
+                totalGrossDonation() {
+                    return (this.qrisCount * this.qrisAvg) +
+                           (this.vaCount * this.vaAvg) +
+                           (this.ewalletCount * this.ewalletAvg);
+                },
+
+                calculateXenditTotal() {
+                    // QRIS: 0.7% + Rp 4.000 + PPN 11%
+                    const qrisFeePerTrx = (this.qrisAvg * 0.007 * 1.11) + (4000 * 1.11);
+                    const qrisTotalFee = this.qrisCount * qrisFeePerTrx;
+
+                    // VA: Rp 4.440 + Rp 4.440 = Rp 8.880 (minimal)
+                    const vaTotalFee = this.vaCount * 8880;
+
+                    // E-Wallet: 1.5% + Rp 4.440
+                    const ewalletFeePerTrx = (this.ewalletAvg * 0.015 * 1.11) + 4440;
+                    const ewalletTotalFee = this.ewalletCount * ewalletFeePerTrx;
+
+                    // Failed / Expired transaction fee (Rp 4.000 per attempt)
+                    const failedFee = this.failedAttempts * 4000;
+
+                    // Legacy API fee ($250 ~ Rp 4.000.000)
+                    const legacyFee = this.includeLegacyFee ? 4000000 : 0;
+
+                    return Math.round(qrisTotalFee + vaTotalFee + ewalletTotalFee + failedFee + legacyFee);
+                },
+
+                calculateMidtransTotal() {
+                    // QRIS: 0.7% (Sudah termasuk PPN, tanpa fixed fee)
+                    const qrisTotalFee = this.qrisCount * (this.qrisAvg * 0.007);
+
+                    // VA: Rp 4.000 + 11% PPN = Rp 4.440
+                    const vaTotalFee = this.vaCount * 4440;
+
+                    // E-Wallet: Rata-rata 1.75% (GoPay 2%, DANA/OVO 1.5%)
+                    const ewalletTotalFee = this.ewalletCount * (this.ewalletAvg * 0.0175);
+
+                    // Failed / Expired: Rp 0
+                    // Monthly maintenance: Rp 0
+
+                    return Math.round(qrisTotalFee + vaTotalFee + ewalletTotalFee);
+                },
+
+                monthlySavings() {
+                    return Math.max(0, this.calculateXenditTotal() - this.calculateMidtransTotal());
+                },
+
+                efficiencyGain() {
+                    const x = this.calculateXenditTotal();
+                    const m = this.calculateMidtransTotal();
+                    if (x <= 0) return 0;
+                    return Math.round(((x - m) / x) * 100);
+                },
+
+                xenditPercentage() {
+                    const total = this.totalGrossDonation();
+                    if (total <= 0) return 0;
+                    return ((this.calculateXenditTotal() / total) * 100).toFixed(1);
+                },
+
+                midtransPercentage() {
+                    const total = this.totalGrossDonation();
+                    if (total <= 0) return 0;
+                    return ((this.calculateMidtransTotal() / total) * 100).toFixed(1);
+                },
+
+                formatRupiah(num) {
+                    return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+                },
+
+                initChart() {
+                    const ctx = document.getElementById('costComparisonChart');
+                    if (!ctx) return;
+
+                    this.chartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Biaya Xendit Baru', 'Biaya Midtrans'],
+                            datasets: [{
+                                label: 'Total Biaya Gateway (Rp)',
+                                data: [this.calculateXenditTotal(), this.calculateMidtransTotal()],
+                                backgroundColor: ['#f43f5e', '#10b981'],
+                                borderRadius: 8,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (context) => 'Biaya: ' + this.formatRupiah(context.raw)
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        color: '#94a3b8',
+                                        callback: (value) => 'Rp ' + (value / 1000000).toFixed(1) + 'Jt'
+                                    },
+                                    grid: { color: 'rgba(255,255,255,0.08)' }
+                                },
+                                x: {
+                                    ticks: { color: '#f8fafc', font: { weight: 'bold' } },
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    });
+                },
+
+                updateChart() {
+                    if (!this.chartInstance) return;
+                    this.chartInstance.data.datasets[0].data = [
+                        this.calculateXenditTotal(),
+                        this.calculateMidtransTotal()
+                    ];
+                    this.chartInstance.update();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
