@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateDisbursementStatusRequest;
 use App\Models\Disbursement;
 use App\Notifications\DisbursementStatusUpdatedNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DisbursementController extends Controller
@@ -79,7 +80,7 @@ class DisbursementController extends Controller
                 $disbursement->receipt_number = 'KW-DISB-'.now()->format('Ym').'-'.str_pad((string) $disbursement->id, 4, '0', STR_PAD_LEFT);
             }
             if ($request->hasFile('transfer_proof')) {
-                $path = $request->file('transfer_proof')->store('disbursements', 'public');
+                $path = $request->file('transfer_proof')->store('disbursements/proofs', 'local');
                 $disbursement->transfer_proof = $path;
             }
         }
@@ -95,5 +96,31 @@ class DisbursementController extends Controller
         }
 
         return back()->with('success', 'Status pencairan berhasil diubah.');
+    }
+
+    public function supportingDocument(Disbursement $disbursement)
+    {
+        if (! auth()->user()->can('disbursement.view') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Anda tidak memiliki wewenang untuk melihat berkas pendukung.');
+        }
+
+        if (! $disbursement->supporting_document || ! Storage::disk('local')->exists($disbursement->supporting_document)) {
+            abort(404, 'Dokumen pendukung tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($disbursement->supporting_document);
+    }
+
+    public function proof(Disbursement $disbursement)
+    {
+        if (! auth()->user()->can('disbursement.view') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Anda tidak memiliki wewenang untuk melihat bukti transfer.');
+        }
+
+        if (! $disbursement->transfer_proof || ! Storage::disk('local')->exists($disbursement->transfer_proof)) {
+            abort(404, 'Bukti transfer tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($disbursement->transfer_proof);
     }
 }

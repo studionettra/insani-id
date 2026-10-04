@@ -7,6 +7,7 @@ use App\Models\ProgramReport;
 use App\Models\ProgramReportCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProgramReportController extends Controller
 {
@@ -116,5 +117,26 @@ class ProgramReportController extends Controller
         $program_report->delete();
 
         return redirect()->back()->with('success', 'Laporan aduan berhasil dihapus.');
+    }
+
+    public function viewEvidence(ProgramReport $program_report, int $index)
+    {
+        if (! auth()->user()->can('program_report.manage') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Anda tidak memiliki wewenang untuk melihat bukti laporan.');
+        }
+
+        $evidenceFiles = $program_report->evidence_files;
+        if (! is_array($evidenceFiles) || ! isset($evidenceFiles[$index])) {
+            abort(404, 'Berkas bukti tidak ditemukan.');
+        }
+
+        $fileData = $evidenceFiles[$index];
+        $filePath = is_array($fileData) ? ($fileData['path'] ?? null) : $fileData;
+
+        if (! $filePath || ! Storage::disk('local')->exists($filePath)) {
+            abort(404, 'Berkas bukti fisik tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($filePath);
     }
 }

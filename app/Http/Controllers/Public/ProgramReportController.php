@@ -101,7 +101,7 @@ class ProgramReportController extends Controller
         if ($request->hasFile('evidence')) {
             foreach ($request->file('evidence') as $file) {
                 if ($file->isValid()) {
-                    $path = $file->store('reports/'.date('Ym'), 'public');
+                    $path = $file->store('reports/'.date('Ym'), 'local');
                     $uploadedFiles[] = [
                         'path' => $path,
                         'original_name' => $file->getClientOriginalName(),

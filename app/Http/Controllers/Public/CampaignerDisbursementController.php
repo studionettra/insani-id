@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\DisbursementRequestedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -118,7 +119,7 @@ class CampaignerDisbursementController extends Controller
 
         $platformFeePercent = $program->category->platform_fee_percent ?? 0;
         $docPath = $request->hasFile('supporting_document')
-            ? $request->file('supporting_document')->store('disbursements/documents', 'public')
+            ? $request->file('supporting_document')->store('disbursements/documents', 'local')
             : null;
 
         $disbursement = DB::transaction(function () use ($program, $request, $profile, $platformFeePercent, $docPath) {
@@ -185,5 +186,35 @@ class CampaignerDisbursementController extends Controller
             'program' => $program,
             'disbursement' => $disbursement,
         ]);
+    }
+
+    public function supportingDocument(Program $program, Disbursement $disbursement)
+    {
+        $profileId = auth()->user()->campaignerProfile?->id;
+
+        if (! $profileId || $program->campaigner_profile_id !== $profileId || $disbursement->program_id !== $program->id) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (! $disbursement->supporting_document || ! Storage::disk('local')->exists($disbursement->supporting_document)) {
+            abort(404, 'Dokumen pendukung tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($disbursement->supporting_document);
+    }
+
+    public function proof(Program $program, Disbursement $disbursement)
+    {
+        $profileId = auth()->user()->campaignerProfile?->id;
+
+        if (! $profileId || $program->campaigner_profile_id !== $profileId || $disbursement->program_id !== $program->id) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if (! $disbursement->transfer_proof || ! Storage::disk('local')->exists($disbursement->transfer_proof)) {
+            abort(404, 'Bukti transfer tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($disbursement->transfer_proof);
     }
 }
