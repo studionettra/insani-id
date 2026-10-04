@@ -61,8 +61,6 @@ class ReportController extends Controller
             $query->whereBetween('paid_at', [$startDate, $endDate]);
         }
 
-        $donations = $query->get();
-
         $filename = 'laporan_donasi_'.now()->format('Ymd_His').'.csv';
 
         $headers = [
@@ -75,33 +73,22 @@ class ReportController extends Controller
 
         $columns = ['ID Donasi', 'Tanggal Lunas', 'Program', 'Nama Donatur', 'Nominal', 'Metode Pembayaran', 'Sumber (UTM Source)', 'Media (UTM Medium)', 'Kampanye (UTM Campaign)', 'Referrer'];
 
-        $callback = function () use ($donations, $columns) {
+        $callback = function () use ($query, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
-            foreach ($donations as $donation) {
-                $row['ID Donasi'] = $donation->donation_code;
-                $row['Tanggal Lunas'] = $donation->paid_at ? $donation->paid_at->format('Y-m-d H:i:s') : '';
-                $row['Program'] = $donation->program ? $donation->program->title : '';
-                $row['Nama Donatur'] = $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name;
-                $row['Nominal'] = $donation->amount;
-                $row['Metode Pembayaran'] = $donation->payment_method;
-                $row['Sumber (UTM Source)'] = $donation->utm_source ?? 'Direct / Organik';
-                $row['Media (UTM Medium)'] = $donation->utm_medium ?? '';
-                $row['Kampanye (UTM Campaign)'] = $donation->utm_campaign ?? '';
-                $row['Referrer'] = $donation->referrer_url ?? '';
-
+            foreach ($query->cursor() as $donation) {
                 fputcsv($file, [
-                    $row['ID Donasi'],
-                    $row['Tanggal Lunas'],
-                    $row['Program'],
-                    $row['Nama Donatur'],
-                    $row['Nominal'],
-                    $row['Metode Pembayaran'],
-                    $row['Sumber (UTM Source)'],
-                    $row['Media (UTM Medium)'],
-                    $row['Kampanye (UTM Campaign)'],
-                    $row['Referrer'],
+                    $donation->donation_code,
+                    $donation->paid_at ? $donation->paid_at->format('Y-m-d H:i:s') : '',
+                    $donation->program ? $donation->program->title : '',
+                    $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name,
+                    $donation->amount,
+                    $donation->payment_method,
+                    $donation->utm_source ?? 'Direct / Organik',
+                    $donation->utm_medium ?? '',
+                    $donation->utm_campaign ?? '',
+                    $donation->referrer_url ?? '',
                 ]);
             }
 
@@ -121,8 +108,6 @@ class ReportController extends Controller
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
-
-        $disbursements = $query->get();
 
         $filename = 'laporan_pencairan_'.now()->format('Ymd_His').'.csv';
 
@@ -154,11 +139,11 @@ class ReportController extends Controller
             'Catatan',
         ];
 
-        $callback = function () use ($disbursements, $columns) {
+        $callback = function () use ($query, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
-            foreach ($disbursements as $disb) {
+            foreach ($query->cursor() as $disb) {
                 fputcsv($file, [
                     $disb->receipt_number ?? "ID #{$disb->id}",
                     $disb->created_at->format('Y-m-d H:i:s'),

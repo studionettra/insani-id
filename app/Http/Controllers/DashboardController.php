@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\Program;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,25 +39,28 @@ class DashboardController extends Controller
 
         $isDonor = in_array('Donatur', $roles) || (! $isStaff && ! $isCampaigner);
 
-        // General Platform Stats (for Admins, Keuangan, Program Officer, Eksekutif)
-        $totalDonations = (float) Donation::where('status', 'paid')->sum('amount');
-        $donationsThisMonth = (float) Donation::where('status', 'paid')
-            ->whereMonth('paid_at', Carbon::now()->month)
-            ->whereYear('paid_at', Carbon::now()->year)
-            ->sum('amount');
-
-        $activePrograms = Program::where('status', 'published')->count();
-        $pendingPrograms = Program::where('status', 'pending_verification')->count();
-        $pendingCampaigners = CampaignerProfile::where('verification_status', 'pending')->count();
-        $totalDonors = Donation::where('status', 'paid')->distinct('donor_email')->count('donor_email');
-        $totalDisbursed = (float) Disbursement::where('status', 'transferred')->sum('requested_amount');
-        $disbursedThisMonth = (float) Disbursement::where('status', 'transferred')
-            ->whereMonth('transferred_at', Carbon::now()->month)
-            ->whereYear('transferred_at', Carbon::now()->year)
-            ->sum('requested_amount');
-        $pendingDisbursements = (float) Disbursement::where('status', 'pending')->sum('requested_amount');
-        $pendingDisbursementsCount = Disbursement::where('status', 'pending')->count();
-        $pendingOfflineDonations = Donation::where('channel', 'offline')->where('status', 'pending')->count();
+        // General Platform Stats (cached for 5 minutes in production)
+        $platformStats = Cache::remember('dashboard_platform_stats', app()->environment('testing') ? 0 : 300, function () {
+            return [
+                'totalDonations' => (float) Donation::where('status', 'paid')->sum('amount'),
+                'donationsThisMonth' => (float) Donation::where('status', 'paid')
+                    ->whereMonth('paid_at', Carbon::now()->month)
+                    ->whereYear('paid_at', Carbon::now()->year)
+                    ->sum('amount'),
+                'activePrograms' => Program::where('status', 'published')->count(),
+                'pendingPrograms' => Program::where('status', 'pending_verification')->count(),
+                'pendingCampaigners' => CampaignerProfile::where('verification_status', 'pending')->count(),
+                'totalDonors' => Donation::where('status', 'paid')->distinct('donor_email')->count('donor_email'),
+                'totalDisbursed' => (float) Disbursement::where('status', 'transferred')->sum('requested_amount'),
+                'disbursedThisMonth' => (float) Disbursement::where('status', 'transferred')
+                    ->whereMonth('transferred_at', Carbon::now()->month)
+                    ->whereYear('transferred_at', Carbon::now()->year)
+                    ->sum('requested_amount'),
+                'pendingDisbursements' => (float) Disbursement::where('status', 'pending')->sum('requested_amount'),
+                'pendingDisbursementsCount' => Disbursement::where('status', 'pending')->count(),
+                'pendingOfflineDonations' => Donation::where('channel', 'offline')->where('status', 'pending')->count(),
+            ];
+        });
 
         // Donor Specific Data
         $donorStats = null;
@@ -327,7 +331,7 @@ class DashboardController extends Controller
                     return [
                         'id' => $d->id,
                         'donation_code' => $d->donation_code,
-                        'donor_name' => $d->is_anonymous ? 'Hamba Allah' : ($d->donor_name ?: 'Donatur'),
+                        'donor_name' => $d->is_anonymous ? 'Inisiator Kebaikan' : ($d->donor_name ?: 'Donatur'),
                         'amount' => (float) $d->amount,
                         'unique_code' => (int) ($d->unique_code ?? 0),
                         'program_title' => $programTitle,
@@ -413,22 +417,11 @@ class DashboardController extends Controller
         }
 
         return Inertia::render('dashboard', [
-            'stats' => [
-                'totalDonations' => $totalDonations,
-                'donationsThisMonth' => $donationsThisMonth,
-                'activePrograms' => $activePrograms,
-                'pendingPrograms' => $pendingPrograms,
-                'pendingCampaigners' => $pendingCampaigners,
-                'totalDonors' => $totalDonors,
-                'totalDisbursed' => $totalDisbursed,
-                'disbursedThisMonth' => $disbursedThisMonth,
-                'pendingDisbursements' => $pendingDisbursements,
-                'pendingDisbursementsCount' => $pendingDisbursementsCount,
-                'pendingOfflineDonations' => $pendingOfflineDonations,
+            'stats' => array_merge($platformStats, [
                 'averageDonation' => $averageDonation ?? 0,
                 'paymentSuccessRate' => $paymentSuccessRate ?? 0,
                 'pendingContactMessages' => $pendingContactMessages ?? 0,
-            ],
+            ]),
             'analyticsData' => $analyticsData,
             'donorStats' => $donorStats,
             'campaignerStats' => $campaignerStats,

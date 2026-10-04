@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Fundraiser;
 use App\Models\Program;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -114,27 +115,30 @@ class ProgramListingController extends Controller
             ->latest('transferred_at')
             ->get();
 
-        $totalCollected = (float) $program->donations()->where('status', 'paid')->sum('amount');
-        $totalGatewayFees = (float) DB::table('donations')
-            ->join('payments', 'donations.id', '=', 'payments.donation_id')
-            ->where('donations.program_id', $program->id)
-            ->where('donations.status', 'paid')
-            ->sum('payments.gateway_fee');
-        $totalTransferredGross = (float) $transferredDisbursements->sum('requested_amount');
-        $totalPlatformFees = (float) $transferredDisbursements->sum('platform_fee_amount');
-        $totalTransferredNett = (float) $transferredDisbursements->sum('nett_amount');
-        $availableBalance = max(0, $totalCollected - $totalGatewayFees - $totalTransferredGross);
+        $transparency = Cache::remember("program_{$program->id}_transparency", app()->environment('testing') ? 0 : 60, function () use ($program, $transferredDisbursements) {
+            $totalCollected = (float) $program->donations()->where('status', 'paid')->sum('amount');
+            $totalGatewayFees = (float) DB::table('donations')
+                ->join('payments', 'donations.id', '=', 'payments.donation_id')
+                ->where('donations.program_id', $program->id)
+                ->where('donations.status', 'paid')
+                ->sum('payments.gateway_fee');
 
-        $transparency = [
-            'total_collected' => $totalCollected,
-            'total_gateway_fees' => $totalGatewayFees,
-            'net_collected' => max(0, $totalCollected - $totalGatewayFees),
-            'total_disbursed' => $totalTransferredGross,
-            'total_platform_fees' => $totalPlatformFees,
-            'total_transferred_nett' => $totalTransferredNett,
-            'available_balance' => $availableBalance,
-            'disbursements' => $transferredDisbursements,
-        ];
+            $totalTransferredGross = (float) $transferredDisbursements->sum('requested_amount');
+            $totalPlatformFees = (float) $transferredDisbursements->sum('platform_fee_amount');
+            $totalTransferredNett = (float) $transferredDisbursements->sum('nett_amount');
+            $availableBalance = max(0, $totalCollected - $totalGatewayFees - $totalTransferredGross);
+
+            return [
+                'total_collected' => $totalCollected,
+                'total_gateway_fees' => $totalGatewayFees,
+                'net_collected' => max(0, $totalCollected - $totalGatewayFees),
+                'total_disbursed' => $totalTransferredGross,
+                'total_platform_fees' => $totalPlatformFees,
+                'total_transferred_nett' => $totalTransferredNett,
+                'available_balance' => $availableBalance,
+                'disbursements' => $transferredDisbursements,
+            ];
+        });
 
         return Inertia::render('Public/Program/Show', [
             'program' => $program,
