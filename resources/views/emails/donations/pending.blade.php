@@ -10,14 +10,14 @@ Pesan donasi Anda telah kami terima dan saat ini berstatus **MENUNGGU PEMBAYARAN
 - **Jumlah Donasi:** Rp {{ number_format($donation->amount, 0, ',', '.') }}
 - **Metode Pembayaran:** {{ $donation->payments->first()?->payment_method == 'bank_transfer_manual' ? 'Transfer Bank Manual' : 'Pembayaran Online' }}
 
-@if($donation->payments->first()?->gateway == 'xendit' && $donation->payments->first()?->checkout_url)
-Silakan klik tombol di bawah ini untuk melihat instruksi pembayaran dan menyelesaikan donasi Anda.
+@if($donation->channel === 'online')
+Silakan klik tombol di bawah ini untuk melihat rincian pembayaran (QRIS / E-Wallet / Virtual Account) dan menyelesaikan donasi Anda:
 
-@component('mail::button', ['url' => $donation->payments->first()->checkout_url, 'color' => 'success'])
-Bayar Sekarang
+@component('mail::button', ['url' => ($donation->payments->first()?->gateway == 'xendit' && $donation->payments->first()?->checkout_url) ? $donation->payments->first()->checkout_url : route('donation.status', ['donationCode' => $donation->donation_code]), 'color' => 'success'])
+Selesaikan Pembayaran Sekarang
 @endcomponent
 
-*(Jika tombol tidak berfungsi, salin dan buka tautan berikut di browser Anda: {{ $donation->payments->first()->checkout_url }})*
+*(Jika tombol tidak berfungsi, salin dan buka tautan berikut di browser Anda: {{ route('donation.status', ['donationCode' => $donation->donation_code]) }})*
 @else
 Silakan lakukan transfer ke rekening berikut sejumlah **Rp {{ number_format($donation->amount, 0, ',', '.') }}**:
 
@@ -26,7 +26,7 @@ Silakan lakukan transfer ke rekening berikut sejumlah **Rp {{ number_format($don
 *Pastikan nominal transfer sesuai agar donasi dapat segera diverifikasi.*
 
 @component('mail::button', ['url' => route('donation.status', ['donationCode' => $donation->donation_code]), 'color' => 'primary'])
-Cek Status Donasi
+Lihat Rincian Rekening & Konfirmasi
 @endcomponent
 @endif
 

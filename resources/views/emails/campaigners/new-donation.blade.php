@@ -5,7 +5,7 @@ Kabar gembira! Program galang dana Anda telah menerima donasi baru.
 
 ### Rincian Donasi:
 - **Program:** {{ $donation->program?->title }}
-- **Donatur:** {{ $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name }}
+- **Donatur:** {{ $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name }}
 - **Jumlah:** Rp {{ number_format($donation->amount, 0, ',', '.') }}
 - **Tanggal:** {{ $donation->paid_at ? $donation->paid_at->format('d M Y H:i') : now()->format('d M Y H:i') }}
 

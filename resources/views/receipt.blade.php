@@ -21,15 +21,24 @@
         body {
             background-color: #f1f5f9;
             color: #1e293b;
-            padding: 40px 20px;
+            padding: 30px 20px;
             display: flex;
             justify-content: center;
+        }
+
+        body.in-iframe {
+            background-color: transparent;
+            padding: 16px 8px;
+        }
+
+        .receipt-wrapper {
+            width: 100%;
+            max-width: 750px;
         }
 
         .receipt-card {
             background: #ffffff;
             width: 100%;
-            max-width: 750px;
             border-radius: 16px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
             border: 1px solid #e2e8f0;
@@ -44,6 +53,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
         }
 
         .receipt-brand h1 {
@@ -68,6 +78,8 @@
             font-weight: 700;
             letter-spacing: 0.5px;
             text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .receipt-body {
@@ -119,6 +131,7 @@
             font-size: 26px;
             font-weight: 800;
             color: #0284c7;
+            white-space: nowrap;
         }
 
         .detail-table {
@@ -150,6 +163,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
+            gap: 24px;
             padding-top: 24px;
             border-top: 1px dashed #cbd5e1;
         }
@@ -158,6 +172,8 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            flex: 1 1 auto;
+            max-width: 330px;
         }
 
         .qr-image {
@@ -167,6 +183,7 @@
             border: 1px solid #e2e8f0;
             padding: 4px;
             background: #ffffff;
+            flex-shrink: 0;
         }
 
         .qr-text p {
@@ -177,18 +194,50 @@
 
         .signature-section {
             text-align: right;
+            position: relative;
+            flex: 0 0 auto;
+            min-width: 290px;
         }
 
-        .signature-section p {
-            font-size: 13px;
+        .signature-section .legal-foundation {
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .legal-text {
+            font-size: 9.5px;
             color: #64748b;
+            margin-bottom: 2px;
+            white-space: nowrap;
         }
 
         .signature-section .sign-title {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #0f172a;
-            margin-top: 40px;
+            margin-top: 6px;
+        }
+
+        .signature-section .sign-subtitle {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .receipt-disclaimer {
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px dashed #e2e8f0;
+            font-size: 10px;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            line-height: 1.45;
         }
 
         .actions-bar {
@@ -231,6 +280,206 @@
             background: #f8fafc;
         }
 
+        /* Responsive Mobile Styles */
+        @media (max-width: 640px) {
+            body {
+                padding: 10px 6px;
+            }
+
+            body.in-iframe {
+                padding: 4px;
+            }
+
+            .receipt-card {
+                border-radius: 14px;
+                box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+            }
+
+            .receipt-header {
+                padding: 18px 16px;
+                gap: 10px;
+            }
+
+            .receipt-brand img {
+                max-height: 32px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .receipt-brand h1 {
+                font-size: 18px;
+            }
+
+            .receipt-brand p {
+                font-size: 11px;
+            }
+
+            .receipt-badge {
+                padding: 5px 10px;
+                font-size: 11px;
+                letter-spacing: 0.3px;
+            }
+
+            .receipt-body {
+                padding: 18px 16px;
+            }
+
+            .receipt-meta {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 18px;
+                padding-bottom: 14px;
+            }
+
+            .meta-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .meta-item .label {
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            .meta-item .value {
+                font-size: 13.5px;
+                margin-top: 0;
+                text-align: right;
+            }
+
+            .amount-box {
+                padding: 14px 16px;
+                margin-bottom: 18px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .amount-box .nominal-label {
+                font-size: 11.5px;
+            }
+
+            .amount-box .nominal-value {
+                font-size: 22px;
+                margin-top: 2px;
+            }
+
+            .detail-table {
+                margin-bottom: 20px;
+            }
+
+            .detail-table td {
+                padding: 9px 0;
+                font-size: 12.5px;
+            }
+
+            .detail-table td.col-label {
+                width: 38%;
+                padding-right: 8px;
+                font-size: 12px;
+                vertical-align: top;
+                line-height: 1.35;
+            }
+
+            .detail-table td.col-value {
+                font-size: 12.5px;
+                text-align: right;
+                word-break: break-word;
+                vertical-align: top;
+                line-height: 1.35;
+            }
+
+            .receipt-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 20px;
+                padding-top: 18px;
+            }
+
+            .signature-section {
+                order: 1;
+                width: 100% !important;
+                min-width: 0 !important;
+                text-align: right;
+            }
+
+            .signature-section .sign-box {
+                height: 60px !important;
+            }
+
+            .signature-section .stamp-img {
+                height: 58px !important;
+                right: 15px !important;
+            }
+
+            .signature-section .signature-img {
+                height: 48px !important;
+            }
+
+            .legal-text {
+                font-size: 9px;
+            }
+
+            .qr-section {
+                order: 2;
+                width: 100%;
+                max-width: 100%;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .qr-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            .qr-text p {
+                font-size: 11px;
+                line-height: 1.35;
+            }
+
+            .receipt-disclaimer {
+                margin-top: 16px;
+                padding-top: 12px;
+                font-size: 9.5px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .actions-bar {
+                margin-top: 16px;
+                flex-direction: column;
+                gap: 8px;
+                padding: 0 4px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 11px 16px;
+                font-size: 13.5px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .legal-text {
+                font-size: 8px;
+            }
+            .signature-section .legal-foundation {
+                font-size: 10px;
+            }
+            .amount-box .nominal-value {
+                font-size: 20px;
+            }
+        }
+
         @media print {
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -238,24 +487,112 @@
             }
 
             body {
-                background: none;
-                padding: 0;
+                background: none !important;
+                padding: 0 !important;
+            }
+
+            .receipt-wrapper {
+                max-width: 100% !important;
             }
 
             .receipt-card {
-                box-shadow: none;
-                border: 1px solid #cbd5e1;
-                max-width: 100%;
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                max-width: 100% !important;
+                border-radius: 12px !important;
+            }
+
+            .receipt-header {
+                padding: 28px 36px !important;
+            }
+
+            .receipt-body {
+                padding: 28px 36px !important;
+            }
+
+            .receipt-meta {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 20px !important;
+                margin-bottom: 24px !important;
+                padding-bottom: 20px !important;
+            }
+
+            .meta-item {
+                display: block !important;
+            }
+
+            .meta-item .value {
+                text-align: left !important;
+                font-size: 15px !important;
+                margin-top: 4px !important;
+            }
+
+            .amount-box {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 16px 20px !important;
+                margin-bottom: 24px !important;
+            }
+
+            .amount-box .nominal-value {
+                font-size: 24px !important;
+            }
+
+            .detail-table {
+                margin-bottom: 24px !important;
+            }
+
+            .detail-table td.col-label {
+                width: 35% !important;
+                text-align: left !important;
+                font-size: 13.5px !important;
+            }
+
+            .detail-table td.col-value {
+                text-align: left !important;
+                font-size: 13.5px !important;
+            }
+
+            .receipt-footer {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: flex-end !important;
+                gap: 24px !important;
+                padding-top: 20px !important;
+            }
+
+            .qr-section {
+                order: 1 !important;
+                width: auto !important;
+                max-width: 320px !important;
+                background: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+
+            .signature-section {
+                order: 2 !important;
+                width: auto !important;
+                min-width: 290px !important;
+                text-align: right !important;
+            }
+
+            .legal-text {
+                white-space: nowrap !important;
             }
 
             .actions-bar {
-                display: none;
+                display: none !important;
             }
         }
     </style>
 </head>
-<body>
-    <div style="width: 100%; max-width: 750px;">
+<body class="{{ request()->has('hide_back_btn') ? 'in-iframe' : '' }}">
+    <div class="receipt-wrapper">
         <div class="receipt-card">
             <div class="receipt-header">
                 <div class="receipt-brand">
@@ -302,15 +639,16 @@
                 <table class="detail-table">
                     <tr>
                         <td class="col-label">Nama Donatur</td>
-                        <td class="col-value">{{ $donation->is_anonymous ? 'Hamba Allah (Anonim)' : $donation->donor_name }}</td>
+                        <td class="col-value">{{ $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name }}</td>
                     </tr>
                     <tr>
                         <td class="col-label">Program Donasi</td>
                         <td class="col-value">
                             @php
-                                $title = is_array($donation->program->title)
-                                    ? ($donation->program->title['id'] ?? reset($donation->program->title))
-                                    : $donation->program->title;
+                                $programTitle = $donation->program?->title;
+                                $title = is_array($programTitle)
+                                    ? ($programTitle['id'] ?? reset($programTitle))
+                                    : ($programTitle ?? 'Donasi Kemanusiaan');
                             @endphp
                             {{ $title }}
                         </td>
@@ -343,42 +681,46 @@
                         @endphp
                         <img src="{{ $qrCodeUrl }}" alt="QR Verifikasi" class="qr-image">
                         <div class="qr-text">
-                            <p><strong>Verifikasi Kwitansi</strong></p>
+                            <p><strong>Verifikasi Kwitansi Resmi</strong></p>
                             <p>Pindai kode QR untuk memverifikasi keaslian donasi secara online.</p>
                         </div>
                     </div>
 
-                    <div class="signature-section" style="position: relative; min-width: 190px;">
-                        <p style="font-size: 11px; margin-bottom: 4px; color: #475569; font-weight: 600;">{{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}</p>
+                    <div class="signature-section">
+                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 6px;">
+                            <img src="{{ asset('images/legal/kemenkumham.svg') }}" alt="Kemenkumham RI" style="height: 24px; width: auto;" title="Kemenkumham RI">
+                            <img src="{{ asset('images/legal/djp-pajak.svg') }}" alt="DJP Pajak" style="height: 22px; width: auto;" title="Direktorat Jenderal Pajak">
+                        </div>
+                        <p class="legal-foundation">{{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}</p>
                         @if(!empty($settings['legal_sk_kemenkumham']))
-                            <p style="font-size: 9.5px; color: #64748b; margin-bottom: 2px;">{{ $settings['legal_sk_label'] ?? 'SK Kemenkumham' }}: {{ $settings['legal_sk_kemenkumham'] }}</p>
+                            <p class="legal-text">{{ $settings['legal_sk_label'] ?? 'SK Kemenkumham' }}: {{ $settings['legal_sk_kemenkumham'] }}</p>
                         @endif
                         @if(!empty($settings['legal_operational_permit']))
-                            <p style="font-size: 9.5px; color: #64748b; margin-bottom: 2px;">Izin Kegiatan: {{ $settings['legal_operational_permit'] }}</p>
+                            <p class="legal-text">Izin Kegiatan: {{ $settings['legal_operational_permit'] }}</p>
                         @endif
                         @if(!empty($settings['legal_npwp']))
-                            <p style="font-size: 9.5px; color: #64748b; margin-bottom: 2px;">NPWP: {{ $settings['legal_npwp'] }}</p>
+                            <p class="legal-text">NPWP: {{ $settings['legal_npwp'] }}</p>
                         @endif
                         
-                        <div style="position: relative; height: 75px; margin: 4px 0; display: flex; align-items: center; justify-content: flex-end;">
+                        <div class="sign-box" style="position: relative; height: 75px; margin: 4px 0; display: flex; align-items: center; justify-content: flex-end;">
                             @if(!empty($settings['receipt_stamp_image']))
-                                <img src="{{ asset('storage/' . $settings['receipt_stamp_image']) }}" alt="Stempel Resmi" style="position: absolute; right: 25px; height: 70px; opacity: 0.85; z-index: 1; pointer-events: none;">
+                                <img src="{{ asset('storage/' . $settings['receipt_stamp_image']) }}" alt="Stempel Resmi" class="stamp-img" style="position: absolute; right: 25px; height: 70px; opacity: 0.85; z-index: 1; pointer-events: none;">
                             @endif
                             @if(!empty($settings['receipt_signature_image']))
-                                <img src="{{ asset('storage/' . $settings['receipt_signature_image']) }}" alt="Tanda Tangan" style="position: relative; height: 55px; z-index: 2;">
+                                <img src="{{ asset('storage/' . $settings['receipt_signature_image']) }}" alt="Tanda Tangan" class="signature-img" style="position: relative; height: 55px; z-index: 2;">
                             @endif
                         </div>
 
-                        <div class="sign-title" style="font-weight: 700; font-size: 13px; text-decoration: underline;">
+                        <div class="sign-title" style="text-decoration: underline;">
                             {{ $settings['receipt_signatory_name'] ?? 'Pengurus Yayasan' }}
                         </div>
-                        <p style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                        <p class="sign-subtitle">
                             {{ $settings['receipt_signatory_title'] ?? 'Bagian Keuangan & Donasi' }}
                         </p>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; padding-top: 14px; border-top: 1px dashed #e2e8f0; font-size: 10px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="receipt-disclaimer">
                     <div>Dokumen ini diterbitkan secara elektronik oleh sistem resmi {{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }} dan sah tanpa tanda tangan basah.</div>
                     <div>Layanan Donatur: {{ $settings['contact_donor_support_wa'] ?? $settings['contact_whatsapp'] ?? '081319456675' }} &bull; {{ $settings['contact_email'] ?? 'sapa@insani.id' }}</div>
                 </div>

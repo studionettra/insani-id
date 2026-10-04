@@ -1,7 +1,7 @@
 <x-mail::message>
 # Alhamdulillah, Donasi Berhasil Diterima!
 
-Halo {{ $donation->is_anonymous ? 'Hamba Allah' : $donation->donor_name }},
+Halo {{ $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name }},
 
 Terima kasih atas kebaikan Anda. Kami telah menerima donasi Anda untuk program **"{{ is_array($donation->program->title) ? $donation->program->title['id'] : $donation->program->title }}"**.
 
