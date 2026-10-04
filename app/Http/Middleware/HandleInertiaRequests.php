@@ -67,8 +67,8 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => app()->getLocale(),
             'supportedLocales' => (function () use ($request) {
-                // Dashboard and admin routes are private and outside the locale group.
-                if ($request->is('dashboard*', 'admin*', 'akun*', 'settings*', 'notifications*', 'campaigner*')) {
+                // Dashboard, admin, and internal campaigner registration routes are outside the public locale group.
+                if ($request->is('dashboard*', 'admin*', 'akun*', 'settings*', 'notifications*', 'campaigner/register*', 'campaigner/status*', 'campaigner/documents*') || $request->routeIs('campaigner.index')) {
                     return [];
                 }
 
@@ -104,7 +104,13 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
             ],
             'siteSettings' => Cache::remember('site_settings_public', 3600, function () {
-                return AppSetting::pluck('value', 'key')->toArray();
+                $hiddenKeys = [
+                    'meta_capi_access_token',
+                ];
+
+                return AppSetting::whereNotIn('key', $hiddenKeys)
+                    ->pluck('value', 'key')
+                    ->toArray();
             }),
             'bankAccounts' => Cache::remember('bank_accounts_public', 3600, function () {
                 return BankAccount::where('is_active', true)->orderBy('sort_order')->get();

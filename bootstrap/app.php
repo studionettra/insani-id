@@ -30,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']);
 
         $middleware->web(append: [
@@ -57,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'webhooks/xendit',
+            'webhooks/midtrans',
             'analytics/*',
         ]);
     })
@@ -66,7 +69,9 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (HttpException $exception, Request $request) {
-            if ($exception->getStatusCode() === 419) {
+            $status = $exception->getStatusCode();
+
+            if ($status === 419) {
                 if ($request->is('api/*') || $request->expectsJson()) {
                     return response()->json([
                         'message' => 'Sesi Anda telah berakhir. Silakan masuk kembali.',
@@ -74,6 +79,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 }
 
                 return redirect()->route('login')->with('status', 'Sesi Anda telah berakhir. Silakan masuk kembali.');
+            }
+
+            if (! app()->hasDebugModeEnabled() || $request->header('X-Inertia')) {
+                if (in_array($status, [403, 404, 500, 503])) {
+                    return inertia('Error', [
+                        'status' => $status,
+                    ])->toResponse($request)->setStatusCode($status);
+                }
             }
         });
     })->create();
