@@ -168,7 +168,7 @@ PRIORITAS MENENGAH:
 | P3 | **Unique code collision** — `rand(101, 999)` hanya 899 kemungkinan per hari per program | LOW | Jika program populer dengan >899 donasi offline/hari, infinite loop |
 | P4 | **Raw Midtrans payload disimpan di DB** — `raw_payload` berisi data lengkap termasuk info sensitif | LOW | Data breach jika DB diakses, tapi umum di industri payment |
 | P5 | **Fallback Xendit masih aktif di kode** — walaupun key kosong di `.env`, class masih di-instantiate | LOW | Bisa menyebabkan error jika xendit package bermasalah |
-| P6 | **Midtrans sandbox key committed di `.env`** — `[REDACTED_MIDTRANS_SANDBOX_KEY]` | 🔴 HIGH | Key sandbox bocor di repository (walau sandbox, bad practice) |
+| P6 | **Midtrans sandbox key committed di `.env`** — `SB-Mid-server-***` | 🔴 HIGH | Key sandbox bocor di repository (walau sandbox, bad practice) |
 | P7 | **Fee calculation hardcoded** — Jika Midtrans ubah tarif, fee display akan salah | LOW | Selisih kecil di laporan keuangan |
 | P8 | **Donation `status` page tidak ada rate limit** — `/donasi/status/{code}` bisa di-brute force | MEDIUM | Enumeration donasi orang lain |
 
@@ -195,9 +195,9 @@ PENTING:
 | File | Credential | Apa | Status |
 |------|-----------|-----|--------|
 | `.env` | `APP_KEY` | Encryption key aplikasi | ⚠️ Committed to repo |
-| `.env` | `MAIL_PASSWORD` | `[REDACTED_MAIL_PASSWORD]` | 🔴 BOCOR di repo |
-| `.env` | `MIDTRANS_SERVER_KEY` | `[REDACTED_MIDTRANS_SERVER_KEY]` (sandbox) | 🔴 BOCOR di repo |
-| `.env` | `MIDTRANS_CLIENT_KEY` | `[REDACTED_MIDTRANS_CLIENT_KEY]` (sandbox) | 🔴 BOCOR di repo |
+| `.env` | `MAIL_PASSWORD` | `[REDACTED_PASSWORD]` | 🔴 BOCOR di repo |
+| `.env` | `MIDTRANS_SERVER_KEY` | `SB-Mid-server-***` (sandbox) | 🔴 BOCOR di repo |
+| `.env` | `MIDTRANS_CLIENT_KEY` | `SB-Mid-client-***` (sandbox) | 🔴 BOCOR di repo |
 | `.env` | `MIDTRANS_MERCHANT_ID` | `[REDACTED_MERCHANT_ID]` | ⚠️ Committed |
 | `.env` | `TURNSTILE_SECRET_KEY` | Testing key (valid) | LOW — test key |
 | `.env.production.example` | Semua credential | Placeholder kosong | ✅ Aman |
