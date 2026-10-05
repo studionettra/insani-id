@@ -1,7 +1,7 @@
 # 🛠️ Rencana Implementasi Perbaikan Pra-Deployment Hostinger
 **Proyek:** Insani Indonesia (`insani.id`)  
 **Target:** Hostinger Business Shared Hosting  
-**Dasar Acuan:** [docs/AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER.md](file:///c:/laragon/www/insani-id/docs/AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER.md)  
+**Dasar Acuan:** [docs/audit/AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER.md](file:///c:/laragon/www/insani-id/docs/audit/AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER.md)  
 **Tanggal:** 4 Oktober 2026  
 **Status:** DRAFT / PROPOSED  
 
