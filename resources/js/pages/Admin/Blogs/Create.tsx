@@ -83,7 +83,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
         const sourceContent = contents.id;
 
         if (!sourceTitle.trim()) {
-            toast.error('Silakan isi judul berita dalam Bahasa Indonesia terlebih dahulu.');
+            toast.error('Silakan isi judul kabar dalam Bahasa Indonesia terlebih dahulu.');
             return;
         }
 
@@ -129,9 +129,9 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                     ar: trContent.ar || prev.ar,
                 }));
 
-                toast.success('✨ Terjemahan EN & AR berita berhasil dibuat! Silakan cek tab bahasa.');
+                toast.success('✨ Terjemahan EN & AR kabar berhasil dibuat! Silakan cek tab bahasa.');
             } else {
-                toast.error('Gagal menerjemahkan berita.');
+                toast.error('Gagal menerjemahkan kabar.');
             }
         } catch (e) {
             toast.error('Terjadi kesalahan saat memproses terjemahan.');
@@ -171,7 +171,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
 
     return (
         <>
-            <Head title="Tulis Berita Baru" />
+            <Head title="Tulis Kabar Baru" />
 
             <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
                 
@@ -185,7 +185,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                         </Button>
                         <div>
                             <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                Tulis Berita Baru
+                                Tulis Kabar Baru
                             </h2>
                             <p className="text-muted-foreground text-xs mt-0.5">
                                 Publikasikan kabar kegiatan, liputan program, atau informasi terbaru.
@@ -203,7 +203,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                             disabled={processing}
                             className="bg-insani-blue hover:bg-insani-darkblue text-white shadow-xs"
                         >
-                            {processing ? 'Menyimpan...' : 'Publikasikan Berita'}
+                            {processing ? 'Menyimpan...' : 'Publikasikan Kabar'}
                         </Button>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                         Bahasa Naskah:
                                     </span>
                                     <p className="text-[11px] text-slate-400">
-                                        Pilih bahasa untuk menyunting judul, ringkasan, dan isi berita
+                                        Pilih bahasa untuk menyunting judul, ringkasan, dan isi kabar
                                     </p>
                                 </div>
                                 <div className="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-800 text-xs">
@@ -264,7 +264,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                             <div dir={contentLocale === 'ar' ? 'rtl' : 'ltr'}>
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="title" className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                                        <span>Judul Berita ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span></span>
+                                        <span>Judul Kabar ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span></span>
                                         {contentLocale !== 'id' && (
                                             <span className="text-[11px] text-slate-400 font-normal lowercase">
                                                 (opsional)
@@ -288,7 +288,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                     value={titles[contentLocale] || ''}
                                     onChange={handleTitleChange}
                                     onBlur={handleTitleBlur}
-                                    placeholder={contentLocale === 'id' ? 'Masukkan judul artikel berita yang menarik...' : `Judul berita (${contentLocale.toUpperCase()})...`}
+                                    placeholder={contentLocale === 'id' ? 'Masukkan judul artikel kabar yang menarik...' : `Judul kabar (${contentLocale.toUpperCase()})...`}
                                     className="mt-1.5 text-lg font-semibold h-12"
                                     required={contentLocale === 'id'}
                                 />
@@ -324,14 +324,14 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                 </div>
                                 <div className="mt-1 flex rounded-lg shadow-xs">
                                     <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-500 text-xs font-mono">
-                                        /berita/
+                                        /kabar/
                                     </span>
                                     <Input
                                         id="slug"
                                         type="text"
                                         value={data.slug}
                                         onChange={handleSlugChange}
-                                        placeholder="judul-artikel-berita"
+                                        placeholder="judul-artikel-kabar"
                                         className="rounded-l-none font-mono text-xs"
                                     />
                                 </div>
@@ -357,7 +357,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                         {/* Rich Text Editor Card */}
                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col gap-2">
                             <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Isi Konten Berita ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
+                                Isi Konten Kabar ({contentLocale.toUpperCase()}) <span className="text-red-500">*</span>
                             </Label>
                             <p className="text-xs text-slate-400 mb-2">
                                 Gunakan editor di bawah untuk memformat teks, menambahkan subjudul, kutipan, dan gambar di dalam konten.
@@ -368,7 +368,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                     key={`blog-content-${contentLocale}`}
                                     value={contents[contentLocale] || ''}
                                     onChange={(val) => setContents(prev => ({ ...prev, [contentLocale]: val }))}
-                                    placeholder="Tuliskan cerita lengkap berita di sini..."
+                                    placeholder="Tuliskan cerita lengkap kabar di sini..."
                                 />
                             </div>
                             {errors.content_html && <p className="text-xs text-red-500 mt-1">{errors.content_html}</p>}
@@ -387,7 +387,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                             isTranslating={isTranslating}
                             activeLocale={contentLocale}
                             onLocaleChange={setContentLocale}
-                            description="Status kesiapan judul, ringkasan, dan isi naskah artikel berita dalam 3 bahasa."
+                            description="Status kesiapan judul, ringkasan, dan isi naskah artikel kabar dalam 3 bahasa."
                         />
 
                         {/* Publishing Options Card */}
@@ -440,7 +440,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                         {/* Category Card */}
                         <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col gap-3">
                             <Label htmlFor="wp_category" className="font-semibold text-sm text-slate-900 dark:text-white">
-                                Kategori Berita <span className="text-red-500">*</span>
+                                Kategori Kabar <span className="text-red-500">*</span>
                             </Label>
                             <p className="text-xs text-slate-400">
                                 Pilih kategori yang sudah ada atau ketik nama kategori baru.
@@ -489,7 +489,7 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                 Foto Sampul / Thumbnail
                             </Label>
                             <p className="text-xs text-slate-400">
-                                Gambar utama artikel berita (format: JPG, PNG, WEBP, maks 3MB).
+                                Gambar utama artikel kabar (format: JPG, PNG, WEBP, maks 3MB).
                             </p>
 
                             {imagePreview ? (

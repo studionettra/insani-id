@@ -66,14 +66,14 @@ it('increments blog views_count once per session upon visit', function () {
     expect($blog->views_count)->toBe(0);
 
     // First visit in session
-    $response = $this->get('/berita/'.$blog->slug);
+    $response = $this->get('/kabar/'.$blog->slug);
     $response->assertOk();
 
     expect($blog->fresh()->views_count)->toBe(1);
     expect(session()->has('viewed_blog_'.$blog->id))->toBeTrue();
 
     // Second visit in same session
-    $this->get('/berita/'.$blog->slug);
+    $this->get('/kabar/'.$blog->slug);
     expect($blog->fresh()->views_count)->toBe(1);
 });
 

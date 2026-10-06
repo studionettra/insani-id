@@ -265,7 +265,7 @@ export default function PublicSearchDialog() {
                 type="button"
                 onClick={() => setIsOpen(true)}
                 className="flex items-center justify-center w-10 h-10 rounded-full text-zinc-600 hover:text-brand-600 hover:bg-zinc-100 transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-                aria-label={t('Cari program, topik atau berita')}
+                aria-label={t('Cari program, topik atau kabar')}
                 title={`${t('Cari')} (Ctrl+K)`}
             >
                 <Search className="w-5 h-5 transition-transform hover:scale-110" />
@@ -293,7 +293,7 @@ export default function PublicSearchDialog() {
                                 type="text"
                                 value={query}
                                 onChange={handleQueryChange}
-                                placeholder={t('Cari program donasi, fokus program, atau berita...')}
+                                placeholder={t('Cari program donasi, fokus program, atau kabar...')}
                                 className="w-full bg-transparent text-sm sm:text-base font-medium text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
                             />
                             {isLoading && (
@@ -691,7 +691,7 @@ export default function PublicSearchDialog() {
                                                     <div className="flex items-center justify-between mb-2">
                                                         <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                                                             <Newspaper className="w-3.5 h-3.5 text-amber-500" />
-                                                            {t('Berita')}
+                                                            {t('Kabar')}
                                                         </span>
                                                         <span className="text-[11px] font-medium text-zinc-400">
                                                             {results.blogs.length} {t('artikel')}

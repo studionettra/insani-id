@@ -370,10 +370,10 @@ export default function MarketingIntegrationTab({
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                                    Google AdSense (Monetisasi Khusus Berita)
+                                    Google AdSense (Monetisasi Khusus Kabar)
                                 </h2>
                                 <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/60 px-2 py-0.5 rounded-full">
-                                    Khusus /berita
+                                    Khusus /kabar
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -420,12 +420,12 @@ export default function MarketingIntegrationTab({
                     {/* Unit Slot Iklan 4 Kolom */}
                     <div className="space-y-2.5">
                         <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                            Unit Slot Iklan Berita (Ad Slots)
+                            Unit Slot Iklan Kabar (Ad Slots)
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div className="p-3.5 rounded-xl border border-gray-200/80 dark:border-gray-700/80 bg-gray-50/50 dark:bg-gray-900/30 space-y-1.5">
                                 <Label htmlFor="adsense_slot_blog_index" className="text-xs font-semibold block">
-                                    1. Indeks Berita
+                                    1. Indeks Kabar
                                 </Label>
                                 <p className="text-[11px] text-gray-400">Banner di atas daftar artikel</p>
                                 <Input
@@ -526,7 +526,7 @@ export default function MarketingIntegrationTab({
                     <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-xl flex items-start gap-2.5 text-xs text-emerald-900 dark:text-emerald-300">
                         <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
                         <span>
-                            <strong>Jaminan Isolasi Kebaikan:</strong> Iklan Google AdSense hanya akan dimuat pada rute <code>/berita</code>. Seluruh halaman program kebaikan, donasi, checkout pembayaran, dan dashboard admin 100% bebas dari script iklan.
+                            <strong>Jaminan Isolasi Kebaikan:</strong> Iklan Google AdSense hanya akan dimuat pada rute <code>/kabar</code>. Seluruh halaman program kebaikan, donasi, checkout pembayaran, dan dashboard admin 100% bebas dari script iklan.
                         </span>
                     </div>
                 </div>

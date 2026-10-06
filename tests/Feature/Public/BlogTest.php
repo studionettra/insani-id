@@ -30,7 +30,7 @@ beforeEach(function () {
 });
 
 it('renders blog index page with articles and categories', function () {
-    $response = $this->get('/berita');
+    $response = $this->get('/kabar');
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
@@ -43,7 +43,7 @@ it('renders blog index page with articles and categories', function () {
 });
 
 it('filters blog posts by category', function () {
-    $response = $this->get('/berita?category=Kabar+Yatim');
+    $response = $this->get('/kabar?category=Kabar+Yatim');
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
@@ -55,7 +55,7 @@ it('filters blog posts by category', function () {
 });
 
 it('filters blog posts by search query', function () {
-    $response = $this->get('/berita?search=Air+Bersih');
+    $response = $this->get('/kabar?search=Air+Bersih');
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
@@ -67,7 +67,7 @@ it('filters blog posts by search query', function () {
 });
 
 it('renders blog detail page with content', function () {
-    $response = $this->get('/berita/bantuan-yatim-piatu-desa-sukamaju');
+    $response = $this->get('/kabar/bantuan-yatim-piatu-desa-sukamaju');
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
@@ -77,4 +77,31 @@ it('renders blog detail page with content', function () {
         ->where('blog.content', '<p>Penyaluran santunan bagi 50 anak yatim berlangsung lancar.</p>')
         ->has('relatedBlogs')
     );
+});
+
+it('redirects legacy /berita to /kabar with 301 status', function () {
+    $response = $this->get('/berita');
+
+    $response->assertRedirect('/kabar');
+    $response->assertStatus(301);
+});
+
+it('redirects legacy /berita/{slug} to /kabar/{slug} with 301 status', function () {
+    $response = $this->get('/berita/bantuan-yatim-piatu-desa-sukamaju');
+
+    $response->assertRedirect('/kabar/bantuan-yatim-piatu-desa-sukamaju');
+    $response->assertStatus(301);
+});
+
+it('redirects legacy WordPress root permalinks to /kabar/{slug} with 301 status', function () {
+    $response = $this->get('/bantuan-yatim-piatu-desa-sukamaju');
+
+    $response->assertRedirect('/kabar/bantuan-yatim-piatu-desa-sukamaju');
+    $response->assertStatus(301);
+});
+
+it('returns 404 for unknown root slugs', function () {
+    $response = $this->get('/slug-yang-tidak-pernah-ada-12345');
+
+    $response->assertNotFound();
 });

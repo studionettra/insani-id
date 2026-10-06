@@ -361,6 +361,7 @@ class AnalyticsService
         $programViews = AnalyticsPageView::where('created_at', '>=', $startDate)
             ->where(function ($q) {
                 $q->where('path', 'like', '%/program/%')
+                    ->orWhere('path', 'like', '%/kabar/%')
                     ->orWhere('path', 'like', '%/berita/%');
             })
             ->count();

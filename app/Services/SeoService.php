@@ -163,7 +163,7 @@ class SeoService
             $rawTitle = data_get($blog, 'title');
             $title = is_array($rawTitle)
                 ? ($rawTitle[app()->getLocale()] ?? $rawTitle['id'] ?? reset($rawTitle))
-                : (string) ($rawTitle ?: 'Kabar & Berita Insani');
+                : (string) ($rawTitle ?: 'Kabar Insani');
 
             $rawExcerpt = data_get($blog, 'excerpt');
             if (is_array($rawExcerpt)) {
@@ -211,7 +211,7 @@ class SeoService
                             [
                                 '@type' => 'ListItem',
                                 'position' => 2,
-                                'name' => 'Kabar & Berita',
+                                'name' => 'Kabar Insani',
                                 'item' => route('blog.index'),
                             ],
                             [
@@ -363,7 +363,7 @@ class SeoService
             'Public/Contact/Create' => "Hubungi Kami - {$siteName}",
             'Public/Program/Listing' => "Daftar Program Donasi - {$siteName}",
             'Public/Program/Index' => "Daftar Program Donasi - {$siteName}",
-            'Public/Blog/Index' => "Kabar & Berita Terbaru - {$siteName}",
+            'Public/Blog/Index' => "Kabar Terbaru - {$siteName}",
             'Public/CampaignerRegistration/Create' => "Daftar Penggalang Dana - {$siteName}",
             'Public/Donation/Lookup' => "Cek Status & Riwayat Donasi - {$siteName}",
         ];

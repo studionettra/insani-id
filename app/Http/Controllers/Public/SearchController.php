@@ -284,12 +284,12 @@ class SearchController extends Controller
                 'keywords' => ['fokus', 'fokus program', 'pilar', 'kategori', 'program utama', 'strategis', 'pilar kebaikan'],
             ],
             [
-                'title' => 'Berita & Artikel Publikasi',
-                'slug' => 'berita',
+                'title' => 'Kabar Insani & Publikasi',
+                'slug' => 'kabar',
                 'meta_description' => 'Kabar terbaru penyaluran bantuan, artikel inspiratif, dan rilis resmi yayasan.',
                 'url' => route('blog.index'),
                 'badge' => 'Kabar',
-                'keywords' => ['berita', 'kabar', 'artikel', 'cerita', 'penyaluran', 'publikasi', 'rilis', 'kabar terbaru', 'cerita kebaikan'],
+                'keywords' => ['kabar', 'kabar insani', 'berita', 'artikel', 'cerita', 'penyaluran', 'publikasi', 'rilis', 'kabar terbaru', 'cerita kebaikan'],
             ],
             [
                 'title' => 'Daftar Campaigner (Buat Program)',

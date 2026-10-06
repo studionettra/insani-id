@@ -34,7 +34,7 @@ it('renders OpenGraph meta tags on blog detail page for crawlers', function () {
         'published_at' => now(),
     ]);
 
-    $response = $this->get("/berita/{$blog->slug}");
+    $response = $this->get("/kabar/{$blog->slug}");
 
     $response->assertOk();
     $response->assertSee('<meta property="og:title" content="Penyaluran Paket Pangan Ramadhan Insani - Insani Indonesia"', false);

@@ -122,7 +122,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             <Link href="/tentang-kami" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/tentang-kami') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Tentang Kami')}</Link>
                             <Link href="/fokus-program" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/fokus-program') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Fokus Program')}</Link>
                             <Link href="/kontak" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/kontak') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Kontak')}</Link>
-                            <Link href="/berita" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/berita') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Berita')}</Link>
+                            <Link href="/kabar" className={`px-4 py-2 rounded-full transition-all active:scale-95 ${isActive('/kabar') ? 'bg-zinc-100 text-zinc-950 font-semibold' : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-50'}`}>{t('Kabar')}</Link>
                         </nav>
                         
                         <div className="flex items-center gap-2 sm:gap-2.5 rtl:space-x-reverse">
@@ -252,8 +252,8 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/berita" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
-                                        <span>{t('Kabar Penyaluran & Berita')}</span>
+                                    <Link href="/kabar" className="hover:text-blue-300 hover:translate-x-1 inline-flex items-center gap-1.5 transition-all">
+                                        <span>{t('Kabar Penyaluran')}</span>
                                     </Link>
                                 </li>
                                 <li>

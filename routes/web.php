@@ -58,6 +58,8 @@ use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Webhook\MidtransWebhookController;
 use App\Http\Controllers\Webhook\XenditWebhookController;
 use App\Models\AppSetting;
+use App\Models\BlogPostCache;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -97,8 +99,18 @@ Route::group([
     Route::get('/laporan-keuangan/{financial_report:slug}/unduh', [PublicFinancialReportController::class, 'download'])->name('financial-reports.download');
     Route::get('/fokus-program', [FocusProgramController::class, 'index'])->name('focus.index');
     Route::get('/fokus-program/{category:slug}', [FocusProgramController::class, 'show'])->name('focus.show');
-    Route::get('/berita', [BlogController::class, 'index'])->name('blog.index');
-    Route::get('/berita/{slug}', [BlogController::class, 'show'])->name('blog.show');
+    Route::get('/kabar', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/kabar/{slug}', [BlogController::class, 'show'])->name('blog.show');
+    Route::get('/berita', function (Request $request) {
+        $qs = $request->getQueryString();
+
+        return redirect()->to('/kabar'.($qs ? '?'.$qs : ''), 301);
+    });
+    Route::get('/berita/{slug}', function (Request $request, string $slug) {
+        $qs = $request->getQueryString();
+
+        return redirect()->to("/kabar/{$slug}".($qs ? '?'.$qs : ''), 301);
+    });
     Route::get('/kontak', [ContactController::class, 'create'])->name('contact.create');
     Route::post('/kontak', [ContactController::class, 'store'])
         ->middleware('throttle:5,1')
@@ -406,3 +418,13 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
 });
 
 require __DIR__.'/settings.php';
+
+// Smart Fallback for Legacy WordPress root permalinks (e.g. insani.id/{slug} -> insani.id/kabar/{slug})
+Route::get('/{legacyBlogSlug}', function (string $legacyBlogSlug) {
+    $blog = BlogPostCache::published()->where('slug', $legacyBlogSlug)->first();
+    if ($blog) {
+        return redirect()->route('blog.show', ['slug' => $blog->slug], 301);
+    }
+
+    abort(404);
+})->where('legacyBlogSlug', '^(?!admin|api|dashboard|livewire|build|storage)[a-zA-Z0-9\-_]+$');

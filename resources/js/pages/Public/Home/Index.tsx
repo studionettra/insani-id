@@ -348,13 +348,13 @@ return;
                                     {t('Kabar Terbaru')}
                                 </h2>
                                 <p className="text-lg text-zinc-600 leading-relaxed">
-                                    {t('Baca berita dan laporan penyaluran program yang telah Anda dukung.')}
+                                    {t('Baca kabar dan laporan penyaluran program yang telah Anda dukung.')}
                                 </p>
                             </div>
                             <div>
                                 <Button asChild variant="outline" className="rounded-full h-11 px-6 border-zinc-200 hover:bg-zinc-100 text-zinc-950 transition-all active:scale-[0.98]">
-                                    <Link href="/berita">
-                                        {t('Baca Semua Berita')}
+                                    <Link href="/kabar">
+                                        {t('Baca Semua Kabar')}
                                     </Link>
                                 </Button>
                             </div>
@@ -364,7 +364,7 @@ return;
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
                                 {/* Featured Post (Left) */}
                                 <FadeIn className="lg:col-span-7">
-                                    <Link href={`/berita/${blogs[0].slug}`} className="group block relative rounded-3xl overflow-hidden bg-white border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                    <Link href={`/kabar/${blogs[0].slug}`} className="group block relative rounded-3xl overflow-hidden bg-white border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
                                         <div className="aspect-[16/10] overflow-hidden bg-zinc-100 relative">
                                             {blogs[0].featured_image_url ? (
                                                 <img src={blogs[0].featured_image_url} alt={blogs[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
@@ -390,7 +390,7 @@ return;
                                 <div className="lg:col-span-5 flex flex-col gap-6">
                                     {blogs.slice(1).map((blog: any, idx: number) => (
                                         <FadeIn key={blog.id} delay={0.2 + (idx * 0.1)} className="h-full">
-                                            <Link href={`/berita/${blog.slug}`} className="group flex flex-col sm:flex-row lg:flex-col xl:flex-row h-full bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300">
+                                            <Link href={`/kabar/${blog.slug}`} className="group flex flex-col sm:flex-row lg:flex-col xl:flex-row h-full bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300">
                                                 <div className="sm:w-2/5 lg:w-full xl:w-2/5 aspect-[4/3] sm:aspect-auto lg:aspect-[16/9] xl:aspect-auto overflow-hidden bg-zinc-100 flex-shrink-0 relative">
                                                     {blog.featured_image_url ? (
                                                         <img src={blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
@@ -416,7 +416,7 @@ return;
                                 {/* Fallback if only 1 blog */}
                                 {blogs.map((blog: any) => (
                                     <FadeIn key={blog.id}>
-                                        <Link href={`/berita/${blog.slug}`} className="group flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
+                                        <Link href={`/kabar/${blog.slug}`} className="group flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
                                             <div className="md:w-1/2 aspect-[16/9] md:aspect-auto overflow-hidden bg-zinc-100 relative">
                                                 {blog.featured_image_url ? (
                                                     <img src={blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />

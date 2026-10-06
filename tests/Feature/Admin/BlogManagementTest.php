@@ -190,7 +190,7 @@ it('excludes draft blogs from public index and detail pages', function () {
     ]);
 
     // Public index only shows published
-    $this->get('/berita')
+    $this->get('/kabar')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Public/Blog/Index')
@@ -199,6 +199,6 @@ it('excludes draft blogs from public index and detail pages', function () {
         );
 
     // Public detail returns 404 for draft
-    $this->get("/berita/{$draft->slug}")
+    $this->get("/kabar/{$draft->slug}")
         ->assertNotFound();
 });

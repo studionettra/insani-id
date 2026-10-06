@@ -132,7 +132,7 @@ class BlogController extends Controller
 
         BlogPostCache::create($validated);
 
-        return redirect()->route('admin.blogs.index')->with('success', 'Berita berhasil diterbitkan.');
+        return redirect()->route('admin.blogs.index')->with('success', 'Kabar berhasil diterbitkan.');
     }
 
     public function edit(BlogPostCache $blog): Response
@@ -212,7 +212,7 @@ class BlogController extends Controller
 
         $blog->update($validated);
 
-        return redirect()->route('admin.blogs.index')->with('success', 'Berita berhasil diperbarui.');
+        return redirect()->route('admin.blogs.index')->with('success', 'Kabar berhasil diperbarui.');
     }
 
     public function destroy(BlogPostCache $blog): RedirectResponse
@@ -223,6 +223,6 @@ class BlogController extends Controller
 
         $blog->delete();
 
-        return redirect()->back()->with('success', 'Berita berhasil dihapus.');
+        return redirect()->back()->with('success', 'Kabar berhasil dihapus.');
     }
 }

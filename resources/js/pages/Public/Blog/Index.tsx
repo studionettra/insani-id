@@ -25,7 +25,7 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         router.get(
-            '/berita',
+            '/kabar',
             {
                 search: searchQuery || undefined,
                 category: filters.category || undefined,
@@ -36,7 +36,7 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
 
     const handleCategoryClick = (categoryName?: string) => {
         router.get(
-            '/berita',
+            '/kabar',
             {
                 search: filters.search || undefined,
                 category: categoryName || undefined,
@@ -47,13 +47,13 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
 
     const handleResetFilters = () => {
         setSearchQuery('');
-        router.get('/berita', {}, { preserveState: true, preserveScroll: true });
+        router.get('/kabar', {}, { preserveState: true, preserveScroll: true });
     };
 
     const isFiltered = Boolean(filters.search || filters.category);
 
     return (
-        <PublicLayout title="Kabar & Berita">
+        <PublicLayout title="Kabar Insani">
             
             {/* Hero Header */}
             <div className="bg-insani-darkblue text-white py-16 md:py-20 relative overflow-hidden">
@@ -62,7 +62,7 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
                     <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 text-blue-200 backdrop-blur-md mb-4">
                         <BookOpen className="w-3.5 h-3.5 mr-2" /> Kabar Insani
                     </span>
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Kabar & Berita Terbaru</h1>
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Kabar Terbaru</h1>
                     <p className="text-base md:text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed">
                         Ikuti perkembangan terbaru, laporan penyaluran amanah, dan kisah inspiratif dari program kebaikan Insani Indonesia.
                     </p>
@@ -166,7 +166,7 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
                                 {blogs.data.map((blog: any) => (
                                     <Link 
                                         key={blog.id} 
-                                        href={`/berita/${blog.slug}`} 
+                                        href={`/kabar/${blog.slug}`} 
                                         className="flex flex-col bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                                     >
                                         {blog.thumbnail_url || blog.featured_image_url ? (
@@ -247,16 +247,16 @@ export default function BlogIndex({ blogs, categories = [], filters = {} }: Blog
                                 <Search className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-semibold text-slate-900 mb-1">
-                                {isFiltered ? 'Tidak ada berita yang ditemukan' : 'Belum Ada Berita'}
+                                {isFiltered ? 'Tidak ada kabar yang ditemukan' : 'Belum Ada Kabar'}
                             </h3>
                             <p className="text-sm text-slate-500 mb-6">
                                 {isFiltered 
                                     ? 'Coba ubah kata kunci pencarian atau pilih kategori lain.' 
-                                    : 'Kabar dan berita terbaru dari Insani Indonesia akan segera hadir di sini.'}
+                                    : 'Kabar terbaru dari Insani Indonesia akan segera hadir di sini.'}
                             </p>
                             {isFiltered && (
                                 <Button onClick={handleResetFilters} variant="outline" className="rounded-full">
-                                    Lihat Semua Berita
+                                    Lihat Semua Kabar
                                 </Button>
                             )}
                         </div>

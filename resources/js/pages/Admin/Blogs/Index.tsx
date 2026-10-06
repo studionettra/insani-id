@@ -80,7 +80,7 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
 
     return (
         <>
-            <Head title="Manajemen Berita" />
+            <Head title="Manajemen Kabar" />
 
             <div className="flex flex-col gap-6 p-6">
                 
@@ -88,10 +88,10 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Manajemen Berita
+                            Manajemen Kabar
                         </h2>
                         <p className="text-muted-foreground text-sm mt-1">
-                            Tulis, sunting, dan kelola seluruh artikel berita kegiatan dan penyaluran program Insani.
+                            Tulis, sunting, dan kelola seluruh artikel kabar kegiatan dan penyaluran program Insani.
                         </p>
                     </div>
 
@@ -99,7 +99,7 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
                         <Button asChild size="sm" className="h-9 bg-insani-blue hover:bg-insani-darkblue text-white shadow-xs">
                             <Link href="/admin/blogs/create">
                                 <Plus className="w-4 h-4 mr-1.5" />
-                                Tulis Berita Baru
+                                Tulis Kabar Baru
                             </Link>
                         </Button>
                     </div>
@@ -244,7 +244,7 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
                                                 <div className="flex items-center justify-end gap-1.5">
                                                     {blog.status === 'published' && (
                                                         <Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-insani-blue" title="Lihat di Web">
-                                                            <a href={`/berita/${blog.slug}`} target="_blank" rel="noopener noreferrer">
+                                                            <a href={`/kabar/${blog.slug}`} target="_blank" rel="noopener noreferrer">
                                                                 <ExternalLink className="w-4 h-4" />
                                                             </a>
                                                         </Button>
@@ -272,12 +272,12 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
                                         <TableCell colSpan={7} className="text-center py-16 text-slate-500">
                                             <div className="max-w-xs mx-auto text-center">
                                                 <FileText className="w-10 h-10 mx-auto text-slate-300 mb-3" />
-                                                <p className="font-semibold text-slate-700 dark:text-slate-300 text-sm">Belum Ada Artikel</p>
-                                                <p className="text-xs text-slate-400 mt-1 mb-4">Mulai tulis artikel berita pertama untuk dipublikasikan ke pembaca.</p>
+                                                <p className="font-semibold text-slate-700 dark:text-slate-300 text-sm">Belum Ada Kabar</p>
+                                                <p className="text-xs text-slate-400 mt-1 mb-4">Mulai tulis artikel kabar pertama untuk dipublikasikan ke pembaca.</p>
                                                 <Button asChild size="sm" className="bg-insani-blue hover:bg-insani-darkblue text-white">
                                                     <Link href="/admin/blogs/create">
                                                         <Plus className="w-4 h-4 mr-1.5" />
-                                                        Tulis Berita Baru
+                                                        Tulis Kabar Baru
                                                     </Link>
                                                 </Button>
                                             </div>
@@ -315,9 +315,9 @@ export default function BlogsIndex({ blogs, categories, filters }: BlogsIndexPro
             <ConfirmDialog
                 open={!!deletingBlog}
                 onOpenChange={(open) => !open && setDeletingBlog(null)}
-                title="Hapus Artikel Berita"
-                description={`Apakah Anda yakin ingin menghapus artikel "${deletingBlog?.title}"? Tindakan ini tidak dapat dibatalkan.`}
-                confirmText="Hapus Artikel"
+                title="Hapus Artikel Kabar"
+                description={`Apakah Anda yakin ingin menghapus kabar "${deletingBlog?.title}"? Tindakan ini tidak dapat dibatalkan.`}
+                confirmText="Hapus Kabar"
                 cancelText="Batal"
                 variant="danger"
                 loading={isDeleting}

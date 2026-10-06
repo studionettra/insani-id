@@ -16,7 +16,7 @@ test('sitemap xml endpoint returns 200 and valid xml content', function () {
         ->toContain('<changefreq>')
         ->toContain('<priority>')
         ->toContain('/program')
-        ->toContain('/berita')
+        ->toContain('/kabar')
         ->toContain('/tentang-kami');
 });
 

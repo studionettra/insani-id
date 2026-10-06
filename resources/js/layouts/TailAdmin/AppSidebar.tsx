@@ -224,7 +224,7 @@ const AppSidebar: React.FC = () => {
       items: [
         ...((permissions.includes('manage_blog') || isSuperadmin) ? [{
           icon: <Newspaper className="w-5 h-5" />,
-          name: "Berita",
+          name: "Kabar Insani",
           path: "/admin/blogs",
         }] : []),
         ...((permissions.includes('manage_banners') || isSuperadmin) ? [{
