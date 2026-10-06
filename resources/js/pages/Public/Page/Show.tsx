@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import PublicLayout from '@/layouts/PublicLayout';
-import DOMPurify from 'dompurify';
+import { sanitizeHtml } from '@/lib/utils';
 import HelpCenterView from '@/components/public/page/HelpCenterView';
 import HowToDonateView from '@/components/public/page/HowToDonateView';
 import LegalDocumentView from '@/components/public/page/LegalDocumentView';
@@ -63,7 +63,7 @@ export default function Show({ page, faqs }: PageProps) {
                                 className="prose prose-lg prose-slate max-w-none text-slate-600
                                     prose-headings:font-bold prose-headings:text-slate-900 
                                     prose-a:text-insani-blue hover:prose-a:underline"
-                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content_html) }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content_html) }}
                             />
 
                             {page.attachment_url && (

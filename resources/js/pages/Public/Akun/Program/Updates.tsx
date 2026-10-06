@@ -2,7 +2,6 @@ import { Head, useForm, router } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale/id';
-import DOMPurify from 'dompurify';
 import { Plus, ShieldCheck, Lock, AlertCircle, Info, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import RichTextEditor from '@/components/rich-text-editor';
@@ -12,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { getLocalizedValue } from '@/lib/utils';
+import { getLocalizedValue, sanitizeHtml } from '@/lib/utils';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const [expanded, setExpanded] = useState(false);
@@ -64,7 +63,7 @@ const UpdateCard = ({ update }: { update: any }) => {
                         <div className="relative">
                             <div 
                                 className={`prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-gray-300 break-words overflow-hidden transition-all duration-300 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md ${expanded ? '' : 'max-h-40'}`}
-                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(update.content)) }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(getLocalizedValue(update.content)) }}
                             />
                             {!expanded && (
                                 <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"></div>

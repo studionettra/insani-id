@@ -11,7 +11,7 @@ import {
     CheckCircle2,
     MessageCircle
 } from 'lucide-react';
-import DOMPurify from 'dompurify';
+import { sanitizeHtml } from '@/lib/utils';
 
 interface LegalDocumentViewProps {
     title: string;
@@ -194,7 +194,7 @@ export default function LegalDocumentView({ title, contentHtml, attachmentUrl }:
                                     prose-li:text-slate-600 
                                     prose-strong:text-slate-900 prose-strong:font-semibold 
                                     prose-a:text-insani-blue prose-a:font-medium prose-a:no-underline hover:prose-a:underline"
-                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedHtml) }}
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(processedHtml) }}
                             />
 
                             {/* ATTACHMENT DOWNLOAD IF ANY */}

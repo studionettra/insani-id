@@ -1,12 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
-import DOMPurify from 'dompurify';
 import { ArrowLeft, AlertCircle, Info, Calendar, DollarSign, Target, Wallet } from 'lucide-react';
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
+import { formatCurrency, formatDate, getLocalizedValue, sanitizeHtml } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
@@ -138,7 +137,7 @@ export default function AkunProgramShow({ program }: Props) {
                                 <div 
                                     className="prose prose-slate dark:prose-invert max-w-none prose-p:leading-relaxed prose-p:text-justify text-slate-700 dark:text-gray-300 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto text-left"
                                     dangerouslySetInnerHTML={{ 
-                                        __html: DOMPurify.sanitize(
+                                        __html: sanitizeHtml(
                                             getLocalizedValue(
                                                 program.story, 
                                                 '<p class="text-slate-500 dark:text-gray-400 italic">Belum ada cerita atau deskripsi untuk program ini.</p>'

@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
 import { trackShareProgram } from '@/lib/analytics';
-import { getLocalizedValue } from '@/lib/utils';
-import DOMPurify from 'dompurify';
+import { getLocalizedValue, sanitizeHtml } from '@/lib/utils';
 
 export default function BlogShow({ blog, relatedBlogs }: any) {
     const { t, locale, isRtl } = useTranslation();
@@ -32,7 +31,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
         return { before: blogContent, after: '' };
     }, [blogContent]);
 
-    const baseShareUrl = typeof window !== 'undefined' ? `${window.location.origin}/berita/${blog.slug}` : `https://insani.id/berita/${blog.slug}`;
+    const baseShareUrl = typeof window !== 'undefined' ? `${window.location.origin}/kabar/${blog.slug}` : `https://insani.id/kabar/${blog.slug}`;
     const rawDescription = blogExcerpt || blogContent || '';
     const cleanExcerpt = rawDescription
         ? rawDescription.replace(/<[^>]+>/g, '').substring(0, 160).trim() + '...'
@@ -56,7 +55,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
         if (channel === 'copy_link') {
             navigator.clipboard.writeText(targetUrl);
             setCopied(true);
-            toast.success('Tautan berita berhasil disalin!');
+            toast.success('Tautan kabar berhasil disalin!');
             setTimeout(() => setCopied(false), 2000);
             return;
         }
@@ -96,8 +95,8 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
             <div className="bg-slate-50 py-12 md:py-16">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     
-                    <Link href="/berita" className="inline-flex items-center text-insani-blue hover:text-insani-darkblue mb-8 font-medium">
-                        <ArrowLeft className={`w-4 h-4 ${isRtl ? 'ml-2 rotate-180' : 'mr-2'}`} /> {t('Kembali')}
+                    <Link href="/kabar" className="inline-flex items-center text-insani-blue hover:text-insani-darkblue mb-8 font-medium">
+                        <ArrowLeft className={`w-4 h-4 ${isRtl ? 'ml-2 rotate-180' : 'mr-2'}`} /> {t('Kembali ke Kabar', 'Kembali')}
                     </Link>
                     
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
@@ -151,7 +150,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                                 <>
                                     <div 
                                         className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
-                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentParts.before) }} 
+                                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentParts.before) }} 
                                     />
 
                                     {/* Google AdSense Slot: In-Article Middle */}
@@ -163,13 +162,13 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
 
                                     <div 
                                         className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
-                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentParts.after) }} 
+                                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentParts.after) }} 
                                     />
                                 </>
                             ) : (
                                 <div 
                                     className="prose prose-lg prose-blue max-w-none text-gray-800 leading-relaxed"
-                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blogContent) }} 
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(blogContent) }} 
                                 />
                             )}
 
@@ -188,7 +187,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                                             Bagikan Informasi Ini
                                         </h4>
                                         <p className="text-xs text-slate-500 mt-0.5">
-                                            Sebarkan berita kebaikan ini kepada keluarga dan teman Anda
+                                            Sebarkan kabar kebaikan ini kepada keluarga dan teman Anda
                                         </p>
                                     </div>
 
@@ -244,8 +243,8 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                 <section className="py-16 bg-white border-t border-slate-200">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-end mb-8">
-                            <h2 className="text-2xl font-bold text-insani-darkblue">{t('Berita Lainnya', 'Berita Lainnya')}</h2>
-                            <Link href="/berita" className="text-insani-blue font-semibold hover:text-insani-darkblue">
+                            <h2 className="text-2xl font-bold text-insani-darkblue">{t('Kabar Lainnya', 'Kabar Lainnya')}</h2>
+                            <Link href="/kabar" className="text-insani-blue font-semibold hover:text-insani-darkblue">
                                 {t('Lihat Semua')}
                             </Link>
                         </div>
@@ -254,7 +253,7 @@ export default function BlogShow({ blog, relatedBlogs }: any) {
                             {relatedBlogs.map((item: any) => (
                                 <Link 
                                     key={item.id} 
-                                    href={`/berita/${item.slug}`} 
+                                    href={`/kabar/${item.slug}`} 
                                     className="flex flex-col bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 hover:shadow-md transition-all duration-300 group"
                                 >
                                     {item.thumbnail_url && (

@@ -1,6 +1,7 @@
 import type { InertiaLinkProps } from '@inertiajs/react';
 import { clsx } from 'clsx';
 import type { ClassValue } from 'clsx';
+import DOMPurify from 'dompurify';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -138,5 +139,14 @@ export function toTitleCase(text: string, locale: string = 'id'): string {
         }).join('');
     }).join('');
 }
+
+export function sanitizeHtml(html: string | null | undefined): string {
+    if (!html) return '';
+    if (typeof window !== 'undefined' && typeof (DOMPurify as any)?.sanitize === 'function') {
+        return (DOMPurify as any).sanitize(html);
+    }
+    return html;
+}
+
 
 

@@ -1,7 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
-import DOMPurify from 'dompurify';
 import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -17,7 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import useTranslation from '@/hooks/use-translation';
 import PublicLayout from '@/layouts/PublicLayout';
 import { trackShareProgram, trackViewContent } from '@/lib/analytics';
-import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue } from '@/lib/utils';
+import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue, sanitizeHtml } from '@/lib/utils';
 
 const UpdateCard = ({ update }: { update: any }) => {
     const { t, locale } = useTranslation();
@@ -33,7 +32,7 @@ const UpdateCard = ({ update }: { update: any }) => {
             <div className="relative">
                 <div
                     className={`text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden transition-all duration-300 ${expanded ? '' : 'max-h-40'}`}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getLocalizedValue(update.content, locale)) }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(getLocalizedValue(update.content, locale)) }}
                 />
                 {!expanded && (
                     <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
@@ -571,7 +570,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
 
                                             <div
                                                 className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-justify prose-a:text-insani-blue prose-headings:text-slate-800 prose-strong:text-slate-800 prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-slate-400 break-words overflow-hidden text-left"
-                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(programStory) }}
+                                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(programStory) }}
                                             />
                                         </div>
                                     )}
