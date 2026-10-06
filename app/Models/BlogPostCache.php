@@ -19,6 +19,7 @@ class BlogPostCache extends Model
 
     protected $fillable = [
         'author_id',
+        'wp_post_id',
         'title',
         'slug',
         'excerpt',
@@ -28,6 +29,7 @@ class BlogPostCache extends Model
         'status',
         'views_count',
         'published_at',
+        'synced_at',
     ];
 
     protected $casts = [
