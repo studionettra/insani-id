@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             TestimonialSeeder::class,
             ProgramReportCategorySeeder::class,
             ImpactStatSeeder::class,
+            KabarArchiveSeeder::class,
         ]);
 
         $admin = User::factory()->create([
