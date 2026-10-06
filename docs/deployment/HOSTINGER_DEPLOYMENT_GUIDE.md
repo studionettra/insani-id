@@ -288,9 +288,12 @@ php artisan key:generate
 # 2. Jalankan migrasi seluruh tabel database
 php artisan migrate --force
 
-# 3. Jalankan seeding data master, peran Spatie, dan akun superadmin awal
+# 3. Jalankan seeding data master, peran Spatie, akun superadmin awal, serta seluruh arsip kabar (141 artikel)
 #    (PENTING: Hanya dijalankan saat instalasi pertama kali!)
 php artisan db:seed --force
+
+# Atau jika hanya ingin melakukan seeding ulang arsip kabar saja secara independen:
+# php artisan db:seed --class=KabarArchiveSeeder --force
 
 # 4. Optimasi produksi (caching konfigurasi, routing, dan blade views)
 php artisan optimize
@@ -298,6 +301,16 @@ php artisan optimize
 # 5. Buat symbolic link storage (jika belum dibuat)
 php artisan storage:link
 ```
+
+> [!TIP]
+> **Migrasi & Seeding Arsip Kabar (141 Artikel + Aset Gambar):**
+> 1. **Data JSON Kabar:** Seluruh data 141 artikel kabar telah tersimpan aman dan terkelola dalam Git di file `database/data/kabar_archive.json`. Data ini mencakup judul, konten HTML, kutipan/ringkasan, multi-bahasa (ID/EN/AR), tanggal rilis asli, jumlah pembaca, dan URL aset gambar lokal.
+> 2. **Aset Gambar Kabar (`storage/app/public/blogs`):** Karena aset gambar tidak dimasukkan ke dalam Git repository (untuk menjaga ukuran repo tetap ringan), arsip gambar lokal dikompresi menjadi file zip (`blogs.zip` / `storage_blogs.zip`).
+>    * Unggah file zip gambar tersebut melalui **File Manager Hostinger** ke folder:
+>      `laravel_app/storage/app/public/`
+>    * Ekstrak file zip tersebut di server sehingga file gambar berada di direktori `laravel_app/storage/app/public/blogs/`.
+> 3. **Idempotensi Seeder:** `KabarArchiveSeeder` bersifat 100% idempoten (`updateOrCreate` berbasis `slug`). Menjalankannya berkali-kali tidak akan membuat duplikasi data artikel.
+
 
 > [!IMPORTANT]
 > **Keamanan Akun Superadmin Awal:**
