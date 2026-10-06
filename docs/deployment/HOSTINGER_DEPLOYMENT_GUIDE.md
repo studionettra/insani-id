@@ -2,7 +2,7 @@
 
 Panduan ini berisi petunjuk komprehensif langkah demi langkah untuk mengunggah, mengonfigurasi, dan menjalankan aplikasi **Laravel 13 + Inertia v3 React (Insani Indonesia)** di paket **Business Shared Hosting Hostinger** dengan aman, cepat, dan stabil.
 
-> **Terakhir diperbarui:** 24 September 2026
+> **Terakhir diperbarui:** 6 Oktober 2026
 
 ---
 
@@ -11,7 +11,7 @@ Panduan ini berisi petunjuk komprehensif langkah demi langkah untuk mengunggah, 
 * **Web Server:** LiteSpeed Web Server (LSWS)
 * **OS:** CloudLinux dengan LVE Manager (batasan RAM ~1.5 - 3 GB, CPU 1-2 core, I/O 10-20 MB/s).
 * **Document Root Default:** `/home/uXXXXXXX/domains/domainanda.com/public_html`
-* **Catatan Penting:** Shared hosting **TIDAK memiliki daemon process manager (Supervisor)**. Oleh karena itu, background queue worker dijalankan melalui **Laravel Scheduler (Cron Job)** yang telah dikonfigurasikan dengan `--stop-when-empty --max-time=50`.
+* **Catatan Penting:** Shared hosting **TIDAK memiliki daemon process manager (Supervisor)**. Oleh karena itu, background queue worker dijalankan melalui **Laravel Scheduler (Cron Job)** yang telah dikonfigurasikan dengan `--stop-when-empty --max-time=50` dan `withoutOverlapping()`.
 * **SSR Inertia:** Shared hosting **TIDAK mendukung persistent Node.js process**. SSR sudah dikontrol via environment variable `INERTIA_SSR_ENABLED` (default `false` di production).
 
 ---
@@ -66,7 +66,7 @@ Jika hPanel akun Anda tidak mengizinkan pengubahan document root domain utama:
    ```
 
 > [!NOTE]
-> Project ini sudah menyertakan file `.htaccess` di root proyek sebagai safety net. Jika document root tidak mengarah ke `public/`, file ini akan secara otomatis me-redirect request ke subfolder `public/`.
+> Project ini sudah menyertakan file `.htaccess` di root proyek sebagai safety net. Jika document root tidak mengarah ke `public/`, file ini akan secara otomatis me-redirect request ke subfolder `public/` serta memblokir akses ke file sensitif (`.env`, `artisan`, `.git`, dll.).
 
 ---
 
@@ -78,17 +78,17 @@ Buka **hPanel** -> **Advanced** -> **PHP Configuration**:
 * Pilih: **PHP 8.3** (sesuai spesifikasi `composer.json`: `"php": "^8.3"`).
 
 ### B. Ekstensi PHP Wajib Dicentang / Diaktifkan
-* `fileinfo` (Wajib untuk validasi MIME upload gambar & dokumen)
-* `gd` (Wajib dengan dukungan WebP untuk resize gambar via Intervention Image — lihat `ImageUploadController`)
+* `fileinfo` (Wajib untuk validasi MIME upload gambar & dokumen program/verifikasi)
+* `gd` (Wajib dengan dukungan WebP untuk resize gambar via Intervention Image v4 — lihat `ImageUploadController`)
 * `intl` (Wajib untuk format angka/mata uang Rupiah & tanggal multi-bahasa via `mcamara/laravel-localization`)
-* `bcmath` (Wajib untuk kalkulasi presisi nominal donasi & invoice Xendit)
+* `bcmath` (Wajib untuk kalkulasi presisi nominal donasi, gateway fee, dan pencairan dana)
 * `pdo_mysql` (Koneksi database MariaDB/MySQL)
-* `zip` (Untuk backup zip via `spatie/laravel-backup` dan export laporan)
+* `zip` (Untuk backup zip via `spatie/laravel-backup` dan export dokumen)
 * `curl`, `mbstring`, `openssl`, `tokenizer`, `xml`
 
 ### C. PHP Options / Resource Limits
 Buka tab **PHP Options** dan sesuaikan nilai berikut:
-* `memory_limit` = `256M` (mencegah out-of-memory saat resize gambar atau generate laporan)
+* `memory_limit` = `256M` (mencegah out-of-memory saat resize gambar atau backup database)
 * `upload_max_filesize` = `20M`
 * `post_max_size` = `25M`
 * `max_execution_time` = `120`
@@ -98,32 +98,35 @@ Buka tab **PHP Options** dan sesuaikan nilai berikut:
 
 ## 4. Build Frontend Aset Sebelum Upload
 
-Karena shared hosting tidak memiliki Node.js runtime untuk menjalankan Vite dev server, Anda wajib meng-compile aset React terlebih dahulu di komputer lokal:
+Karena shared hosting tidak memiliki Node.js runtime untuk menjalankan Vite dev server, Anda wajib meng-compile aset React (React 19 + Tailwind CSS v4 + Wayfinder) di komputer lokal:
 
 ```bash
 # Di komputer lokal:
 npm run build
 ```
 
-Pastikan folder `public/build/` telah terisi manifest dan file javascript/css yang sudah ter-bundle.
+Pastikan folder `public/build/` telah terisi file manifest dan bundle JS/CSS.
 
 > [!IMPORTANT]
-> **SSR Inertia** sudah dinonaktifkan secara default di production melalui `config/inertia.php` (`INERTIA_SSR_ENABLED=false`). Shared hosting tidak dapat menjalankan Node.js SSR server. Jika Anda ingin mengaktifkan SSR di environment lokal, set `INERTIA_SSR_ENABLED=true` di file `.env` lokal.
+> **SSR Inertia** dinonaktifkan secara default di production melalui `config/inertia.php` (`INERTIA_SSR_ENABLED=false`). Shared hosting tidak dapat menjalankan Node.js SSR background process. Biarkan `INERTIA_SSR_ENABLED=false` di file `.env` produksi.
 
 ---
 
 ## 5. Konfigurasi Environment Produksi (`.env`)
 
 > [!TIP]
-> Project ini menyertakan file **`.env.production.example`** yang sudah disesuaikan untuk Hostinger Business Shared Hosting. Gunakan file ini sebagai template:
+> Project ini menyertakan file **`.env.production.example`** yang sudah disesuaikan secara presisi untuk Hostinger Business Shared Hosting. Gunakan file ini sebagai template:
 > ```bash
 > cp .env.production.example .env
 > ```
-> Lalu isi semua value yang masih kosong.
+> Lalu isi semua nilai credential produksi Anda.
 
-Pastikan konfigurasi berikut sudah benar:
+Pastikan konfigurasi utama berikut terisi dengan benar:
 
 ```dotenv
+# ==============================================================
+# Insani Indonesia — Production Environment (Hostinger Business)
+# ==============================================================
 APP_NAME="Insani Indonesia"
 APP_ENV=production
 APP_KEY=                          # Generate dengan: php artisan key:generate
@@ -132,10 +135,16 @@ APP_URL=https://insani.id
 
 APP_LOCALE=id
 APP_FALLBACK_LOCALE=id
+APP_FAKER_LOCALE=id_ID
+
+APP_MAINTENANCE_DRIVER=file
+BCRYPT_ROUNDS=12
 
 # --- Logging ---
-# Rotasi harian agar log tidak membengkak di shared hosting (retensi 7 hari)
+# Rotasi harian agar file log tidak membengkak di shared hosting
 LOG_CHANNEL=daily
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
 LOG_LEVEL=error
 
 # --- Database (dari hPanel -> Databases -> Management) ---
@@ -146,13 +155,20 @@ DB_DATABASE=uXXXXXXX_insani
 DB_USERNAME=uXXXXXXX_insani_user
 DB_PASSWORD=PasswordDatabaseAndaYangKuat
 
+# Path mysqldump jika backup spatie gagal mendeteksi binary (opsional)
+# DUMP_BINARY_PATH=/usr/bin/mysqldump
+
 # --- Session & Keamanan Cookie ---
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
 SESSION_ENCRYPT=true
+SESSION_PATH=/
 SESSION_DOMAIN=insani.id
+SESSION_SECURE_COOKIE=true
 
-# --- Queue Database (Diproses via Scheduler Cron) ---
+# --- Services, Queue, & Cache ---
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
 QUEUE_CONNECTION=database
 CACHE_STORE=database
 
@@ -160,35 +176,53 @@ CACHE_STORE=database
 INERTIA_SSR_ENABLED=false
 
 # --- Mail SMTP Hostinger Business ---
+# Catatan Hostinger:
+# Opsi 1 (Port 465 - SSL): MAIL_SCHEME=smtps, MAIL_PORT=465 (Rekomendasi)
+# Opsi 2 (Port 587 - TLS): MAIL_SCHEME=tls, MAIL_PORT=587
 MAIL_MAILER=smtp
-MAIL_SCHEME=tls
+MAIL_SCHEME=smtps
 MAIL_HOST=smtp.hostinger.com
 MAIL_PORT=465
-MAIL_USERNAME=sapa@insani.id
+MAIL_USERNAME=notifikasi@insani.id
 MAIL_PASSWORD=PasswordEmailHostingerAnda
-MAIL_FROM_ADDRESS="sapa@insani.id"
+MAIL_FROM_ADDRESS="notifikasi@insani.id"
 MAIL_FROM_NAME="Insani Indonesia"
+MAIL_REPLY_TO_ADDRESS="sapa@insani.id"
+MAIL_REPLY_TO_NAME="Layanan Sahabat Insani"
 
-# --- Cloudflare Turnstile Captcha PRODUKSI ---
-VITE_TURNSTILE_SITE_KEY=SiteKeyAsliCloudflareAnda
-TURNSTILE_SECRET_KEY=SecretKeyAsliCloudflareAnda
+# --- Cloudflare Turnstile Captcha (PRODUKSI) ---
+VITE_TURNSTILE_SITE_KEY=ProductionSiteKeyDariCloudflare
+TURNSTILE_SECRET_KEY=ProductionSecretKeyDariCloudflare
 
-# --- Xendit Payment Gateway PRODUKSI ---
+# --- Midtrans Payment Gateway PRODUKSI (Gateway Utama - Core API) ---
+MIDTRANS_MERCHANT_ID=ProductionMerchantID
+MIDTRANS_CLIENT_KEY=Mid-client-ProductionClientKey
+MIDTRANS_SERVER_KEY=Mid-server-ProductionServerKey
+MIDTRANS_IS_PRODUCTION=true
+MIDTRANS_EXPIRY_QRIS_MINUTES=30
+MIDTRANS_EXPIRY_VA_HOURS=24
+
+# --- Xendit Payment Gateway (Cadangan / Legacy) ---
 XENDIT_API_KEY=xnd_production_...
 XENDIT_WEBHOOK_TOKEN=TokenWebhookXenditAsli
+
+# --- WhatsApp Gateway (Fonnte - Notifikasi WA Donatur Opsional) ---
+WHATSAPP_PROVIDER=fonnte
+WHATSAPP_ENDPOINT=https://api.fonnte.com/send
+WHATSAPP_TOKEN=TokenAkunFonnteAnda
 ```
 
 > [!CAUTION]
-> **JANGAN** menyalin file `.env` dari komputer lokal ke server! File `.env` lokal berisi credential development (Xendit development key, Turnstile test key, dll.). Selalu buat `.env` baru di server dari template `.env.production.example`.
+> **JANGAN** menyalin file `.env` dari komputer lokal ke server! File `.env` lokal berisi credential development (Midtrans sandbox, Turnstile test key, database lokal). Selalu buat `.env` baru di server dari template `.env.production.example`.
 
 ---
 
 ## 6. Setup SSL & HTTPS
 
 1. Buka **hPanel** -> **Security** -> **SSL**.
-2. Install **Free SSL** (Let's Encrypt) untuk domain `insani.id`.
-3. Aktifkan **Force HTTPS** agar semua request di-redirect ke HTTPS.
-4. Pastikan `APP_URL` di `.env` menggunakan `https://`.
+2. Install **Free SSL** (Let's Encrypt) untuk domain `insani.id` (termasuk `www.insani.id`).
+3. Aktifkan fitur **Force HTTPS** agar semua request otomatis dialihkan ke HTTPS.
+4. Pastikan `APP_URL` di `.env` menggunakan prefix `https://`.
 
 ---
 
@@ -196,7 +230,7 @@ XENDIT_WEBHOOK_TOKEN=TokenWebhookXenditAsli
 
 Untuk menampilkan gambar banner, avatar, foto program, dan dokumen publik:
 1. Aktifkan akses SSH di **hPanel** -> **Advanced** -> **SSH Access**.
-2. Hubungkan terminal SSH Anda (menggunakan PuTTY atau terminal biasa).
+2. Hubungkan terminal SSH Anda (menggunakan PuTTY atau terminal SSH bawaan OS).
 3. Masuk ke direktori Laravel dan jalankan:
    ```bash
    cd /home/uXXXXXXX/domains/domainanda.com/laravel_app
@@ -212,17 +246,18 @@ ln -s /home/uXXXXXXX/domains/domainanda.com/laravel_app/storage/app/public /home
 
 ## 8. Setup Cron Job di hPanel Hostinger
 
-Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu entry cron menjalankan semua tugas terjadwal berikut:
+Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu cron entry menjalankan seluruh tugas terjadwal aplikasi:
 
 | Tugas | Jadwal | Keterangan |
 |:---|:---|:---|
-| `queue:work --stop-when-empty --max-time=50 --tries=2` | Setiap menit | Drain antrean email, notifikasi donasi |
-| `programs:check-status` | 00:01 | Cek status & deadline program |
-| `disbursements:send-update-reminders` | 09:00 | Reminder update pencairan dana |
-| `donations:expire-stale --hours=48` | 02:00 | Expire donasi manual kedaluwarsa |
-| `backup:run --only-db` | 01:00 | Backup database otomatis |
-| `backup:clean` | 01:30 | Bersihkan backup lama |
-| `notifications:prune-read` | 03:30 | Hapus notifikasi terbaca >60 hari |
+| `queue:work --stop-when-empty --max-time=50 --tries=2` | Setiap menit | Memproses antrean email, notifikasi, dan dispatch job |
+| `programs:check-status` | 00:01 | Evaluasi status target donasi dan deadline program |
+| `disbursements:send-update-reminders` | 09:00 | Kirim pengingat pelaporan pencairan dana ke campaigner |
+| `donations:expire-stale --hours=48` | 02:00 | Menandai kedaluwarsa donasi manual/VA yang belum dibayar |
+| `backup:run --only-db` | 01:00 | Backup otomatis database MySQL via Spatie Backup |
+| `backup:clean` | 01:30 | Membersihkan file backup lama sesuai aturan retensi |
+| `notifications:prune-read` | 03:30 | Hapus notifikasi sistem yang telah dibaca >60 hari |
+| `model:prune` | 04:00 | Prune data first-party analytics (sessions, pageviews, events) |
 
 ### Langkah Pengaturan:
 1. Buka **hPanel** -> **Advanced** -> **Cron Jobs**.
@@ -232,62 +267,98 @@ Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu en
    ```bash
    /usr/bin/php /home/uXXXXXXX/domains/domainanda.com/laravel_app/artisan schedule:run >> /dev/null 2>&1
    ```
-   *(Sesuaikan path absolut `/home/uXXXXXXX/...` sesuai dengan path home directory yang tertera di sidebar hPanel Anda).*
+   *(Sesuaikan path `/home/uXXXXXXX/...` sesuai dengan path direktori akun hPanel Anda).*
 5. Klik **Save**.
 
 > [!NOTE]
-> Queue worker menggunakan `--max-time=50` (50 detik) dan `--stop-when-empty` agar tidak melebihi batas waktu cron 1 menit. Flag `withoutOverlapping()` mencegah duplikasi proses.
+> Queue worker menggunakan `--max-time=50` (50 detik) dan `--stop-when-empty` agar selesai sebelum cron menit berikutnya dijalankan. Flag `withoutOverlapping()` memastikan tidak ada proses worker yang tumpang tindih.
 
 ---
 
-## 9. Migrasi Database & Optimasi Produksi
+## 9. Migrasi Database, Seeding Awal, & Optimasi Produksi
 
-Setelah menghubungkan SSH atau melalui terminal hPanel, jalankan perintah berikut secara berurutan:
+Setelah menghubungkan SSH atau terminal hPanel, jalankan perintah berikut secara berurutan:
 
 ```bash
 cd /home/uXXXXXXX/domains/domainanda.com/laravel_app
 
-# 1. Generate APP_KEY baru (hanya sekali, saat deploy pertama)
+# 1. Generate APP_KEY baru (hanya sekali, saat instalasi pertama)
 php artisan key:generate
 
-# 2. Jalankan migrasi database
+# 2. Jalankan migrasi seluruh tabel database
 php artisan migrate --force
 
-# 3. Optimasi produksi (cache config, routes, views)
+# 3. Jalankan seeding data master, peran Spatie, dan akun superadmin awal
+#    (PENTING: Hanya dijalankan saat instalasi pertama kali!)
+php artisan db:seed --force
+
+# 4. Optimasi produksi (caching konfigurasi, routing, dan blade views)
 php artisan optimize
 
-# 4. Buat symlink storage (jika belum)
+# 5. Buat symbolic link storage (jika belum dibuat)
 php artisan storage:link
 ```
 
+> [!IMPORTANT]
+> **Keamanan Akun Superadmin Awal:**
+> Perintah `db:seed` akan membuat akun superadmin default:
+> * Email: `admin@insani.id`
+> * Password: `password`
+> 
+> Aplikasi Insani Indonesia telah dilengkapi proteksi **Force Password Change** (`must_change_password`). Begitu Anda login pertama kali ke `/login`, sistem akan mewajibkan Anda mengganti password baru melalui halaman `/force-password-change`. Segera login dan perbarui kata sandi tersebut dengan sandi yang kuat dan aman!
+
 > [!WARNING]
-> **Jangan** menjalankan `php artisan queue:table` dan `php artisan session:table` — migrasi untuk tabel `jobs`, `job_batches`, `failed_jobs`, `sessions`, dan `cache` sudah terdefinisi di file migrasi bawaan project (`0001_01_01_000001_create_cache_table.php` dan `0001_01_01_000002_create_jobs_table.php`). Cukup jalankan `php artisan migrate --force`.
+> **Jangan** menjalankan `php artisan queue:table` dan `php artisan session:table` — tabel `jobs`, `job_batches`, `failed_jobs`, `sessions`, dan `cache` sudah memiliki file migrasi resmi bawaan proyek. Cukup jalankan `php artisan migrate --force`.
 
 ---
 
-## 10. Konfigurasi Webhook di Dashboard Xendit
+## 10. Konfigurasi Payment Gateway & Webhook (Midtrans & Xendit)
 
+Aplikasi Insani Indonesia menggunakan arsitektur pembayaran hybrid: **Midtrans Core API** sebagai gateway utama (100% native QRIS & Virtual Account tanpa Snap popup), serta **Xendit** sebagai gateway cadangan (legacy fallback).
+
+### A. Konfigurasi Midtrans (Gateway Utama)
+1. Buka [Midtrans Dashboard (MAP)](https://dashboard.midtrans.com/) dan login.
+2. Pastikan mode diubah ke **Production Mode**.
+3. Buka menu **Settings** -> **Configuration**:
+   * Pada kolom **Payment Notification URL**, masukkan:
+     ```text
+     https://insani.id/webhooks/midtrans
+     ```
+   * Simpan pengaturan.
+4. Buka menu **Settings** -> **Access Keys**:
+   * Salin **Merchant ID**, **Client Key**, dan **Server Key**.
+   * Tempelkan ke file `.env` di server:
+     ```dotenv
+     MIDTRANS_MERCHANT_ID=G123456789
+     MIDTRANS_CLIENT_KEY=Mid-client-XXXXX
+     MIDTRANS_SERVER_KEY=Mid-server-XXXXX
+     MIDTRANS_IS_PRODUCTION=true
+     ```
+5. Buka menu **Settings** -> **Payment Method** untuk memastikan metode QRIS (GoPay/ShopeePay) dan Bank Transfer Virtual Account (BCA, Mandiri, BNI, BRI, Permata) telah aktif.
+
+> [!NOTE]
+> Webhook Midtrans di `MidtransWebhookController` diverifikasi otomatis menggunakan algoritma kriptografi SHA-512 Signature Key (`order_id + status_code + gross_amount + server_key`). Tidak memerlukan verifikasi token statis manual.
+
+### B. Konfigurasi Xendit (Gateway Cadangan / Legacy)
 1. Buka [Dashboard Xendit](https://dashboard.xendit.co/) -> **Settings** -> **Developers** -> **Webhooks**.
 2. Pada URL Callback Invoices, masukkan:
    ```text
    https://insani.id/webhooks/xendit
    ```
 3. Salin **Verification Token (Callback Token)** dari dashboard Xendit.
-4. Tempelkan nilai tersebut ke dalam file `.env` di baris:
+4. Tempelkan nilai tersebut ke dalam file `.env`:
    ```dotenv
+   XENDIT_API_KEY=xnd_production_...
    XENDIT_WEBHOOK_TOKEN=TokenYangDisalinTadi
    ```
-5. Klik **Test and Save** di Xendit. Anda harus menerima status HTTP `200 OK`.
-
-> [!IMPORTANT]
-> Pastikan Anda menggunakan **Xendit Production API Key** (`xnd_production_...`), bukan Development Key (`xnd_development_...`). Switch mode di dashboard Xendit ke **Live Mode** sebelum menyalin API key.
+5. Klik **Test and Save** di dashboard Xendit (harus mengembalikan status HTTP `200 OK`).
 
 ---
 
 ## 11. Konfigurasi Cloudflare Turnstile (Captcha)
 
 1. Buka [Cloudflare Dashboard](https://dash.cloudflare.com/) -> **Turnstile**.
-2. Buat site baru dengan domain `insani.id`.
+2. Tambahkan widget site baru dengan domain `insani.id`.
 3. Salin **Site Key** dan **Secret Key** ke `.env`:
    ```dotenv
    VITE_TURNSTILE_SITE_KEY=SiteKeyDariCloudflare
@@ -295,39 +366,45 @@ php artisan storage:link
    ```
 
 > [!CAUTION]
-> Key testing (`1x00000000000000000000AA`) **tidak boleh** digunakan di production! Selalu ganti dengan key production dari dashboard Cloudflare.
+> Key testing bawaan Cloudflare (`1x00000000000000000000AA`) **tidak boleh** digunakan di server produksi! Selalu gunakan key produksi resmi dari dashboard Cloudflare.
 
 ---
 
-## 12. Verifikasi Post-Deploy
+## 12. Verifikasi Post-Deploy & Troubleshooting
 
-Setelah semua langkah di atas selesai, lakukan verifikasi berikut:
+Setelah seluruh tahapan selesai, jalankan checklist verifikasi berikut:
 
 ### Checklist Verifikasi
 - [ ] Website dapat diakses di `https://insani.id`
-- [ ] HTTPS redirect berfungsi (akses `http://insani.id` harus redirect ke `https://`)
-- [ ] Halaman publik (beranda, program, blog) tampil dengan benar
-- [ ] Gambar banner, avatar, dan foto program tampil (symlink storage OK)
-- [ ] Form donasi berfungsi — test dengan Xendit production
-- [ ] Email notifikasi terkirim (cek via donasi test)
-- [ ] Captcha Turnstile muncul di form login/register/kontak
-- [ ] Login admin berfungsi di `/login`
-- [ ] Dashboard admin dapat diakses
-- [ ] Cron job berjalan — cek log: `tail -f storage/logs/laravel.log`
-- [ ] Backup database berjalan: `php artisan backup:list`
-- [ ] Submit sitemap ke [Google Search Console](https://search.google.com/search-console): `https://insani.id/sitemap.xml`
+- [ ] Redireksi HTTPS aktif (akses `http://insani.id` otomatis dialihkan ke `https://`)
+- [ ] Halaman publik (beranda, daftar program, blog, kontak, laporan) tampil normal
+- [ ] Gambar banner, avatar, dan galeri program tampil utuh (symlink storage berfungsi)
+- [ ] Form donasi online berfungsi (uji coba QRIS / VA Midtrans dan cek halaman status donasi native `/donasi/status/{donationCode}`)
+- [ ] Webhook Midtrans terverifikasi dan update status pembayaran donasi secara real-time
+- [ ] Email notifikasi donasi terkirim (cek antrean queue job di tabel `jobs`)
+- [ ] Widget Cloudflare Turnstile muncul di form donasi, login, kontak, dan laporan program
+- [ ] Login admin berfungsi di `/login` dengan akun default `admin@insani.id`
+- [ ] Alur paksa ubah password (`/force-password-change`) berhasil dijalankan pada login pertama
+- [ ] Dashboard manajemen admin dapat diakses lancar
+- [ ] First-party Analytics aktif mencatat kunjungan (endpoint `/analytics/collect` dan `/analytics/heartbeat` merespon 200 OK)
+- [ ] Cron job berjalan di server — cek log: `tail -f storage/logs/laravel.log`
+- [ ] Database backup berfungsi: jalankan manual `php artisan backup:run --only-db` lalu cek dengan `php artisan backup:list`
+- [ ] Submit sitemap XML ke [Google Search Console](https://search.google.com/search-console): `https://insani.id/sitemap.xml`
 
 ### Troubleshooting Umum
 
 | Masalah | Solusi |
 |:---|:---|
-| Error 500 tanpa detail | Cek `APP_DEBUG=false` sudah benar, baca `storage/logs/laravel.log` |
-| Gambar tidak tampil | Jalankan `php artisan storage:link` via SSH |
-| "Vite manifest not found" | Pastikan `public/build/` sudah diupload (jalankan `npm run build` lokal) |
-| Email tidak terkirim | Verifikasi `MAIL_SCHEME=tls` dan password di `.env` |
-| Queue job tidak diproses | Cek cron job aktif di hPanel dan path artisan benar |
-| Backup gagal | Cek `mysqldump` tersedia; set `DUMP_BINARY_PATH` di `.env` jika path berbeda |
+| **Error 500 tanpa detail** | Pastikan `APP_DEBUG=false`, periksa detail error pada file `storage/logs/laravel-YYYY-MM-DD.log`. |
+| **Gambar/Avatar tidak tampil (404)** | Jalankan `php artisan storage:link` via SSH. Jika menggunakan Opsi B, pastikan symlink manual mengarah ke direktori `storage/app/public` yang benar. |
+| **"Vite manifest not found"** | Folder `public/build/` belum diupload. Jalankan `npm run build` di lokal dan unggah kembali folder `public/build/`. |
+| **Email SMTP gagal terkirim** | Pada Hostinger port 465 wajib menggunakan `MAIL_SCHEME=smtps`. Jika menggunakan port 587, gunakan `MAIL_SCHEME=tls`. Pastikan password email di hPanel sudah benar. |
+| **Midtrans Webhook 403 (Invalid Signature)** | Pastikan `MIDTRANS_SERVER_KEY` di file `.env` sudah sesuai dengan production Server Key di dashboard Midtrans, dan `MIDTRANS_IS_PRODUCTION=true`. |
+| **Queue job tidak kunjung diproses** | Pastikan Cron Job di hPanel berstatus aktif dengan interval `* * * * *` dan path biner `/usr/bin/php` serta `artisan` sudah valid. |
+| **Backup Spatie gagal saat dump DB** | Buka `.env` dan tambahkan `DUMP_BINARY_PATH=/usr/bin/mysqldump` (sesuaikan lokasi `mysqldump` pada server Hostinger jika berbeda). |
+| **Admin tidak bisa masuk setelah seed** | Pastikan Anda menyelesaikan form `/force-password-change` setelah login dengan kata sandi bawaan `password`. |
 
 ---
 
 Aplikasi Insani Indonesia kini siap melayani donatur dan beroperasi penuh di Hostinger Business Shared Hosting! 🚀
+
