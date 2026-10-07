@@ -79,18 +79,9 @@ class MidtransWebhookController extends Controller
             $gatewayStatus = 'FAILED';
         }
 
-        // Calculate Midtrans official gateway fee
-        $fee = 0;
+        // Calculate Midtrans official gateway fee using centralized pricing logic
         $amountFloat = (float) $grossAmount;
-        if ($isPaid) {
-            if ($paymentType === 'qris') {
-                $fee = round($amountFloat * 0.007, 2); // 0.7% all-in
-            } elseif (in_array($paymentType, ['gopay', 'shopeepay'], true)) {
-                $fee = round($amountFloat * 0.02, 2);  // 2%
-            } elseif (in_array($paymentType, ['bank_transfer', 'echannel', 'cimb_va'], true)) {
-                $fee = 4000;                          // Flat Rp 4.000
-            }
-        }
+        $fee = $isPaid ? MidtransCorePaymentService::calculateGatewayFee($paymentType, $amountFloat) : 0.0;
 
         $updateData = [
             'gateway_status' => $gatewayStatus,

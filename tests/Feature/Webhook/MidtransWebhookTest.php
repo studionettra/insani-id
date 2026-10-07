@@ -233,6 +233,7 @@ test('midtrans syncPaymentStatus updates payment, donation, comments for Tab Don
     $payment->refresh();
     expect($payment->gateway_status)->toBe('PAID')
         ->and((float) $payment->paid_amount)->toBe(75000.0)
+        ->and((float) $payment->gateway_fee)->toBe(4440.0) // Flat Rp 4.000 + PPN 11% for VA
         ->and($payment->payment_destination)->toBe('12345678901');
 
     // Verify donation updated to paid
@@ -253,4 +254,27 @@ test('midtrans syncPaymentStatus updates payment, donation, comments for Tab Don
     // Verify program collected amount updated
     $program->refresh();
     expect((float) $program->collected_amount)->toBe(75000.0);
+});
+
+test('midtrans calculateGatewayFee computes precise fees according to official pricing and VAT', function () {
+    // 1. QRIS: 0.7% MDR all-in
+    expect(MidtransCorePaymentService::calculateGatewayFee('qris', 100000))->toBe(700.0)
+        ->and(MidtransCorePaymentService::calculateGatewayFee('QRIS ', 50000))->toBe(350.0);
+
+    // 2. E-Wallets: 2% + 11% PPN = 2.22%
+    expect(MidtransCorePaymentService::calculateGatewayFee('gopay', 100000))->toBe(2220.0)
+        ->and(MidtransCorePaymentService::calculateGatewayFee('ShopeePay', 100000))->toBe(2220.0);
+
+    // 3. Virtual Accounts: Flat Rp 4.000 + 11% PPN (Rp 440) = Rp 4.440
+    expect(MidtransCorePaymentService::calculateGatewayFee('bank_transfer', 50000))->toBe(4440.0)
+        ->and(MidtransCorePaymentService::calculateGatewayFee('echannel', 100000))->toBe(4440.0)
+        ->and(MidtransCorePaymentService::calculateGatewayFee('cimb_va', 75000))->toBe(4440.0)
+        ->and(MidtransCorePaymentService::calculateGatewayFee('bca_va', 25000))->toBe(4440.0);
+
+    // 4. Credit Card: 2.9% + (Rp 2.000 * 1.11 PPN) = 2.9% + Rp 2.220
+    expect(MidtransCorePaymentService::calculateGatewayFee('credit_card', 100000))->toBe(5120.0);
+
+    // 5. Manual / Unknown: Rp 0
+    expect(MidtransCorePaymentService::calculateGatewayFee('manual', 100000))->toBe(0.0)
+        ->and(MidtransCorePaymentService::calculateGatewayFee('unknown_channel', 100000))->toBe(0.0);
 });

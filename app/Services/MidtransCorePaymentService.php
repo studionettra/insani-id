@@ -304,6 +304,38 @@ class MidtransCorePaymentService
     }
 
     /**
+     * Calculate Midtrans official gateway fee based on payment type and gross amount.
+     * Includes VAT (PPN 11%) according to official Midtrans pricing regulations.
+     */
+    public static function calculateGatewayFee(string $paymentType, float $grossAmount): float
+    {
+        $type = strtolower(trim($paymentType));
+
+        // 1. QRIS: 0.7% MDR all-in (BI standard)
+        if ($type === 'qris') {
+            return round($grossAmount * 0.007, 2);
+        }
+
+        // 2. E-Wallets (GoPay, ShopeePay): 2% + 11% PPN = 2.22%
+        if (in_array($type, ['gopay', 'shopeepay'], true)) {
+            return round($grossAmount * 0.02 * 1.11, 2);
+        }
+
+        // 3. Virtual Accounts (Bank Transfer, E-Channel Mandiri, CIMB VA, Permata, dll):
+        // Flat Rp 4.000 + 11% PPN (Rp 440) = Rp 4.440
+        if (in_array($type, ['bank_transfer', 'echannel', 'cimb_va', 'bca_va', 'bni_va', 'bri_va', 'permata_va'], true) || str_ends_with($type, '_va')) {
+            return 4440.0;
+        }
+
+        // 4. Credit Card: 2.9% + (Rp 2.000 * 1.11 PPN)
+        if ($type === 'credit_card') {
+            return round(($grossAmount * 0.029) + (2000 * 1.11), 2);
+        }
+
+        return 0.0;
+    }
+
+    /**
      * Main charge dispatcher.
      *
      * @return array<string, mixed>
@@ -656,17 +688,8 @@ class MidtransCorePaymentService
             $gatewayStatus = 'FAILED';
         }
 
-        // Calculate Midtrans official gateway fee
-        $fee = 0;
-        if ($isPaid) {
-            if ($paymentType === 'qris') {
-                $fee = round($grossAmount * 0.007, 2); // 0.7% all-in
-            } elseif (in_array($paymentType, ['gopay', 'shopeepay'], true)) {
-                $fee = round($grossAmount * 0.02, 2);  // 2%
-            } elseif (in_array($paymentType, ['bank_transfer', 'echannel', 'cimb_va'], true)) {
-                $fee = 4000;                          // Flat Rp 4.000
-            }
-        }
+        // Calculate Midtrans official gateway fee using centralized pricing logic
+        $fee = $isPaid ? self::calculateGatewayFee($paymentType, $grossAmount) : 0.0;
 
         $updateData = [
             'gateway_status' => $gatewayStatus,
