@@ -265,13 +265,13 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
     const getCategoryBadge = (cat: string) => {
         switch (cat) {
             case 'annual_report':
-                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">Annual Report</span>;
+                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Annual Report</span>;
             case 'audited_financial':
-                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Audited Financial</span>;
+                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Audited Financial</span>;
             case 'impact_report':
-                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Impact Report</span>;
+                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Impact Report</span>;
             default:
-                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">{cat}</span>;
+                return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">{cat}</span>;
         }
     };
 
@@ -279,29 +279,22 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
         <>
             <Head title="Manajemen Laporan Keuangan & Annual Report" />
 
-            <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+            <div className="space-y-6">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <div className="flex items-center gap-2">
-                            <span className="p-2 rounded-xl bg-insani-blue/10 text-insani-blue">
-                                <FileSpreadsheet className="w-6 h-6" />
-                            </span>
-                            <div>
-                                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                                    Laporan Keuangan & Annual Report
-                                </h1>
-                                <p className="text-sm text-slate-500 mt-0.5">
-                                    Kelola arsip laporan tahunan, laporan keuangan audited, dan transparansi publik yayasan.
-                                </p>
-                            </div>
-                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            Laporan Keuangan & Annual Report
+                        </h1>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            Kelola arsip laporan tahunan, laporan keuangan audited, dan transparansi publik yayasan.
+                        </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Button 
                             onClick={openCreateModal}
-                            className="bg-insani-blue hover:bg-insani-blue/90 text-white rounded-xl shadow-sm gap-2"
+                            className="bg-insani-blue hover:bg-insani-blue/90 text-white rounded-xl shadow-xs gap-2"
                         >
                             <Plus className="w-4 h-4" />
                             Tambah Laporan
@@ -310,16 +303,16 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                 </div>
 
                 {/* Filter and Search Bar */}
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
                     <form onSubmit={handleSearch} className="relative w-full md:w-96 flex">
                         <Input
                             type="text"
                             placeholder="Cari judul, auditor, status audit..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9 pr-4 rounded-xl text-sm w-full bg-slate-50 border-slate-200 focus:bg-white"
+                            className="pl-9 pr-4 rounded-xl text-sm w-full bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:bg-white dark:focus:bg-gray-900"
                         />
-                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <Search className="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
                     </form>
 
                     <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -330,7 +323,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                 setSelectedYear(e.target.value);
                                 handleFilter({ year: e.target.value });
                             }}
-                            className="text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-insani-blue/20"
+                            className="text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-insani-blue/20"
                         >
                             <option value="">Semua Tahun</option>
                             {availableYears.map((yr: number) => (
@@ -345,7 +338,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                 setSelectedCategory(e.target.value);
                                 handleFilter({ category: e.target.value });
                             }}
-                            className="text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-insani-blue/20"
+                            className="text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-insani-blue/20"
                         >
                             <option value="">Semua Kategori</option>
                             {CATEGORY_OPTIONS.map((opt) => (
@@ -356,29 +349,29 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                 </div>
 
                 {/* Data Table */}
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden">
                     <Table>
                         <TableHeader>
-                            <TableRow className="bg-slate-50/80">
-                                <TableHead className="w-16 text-center">Sampul</TableHead>
-                                <TableHead>Tahun & Kategori</TableHead>
-                                <TableHead>Judul Laporan</TableHead>
-                                <TableHead>Opini & Auditor</TableHead>
-                                <TableHead>Penerimaan / Penyaluran</TableHead>
-                                <TableHead>Berkas / Info</TableHead>
-                                <TableHead className="text-center">Unduhan</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Aksi</TableHead>
+                            <TableRow className="bg-gray-50/70 dark:bg-gray-800/50 border-gray-200 dark:border-gray-800">
+                                <TableHead className="w-16 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">Sampul</TableHead>
+                                <TableHead className="text-xs font-semibold text-gray-500 dark:text-gray-400">Tahun & Kategori</TableHead>
+                                <TableHead className="text-xs font-semibold text-gray-500 dark:text-gray-400">Judul Laporan</TableHead>
+                                <TableHead className="text-xs font-semibold text-gray-500 dark:text-gray-400">Opini & Auditor</TableHead>
+                                <TableHead className="text-xs font-semibold text-gray-500 dark:text-gray-400">Penerimaan / Penyaluran</TableHead>
+                                <TableHead className="text-xs font-semibold text-gray-500 dark:text-gray-400">Berkas / Info</TableHead>
+                                <TableHead className="text-center text-xs font-semibold text-gray-500 dark:text-gray-400">Unduhan</TableHead>
+                                <TableHead className="text-center text-xs font-semibold text-gray-500 dark:text-gray-400">Status</TableHead>
+                                <TableHead className="text-right text-xs font-semibold text-gray-500 dark:text-gray-400">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {reports.data?.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="h-48 text-center text-slate-500">
+                                    <TableCell colSpan={9} className="h-48 text-center text-gray-500 dark:text-gray-400">
                                         <div className="flex flex-col items-center justify-center space-y-2">
-                                            <FileSpreadsheet className="w-10 h-10 text-slate-300" />
-                                            <p className="font-medium text-slate-600">Belum ada laporan keuangan.</p>
-                                            <p className="text-xs text-slate-400">Klik tombol "Tambah Laporan" untuk mengunggah dokumen baru.</p>
+                                            <FileSpreadsheet className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+                                            <p className="font-medium text-gray-600 dark:text-gray-300">Belum ada laporan keuangan.</p>
+                                            <p className="text-xs text-gray-400 dark:text-gray-500">Klik tombol "Tambah Laporan" untuk mengunggah dokumen baru.</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -388,17 +381,17 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                     const titleEn = report.title_translations?.en || report.title?.en;
 
                                     return (
-                                        <TableRow key={report.id} className="hover:bg-slate-50/60 transition-colors">
+                                        <TableRow key={report.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/50 border-gray-200 dark:border-gray-800 transition-colors">
                                             {/* Sampul */}
                                             <TableCell className="text-center">
                                                 {report.cover_url ? (
                                                     <img 
                                                         src={report.cover_url} 
                                                         alt={title} 
-                                                        className="w-10 h-14 object-cover rounded shadow-sm border border-slate-200 mx-auto"
+                                                        className="w-10 h-14 object-cover rounded shadow-xs border border-gray-200 dark:border-gray-700 mx-auto"
                                                     />
                                                 ) : (
-                                                    <div className="w-10 h-14 bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-200 rounded flex flex-col items-center justify-center mx-auto text-slate-400">
+                                                    <div className="w-10 h-14 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-700 rounded flex flex-col items-center justify-center mx-auto text-gray-400 dark:text-gray-500">
                                                         <FileText className="w-5 h-5 text-insani-blue/60" />
                                                         <span className="text-[8px] font-bold mt-0.5">{report.report_year}</span>
                                                     </div>
@@ -407,7 +400,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
 
                                             {/* Tahun & Kategori */}
                                             <TableCell>
-                                                <div className="font-bold text-slate-900 text-sm">
+                                                <div className="font-bold text-gray-900 dark:text-white text-sm">
                                                     {report.report_year}
                                                 </div>
                                                 <div className="mt-1">
@@ -417,11 +410,11 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
 
                                             {/* Judul Laporan */}
                                             <TableCell className="max-w-xs">
-                                                <div className="font-semibold text-slate-900 line-clamp-2" title={title}>
+                                                <div className="font-semibold text-gray-900 dark:text-white line-clamp-2" title={title}>
                                                     {title}
                                                 </div>
                                                 {titleEn && (
-                                                    <div className="text-xs text-slate-400 italic line-clamp-1 mt-0.5">
+                                                    <div className="text-xs text-gray-400 dark:text-gray-500 italic line-clamp-1 mt-0.5">
                                                         {titleEn}
                                                     </div>
                                                 )}
@@ -433,14 +426,14 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
                                                         report.title_translations?.en || report.title?.en
                                                             ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
-                                                            : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                                                            : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
                                                     }`}>
                                                         EN {report.title_translations?.en || report.title?.en ? '✓' : '—'}
                                                     </span>
                                                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
                                                         report.title_translations?.ar || report.title?.ar
                                                             ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-                                                            : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
+                                                            : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
                                                     }`}>
                                                         AR {report.title_translations?.ar || report.title?.ar ? '✓' : '—'}
                                                     </span>
@@ -450,15 +443,15 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                             {/* Opini & Auditor */}
                                             <TableCell>
                                                 {report.audit_status ? (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                                         {report.audit_status}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-xs text-slate-400">-</span>
+                                                    <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
                                                 )}
                                                 {report.auditor_name && (
-                                                    <div className="text-xs text-slate-500 font-medium mt-1">
+                                                    <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">
                                                         {report.auditor_name}
                                                     </div>
                                                 )}
@@ -467,17 +460,17 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                             {/* Finansial */}
                                             <TableCell className="text-xs">
                                                 {report.formatted_revenue ? (
-                                                    <div className="text-slate-700">
-                                                        <span className="text-slate-400">Masuk:</span> {report.formatted_revenue}
+                                                    <div className="text-gray-700 dark:text-gray-300">
+                                                        <span className="text-gray-400 dark:text-gray-500">Masuk:</span> {report.formatted_revenue}
                                                     </div>
                                                 ) : null}
                                                 {report.formatted_disbursement ? (
-                                                    <div className="text-emerald-700 font-medium mt-0.5">
-                                                        <span className="text-slate-400">Salur:</span> {report.formatted_disbursement}
+                                                    <div className="text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
+                                                        <span className="text-gray-400 dark:text-gray-500">Salur:</span> {report.formatted_disbursement}
                                                     </div>
                                                 ) : null}
                                                 {!report.formatted_revenue && !report.formatted_disbursement && (
-                                                    <span className="text-slate-400">-</span>
+                                                    <span className="text-gray-400 dark:text-gray-500">-</span>
                                                 )}
                                             </TableCell>
 
@@ -488,7 +481,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                                         <FileText className="w-3.5 h-3.5 text-red-500" />
                                                         <span>PDF</span>
                                                         {report.formatted_file_size && (
-                                                            <span className="text-slate-400 font-normal">({report.formatted_file_size})</span>
+                                                            <span className="text-gray-400 dark:text-gray-500 font-normal">({report.formatted_file_size})</span>
                                                         )}
                                                     </div>
                                                 ) : report.external_url ? (
@@ -496,31 +489,31 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                                         href={report.external_url} 
                                                         target="_blank" 
                                                         rel="noreferrer"
-                                                        className="inline-flex items-center gap-1 text-xs text-cyan-600 hover:underline"
+                                                        className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:underline"
                                                     >
                                                         <ExternalLink className="w-3.5 h-3.5" />
                                                         Link Cloud
                                                     </a>
                                                 ) : (
-                                                    <span className="text-xs text-slate-400">Tidak ada berkas</span>
+                                                    <span className="text-xs text-gray-400 dark:text-gray-500">Tidak ada berkas</span>
                                                 )}
                                             </TableCell>
 
                                             {/* Unduhan */}
-                                            <TableCell className="text-center font-mono text-xs text-slate-600">
+                                            <TableCell className="text-center font-mono text-xs text-gray-600 dark:text-gray-400">
                                                 {report.download_count || 0}
                                             </TableCell>
 
                                             {/* Status */}
                                             <TableCell className="text-center">
                                                 {report.is_active ? (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                                                         <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                                                         Aktif
                                                     </span>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
-                                                        <XCircle className="w-3 h-3 text-slate-400" />
+                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+                                                        <XCircle className="w-3 h-3 text-gray-400" />
                                                         Nonaktif
                                                     </span>
                                                 )}
@@ -534,7 +527,7 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                                             href={report.view_url}
                                                             target="_blank"
                                                             rel="noreferrer"
-                                                            className="p-1.5 text-slate-500 hover:text-insani-blue hover:bg-slate-100 rounded-lg transition-colors"
+                                                            className="p-1.5 text-gray-500 hover:text-insani-blue hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-lg transition-colors"
                                                             title="Pratinjau Laporan"
                                                         >
                                                             <Eye className="w-4 h-4" />
@@ -542,14 +535,14 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                                     )}
                                                     <button
                                                         onClick={() => openEditModal(report)}
-                                                        className="p-1.5 text-slate-500 hover:text-amber-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                                        className="p-1.5 text-gray-500 hover:text-amber-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-lg transition-colors"
                                                         title="Ubah Laporan"
                                                     >
                                                         <Edit className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => setReportToDelete(report)}
-                                                        className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-slate-100 rounded-lg transition-colors"
+                                                        className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 rounded-lg transition-colors"
                                                         title="Hapus Laporan"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
@@ -566,8 +559,8 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
 
                 {/* Pagination */}
                 {reports.links && reports.links.length > 3 && (
-                    <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                        <div className="text-sm text-slate-500">
+                    <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-4">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                             Menampilkan {reports.from || 0} sampai {reports.to || 0} dari {reports.total || 0} laporan
                         </div>
                         <div className="flex items-center gap-1">
@@ -581,8 +574,8 @@ export default function FinancialReportsIndex({ reports, availableYears = [], fi
                                         link.active 
                                             ? 'bg-insani-blue text-white font-medium' 
                                             : !link.url 
-                                                ? 'text-slate-300 cursor-not-allowed' 
-                                                : 'text-slate-600 hover:bg-slate-100'
+                                                ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' 
+                                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                     }`}
                                 />
                             ))}

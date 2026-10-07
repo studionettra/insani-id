@@ -12,7 +12,12 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
     const { auth, siteSettings, activePopup } = usePage().props;
     const { t, locale, isRtl } = useTranslation();
     const { url } = usePage();
-    const isActive = (path) => path === '/' ? url === '/' : url.startsWith(path);
+    const currentPath = (url || '').split(/[?#]/)[0];
+    const isActive = (path) => {
+        if (!path) return false;
+        if (path === '/') return currentPath === '/' || currentPath === '';
+        return currentPath === path || currentPath.startsWith(path + '/');
+    };
 
     useEffect(() => {
         document.documentElement.classList.remove('dark');
@@ -146,7 +151,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
             )}
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col w-full mx-auto pb-20 md:pb-0">
+            <main className={`flex-1 flex flex-col w-full mx-auto ${hideFooter ? 'pb-20 md:pb-0' : ''}`}>
                 {children}
             </main>
 
@@ -319,10 +324,6 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             {/* QRIS Card with modern styling */}
                             <div className="bg-white/10 backdrop-blur-md border border-white/15 p-3.5 rounded-2xl shadow-xl inline-block max-w-[220px]">
                                 <div className="bg-white p-2.5 rounded-xl flex flex-col items-center">
-                                    <div className="w-full flex items-center justify-between px-1 pb-1.5 mb-1.5 border-b border-slate-100">
-                                        <img src="/images/payments/qris.svg" alt="QRIS" className="h-4 w-auto object-contain" />
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Resmi BI</span>
-                                    </div>
                                     <img 
                                         src={qrisImageUrl} 
                                         alt="QRIS Donasi Yayasan Peduli Insani Indonesia" 
@@ -408,50 +409,63 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
             )}
 
             {/* Bottom Navigation (Mobile Only) with Floating Center Button */}
-            {!hideMobileNav && (
-            <nav className="md:hidden fixed bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-gray-200/60 z-50 flex items-center justify-around py-1.5 pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.06)] print:hidden">
-                {/* 1. Beranda */}
-                <Link href="/" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isActive('/') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <Home className="w-5 h-5" strokeWidth={isActive('/') ? 2.5 : 2} />
-                    </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Beranda')}</span>
-                </Link>
+            {!hideMobileNav && (() => {
+                const isHomeActive = isActive('/');
+                const isFocusActive = isActive('/fokus-program');
+                const isProgramActive = isActive('/program');
+                const isCekDonasiActive = isActive('/cek-donasi') || isActive('/donasi/status') || isActive('/donasi/kwitansi');
 
-                {/* 2. Fokus Program */}
-                <Link href="/fokus-program" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isActive('/fokus-program') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/fokus-program') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <Compass className="w-5 h-5" strokeWidth={isActive('/fokus-program') ? 2.5 : 2} />
-                    </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Fokus')}</span>
-                </Link>
+                return (
+                    <nav className="md:hidden fixed bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-gray-200/60 z-50 flex items-center justify-around py-1.5 pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.06)] print:hidden">
+                        {/* 1. Beranda */}
+                        <Link href="/" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isHomeActive ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                            <div className={`p-1.5 rounded-full transition-colors ${isHomeActive ? 'bg-brand-50' : 'bg-transparent'}`}>
+                                <Home className="w-5 h-5" strokeWidth={isHomeActive ? 2.5 : 2} />
+                            </div>
+                            <span className={`text-[10px] mt-0.5 ${isHomeActive ? 'font-semibold text-brand-600' : 'font-medium'}`}>{t('Beranda')}</span>
+                        </Link>
 
-                {/* 3. Floating Center Action: DONASI */}
-                <Link
-                    href="/program"
-                    className="relative -top-4 flex flex-col items-center group active:scale-90 transition-transform duration-200"
-                    aria-label={t('Donasi Sekarang')}
-                >
-                    <div className="w-13 h-13 rounded-full bg-gradient-to-tr from-brand-600 via-emerald-600 to-emerald-500 text-white flex items-center justify-center shadow-lg shadow-brand-600/35 border-4 border-white group-hover:scale-105 transition-transform">
-                        <Heart className="w-6 h-6 fill-white" />
-                    </div>
-                    <span className="text-[10px] font-bold text-brand-700 mt-0.5 tracking-tight">
-                        {t('Donasi')}
-                    </span>
-                </Link>
+                        {/* 2. Fokus Program */}
+                        <Link href="/fokus-program" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isFocusActive ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                            <div className={`p-1.5 rounded-full transition-colors ${isFocusActive ? 'bg-brand-50' : 'bg-transparent'}`}>
+                                <Compass className="w-5 h-5" strokeWidth={isFocusActive ? 2.5 : 2} />
+                            </div>
+                            <span className={`text-[10px] mt-0.5 ${isFocusActive ? 'font-semibold text-brand-600' : 'font-medium'}`}>{t('Fokus')}</span>
+                        </Link>
 
-                {/* 4. Cek Status Donasi */}
-                <Link href="/cek-donasi" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isActive('/cek-donasi') ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
-                    <div className={`p-1.5 rounded-full transition-colors ${isActive('/cek-donasi') ? 'bg-brand-50' : 'bg-transparent'}`}>
-                        <HandHeart className="w-5 h-5" strokeWidth={isActive('/cek-donasi') ? 2.5 : 2} />
-                    </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Cek Donasi')}</span>
-                </Link>
+                        {/* 3. Floating Center Action: DONASI */}
+                        <Link
+                            href="/program"
+                            className="relative -top-4 flex flex-col items-center group active:scale-90 transition-transform duration-200"
+                            aria-label={t('Donasi Sekarang')}
+                        >
+                            <div className={`w-13 h-13 rounded-full bg-gradient-to-tr from-brand-600 via-emerald-600 to-emerald-500 text-white flex items-center justify-center shadow-lg transition-all duration-200 ${
+                                isProgramActive
+                                    ? 'ring-4 ring-brand-500/40 shadow-brand-600/50 scale-105 border-4 border-white'
+                                    : 'shadow-brand-600/35 border-4 border-white group-hover:scale-105'
+                            }`}>
+                                <Heart className="w-6 h-6 fill-white" />
+                            </div>
+                            <span className={`text-[10px] mt-0.5 tracking-tight transition-colors ${
+                                isProgramActive ? 'text-brand-600 font-bold' : 'text-zinc-600 group-hover:text-zinc-900 font-medium'
+                            }`}>
+                                {t('Donasi')}
+                            </span>
+                        </Link>
 
-                {/* 5. Akun (Bottom Sheet Drawer) */}
-                <PublicAccountDropdown variant="mobile" />
-            </nav>
-            )}
+                        {/* 4. Cek Status Donasi */}
+                        <Link href="/cek-donasi" className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${isCekDonasiActive ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'}`}>
+                            <div className={`p-1.5 rounded-full transition-colors ${isCekDonasiActive ? 'bg-brand-50' : 'bg-transparent'}`}>
+                                <HandHeart className="w-5 h-5" strokeWidth={isCekDonasiActive ? 2.5 : 2} />
+                            </div>
+                            <span className={`text-[10px] mt-0.5 ${isCekDonasiActive ? 'font-semibold text-brand-600' : 'font-medium'}`}>{t('Cek Donasi')}</span>
+                        </Link>
+
+                        {/* 5. Akun (Bottom Sheet Drawer) */}
+                        <PublicAccountDropdown variant="mobile" />
+                    </nav>
+                );
+            })()}
         </div>
     );
 }

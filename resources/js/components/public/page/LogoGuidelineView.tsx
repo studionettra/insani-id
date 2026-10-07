@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { 
     Palette, 
@@ -82,6 +82,40 @@ export default function LogoGuidelineView({ page }: LogoGuidelineViewProps) {
     const [copiedColor, setCopiedColor] = useState<string | null>(null);
     const [primaryBg, setPrimaryBg] = useState<'light' | 'slate' | 'dark'>('light');
     const [secondaryBg, setSecondaryBg] = useState<'light' | 'slate' | 'dark'>('light');
+    const [activeSection, setActiveSection] = useState<string>('filosofi-logo');
+
+    const navItems = [
+        { id: 'filosofi-logo', label: '1. Filosofi & Nilai' },
+        { id: 'format-logo', label: '2. Format Utama' },
+        { id: 'aturan-penggunaan', label: "3. Do & Don'ts" },
+        { id: 'zona-eksklusif', label: '4. Zona Eksklusif' },
+        { id: 'palet-warna', label: '5. Palet Warna' },
+        { id: 'unduh-logo', label: '6. Pusat Unduhan Logo' },
+    ];
+
+    useEffect(() => {
+        const sectionIds = navItems.map((item) => item.id);
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setActiveSection(entry.target.id);
+                    }
+                });
+            },
+            {
+                rootMargin: '-100px 0px -65% 0px',
+                threshold: 0
+            }
+        );
+
+        sectionIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+
+        return () => observer.disconnect();
+    }, []);
 
     const whatsappNumber = siteSettings?.contact_whatsapp || siteSettings?.contact_donor_support_wa || '081319456675';
     const whatsappClean = whatsappNumber.replace(/[^0-9]/g, '');
@@ -164,6 +198,7 @@ export default function LogoGuidelineView({ page }: LogoGuidelineViewProps) {
 
     const scrollToSection = (e: React.MouseEvent, id: string) => {
         e.preventDefault();
+        setActiveSection(id);
         const element = document.getElementById(id);
         if (element) {
             const yOffset = -90;
@@ -173,7 +208,7 @@ export default function LogoGuidelineView({ page }: LogoGuidelineViewProps) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50/70 pb-20 font-outfit">
+        <div className="min-h-screen bg-slate-50/70 pb-6 sm:pb-10 md:pb-16 font-outfit">
             {/* 1. HERO HEADER */}
             <div className="relative bg-insani-darkblue text-white py-14 md:py-20 px-4 overflow-hidden">
                 {/* Decorative radial gradients & glow orb */}
@@ -229,26 +264,25 @@ export default function LogoGuidelineView({ page }: LogoGuidelineViewProps) {
 
             {/* 5. BODY */}
             <div className="container mx-auto px-4 max-w-5xl -mt-8 relative z-10 space-y-8">
-                {/* STICKY QUICK NAV PILLS */}
-                <div className="bg-white/95 backdrop-blur-md rounded-2xl p-2.5 border border-slate-200/80 shadow-sm flex items-center justify-start sm:justify-center gap-1 sm:gap-2 overflow-x-auto text-xs font-semibold text-slate-600 scrollbar-none">
-                    <a href="#filosofi-logo" onClick={(e) => scrollToSection(e, 'filosofi-logo')} className="px-3 py-1.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 whitespace-nowrap transition-colors">
-                        1. Filosofi &amp; Nilai
-                    </a>
-                    <a href="#format-logo" onClick={(e) => scrollToSection(e, 'format-logo')} className="px-3 py-1.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 whitespace-nowrap transition-colors">
-                        2. Format Utama
-                    </a>
-                    <a href="#aturan-penggunaan" onClick={(e) => scrollToSection(e, 'aturan-penggunaan')} className="px-3 py-1.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 whitespace-nowrap transition-colors">
-                        3. Do &amp; Don'ts
-                    </a>
-                    <a href="#zona-eksklusif" onClick={(e) => scrollToSection(e, 'zona-eksklusif')} className="px-3 py-1.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 whitespace-nowrap transition-colors">
-                        4. Zona Eksklusif
-                    </a>
-                    <a href="#palet-warna" onClick={(e) => scrollToSection(e, 'palet-warna')} className="px-3 py-1.5 rounded-xl hover:bg-slate-100 hover:text-slate-900 whitespace-nowrap transition-colors">
-                        5. Palet Warna
-                    </a>
-                    <a href="#unduh-logo" onClick={(e) => scrollToSection(e, 'unduh-logo')} className="px-3 py-1.5 rounded-xl bg-brand-50 text-brand-700 font-bold hover:bg-brand-100 whitespace-nowrap transition-colors">
-                        6. Pusat Unduhan Logo
-                    </a>
+                {/* QUICK NAV PILLS */}
+                <div className="bg-white/95 backdrop-blur-md rounded-2xl p-2.5 border border-slate-200/80 shadow-xs flex items-center justify-start sm:justify-center gap-1 sm:gap-2 overflow-x-auto text-xs font-semibold text-slate-600 scrollbar-none">
+                    {navItems.map((item) => {
+                        const isActive = activeSection === item.id;
+                        return (
+                            <a
+                                key={item.id}
+                                href={`#${item.id}`}
+                                onClick={(e) => scrollToSection(e, item.id)}
+                                className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                                    isActive
+                                        ? 'bg-brand-50 text-brand-700 font-bold shadow-2xs'
+                                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-semibold'
+                                }`}
+                            >
+                                {item.label}
+                            </a>
+                        );
+                    })}
                 </div>
 
                 {/* SECTION 1: FILOSOFI & NILAI BRAND */}

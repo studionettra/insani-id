@@ -48,14 +48,17 @@ export default function PublicAccountDropdown({
 
     const user = auth?.user;
     const userAccountUrl = user ? '/dashboard' : '/login';
+    const currentPath = (currentUrl || '').split(/[?#]/)[0];
     const isAccountActive = Boolean(
-        currentUrl === userAccountUrl ||
-        (currentUrl && (
-            currentUrl.startsWith('/akun') ||
-            currentUrl.startsWith('/dashboard') ||
-            currentUrl.startsWith('/login') ||
-            currentUrl.startsWith('/register')
-        ))
+        currentPath === userAccountUrl ||
+        currentPath.startsWith('/akun') ||
+        currentPath.startsWith('/dashboard') ||
+        currentPath.startsWith('/login') ||
+        currentPath.startsWith('/register') ||
+        currentPath.startsWith('/forgot-password') ||
+        currentPath.startsWith('/reset-password') ||
+        currentPath.startsWith('/verify-email') ||
+        currentPath.startsWith('/donasi-saya')
     );
 
     useEffect(() => {
@@ -426,7 +429,7 @@ export default function PublicAccountDropdown({
                 <button
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`flex flex-col items-center justify-center w-16 transition-all duration-200 active:scale-90 ${
+                    className={`flex flex-col items-center justify-center w-14 transition-all duration-200 active:scale-90 ${
                         isOpen || isAccountActive ? 'text-brand-600' : 'text-zinc-500 hover:text-zinc-800'
                     } ${className}`}
                     aria-label={t('Akun')}
@@ -440,16 +443,16 @@ export default function PublicAccountDropdown({
                             <img
                                 src={user.avatar}
                                 alt={user.name}
-                                className="w-[22px] h-[22px] rounded-full object-cover border border-brand-200"
+                                className="w-5 h-5 rounded-full object-cover border border-brand-200"
                             />
                         ) : (
                             <User
-                                className="w-[22px] h-[22px]"
+                                className="w-5 h-5"
                                 strokeWidth={isOpen || isAccountActive ? 2.5 : 2}
                             />
                         )}
                     </div>
-                    <span className="text-[10px] font-medium mt-0.5">{t('Akun')}</span>
+                    <span className={`text-[10px] mt-0.5 ${isOpen || isAccountActive ? 'font-semibold text-brand-600' : 'font-medium'}`}>{t('Akun')}</span>
                 </button>
 
                 {/* Mobile Bottom Sheet Drawer (Portaled to document.body) */}

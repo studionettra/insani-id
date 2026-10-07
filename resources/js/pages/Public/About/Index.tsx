@@ -12,7 +12,12 @@ import {
     Users,
     Download,
     Eye,
-    FileSpreadsheet
+    FileSpreadsheet,
+    Compass,
+    Target,
+    HeartHandshake,
+    TrendingUp,
+    Quote
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
@@ -58,6 +63,8 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             return { title: line.trim(), desc: '' };
         }).filter((v: any) => v.title)
         : defaultValues;
+
+    const missionIcons = [ShieldCheck, HeartHandshake, TrendingUp];
 
     const displayedFaqs = faqs || [];
 
@@ -189,81 +196,137 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                 </div>
             </section>
 
-            {/* 2. Visi, Misi & Values (Bento Grid) */}
-            <section className="py-24 bg-white relative">
+            {/* 2. Visi, Misi & Nilai-Nilai Insani (Harmonized Civic Bento) */}
+            <section className="py-20 md:py-28 bg-gradient-to-b from-white via-slate-50/60 to-white relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center max-w-2xl mx-auto mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">Landasan Gerak Kami</h2>
-                        <p className="text-slate-600 text-lg">Kompas yang menuntun setiap langkah dan program kemanusiaan Insani Indonesia.</p>
+                    {/* Header Section */}
+                    <div className="text-center max-w-2xl mx-auto mb-14 md:mb-16">
+                        <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-insani-blue/10 text-insani-blue mb-4 border border-insani-blue/15">
+                            <Compass className="w-3.5 h-3.5" />
+                            {t('Kompas Filosofis Lembaga')}
+                        </span>
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
+                            Landasan Gerak Kami
+                        </h2>
+                        <p className="text-slate-600 text-base md:text-lg leading-relaxed">
+                            Kompas nilai dan komitmen yang menuntun setiap ikhtiar kemanusiaan Insani Indonesia.
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                        {/* Visi Misi Card */}
+                    <div className="space-y-12 md:space-y-14">
+                        {/* A. VISI KAMI (The North Star Manifesto Card) */}
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-100px" }}
-                            transition={{ duration: 0.6 }}
-                            className="md:col-span-7 bg-slate-50 rounded-3xl p-8 lg:p-12 border border-slate-100 overflow-hidden relative group"
+                            viewport={{ once: true, margin: "-60px" }}
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#054bad] via-[#043c8a] to-[#02285a] text-white p-8 sm:p-10 lg:p-12 shadow-xl border border-white/10"
                         >
+                            {/* Ambient Glows & Watermark */}
+                            <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none" />
+                            <div className="absolute bottom-0 left-1/3 -mb-20 w-72 h-72 bg-insani-blue/25 rounded-full blur-3xl pointer-events-none" />
+                            <div className="absolute -bottom-8 -right-8 text-white/[0.04] pointer-events-none">
+                                <Quote className="w-44 h-44" />
+                            </div>
 
-                            <div className="relative z-10">
-                                <div className="mb-10">
-                                    <h3 className="text-2xl font-bold text-insani-darkblue mb-4 flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-insani-blue/10 flex items-center justify-center text-insani-blue">
-                                            <span className="font-serif text-xl italic">V</span>
-                                        </div>
-                                        Visi
-                                    </h3>
-                                    <p className="text-slate-700 leading-relaxed text-lg">
-                                        {visionText}
-                                    </p>
+                            <div className="relative z-10 max-w-4xl">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-cyan-200 border border-white/20 text-xs font-semibold uppercase tracking-wider mb-5 backdrop-blur-xs">
+                                    <Target className="w-3.5 h-3.5 text-cyan-300" />
+                                    Visi Lembaga
                                 </div>
-                                
-                                <div>
-                                    <h3 className="text-2xl font-bold text-insani-darkblue mb-4 flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-600">
-                                            <span className="font-serif text-xl italic">M</span>
-                                        </div>
-                                        Misi
-                                    </h3>
-                                    <ul className="space-y-4 text-slate-700">
-                                        {missions.map((mission: string, idx: number) => (
-                                            <li key={idx} className="flex items-start gap-3">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-insani-blue mt-2.5 flex-shrink-0"></div>
-                                                <p>{mission}</p>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                <blockquote className="text-xl sm:text-2xl lg:text-3xl font-bold leading-relaxed tracking-tight text-white mb-6">
+                                    "{visionText}"
+                                </blockquote>
+                                <div className="flex items-center gap-3 text-cyan-100/80 text-sm font-medium pt-4 border-t border-white/15">
+                                    <div className="w-2 h-2 rounded-full bg-insani-turquoise animate-pulse" />
+                                    <span>Mewujudkan masa depan kemanusiaan yang berdaya, adil, dan bermartabat</span>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Values Card */}
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-100px" }}
-                            transition={{ duration: 0.6, delay: 0.1 }}
-                            className="md:col-span-5 bg-insani-darkblue text-white rounded-3xl p-8 lg:p-12 overflow-hidden relative group"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-insani-blue/20 to-transparent"></div>
-                            
-                            <div className="relative z-10 h-full flex flex-col justify-between">
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-8">Nilai-Nilai<br/>Perjuangan</h3>
-                                    <div className="space-y-6">
-                                        {values.map((val: any, idx: number) => (
-                                            <div key={idx} className="border-l-2 border-insani-blue/50 pl-5 hover:border-insani-blue transition-colors">
-                                                <h4 className="font-semibold text-lg mb-1">{val.title}</h4>
-                                                {val.desc && <p className="text-slate-300 text-sm">{val.desc}</p>}
+                        {/* B. MISI KAMI (3 Strategic Pillar Cards) */}
+                        <div>
+                            <div className="flex items-center gap-2.5 mb-6">
+                                <div className="w-2.5 h-2.5 rounded-full bg-insani-blue" />
+                                <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+                                    Misi Utama Lembaga
+                                </h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {missions.map((mission: string, idx: number) => {
+                                    const IconComp = missionIcons[idx % missionIcons.length];
+                                    return (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true, margin: "-60px" }}
+                                            transition={{ duration: 0.4, delay: idx * 0.08 }}
+                                            className="group bg-white rounded-2xl p-7 border border-slate-200/80 hover:border-insani-blue/40 hover:shadow-lg transition-all duration-300 flex flex-col justify-between relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-insani-blue/0 via-insani-blue/0 to-insani-blue/0 group-hover:from-insani-blue group-hover:via-cyan-400 group-hover:to-insani-turquoise transition-all duration-500" />
+                                            
+                                            <div>
+                                                <div className="flex items-center justify-between mb-5">
+                                                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-insani-blue/10 text-insani-blue border border-insani-blue/15">
+                                                        0{idx + 1}
+                                                    </span>
+                                                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200/70 shadow-2xs flex items-center justify-center text-insani-blue group-hover:bg-insani-blue group-hover:text-white transition-colors duration-300">
+                                                        <IconComp className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                                <p className="text-slate-700 leading-relaxed font-normal text-base">
+                                                    {mission}
+                                                </p>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-
+                                        </motion.div>
+                                    );
+                                })}
                             </div>
-                        </motion.div>
+                        </div>
+
+                        {/* C. NILAI-NILAI PERJUANGAN (Akrostik INSANI) */}
+                        <div>
+                            <div className="flex items-center gap-2.5 mb-6">
+                                <div className="w-2.5 h-2.5 rounded-full bg-insani-turquoise" />
+                                <h3 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
+                                    Nilai-Nilai Perjuangan
+                                </h3>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                                {values.map((val: any, idx: number) => {
+                                    const letter = val.title.charAt(0);
+                                    return (
+                                        <motion.div
+                                            key={idx}
+                                            initial={{ opacity: 0, y: 15 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true, margin: "-40px" }}
+                                            transition={{ duration: 0.35, delay: idx * 0.05 }}
+                                            className="group relative bg-white rounded-2xl p-5 border border-slate-200/80 hover:border-insani-blue/40 hover:shadow-lg transition-all duration-300 flex flex-col justify-start overflow-hidden h-full"
+                                        >
+                                            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-insani-blue/5 via-cyan-500/5 to-transparent rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-500" />
+                                            
+                                            <div className="relative z-10 flex flex-col h-full">
+                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/90 text-insani-darkblue font-extrabold text-lg flex items-center justify-center group-hover:bg-insani-blue group-hover:text-white group-hover:border-insani-blue transition-all duration-300 shadow-2xs mb-4 shrink-0">
+                                                    {letter}
+                                                </div>
+                                                <h4 className="font-bold text-[15px] sm:text-base text-slate-900 group-hover:text-insani-blue transition-colors mb-2 tracking-tight">
+                                                    {val.title}
+                                                </h4>
+                                                {val.desc && (
+                                                    <p className="text-slate-600 text-xs sm:text-[13px] leading-relaxed">
+                                                        {val.desc}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

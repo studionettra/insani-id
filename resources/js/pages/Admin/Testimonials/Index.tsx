@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { Trash2, Edit, Plus, Search, Star, MessageSquareQuote, User, Languages } from 'lucide-react';
+import { Trash2, Edit, Plus, Search, Star, User, Languages } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
@@ -213,8 +213,7 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
                 {/* Header Title & Action Button */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
-                            <MessageSquareQuote className="h-6 w-6 text-insani-blue" />
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
                             Testimoni Donatur & Mitra
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
