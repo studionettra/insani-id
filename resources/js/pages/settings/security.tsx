@@ -1,9 +1,10 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/security';
 
@@ -14,6 +15,7 @@ type Props = {
 export default function Security(props: Props) {
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
+    const [logoutOtherDevices, setLogoutOtherDevices] = useState(true);
 
     return (
         <>
@@ -129,6 +131,35 @@ export default function Security(props: Props) {
                                     className="text-xs mt-1"
                                     message={errors.password_confirmation}
                                 />
+                            </div>
+
+                            <div className="rounded-xl border border-gray-200 bg-gray-50/70 p-3.5 dark:border-gray-800 dark:bg-gray-800/40">
+                                <div className="flex items-start gap-3">
+                                    <Checkbox
+                                        id="logout_other_devices_checkbox"
+                                        checked={logoutOtherDevices}
+                                        onCheckedChange={(checked) =>
+                                            setLogoutOtherDevices(Boolean(checked))
+                                        }
+                                        className="mt-0.5"
+                                    />
+                                    <input
+                                        type="hidden"
+                                        name="logout_other_devices"
+                                        value={logoutOtherDevices ? '1' : '0'}
+                                    />
+                                    <div className="grid gap-1">
+                                        <Label
+                                            htmlFor="logout_other_devices_checkbox"
+                                            className="cursor-pointer text-xs font-semibold text-gray-800 dark:text-gray-200"
+                                        >
+                                            Keluarkan akun dari semua perangkat lain
+                                        </Label>
+                                        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                                            Sangat disarankan jika Anda menduga kata sandi akun telah diketahui orang lain atau pernah login di komputer umum/bersama.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="flex items-center gap-4 pt-2">

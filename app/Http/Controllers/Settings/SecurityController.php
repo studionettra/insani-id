@@ -8,6 +8,9 @@ use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Response;
 
 class SecurityController extends Controller
@@ -29,11 +32,32 @@ class SecurityController extends Controller
      */
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {
-        $request->user()->update([
+        $user = $request->user();
+
+        $user->update([
             'password' => $request->password,
         ]);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Password updated.')]);
+        $logoutOtherDevices = $request->boolean('logout_other_devices', true);
+
+        if ($logoutOtherDevices) {
+            Auth::logoutOtherDevices($request->password);
+
+            $sessionTable = config('session.table', 'sessions');
+            if (Schema::hasTable($sessionTable)) {
+                DB::table($sessionTable)
+                    ->where('user_id', $user->id)
+                    ->where('id', '!=', (string) $request->session()->getId())
+                    ->delete();
+            }
+        }
+
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $logoutOtherDevices
+                ? 'Kata sandi berhasil diperbarui dan sesi di perangkat lain telah diakhiri.'
+                : 'Kata sandi berhasil diperbarui.',
+        ]);
 
         return back();
     }

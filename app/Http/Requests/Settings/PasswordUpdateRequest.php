@@ -20,6 +20,7 @@ class PasswordUpdateRequest extends FormRequest
         return [
             'current_password' => $this->currentPasswordRules(),
             'password' => $this->passwordRules(),
+            'logout_other_devices' => ['nullable', 'boolean'],
         ];
     }
 }

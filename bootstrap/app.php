@@ -34,6 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']);
 
+        $middleware->authenticateSessions();
+
         $middleware->web(append: [
             SecurityHeaders::class,
             HandleAppearance::class,
