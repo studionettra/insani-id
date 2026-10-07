@@ -26,12 +26,15 @@ Logo mitra atau instansi yang bekerjasama akan ditampilkan di frontend.
 
 ## 3. Konfigurasi Homepage Banner (Carousel)
 Banner utama yang akan tampil secara bergeser di halaman beranda.
+> 💡 **Panduan Lengkap Desain:** Baca [**`docs/content/PANDUAN_DESAIN_BANNER_BERANDA.md`**](file:///c:/laragon/www/insani-id/docs/content/PANDUAN_DESAIN_BANNER_BERANDA.md) untuk acuan dimensi kanvas (Desktop 1920×820 px vs Mobile 1080×1920 px), pemetaan Safe Zone agar wajah/teks tidak terpotong, dan batas ukuran file WebP.
+
 - **Aksi:** Masuk ke menu **Dashboard Admin > Pengaturan Tampilan > Homepage Banners**.
 - **Langkah Pengisian:**
   1. Buat beberapa banner utama.
-  2. Masukkan URL gambar (landscape), Judul Banner, dan Deskripsi singkat.
-  3. Arahkan *Call to Action* (URL Tujuan) misal ke halaman Program Donasi tertentu.
-  4. Atur urutan tayangnya dan pastikan statusnya `Aktif`.
+  2. Masukkan file gambar Desktop (rasio 21:9 atau 1920×820 px) dan gambar Mobile terpisah (rasio 9:16 atau 1080×1920 px).
+  3. Masukkan Judul Banner, Deskripsi singkat (maks. 200 karakter), dan gunakan fitur terjemahan otomatis (EN & AR).
+  4. Arahkan *Call to Action* (URL Tujuan) misal ke halaman Program Donasi tertentu.
+  5. Atur urutan tayangnya dan pastikan statusnya `Aktif`.
 
 ## 4. Pengaturan Impact Stats (Statistik Dampak)
 Statistik capaian yayasan yang ditampilkan secara dinamis di *homepage* (misal: "1M+ Dana Tersalurkan", "5000+ Penerima Manfaat").

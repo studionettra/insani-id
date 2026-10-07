@@ -59,6 +59,7 @@ Dokumen rencana kerja teknis yang terstruktur untuk migrasi dan pembenahan siste
 
 ### 5. ✍️ [Naskah Konten & Seeder CMS (`docs/content/`)](file:///c:/laragon/www/insani-id/docs/content)
 Naskah acuan resmi konten publik dan narasi program yayasan:
+* [**`PANDUAN_DESAIN_BANNER_BERANDA.md`**](file:///c:/laragon/www/insani-id/docs/content/PANDUAN_DESAIN_BANNER_BERANDA.md) — Panduan standar desain banner beranda, spesifikasi aspek rasio (Desktop 1920x820 vs Mobile 1080x1920), pemetaan safe zone, etika visual filantropi, dan optimasi LCP.
 * [**`fokus-program-insani.md`**](file:///c:/laragon/www/insani-id/docs/content/fokus-program-insani.md) — Naskah definitif 6 Fokus Program Yayasan (BLOK A Narasi Realitas Lapangan + BLOK B Narasi Capaian Program). Menjadi *source of truth* untuk `CategorySeeder.php`.
 * [**`archive/analisis-biaya-xendit-vs-midtrans.html`**](file:///c:/laragon/www/insani-id/docs/content/archive/analisis-biaya-xendit-vs-midtrans.html) — Laporan komparasi kalkulasi biaya transaksi gateway Xendit vs Midtrans.
 
