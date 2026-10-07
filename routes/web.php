@@ -61,6 +61,7 @@ use App\Models\AppSetting;
 use App\Models\BlogPostCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\RegisteredUserController;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 // Public Localized Routes
@@ -226,6 +227,11 @@ Route::post('/analytics/collect', [AnalyticsCollectorController::class, 'collect
 Route::post('/analytics/heartbeat', [AnalyticsCollectorController::class, 'heartbeat'])
     ->middleware('throttle:60,1')
     ->name('analytics.heartbeat');
+
+// Throttled Fortify Register
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware(['guest', 'throttle:register'])
+    ->name('register.store');
 
 Route::middleware(['auth', 'no-cache'])->group(function () {
     Route::get('/force-password-change', [ForcePasswordChangeController::class, 'show'])->name('password.force-change');

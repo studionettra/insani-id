@@ -2,11 +2,17 @@
 
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 
 beforeEach(function () {
     $this->skipUnlessFortifyHas(Features::resetPasswords());
+
+    Http::fake([
+        'challenges.cloudflare.com/*' => Http::response(['success' => true]),
+        'api.pwnedpasswords.com/*' => Http::response(''),
+    ]);
 });
 
 test('reset password link screen can be rendered', function () {
