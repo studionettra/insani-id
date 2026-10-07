@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
@@ -37,7 +38,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
 
     public function getActivitylogOptions(): LogOptions
     {
@@ -59,7 +60,30 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
             'last_login_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Determine if the user is a staff member.
+     */
+    public function isStaff(): bool
+    {
+        $staffRoles = [
+            'Administrator',
+            'Program Officer',
+            'Verifikator',
+            'Keuangan',
+            'Content Editor',
+            'Customer Service',
+            'Eksekutif',
+            'Relawan Lapangan',
+            'admin',
+            'superadmin',
+        ];
+
+        return (method_exists($this, 'hasAnyRole') && $this->hasAnyRole($staffRoles))
+            || (! empty($this->is_admin));
     }
 
     public function campaignerProfile()

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Actions\Fortify\EnableTwoFactorAuthentication;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Requests\CustomLoginRequest;
 use App\Http\Requests\CustomSendPasswordResetLinkRequest;
@@ -18,6 +19,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Laravel\Fortify\Actions\EnableTwoFactorAuthentication as FortifyEnableTwoFactorAuthentication;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
@@ -34,6 +36,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->app->bind(LoginRequest::class, CustomLoginRequest::class);
         $this->app->bind(SendPasswordResetLinkRequest::class, CustomSendPasswordResetLinkRequest::class);
         $this->app->singleton(LogoutResponseContract::class, LogoutResponse::class);
+        $this->app->bind(FortifyEnableTwoFactorAuthentication::class, EnableTwoFactorAuthentication::class);
     }
 
     /**
@@ -109,6 +112,8 @@ class FortifyServiceProvider extends ServiceProvider
         ]));
 
         Fortify::confirmPasswordView(fn () => Inertia::render('Public/Auth/ConfirmPassword'));
+
+        Fortify::twoFactorChallengeView(fn () => Inertia::render('Public/Auth/TwoFactorChallenge'));
     }
 
     /**
@@ -126,6 +131,5 @@ class FortifyServiceProvider extends ServiceProvider
         RateLimiter::for('register', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
         });
-
     }
 }
