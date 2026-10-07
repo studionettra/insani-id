@@ -114,8 +114,8 @@ it('includes UTM attribution columns in admin donation report CSV export', funct
     $response->sendContent();
     $csvContent = ob_get_clean();
 
-    expect($csvContent)->toContain('Sumber (UTM Source)');
-    expect($csvContent)->toContain('Kampanye (UTM Campaign)');
+    expect($csvContent)->toContain('Sumber UTM');
+    expect($csvContent)->toContain('Kampanye UTM');
     expect($csvContent)->toContain('tiktok_ads');
     expect($csvContent)->toContain('peduli_sesama');
 });

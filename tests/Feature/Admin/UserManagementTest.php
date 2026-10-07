@@ -2,11 +2,17 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 beforeEach(function () {
+    Http::fake([
+        'challenges.cloudflare.com/*' => Http::response(['success' => true]),
+        'api.pwnedpasswords.com/*' => Http::response(''),
+    ]);
+
     $this->adminRole = Role::firstOrCreate(['name' => 'Administrator']);
     Role::firstOrCreate(['name' => 'Donatur']);
 
