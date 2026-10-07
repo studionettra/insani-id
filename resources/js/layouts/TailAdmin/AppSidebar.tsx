@@ -197,7 +197,7 @@ const AppSidebar: React.FC = () => {
         }] : []),
         ...((permissions.includes('report.view') || isSuperadmin) ? [{
           icon: <FileSpreadsheet className="w-5 h-5" />,
-          name: "Laporan & Rekap",
+          name: "Laporan Keuangan & Rekap",
           path: "/admin/reports",
         }] : []),
       ],
