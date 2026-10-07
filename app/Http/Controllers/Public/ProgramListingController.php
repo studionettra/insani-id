@@ -136,7 +136,7 @@ class ProgramListingController extends Controller
                 'total_platform_fees' => $totalPlatformFees,
                 'total_transferred_nett' => $totalTransferredNett,
                 'available_balance' => $availableBalance,
-                'disbursements' => $transferredDisbursements,
+                'disbursements' => $transferredDisbursements->toArray(),
             ];
         });
 

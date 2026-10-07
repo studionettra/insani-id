@@ -66,3 +66,20 @@ it('renders public program detail page with transparency data successfully', fun
         ->has('transparency.disbursements', 1)
     );
 });
+
+it('renders public program detail page with empty disbursements array cleanly', function () {
+    $user = User::factory()->create();
+    $program = Program::factory()->published()->create([
+        'created_by' => $user->id,
+        'title' => ['id' => 'Bantu Air Bersih'],
+    ]);
+
+    $response = $this->get("/program/{$program->slug}");
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Public/Program/Show')
+        ->has('transparency')
+        ->where('transparency.disbursements', [])
+    );
+});

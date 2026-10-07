@@ -2,7 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
 import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
@@ -147,6 +147,14 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     const [isInviteFundraiserModalOpen, setIsInviteFundraiserModalOpen] = useState(false);
     const [inviteCopied, setInviteCopied] = useState(false);
     const [isTransparencyModalOpen, setIsTransparencyModalOpen] = useState(false);
+
+    const disbursementsList = useMemo(() => {
+        const raw = transparency?.disbursements;
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw;
+        if (typeof raw === 'object') return Object.values(raw);
+        return [];
+    }, [transparency?.disbursements]);
 
     const programTitle = getLocalizedValue(program.title, locale);
     const programStory = getLocalizedValue(program.story, locale);
@@ -1352,11 +1360,11 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center justify-between">
                                 <span>{t('Riwayat Penyaluran Dana', 'Riwayat Penyaluran Dana')}</span>
                                 <Badge variant="secondary" className="text-[10px] font-semibold bg-slate-100 text-slate-600">
-                                    {transparency?.disbursements?.length || 0} {t('Penyaluran')}
+                                    {disbursementsList.length} {t('Penyaluran')}
                                 </Badge>
                             </h4>
 
-                            {(!transparency?.disbursements || transparency.disbursements.length === 0) ? (
+                            {disbursementsList.length === 0 ? (
                                 <div className="flex items-start gap-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-left">
                                     <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                                     <div>
@@ -1366,7 +1374,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                 </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {transparency.disbursements.map((item: any) => (
+                                    {disbursementsList.map((item: any) => (
                                         <div key={item.id} className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-blue-200 transition-colors">
                                             <div className="flex justify-between items-start gap-2 mb-1.5">
                                                 <div>
