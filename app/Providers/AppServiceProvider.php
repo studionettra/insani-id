@@ -7,6 +7,9 @@ use App\Models\Program;
 use App\Observers\PaymentObserver;
 use App\Observers\ProgramObserver;
 use Carbon\CarbonImmutable;
+use App\Models\User;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Date;
@@ -16,6 +19,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Fortify\Fortify;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,6 +41,43 @@ class AppServiceProvider extends ServiceProvider
         // Implicitly grant "Administrator" role all permissions
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Administrator') ? true : null;
+        });
+
+        // Record last login time on successful login
+        Event::listen(Login::class, function (Login $event) {
+            if ($event->user instanceof User) {
+                $event->user->forceFill([
+                    'last_login_at' => now(),
+                ])->saveQuietly();
+
+                activity('auth')
+                    ->causedBy($event->user)
+                    ->event('login')
+                    ->withProperties([
+                        'ip' => request()->ip(),
+                        'user_agent' => request()->userAgent(),
+                    ])
+                    ->log("Pengguna {$event->user->email} berhasil masuk");
+            }
+        });
+
+        // Audit failed login attempts without storing plain passwords
+        Event::listen(Failed::class, function (Failed $event) {
+            $email = $event->credentials['email'] ?? $event->credentials[Fortify::username()] ?? 'unknown';
+
+            $activity = activity('auth')
+                ->event('login_failed')
+                ->withProperties([
+                    'email' => $email,
+                    'ip' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ]);
+
+            if ($event->user instanceof User) {
+                $activity->performedOn($event->user);
+            }
+
+            $activity->log("Percobaan masuk gagal untuk {$email}");
         });
 
         // Capture user entity on logout before session is invalidated

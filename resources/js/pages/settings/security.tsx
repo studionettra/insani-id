@@ -1,5 +1,6 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { useRef, useState } from 'react';
+import { Clock } from 'lucide-react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -10,6 +11,7 @@ import { edit } from '@/routes/security';
 
 type Props = {
     passwordRules: string;
+    lastLoginAt?: string | null;
 };
 
 export default function Security(props: Props) {
@@ -174,6 +176,18 @@ export default function Security(props: Props) {
                         </>
                     )}
                 </Form>
+
+                <div className="rounded-xl border border-gray-200/80 bg-gray-50/50 p-4 dark:border-gray-800 dark:bg-gray-800/30">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
+                        <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <span>Aktivitas Login Terakhir</span>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {props.lastLoginAt
+                            ? `Akun terakhir kali masuk pada ${new Date(props.lastLoginAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })} WIB`
+                            : 'Belum ada rekaman riwayat login sebelumnya.'}
+                    </p>
+                </div>
             </div>
         </>
     );

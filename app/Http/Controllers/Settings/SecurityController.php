@@ -20,8 +20,11 @@ class SecurityController extends Controller
      */
     public function edit(TwoFactorAuthenticationRequest $request): Response
     {
+        $user = $request->user();
+
         $props = [
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'lastLoginAt' => $user->last_login_at?->toIso8601String(),
         ];
 
         return Inertia::render('settings/security', $props);

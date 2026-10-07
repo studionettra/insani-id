@@ -23,6 +23,14 @@ Schedule::call(function () {
         ->delete();
 })->dailyAt('03:30')->name('notifications:prune-read');
 
+// Prune auth activity logs older than 60 days
+Schedule::call(function () {
+    DB::table('activity_log')
+        ->where('log_name', 'auth')
+        ->where('created_at', '<', now()->subDays(60))
+        ->delete();
+})->dailyAt('03:45')->name('activity-log:prune-auth');
+
 // Prune prunable Eloquent models (AnalyticsSession, AnalyticsPageView, AnalyticsEvent)
 Schedule::command('model:prune')->dailyAt('04:00');
 
