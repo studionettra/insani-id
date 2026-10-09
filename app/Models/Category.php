@@ -64,4 +64,22 @@ class Category extends Model
         'distribution_gallery' => 'array',
         'crisis_gallery' => 'array',
     ];
+
+    /**
+     * Convert model to array using active locale for translatable attributes.
+     */
+    public function toArray(): array
+    {
+        $attributes = parent::toArray();
+
+        foreach ($this->getTranslatableAttributes() as $field) {
+            $translations = $this->getTranslations($field);
+            $locale = app()->getLocale();
+            $fallback = config('app.fallback_locale', 'id');
+
+            $attributes[$field] = $translations[$locale] ?? $translations[$fallback] ?? $translations['id'] ?? (is_array($translations) && count($translations) > 0 ? reset($translations) : '');
+        }
+
+        return $attributes;
+    }
 }
