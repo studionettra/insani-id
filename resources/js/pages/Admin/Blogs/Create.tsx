@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -416,11 +417,11 @@ export default function BlogCreate({ categories = [] }: BlogCreateProps) {
                                 <Label htmlFor="published_at" className="text-xs font-medium text-slate-600 dark:text-slate-400">
                                     Tanggal Publikasi
                                 </Label>
-                                <Input
+                                <DatePicker
                                     id="published_at"
-                                    type="date"
                                     value={data.published_at}
-                                    onChange={(e) => setData('published_at', e.target.value)}
+                                    onChange={(dateStr) => setData('published_at', dateStr)}
+                                    placeholder="Pilih tanggal publikasi..."
                                     className="mt-1.5 text-sm"
                                 />
                                 {errors.published_at && <p className="text-xs text-red-500 mt-1">{errors.published_at}</p>}

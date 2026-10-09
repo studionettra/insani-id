@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getLocalizedValue, toTitleCase } from '@/lib/utils';
@@ -312,14 +313,13 @@ export default function ProgramEdit({ categories, program }: Props) {
                                 <Label htmlFor="deadline" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Batas Waktu (Opsional)
                                 </Label>
-                                <Input
+                                <DatePicker
                                     id="deadline"
-                                    type="date"
-                                    value={data.deadline}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setData('deadline', e.target.value)}
-                                    onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
-                                    className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB]"
+                                    value={data.deadline || ''}
+                                    minDate="today"
+                                    onChange={(dateStr) => setData('deadline', dateStr)}
+                                    placeholder="Pilih batas waktu program..."
+                                    className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 />
                                 {errors.deadline && <p className="mt-1 text-xs text-red-500">{errors.deadline}</p>}
                             </div>

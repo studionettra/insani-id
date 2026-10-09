@@ -6,6 +6,7 @@ import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getLocalizedValue, toTitleCase } from '@/lib/utils';
@@ -342,14 +343,13 @@ export default function ProgramCreate({ categories }: Props) {
                                 <Label htmlFor="deadline" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Batas Waktu (Opsional)
                                 </Label>
-                                <Input
+                                <DatePicker
                                     id="deadline"
-                                    type="date"
                                     value={data.deadline}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setData('deadline', e.target.value)}
-                                    onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
-                                    className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB]"
+                                    minDate="today"
+                                    onChange={(dateStr) => setData('deadline', dateStr)}
+                                    placeholder="Pilih batas waktu program..."
+                                    className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                                 />
                                 <p className="text-[11px] text-gray-500 dark:text-gray-400">Kosongkan jika program tidak memiliki batas waktu.</p>
                                 {errors.deadline && <p className="mt-1 text-xs text-red-500">{errors.deadline}</p>}

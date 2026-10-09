@@ -5,6 +5,7 @@ import RichTextEditor from '@/components/rich-text-editor';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -323,13 +324,12 @@ export default function AkunProgramEdit({ categories, program }: Props) {
                                     <Label htmlFor="deadline" className="mb-2 block">
                                         Batas Waktu {data.is_continuous ? '(Opsional / Fleksibel)' : '(Opsional)'}
                                     </Label>
-                                    <Input
+                                    <DatePicker
                                         id="deadline"
-                                        type="date"
-                                        value={data.deadline}
-                                        min={new Date().toISOString().split('T')[0]}
-                                        onChange={e => setData('deadline', e.target.value)}
-                                        onClick={(e) => 'showPicker' in HTMLInputElement.prototype && (e.target as HTMLInputElement).showPicker()}
+                                        value={data.deadline || ''}
+                                        minDate="today"
+                                        onChange={dateStr => setData('deadline', dateStr)}
+                                        placeholder="Pilih batas waktu program..."
                                     />
                                     <p className="text-[11px] text-slate-500 dark:text-gray-400 mt-1.5">
                                         {data.is_continuous

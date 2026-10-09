@@ -23,6 +23,7 @@ import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import { autoTranslateFields } from '@/lib/translate';
 import { getLocalizedValue } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -1089,19 +1090,21 @@ export default function PopupMessagesIndex({ popups, filters }: Props) {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div className="space-y-1">
                                         <span className="text-[11px] text-gray-500">Mulai Tayang:</span>
-                                        <Input
-                                            type="datetime-local"
+                                        <DatePicker
+                                            enableTime
                                             value={data.start_at}
-                                            onChange={(e) => setData('start_at', e.target.value)}
+                                            onChange={(dateStr) => setData('start_at', dateStr)}
+                                            placeholder="Pilih tanggal & jam..."
                                             className="rounded-xl text-xs bg-white dark:bg-zinc-900"
                                         />
                                     </div>
                                     <div className="space-y-1">
                                         <span className="text-[11px] text-gray-500">Berakhir Tayang:</span>
-                                        <Input
-                                            type="datetime-local"
+                                        <DatePicker
+                                            enableTime
                                             value={data.end_at}
-                                            onChange={(e) => setData('end_at', e.target.value)}
+                                            onChange={(dateStr) => setData('end_at', dateStr)}
+                                            placeholder="Pilih tanggal & jam..."
                                             className="rounded-xl text-xs bg-white dark:bg-zinc-900"
                                         />
                                     </div>
