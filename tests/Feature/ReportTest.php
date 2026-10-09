@@ -6,6 +6,7 @@ use App\Models\Disbursement;
 use App\Models\Donation;
 use App\Models\Program;
 use App\Models\User;
+use Inertia\Testing\AssertableInertia;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -57,6 +58,45 @@ it('allows admin to view reports dashboard', function () {
         ->get(route('admin.reports.index'));
 
     $response->assertStatus(200);
+});
+
+it('calculates platform fee and reconciles escrow correctly in reports dashboard', function () {
+    Donation::create([
+        'program_id' => $this->program->id,
+        'donation_code' => 'DON-REC-1',
+        'amount' => 100000,
+        'donor_name' => 'Donatur',
+        'donor_email' => 'donatur@example.com',
+        'donor_phone' => '08123456789',
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    Disbursement::create([
+        'program_id' => $this->program->id,
+        'requested_amount' => 95000,
+        'platform_fee_percent' => 5,
+        'platform_fee_amount' => 5000,
+        'bank_fee' => 2500,
+        'nett_amount' => 92500,
+        'status' => 'transferred',
+        'bank_name' => 'BCA',
+        'bank_account_number' => '123',
+        'bank_account_name' => 'Mitra',
+        'transferred_at' => now(),
+    ]);
+
+    $response = $this->actingAs($this->admin)
+        ->get(route('admin.reports.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn (AssertableInertia $page) => $page
+        ->component('Admin/Reports/Index')
+        ->where('financialSummary.total_platform_fees', 5000)
+        ->where('financialSummary.total_disbursed_gross', 100000) // 95000 + 5000
+        ->where('financialSummary.total_disbursed_nett', 92500)
+        ->where('financialSummary.escrow_balance', 0) // 100000 - 100000 = 0
+    );
 });
 
 it('allows admin to export donations', function () {

@@ -39,11 +39,12 @@ class ReportController extends Controller
         if ($startDate && $endDate) {
             $disbursementQuery->whereBetween('transferred_at', [$startDate, $endDate]);
         }
-        $totalDisbursedGross = (float) $disbursementQuery->sum('requested_amount');
         $totalPlatformFees = (float) $disbursementQuery->sum('platform_fee_amount');
         $totalBankFees = (float) $disbursementQuery->sum('bank_fee');
         $totalDisbursedNett = (float) $disbursementQuery->sum('nett_amount');
         $totalDisbursementsCount = (int) $disbursementQuery->count();
+        // Total alokasi bruto penyaluran dari rekening penampungan (mencakup hak campaigner dan alokasi hak lembaga)
+        $totalDisbursedGross = (float) $disbursementQuery->selectRaw('SUM(requested_amount + platform_fee_amount) as total')->value('total');
 
         // 4. Escrow & Cashflow Balance
         // Point-in-time total escrow fund currently held across all programs
@@ -52,7 +53,9 @@ class ReportController extends Controller
                 ->join('payments', 'donations.id', '=', 'payments.donation_id')
                 ->where('donations.status', 'paid')
                 ->sum('payments.gateway_fee'));
-        $allTimeDisbursedGross = (float) Disbursement::whereIn('status', ['transferred'])->sum('requested_amount');
+        $allTimeDisbursedGross = (float) Disbursement::whereIn('status', ['transferred'])
+            ->selectRaw('SUM(requested_amount + platform_fee_amount) as total')
+            ->value('total');
         $currentEscrowBalance = max(0, $allTimeNetCollected - $allTimeDisbursedGross);
         $periodNetCashflow = $netCollectedDonations - $totalDisbursedGross;
 
@@ -372,8 +375,9 @@ class ReportController extends Controller
             'Tgl Transfer',
             'Program',
             'Status',
-            'Nominal Pengajuan',
-            'Potongan Platform 5%',
+            'Alokasi Program Bruto',
+            'Nominal Pengajuan Campaigner',
+            'Hak Lembaga 5%',
             'Biaya Bank BI-Fast',
             'Nominal Bersih Ditransfer',
             'Bank Tujuan',
@@ -393,12 +397,14 @@ class ReportController extends Controller
             fputcsv($file, $columns);
 
             foreach ($query->cursor() as $disb) {
+                $grossAllocation = (float) $disb->requested_amount + (float) $disb->platform_fee_amount;
                 fputcsv($file, [
                     $disb->receipt_number ?? "ID #{$disb->id}",
                     $disb->created_at->format('Y-m-d H:i:s'),
                     $disb->transferred_at ? $disb->transferred_at->format('Y-m-d H:i:s') : '-',
                     $disb->program ? $disb->program->title : '',
                     $disb->status,
+                    $grossAllocation,
                     $disb->requested_amount,
                     $disb->platform_fee_amount,
                     $disb->bank_fee ?? 2500,

@@ -19,6 +19,7 @@ import {
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -304,19 +305,23 @@ export default function ReportIndex({
                             <span>Rentang Tanggal Kustom:</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Input
-                                type="date"
-                                value={customDates.start}
-                                onChange={(e) => setCustomDates({ ...customDates, start: e.target.value })}
-                                className="h-8 text-xs w-36 border-gray-200 dark:border-gray-700 dark:bg-gray-800"
-                            />
+                            <div className="w-36">
+                                <DatePicker
+                                    value={customDates.start}
+                                    onChange={(dateStr) => setCustomDates({ ...customDates, start: dateStr })}
+                                    placeholder="Dari tanggal"
+                                    className="h-8 text-xs border-gray-200 dark:border-gray-700 dark:bg-gray-800"
+                                />
+                            </div>
                             <span className="text-gray-400">s/d</span>
-                            <Input
-                                type="date"
-                                value={customDates.end}
-                                onChange={(e) => setCustomDates({ ...customDates, end: e.target.value })}
-                                className="h-8 text-xs w-36 border-gray-200 dark:border-gray-700 dark:bg-gray-800"
-                            />
+                            <div className="w-36">
+                                <DatePicker
+                                    value={customDates.end}
+                                    onChange={(dateStr) => setCustomDates({ ...customDates, end: dateStr })}
+                                    placeholder="Sampai tanggal"
+                                    className="h-8 text-xs border-gray-200 dark:border-gray-700 dark:bg-gray-800"
+                                />
+                            </div>
                         </div>
                         <Button
                             type="submit"
@@ -367,7 +372,7 @@ export default function ReportIndex({
                             </p>
                             <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 flex items-center gap-1">
                                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Diserap oleh yayasan</span>
+                                <span>Dikelola oleh yayasan</span>
                             </p>
                         </div>
                     </div>
@@ -421,7 +426,7 @@ export default function ReportIndex({
                                 {formatCurrency(financialSummary.escrow_balance)}
                             </p>
                             <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
-                                Titipan amanah siap salur
+                                Titipan amanah donatur
                             </p>
                         </div>
                     </div>
@@ -522,7 +527,7 @@ export default function ReportIndex({
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center text-rose-600 dark:text-rose-400">
-                                            <span>Potongan Biaya Payment Gateway (Midtrans)</span>
+                                            <span>Potongan Biaya Payment Gateway</span>
                                             <span className="font-semibold">
                                                 - {formatCurrency(financialSummary.total_gateway_fees)}
                                             </span>
@@ -541,7 +546,7 @@ export default function ReportIndex({
                                     </p>
                                     <div className="space-y-2 bg-gray-50/60 dark:bg-gray-800/40 rounded-lg p-3">
                                         <div className="flex justify-between items-center text-gray-700 dark:text-gray-300">
-                                            <span>Total Pengajuan Pencairan Disetujui</span>
+                                            <span>Total Alokasi Penyaluran Program</span>
                                             <span className="font-semibold text-gray-900 dark:text-white">
                                                 {formatCurrency(financialSummary.total_disbursed_gross)}
                                             </span>
@@ -549,13 +554,13 @@ export default function ReportIndex({
                                         <div className="flex justify-between items-center text-indigo-600 dark:text-indigo-400">
                                             <span>Alokasi Hak Operasional Lembaga 5%</span>
                                             <span className="font-semibold">
-                                                {formatCurrency(financialSummary.total_platform_fees)}
+                                                - {formatCurrency(financialSummary.total_platform_fees)}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
-                                            <span>Biaya Administrasi Transfer Bank BI-Fast (Rp 2.500)</span>
+                                        <div className="flex justify-between items-center text-rose-600 dark:text-rose-400">
+                                            <span>Biaya Administrasi Transfer Bank BI-Fast</span>
                                             <span className="font-semibold">
-                                                {formatCurrency(financialSummary.total_bank_fees)}
+                                                - {formatCurrency(financialSummary.total_bank_fees)}
                                             </span>
                                         </div>
                                         <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center font-bold text-blue-700 dark:text-blue-400">
@@ -575,7 +580,7 @@ export default function ReportIndex({
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs text-amber-900 dark:text-amber-200 pt-1 border-t border-amber-200/60 dark:border-amber-900/40 font-bold">
-                                            <span>Saldo Kas Mengendap Saat Ini (Total Dana Titipan Donatur)</span>
+                                            <span>Saldo Kas Mengendap Saat Ini</span>
                                             <span className="text-base text-amber-700 dark:text-amber-400">
                                                 {formatCurrency(financialSummary.escrow_balance)}
                                             </span>
@@ -595,10 +600,10 @@ export default function ReportIndex({
                                 <div className="space-y-3 text-xs text-gray-600 dark:text-gray-400">
                                     <div className="p-3 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
                                         <p className="font-semibold text-emerald-800 dark:text-emerald-300 mb-1">
-                                            1. Biaya Payment Gateway Diserap Yayasan
+                                            1. Biaya Payment Gateway Dikelola Yayasan
                                         </p>
                                         <p>
-                                            Donatur hanya membayar nominal donasi yang dipilih tanpa biaya admin tambahan (bebas surcharge). Seluruh biaya Midtrans dihitung secara presisi di backend dan dibebankan sebagai biaya transaksi yayasan.
+                                            Donatur hanya membayar nominal donasi yang dipilih tanpa biaya admin tambahan. Seluruh biaya Midtrans dihitung di backend sesuai metode pembayaran yang dipilih dan dibebankan sebagai biaya transaksi yayasan.
                                         </p>
                                     </div>
 
@@ -613,7 +618,7 @@ export default function ReportIndex({
 
                                     <div className="p-3 bg-blue-50/50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-900/40">
                                         <p className="font-semibold text-blue-800 dark:text-blue-300 mb-1">
-                                            3. Kliring Transfer BI-Fast (Rp 2.500)
+                                            3. Biaya Transfer BI-Fast (Rp 2.500)
                                         </p>
                                         <p>
                                             Biaya administrasi transfer antarbank resmi BI-Fast yang dibayarkan ke bank saat mentransfer dana bersih ke rekening penggalang dana.
@@ -926,19 +931,19 @@ export default function ReportIndex({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Dari Tanggal</Label>
-                                        <Input
-                                            type="date"
+                                        <DatePicker
                                             value={donationsDates.start}
-                                            onChange={(e) => setDonationsDates({ ...donationsDates, start: e.target.value })}
+                                            onChange={(dateStr) => setDonationsDates({ ...donationsDates, start: dateStr })}
+                                            placeholder="Dari tanggal..."
                                             className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs h-9"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Sampai Tanggal</Label>
-                                        <Input
-                                            type="date"
+                                        <DatePicker
                                             value={donationsDates.end}
-                                            onChange={(e) => setDonationsDates({ ...donationsDates, end: e.target.value })}
+                                            onChange={(dateStr) => setDonationsDates({ ...donationsDates, end: dateStr })}
+                                            placeholder="Sampai tanggal..."
                                             className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs h-9"
                                         />
                                     </div>
@@ -964,19 +969,19 @@ export default function ReportIndex({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Dari Tanggal</Label>
-                                        <Input
-                                            type="date"
+                                        <DatePicker
                                             value={disbursementsDates.start}
-                                            onChange={(e) => setDisbursementsDates({ ...disbursementsDates, start: e.target.value })}
+                                            onChange={(dateStr) => setDisbursementsDates({ ...disbursementsDates, start: dateStr })}
+                                            placeholder="Dari tanggal..."
                                             className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs h-9"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
                                         <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Sampai Tanggal</Label>
-                                        <Input
-                                            type="date"
+                                        <DatePicker
                                             value={disbursementsDates.end}
-                                            onChange={(e) => setDisbursementsDates({ ...disbursementsDates, end: e.target.value })}
+                                            onChange={(dateStr) => setDisbursementsDates({ ...disbursementsDates, end: dateStr })}
+                                            placeholder="Sampai tanggal..."
                                             className="border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white text-xs h-9"
                                         />
                                     </div>
