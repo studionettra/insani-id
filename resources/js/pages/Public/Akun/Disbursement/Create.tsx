@@ -1,13 +1,21 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Wallet, AlertCircle, FileText, Calendar, MapPin, Users, Upload, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Wallet, AlertCircle, FileText, Calendar, MapPin, Users, Upload, CheckCircle2, ShieldAlert, Info } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatRupiah, getLocalizedValue } from '@/lib/utils';
+
+const formatRupiahInput = (val: string | number | null | undefined): string => {
+    if (val === null || val === undefined || val === '') return '';
+    const digits = String(val).replace(/\D/g, '');
+    if (!digits) return '';
+    return new Intl.NumberFormat('id-ID').format(BigInt(digits));
+};
 
 export default function Create({
     program,
@@ -33,22 +41,29 @@ export default function Create({
     const requestedNum = Number(data.requested_amount) || 0;
     const isAmountValid = requestedNum >= 150000 && requestedNum <= availableBalance;
 
+    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value;
+        const digits = raw.replace(/\D/g, '');
+        setData('requested_amount', digits);
+    };
+
+    const handleWithdrawMax = () => {
+        setData('requested_amount', String(Math.floor(availableBalance)));
+    };
+
     const calculation = useMemo(() => {
         if (requestedNum < 150000) {
             return {
-                platformFee: 0,
                 bankFee: bankTransferFee,
                 nettAmount: 0,
             };
         }
-        const platformFee = requestedNum * (platformFeePercent / 100);
-        const nettAmount = Math.max(0, requestedNum - platformFee - bankTransferFee);
+        const nettAmount = Math.max(0, requestedNum - bankTransferFee);
         return {
-            platformFee,
             bankFee: bankTransferFee,
             nettAmount,
         };
-    }, [requestedNum, platformFeePercent]);
+    }, [requestedNum]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,48 +157,63 @@ export default function Create({
                                 </Alert>
                             )}
 
+                            {/* Ketentuan Biaya Penarikan */}
+                            <div className="bg-slate-50 dark:bg-gray-800/40 rounded-lg p-3.5 border border-slate-200/80 dark:border-gray-700/60 text-xs text-slate-600 dark:text-gray-300 flex items-start gap-2.5 mb-5">
+                                <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-semibold text-slate-800 dark:text-gray-200">Ketentuan Biaya Transfer Pencairan:</p>
+                                    <p className="text-slate-500 dark:text-gray-400 mt-0.5">
+                                        Saldo yang dapat dicairkan telah dipotong biaya operasional platform ({platformFeePercent}%). Pada setiap pengajuan pencairan, hanya dikenakan biaya administrasi transfer antarbank (BI-Fast) flat sebesar <strong>Rp 2.500</strong>.
+                                    </p>
+                                </div>
+                            </div>
+
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 {/* Nominal Penarikan */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="requested_amount" className="text-slate-900 dark:text-gray-200 font-medium">
-                                        Nominal Penarikan (Rp) <span className="text-red-500">*</span>
-                                    </Label>
+                                    <div className="flex justify-between items-center">
+                                        <Label htmlFor="requested_amount" className="text-slate-900 dark:text-gray-200 font-medium">
+                                            Nominal Penarikan (Rp) <span className="text-red-500">*</span>
+                                        </Label>
+                                        {availableBalance >= 150000 && (
+                                            <button
+                                                type="button"
+                                                onClick={handleWithdrawMax}
+                                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                                            >
+                                                Tarik Maksimal ({formatRupiah(availableBalance)})
+                                            </button>
+                                        )}
+                                    </div>
                                     <div className="relative">
                                         <span className="absolute left-3 top-2.5 text-sm font-semibold text-slate-500">Rp</span>
                                         <Input
                                             id="requested_amount"
-                                            type="number"
-                                            placeholder="Minimal 150000"
-                                            value={data.requested_amount}
-                                            onChange={(e) => setData('requested_amount', e.target.value)}
-                                            min="150000"
-                                            max={availableBalance}
+                                            type="text"
+                                            inputMode="numeric"
+                                            placeholder="Contoh: 500.000"
+                                            value={formatRupiahInput(data.requested_amount)}
+                                            onChange={handleAmountChange}
                                             disabled={availableBalance < 150000}
-                                            className="pl-10 border-slate-200 dark:border-gray-800 dark:bg-gray-950 dark:text-white font-medium"
+                                            className="pl-10 border-slate-200 dark:border-gray-800 dark:bg-gray-950 dark:text-white font-medium text-base tracking-wide"
                                         />
                                     </div>
                                     {errors.requested_amount && (
                                         <p className="text-xs text-red-500 font-medium">{errors.requested_amount}</p>
                                     )}
                                     {data.requested_amount && !isAmountValid && (
-                                        <p className="text-xs text-red-500 font-medium">Nominal harus minimal Rp 150.000 dan tidak melebihi saldo tersedia.</p>
+                                        <p className="text-xs text-red-500 font-medium">Nominal harus minimal Rp 150.000 dan tidak melebihi saldo tersedia ({formatRupiah(availableBalance)}).</p>
                                     )}
                                 </div>
 
                                 {/* Live Breakdown Card */}
                                 {requestedNum >= 150000 && (
                                     <div className="bg-slate-50 dark:bg-gray-800/60 rounded-lg p-4 border border-slate-200 dark:border-gray-700/80 space-y-2">
-                                        <h4 className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase tracking-wider mb-2">Simulasi Realistis Pencairan:</h4>
+                                        <h4 className="text-xs font-semibold text-slate-700 dark:text-gray-300 uppercase tracking-wider mb-2">Rincian Pencairan:</h4>
                                         <div className="flex justify-between text-sm text-slate-600 dark:text-gray-300">
                                             <span>Nominal Diajukan:</span>
                                             <span className="font-semibold text-slate-900 dark:text-white">{formatRupiah(requestedNum)}</span>
                                         </div>
-                                        {platformFeePercent > 0 && (
-                                            <div className="flex justify-between text-sm text-slate-600 dark:text-gray-300">
-                                                <span>Biaya Platform ({platformFeePercent}%):</span>
-                                                <span className="text-red-500 font-medium">- {formatRupiah(calculation.platformFee)}</span>
-                                            </div>
-                                        )}
                                         <div className="flex justify-between text-sm text-slate-600 dark:text-gray-300">
                                             <span>Biaya Admin Transfer Bank (BI-Fast):</span>
                                             <span className="text-red-500 font-medium">- {formatRupiah(calculation.bankFee)}</span>
@@ -258,12 +288,12 @@ export default function Create({
                                             <Calendar className="w-4 h-4 text-slate-500" />
                                             Estimasi Tanggal Penyaluran <span className="text-red-500">*</span>
                                         </Label>
-                                        <Input
+                                        <DatePicker
                                             id="estimated_distribution_date"
-                                            type="date"
-                                            min={todayDate}
                                             value={data.estimated_distribution_date}
-                                            onChange={(e) => setData('estimated_distribution_date', e.target.value)}
+                                            onChange={(dateStr) => setData('estimated_distribution_date', dateStr)}
+                                            minDate="today"
+                                            placeholder="Pilih tanggal penyaluran..."
                                             className="border-slate-200 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
                                         />
                                         {errors.estimated_distribution_date && (
@@ -274,7 +304,7 @@ export default function Create({
                                     <div className="space-y-2">
                                         <Label htmlFor="supporting_document" className="text-slate-900 dark:text-gray-200 font-medium flex items-center gap-1.5">
                                             <Upload className="w-4 h-4 text-slate-500" />
-                                            Lampiran RAB / Dokumen Pendukung (Opsional)
+                                            Lampiran RAB / Dokumen Pendukung <span className="text-red-500">*</span>
                                         </Label>
                                         <Input
                                             id="supporting_document"
@@ -283,7 +313,7 @@ export default function Create({
                                             onChange={(e) => setData('supporting_document', e.target.files ? e.target.files[0] : null)}
                                             className="border-slate-200 dark:border-gray-800 dark:bg-gray-950 dark:text-white text-xs py-1.5"
                                         />
-                                        <p className="text-[11px] text-slate-400">PDF atau Gambar (Maks. 2MB)</p>
+                                        <p className="text-[11px] text-slate-400">PDF atau Gambar (Maks. 2MB). Wajib dilampirkan sebelum mengirim pengajuan.</p>
                                         {errors.supporting_document && (
                                             <p className="text-xs text-red-500">{errors.supporting_document}</p>
                                         )}
@@ -324,7 +354,8 @@ export default function Create({
                                             !data.distribution_plan ||
                                             !data.beneficiary_target ||
                                             !data.location ||
-                                            !data.estimated_distribution_date
+                                            !data.estimated_distribution_date ||
+                                            !data.supporting_document
                                         }
                                         className="bg-blue-600 hover:bg-blue-700 text-white shadow-xs font-semibold px-6"
                                     >

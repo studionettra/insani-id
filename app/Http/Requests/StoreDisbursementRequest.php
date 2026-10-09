@@ -26,6 +26,18 @@ class StoreDisbursementRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('requested_amount') && is_string($this->requested_amount)) {
+            $this->merge([
+                'requested_amount' => str_replace('.', '', $this->requested_amount),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -42,7 +54,7 @@ class StoreDisbursementRequest extends FormRequest
             'beneficiary_target' => ['required', 'string', 'max:150'],
             'location' => ['required', 'string', 'max:150'],
             'estimated_distribution_date' => ['required', 'date'],
-            'supporting_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'supporting_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -65,9 +77,10 @@ class StoreDisbursementRequest extends FormRequest
             'location.required' => 'Lokasi penyaluran wajib diisi.',
             'estimated_distribution_date.required' => 'Estimasi tanggal penyaluran wajib diisi.',
             'estimated_distribution_date.date' => 'Format tanggal penyaluran tidak valid.',
+            'supporting_document.required' => 'Dokumen RAB / berkas pendukung wajib diunggah.',
             'supporting_document.file' => 'Berkas pendukung harus berupa file.',
             'supporting_document.mimes' => 'Berkas pendukung harus berformat PDF, JPG, JPEG, atau PNG.',
-            'supporting_document.max' => 'Ukuran berkas pendukung maksimal 2MB.',
+            'supporting_document.max' => 'Ukuran berkas RAB maksimal 2MB.',
             'notes.max' => 'Catatan maksimal 500 karakter.',
         ];
     }

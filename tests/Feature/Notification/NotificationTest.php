@@ -72,6 +72,7 @@ beforeEach(function () {
 
 test('pengajuan pencairan dana mengirim notifikasi database ke admin dan keuangan', function () {
     Notification::fake();
+    Storage::fake('local');
 
     $finance = User::factory()->create();
     $finance->assignRole('Keuangan');
@@ -122,6 +123,7 @@ test('pengajuan pencairan dana mengirim notifikasi database ke admin dan keuanga
         'beneficiary_target' => '100 Penerima',
         'location' => 'Bandung',
         'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
+        'supporting_document' => UploadedFile::fake()->create('rab.pdf', 200, 'application/pdf'),
         'notes' => 'Pencairan tahap 1',
     ]);
 

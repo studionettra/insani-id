@@ -80,6 +80,13 @@ test('campaigner can view disbursements page', function () {
         ->get(route('akun.programs.disbursements.index', $this->program->id));
 
     $response->assertStatus(200);
+    $response->assertInertia(fn ($page) => $page
+        ->component('Public/Akun/Disbursement/Index')
+        ->has('balanceBreakdown.total_collected_online')
+        ->has('balanceBreakdown.total_gateway_fee')
+        ->has('balanceBreakdown.available_balance')
+        ->has('disbursements.data')
+    );
 });
 
 test('campaigner can view program saya page', function () {
@@ -130,7 +137,7 @@ test('cannot withdraw less than 150000', function () {
     $response->assertSessionHasErrors('requested_amount');
 });
 
-test('can withdraw valid amount and fee is calculated', function () {
+test('cannot withdraw without supporting document rab', function () {
     $response = $this->actingAs($this->campaigner)
         ->post(route('akun.programs.disbursements.store', $this->program->id), [
             'requested_amount' => 200000,
@@ -140,6 +147,20 @@ test('can withdraw valid amount and fee is calculated', function () {
             'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
         ]);
 
+    $response->assertSessionHasErrors('supporting_document');
+});
+
+test('can withdraw valid amount and fee is calculated', function () {
+    $response = $this->actingAs($this->campaigner)
+        ->post(route('akun.programs.disbursements.store', $this->program->id), [
+            'requested_amount' => 200000,
+            'distribution_plan' => 'Penyaluran sembako dhuafa',
+            'beneficiary_target' => '50 KK lansia',
+            'location' => 'Bandung Barat',
+            'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
+            'supporting_document' => UploadedFile::fake()->create('rab.pdf', 200, 'application/pdf'),
+        ]);
+
     $response->assertRedirect();
     $response->assertSessionHas('success');
 
@@ -147,13 +168,34 @@ test('can withdraw valid amount and fee is calculated', function () {
         'program_id' => $this->program->id,
         'requested_amount' => 200000,
         'platform_fee_percent' => 5.0,
-        'platform_fee_amount' => 10000, // 5% of 200000
+        'platform_fee_amount' => 10526,
         'bank_fee' => 2500,
-        'nett_amount' => 187500, // 200000 - 10000 - 2500
+        'nett_amount' => 197500, // 200000 - 2500 (BI-Fast flat)
         'distribution_plan' => 'Penyaluran sembako dhuafa',
         'beneficiary_target' => '50 KK lansia',
         'location' => 'Bandung Barat',
         'status' => 'pending',
+    ]);
+});
+
+test('can withdraw amount formatted with indonesian thousand separator dots', function () {
+    $response = $this->actingAs($this->campaigner)
+        ->post(route('akun.programs.disbursements.store', $this->program->id), [
+            'requested_amount' => '200.000',
+            'distribution_plan' => 'Penyaluran sembako dhuafa',
+            'beneficiary_target' => '50 KK lansia',
+            'location' => 'Bandung Barat',
+            'estimated_distribution_date' => now()->addDays(3)->format('Y-m-d'),
+            'supporting_document' => UploadedFile::fake()->create('rab.pdf', 200, 'application/pdf'),
+        ]);
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('disbursements', [
+        'program_id' => $this->program->id,
+        'requested_amount' => 200000,
+        'nett_amount' => 197500,
     ]);
 });
 
@@ -181,6 +223,7 @@ test('gating prevents second withdrawal until previous disbursement report is ap
             'beneficiary_target' => '30 KK',
             'location' => 'Bandung',
             'estimated_distribution_date' => now()->addDays(2)->format('Y-m-d'),
+            'supporting_document' => UploadedFile::fake()->create('rab.pdf', 200, 'application/pdf'),
         ]);
 
     $response->assertSessionHasErrors('gating');
@@ -203,6 +246,7 @@ test('gating prevents second withdrawal until previous disbursement report is ap
             'beneficiary_target' => '30 KK',
             'location' => 'Bandung',
             'estimated_distribution_date' => now()->addDays(2)->format('Y-m-d'),
+            'supporting_document' => UploadedFile::fake()->create('rab.pdf', 200, 'application/pdf'),
         ]);
 
     $response2->assertSessionHasErrors('gating');
@@ -221,6 +265,7 @@ test('gating prevents second withdrawal until previous disbursement report is ap
             'beneficiary_target' => '30 KK',
             'location' => 'Bandung',
             'estimated_distribution_date' => now()->addDays(2)->format('Y-m-d'),
+            'supporting_document' => UploadedFile::fake()->create('rab.pdf', 200, 'application/pdf'),
         ]);
 
     $response3->assertRedirect();

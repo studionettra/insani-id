@@ -1,10 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Eye, Download, CheckCircle, Clock, AlertCircle, Receipt } from 'lucide-react';
+import { Eye, Download, CheckCircle, Clock, AlertCircle, Printer } from 'lucide-react';
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { formatRupiah, formatDate } from '@/lib/utils';
+import { formatRupiah, formatDate, getLocalizedValue } from '@/lib/utils';
 import admin from '@/routes/admin';
 
 export default function Index({ disbursements, filters }: any) {
@@ -80,7 +80,7 @@ export default function Index({ disbursements, filters }: any) {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                <div className="line-clamp-1 max-w-xs">{item.program?.title}</div>
+                                                <div className="line-clamp-1 max-w-xs">{getLocalizedValue(item.program?.title, 'id', 'Program')}</div>
                                                 <div className="text-xs text-gray-500 mt-0.5">
                                                     {item.bank_name} &bull; <span className="font-mono">{item.bank_account_number}</span> ({item.bank_account_name})
                                                 </div>
@@ -97,7 +97,7 @@ export default function Index({ disbursements, filters }: any) {
                                                     {item.status === 'transferred' && (
                                                         <Button variant="ghost" size="sm" asChild className="h-8 px-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50">
                                                             <Link href={`/admin/disbursements/${item.id}/receipt`} target="_blank" title="Cetak Kuitansi">
-                                                                <Receipt className="w-4 h-4" />
+                                                                <Printer className="w-4 h-4" />
                                                             </Link>
                                                         </Button>
                                                     )}

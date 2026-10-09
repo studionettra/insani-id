@@ -118,9 +118,19 @@ class Program extends Model
             ->sum('requested_amount');
     }
 
+    public function getPlatformFeePercentAttribute(): float
+    {
+        return (float) ($this->category?->platform_fee_percent ?? 0);
+    }
+
+    public function getPlatformFeeAmountAttribute(): float
+    {
+        return (float) round($this->net_collected_amount * ($this->platform_fee_percent / 100));
+    }
+
     public function getAvailableBalanceAttribute(): float
     {
-        return max(0, $this->net_collected_amount - $this->total_disbursed_amount);
+        return max(0, $this->net_collected_amount - $this->platform_fee_amount - $this->total_disbursed_amount);
     }
 
     public function updates()

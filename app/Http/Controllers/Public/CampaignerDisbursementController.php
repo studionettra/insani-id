@@ -28,11 +28,31 @@ class CampaignerDisbursementController extends Controller
             abort(403, 'Unauthorized.');
         }
 
+        $program->loadMissing('category');
+
+        $totalCollectedOnline = (float) $program->total_collected_amount;
+        $totalBankFee = (float) $program->total_gateway_fees;
+        $platformFeePercent = (float) $program->platform_fee_percent;
+        $platformFeeAmount = (float) $program->platform_fee_amount;
+        $totalDisbursed = (float) $program->total_disbursed_amount;
+        $availableBalance = (float) $program->available_balance;
+
+        $balanceBreakdown = [
+            'total_collected_online' => $totalCollectedOnline,
+            'total_gateway_fee' => $totalBankFee,
+            'total_bank_fee' => $totalBankFee,
+            'platform_fee_percent' => $platformFeePercent,
+            'platform_fee_amount' => $platformFeeAmount,
+            'total_disbursed' => $totalDisbursed,
+            'available_balance' => $availableBalance,
+        ];
+
         $disbursements = $program->disbursements()->latest()->paginate(10);
 
         return Inertia::render('Public/Akun/Disbursement/Index', [
             'program' => $program,
             'disbursements' => $disbursements,
+            'balanceBreakdown' => $balanceBreakdown,
         ]);
     }
 
@@ -117,12 +137,11 @@ class CampaignerDisbursementController extends Controller
             return back()->with('error', 'Silakan lengkapi profil rekening bank Anda terlebih dahulu.');
         }
 
-        $platformFeePercent = $program->category->platform_fee_percent ?? 0;
         $docPath = $request->hasFile('supporting_document')
             ? $request->file('supporting_document')->store('disbursements/documents', 'local')
             : null;
 
-        $disbursement = DB::transaction(function () use ($program, $request, $profile, $platformFeePercent, $docPath) {
+        $disbursement = DB::transaction(function () use ($program, $request, $profile, $docPath) {
             $lockedProgram = Program::whereKey($program->id)->lockForUpdate()->firstOrFail();
             $availableBalance = $lockedProgram->available_balance;
 
@@ -134,9 +153,44 @@ class CampaignerDisbursementController extends Controller
                 ]);
             }
 
-            $platformFeeAmount = $requestedAmount * ($platformFeePercent / 100);
+            // Fee operasional platform (5%) dihitung secara proporsional dari alokasi program ini,
+            // dicatat pada record pencairan untuk audit & laporan keuangan lembaga,
+            // tanpa memotong ganda nominal yang diterima campaigner (nett_amount = requested_amount - bank_fee).
             $bankFee = 2500.0;
-            $nettAmount = max(0, $requestedAmount - $platformFeeAmount - $bankFee);
+            $nettAmount = max(0, $requestedAmount - $bankFee);
+
+            $platformFeePercent = (float) ($lockedProgram->platform_fee_percent ?? 0);
+            $platformFeeAmount = 0.0;
+            if ($platformFeePercent > 0) {
+                $alreadyRecognizedFee = (float) $lockedProgram->disbursements()
+                    ->whereIn('status', ['pending', 'approved', 'transferred'])
+                    ->sum('platform_fee_amount');
+                $remainingFee = max(0, $lockedProgram->platform_fee_amount - $alreadyRecognizedFee);
+
+                if ($requestedAmount >= $availableBalance) {
+                    $platformFeeAmount = $remainingFee;
+                } else {
+                    $calculatedFee = round($requestedAmount * ($platformFeePercent / (100 - $platformFeePercent)));
+                    $platformFeeAmount = min($remainingFee, (float) $calculatedFee);
+                }
+            }
+
+            // Alokasikan biaya transaksi payment gateway program secara proporsional
+            $totalProgramGatewayFees = (float) $lockedProgram->total_gateway_fees;
+            $alreadyRecognizedGatewayFee = (float) $lockedProgram->disbursements()
+                ->whereIn('status', ['pending', 'approved', 'transferred'])
+                ->sum('gateway_fee');
+            $remainingGatewayFee = max(0, $totalProgramGatewayFees - $alreadyRecognizedGatewayFee);
+
+            $gatewayFeeAmount = 0.0;
+            if ($remainingGatewayFee > 0) {
+                if ($requestedAmount >= $availableBalance) {
+                    $gatewayFeeAmount = $remainingGatewayFee;
+                } else {
+                    $ratio = $availableBalance > 0 ? ($requestedAmount / $availableBalance) : 1;
+                    $gatewayFeeAmount = min($remainingGatewayFee, round($remainingGatewayFee * $ratio));
+                }
+            }
 
             return $lockedProgram->disbursements()->create([
                 'requested_amount' => $requestedAmount,
@@ -145,6 +199,7 @@ class CampaignerDisbursementController extends Controller
                 'bank_account_name' => $profile->bank_account_name,
                 'platform_fee_percent' => $platformFeePercent,
                 'platform_fee_amount' => $platformFeeAmount,
+                'gateway_fee' => $gatewayFeeAmount,
                 'bank_fee' => $bankFee,
                 'nett_amount' => $nettAmount,
                 'notes' => $request->input('notes'),

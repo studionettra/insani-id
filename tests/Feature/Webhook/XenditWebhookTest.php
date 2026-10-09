@@ -1,6 +1,7 @@
 <?php
 
 use App\Jobs\SendDonationPaidNotification;
+use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Donation;
 use App\Models\Payment;
@@ -337,7 +338,12 @@ test('it successfully processes SETTLED webhook and updates payment channel and 
 });
 
 test('webhook saves explicit fees from payload and updates program available balance correctly', function () {
+    $category = Category::factory()->create([
+        'platform_fee_percent' => 0,
+    ]);
+
     $program = Program::factory()->create([
+        'category_id' => $category->id,
         'target_amount' => 1000000,
     ]);
 

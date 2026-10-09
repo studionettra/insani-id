@@ -1,5 +1,5 @@
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, XCircle, Upload, Check, Copy, FileText, Download, Receipt, ExternalLink, Calendar, MapPin, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Upload, Check, Copy, FileText, Download, ReceiptText, Printer, ExternalLink, Calendar, MapPin, Users } from 'lucide-react';
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { formatRupiah, formatDate } from '@/lib/utils';
+import { formatRupiah, formatDate, getLocalizedValue } from '@/lib/utils';
 import admin from '@/routes/admin';
 
 export default function Show({ disbursement }: any) {
@@ -81,7 +81,7 @@ export default function Show({ disbursement }: any) {
                         {disbursement.status === 'transferred' && (
                             <Button size="sm" variant="outline" asChild className="border-purple-200 text-purple-700 hover:bg-purple-50">
                                 <Link href={`/admin/disbursements/${disbursement.id}/receipt`} target="_blank">
-                                    <Receipt className="w-4 h-4 mr-1.5" />
+                                    <ReceiptText className="w-4 h-4 mr-1.5" />
                                     Lihat Kuitansi
                                 </Link>
                             </Button>
@@ -121,17 +121,44 @@ export default function Show({ disbursement }: any) {
                                 </div>
                                 
                                 <div className="space-y-2.5 pt-4 border-t border-gray-100 text-sm">
-                                    <div className="flex justify-between items-center text-gray-600">
-                                        <span>Nominal Pengajuan Campaigner</span>
-                                        <span className="font-medium text-gray-900">{formatRupiah(disbursement.requested_amount)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-gray-600">
-                                        <span>Biaya Operasional Platform ({disbursement.platform_fee_percent}%)</span>
-                                        <span className="font-medium text-red-600">- {formatRupiah(disbursement.platform_fee_amount)}</span>
-                                    </div>
+                                    {Number(disbursement.platform_fee_amount) > 0 || Number(disbursement.gateway_fee) > 0 ? (
+                                        <>
+                                            <div className="flex justify-between items-center text-gray-600">
+                                                <span>Alokasi Program Bruto</span>
+                                                <span className="font-semibold text-gray-900 font-mono tabular-nums">
+                                                    {formatRupiah(
+                                                        Number(disbursement.requested_amount) +
+                                                        Number(disbursement.platform_fee_amount || 0) +
+                                                        Number(disbursement.gateway_fee || 0)
+                                                    )}
+                                                </span>
+                                            </div>
+                                            {Number(disbursement.gateway_fee) > 0 && (
+                                                <div className="flex justify-between items-center text-gray-600">
+                                                    <span>Biaya Transaksi Payment Gateway</span>
+                                                    <span className="font-medium text-red-600 font-mono tabular-nums">
+                                                        - {formatRupiah(disbursement.gateway_fee)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {Number(disbursement.platform_fee_amount) > 0 && (
+                                                <div className="flex justify-between items-center text-gray-600">
+                                                    <span>Hak Operasional Lembaga ({disbursement.platform_fee_percent}%)</span>
+                                                    <span className="font-medium text-red-600 font-mono tabular-nums">
+                                                        - {formatRupiah(disbursement.platform_fee_amount)}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div className="flex justify-between items-center text-gray-600">
+                                            <span>Nominal Pengajuan Campaigner</span>
+                                            <span className="font-medium text-gray-900 font-mono tabular-nums">{formatRupiah(disbursement.requested_amount)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between items-center text-gray-600">
                                         <span>Biaya Admin Transfer Bank (BI-Fast)</span>
-                                        <span className="font-medium text-red-600">- {formatRupiah(disbursement.bank_fee || 2500)}</span>
+                                        <span className="font-medium text-red-600 font-mono tabular-nums">- {formatRupiah(disbursement.bank_fee || 2500)}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-2.5 border-t border-gray-100 font-bold text-gray-900">
                                         <span>Total Bersih Diterima Campaigner</span>
@@ -282,10 +309,10 @@ export default function Show({ disbursement }: any) {
                             </div>
                             <div className="p-6 space-y-3">
                                 <Link href={admin.programs.show(disbursement.program_id).url} className="font-semibold text-[#1A56DB] hover:underline text-sm block leading-snug">
-                                    {disbursement.program?.title}
+                                    {getLocalizedValue(disbursement.program?.title, 'id', 'Program')}
                                 </Link>
                                 <div className="text-xs text-gray-500 space-y-1 pt-2 border-t border-gray-100">
-                                    <p><span className="font-medium text-gray-700">Kategori:</span> {disbursement.program?.category?.name || '-'}</p>
+                                    <p><span className="font-medium text-gray-700">Kategori:</span> {getLocalizedValue(disbursement.program?.category?.name, 'id', '-')}</p>
                                     <p><span className="font-medium text-gray-700">Campaigner:</span> {disbursement.program?.campaigner_profile?.organization_name || disbursement.program?.creator?.name || '-'}</p>
                                 </div>
                             </div>
@@ -381,7 +408,7 @@ export default function Show({ disbursement }: any) {
                                         </div>
                                         <Button variant="outline" className="w-full border-purple-200 text-purple-700 hover:bg-purple-50" asChild>
                                             <Link href={`/admin/disbursements/${disbursement.id}/receipt`} target="_blank">
-                                                <Receipt className="w-4 h-4 mr-2" /> Cetak / Lihat Kuitansi Resmi
+                                                <Printer className="w-4 h-4 mr-2" /> Cetak / Lihat Kuitansi Resmi
                                             </Link>
                                         </Button>
                                     </div>
