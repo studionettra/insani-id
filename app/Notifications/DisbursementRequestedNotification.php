@@ -29,7 +29,8 @@ class DisbursementRequestedNotification extends Notification implements ShouldQu
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $programTitle = $this->disbursement->program?->title ?? 'Program';
+        $programTitle = $this->disbursement->program?->getTranslation('title', 'id')
+            ?: (is_string($this->disbursement->program?->title) ? $this->disbursement->program?->title : 'Program');
         $formattedAmount = 'Rp '.number_format((float) $this->disbursement->requested_amount, 0, ',', '.');
         $replyToEmail = config('mail.reply_to.address', 'sapa@insani.id');
         $replyToName = config('mail.reply_to.name', 'Layanan Sahabat Insani');
@@ -56,7 +57,8 @@ class DisbursementRequestedNotification extends Notification implements ShouldQu
      */
     public function toArray(object $notifiable): array
     {
-        $programTitle = $this->disbursement->program?->title ?? 'Program';
+        $programTitle = $this->disbursement->program?->getTranslation('title', 'id')
+            ?: (is_string($this->disbursement->program?->title) ? $this->disbursement->program?->title : 'Program');
         $formattedAmount = 'Rp '.number_format((float) $this->disbursement->requested_amount, 0, ',', '.');
 
         return [

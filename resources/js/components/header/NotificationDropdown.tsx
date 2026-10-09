@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { useNotificationAlerts } from "@/hooks/useNotificationAlerts";
+import { getLocalizedValue } from "@/lib/utils";
 import type { AppNotification } from "@/types/notification";
 
 export default function NotificationDropdown() {
@@ -198,12 +199,12 @@ export default function NotificationDropdown() {
                             : "font-medium text-gray-700 dark:text-gray-300"
                         }`}
                       >
-                        {item.data.title}
+                        {getLocalizedValue(item.data.title, 'id', 'Notifikasi')}
                       </p>
                     </div>
 
                     <p className="text-xs text-gray-600 line-clamp-2 dark:text-gray-400 leading-relaxed">
-                      {item.data.message}
+                      {getLocalizedValue(item.data.message, 'id', '')}
                     </p>
 
                     <div className="flex items-center gap-1.5 mt-1.5">

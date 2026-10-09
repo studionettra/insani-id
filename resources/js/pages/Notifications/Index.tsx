@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useNotificationSound } from "@/hooks/useNotificationAlerts";
+import { getLocalizedValue } from "@/lib/utils";
 import type { AppNotification } from "@/types/notification";
 
 interface NotificationsIndexProps {
@@ -561,7 +562,7 @@ export default function NotificationsIndex({
                                 : "font-medium text-gray-700 dark:text-gray-200"
                             }`}
                           >
-                            {item.data.title}
+                            {getLocalizedValue(item.data.title, 'id', 'Notifikasi')}
                           </Link>
 
                           <span
@@ -576,7 +577,7 @@ export default function NotificationsIndex({
                         </div>
 
                         <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-2">
-                          {item.data.message}
+                          {getLocalizedValue(item.data.message, 'id', '')}
                         </p>
 
                         <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
