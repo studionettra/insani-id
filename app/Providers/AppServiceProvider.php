@@ -4,10 +4,10 @@ namespace App\Providers;
 
 use App\Models\Payment;
 use App\Models\Program;
+use App\Models\User;
 use App\Observers\PaymentObserver;
 use App\Observers\ProgramObserver;
 use Carbon\CarbonImmutable;
-use App\Models\User;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;

@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, AlertCircle, Info, Calendar, DollarSign, Target, Wallet } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Info, Calendar, HandHeart, Target, Wallet } from 'lucide-react';
 import React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -168,7 +168,7 @@ export default function AkunProgramShow({ program }: Props) {
                                 </div>
                                 <div className="flex items-start">
                                     <div className="bg-emerald-100 dark:bg-emerald-950/60 p-2.5 rounded-xl text-emerald-600 dark:text-emerald-400 mr-4 shrink-0">
-                                        <DollarSign className="w-5 h-5" />
+                                        <HandHeart className="w-5 h-5" />
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase font-semibold tracking-wider text-slate-500 dark:text-gray-400">Terkumpul</p>

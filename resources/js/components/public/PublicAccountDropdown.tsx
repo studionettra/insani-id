@@ -6,7 +6,7 @@ import {
     ChevronDown,
     LogIn,
     UserPlus,
-    Receipt,
+    ReceiptText,
     HelpCircle,
     Check,
     LayoutGrid,
@@ -223,7 +223,7 @@ export default function PublicAccountDropdown({
                                 onClick={() => setIsOpen(false)}
                                 className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-zinc-700 hover:text-brand-700 hover:bg-brand-50/50 transition-colors"
                             >
-                                <Receipt className="w-4 h-4 text-zinc-400" />
+                                <ReceiptText className="w-4 h-4 text-zinc-400" />
                                 <span>{t('Cek Status Donasi')}</span>
                             </Link>
                         )}
@@ -362,7 +362,7 @@ export default function PublicAccountDropdown({
                                 onClick={() => setIsOpen(false)}
                                 className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-xs font-medium text-zinc-800 hover:text-brand-700 hover:bg-brand-50/50 transition-colors"
                             >
-                                <Receipt className="w-4 h-4 text-zinc-400" />
+                                <ReceiptText className="w-4 h-4 text-zinc-400" />
                                 <span>{t('Riwayat & Cek Donasi')}</span>
                             </Link>
                         )}

@@ -6,7 +6,7 @@ import {
     CreditCard, 
     QrCode, 
     Building2, 
-    Receipt, 
+    ReceiptText, 
     Heart, 
     ShieldCheck, 
     MessageCircle, 
@@ -215,7 +215,7 @@ export default function HowToDonateView() {
                     <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/40 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-xl bg-insani-blue/10 text-insani-blue flex items-center justify-center shrink-0 mt-0.5">
-                                <Receipt className="w-5 h-5" />
+                                <ReceiptText className="w-5 h-5" />
                             </div>
                             <div>
                                 <p className="font-bold text-slate-900 text-sm">

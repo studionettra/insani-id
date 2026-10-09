@@ -8,7 +8,7 @@ import {
     Rocket, 
     Users, 
     ShieldCheck, 
-    Receipt, 
+    ReceiptText, 
     CreditCard, 
     MessageCircle, 
     Phone, 
@@ -774,7 +774,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                         className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-brand-500/50 hover:-translate-y-0.5 transition-all group"
                     >
                         <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                            <Receipt className="w-5 h-5" />
+                            <ReceiptText className="w-5 h-5" />
                         </div>
                         <h2 className="font-bold text-slate-900 text-sm sm:text-base group-hover:text-brand-600 transition-colors">
                             Cek Donasi

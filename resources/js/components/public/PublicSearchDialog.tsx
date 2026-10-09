@@ -16,7 +16,7 @@ import {
     Phone,
     FileText,
     CreditCard,
-    Receipt,
+    ReceiptText,
     Building2,
     ShieldCheck,
     Rocket,
@@ -97,7 +97,7 @@ const getPageIcon = (slug: string) => {
         case 'cara-donasi':
             return <CreditCard className="w-4 h-4 text-emerald-600" />;
         case 'cek-donasi':
-            return <Receipt className="w-4 h-4 text-amber-600" />;
+            return <ReceiptText className="w-4 h-4 text-amber-600" />;
         case 'pusat-bantuan':
             return <HelpCircle className="w-4 h-4 text-teal-600" />;
         case 'laporan-keuangan':

@@ -11,7 +11,7 @@ import {
     PlusCircle, 
     CheckCircle2,
     Compass,
-    Receipt,
+    ReceiptText,
     UserCheck,
     ArrowRight,
     ChevronRight,
@@ -1147,7 +1147,7 @@ export default function Dashboard({
                                             <Link href="/akun/donasi-saya" className="flex items-center justify-between w-full">
                                                 <div className="flex items-center">
                                                     <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mr-2.5">
-                                                        <Receipt className="w-3.5 h-3.5" />
+                                                        <ReceiptText className="w-3.5 h-3.5" />
                                                     </div>
                                                     <span>Riwayat Donasi & Kuitansi</span>
                                                 </div>

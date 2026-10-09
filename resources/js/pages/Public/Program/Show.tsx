@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, Receipt, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, ReceiptText, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -1284,7 +1284,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                     <DialogHeader className="text-left pb-2 border-b border-slate-100">
                         <div className="flex items-center gap-2.5">
                             <div className="w-9 h-9 rounded-full bg-blue-50 text-insani-blue flex items-center justify-center font-bold shrink-0">
-                                <Receipt className="w-4.5 h-4.5" />
+                                <ReceiptText className="w-4.5 h-4.5" />
                             </div>
                             <div>
                                 <DialogTitle className="text-lg font-bold text-slate-900">
