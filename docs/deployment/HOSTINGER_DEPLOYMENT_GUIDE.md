@@ -226,7 +226,7 @@ WHATSAPP_TOKEN=TokenAkunFonnteAnda
 
 ---
 
-## 7. Setup Symbolic Link Storage (`storage:link`)
+## 7. Setup Symbolic Link Storage (`storage:link`) & Izin Berkas (Permissions)
 
 Untuk menampilkan gambar banner, avatar, foto program, dan dokumen publik:
 1. Aktifkan akses SSH di **hPanel** -> **Advanced** -> **SSH Access**.
@@ -241,6 +241,15 @@ Untuk menampilkan gambar banner, avatar, foto program, dan dokumen publik:
 ```bash
 ln -s /home/uXXXXXXX/domains/domainanda.com/laravel_app/storage/app/public /home/uXXXXXXX/domains/domainanda.com/public_html/storage
 ```
+
+### Izin Berkas (File Permissions)
+* **Izin Berkas (File Permissions):** Pastikan folder `storage/` di server memiliki permission `755` (atau `775`), hindari penggunaan `777` agar user sistem lain di shared hosting tidak dapat membaca file penyimpanan lokal (khususnya dokumen privat seperti RAB dan bukti transfer pencairan dana di `storage/app/private/`).
+* **Perintah SSH Izin Berkas yang Direkomendasikan:**
+  ```bash
+  # Mengatur direktori menjadi 755 dan file menjadi 644 secara aman
+  find storage bootstrap/cache -type d -exec chmod 755 {} \;
+  find storage bootstrap/cache -type f -exec chmod 644 {} \;
+  ```
 
 ---
 
@@ -402,6 +411,7 @@ Setelah seluruh tahapan selesai, jalankan checklist verifikasi berikut:
 - [ ] First-party Analytics aktif mencatat kunjungan (endpoint `/analytics/collect` dan `/analytics/heartbeat` merespon 200 OK)
 - [ ] Cron job berjalan di server — cek log: `tail -f storage/logs/laravel.log`
 - [ ] Database backup berfungsi: jalankan manual `php artisan backup:run --only-db` lalu cek dengan `php artisan backup:list`
+- [ ] Izin berkas folder `storage/` dan `bootstrap/cache` telah dipastikan `755` (atau `775`) dan bukan `777`
 - [ ] Submit sitemap XML ke [Google Search Console](https://search.google.com/search-console): `https://insani.id/sitemap.xml`
 
 ### Troubleshooting Umum

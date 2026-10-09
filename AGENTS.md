@@ -197,7 +197,12 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 # Design, Icons, and Asset Guidelines
 
 - **Larangan Icon Sparkles:** DILARANG menggunakan icon `Sparkles`, `PencilSparkles`, atau varian kilau/bintang sejenis di seluruh antarmuka aplikasi. Icon ini diasosiasikan dengan AI gimmick / cliché dan tidak cocok untuk citra lembaga filantropi & yayasan resmi.
+- **Larangan Icon Berlogo Dollar ($) & Pemilihan Icon Finansial/Kuitansi:** DILARANG menggunakan icon yang menampilkan grafis simbol mata uang Dollar (`$`) seperti `DollarSign`, `CircleDollarSign`, `BadgeDollarSign`, serta icon `Receipt` (karena icon bawaan `Receipt` di katalog Lucide memiliki simbol dollar `$` di dalamnya). Seluruh transaksi, donasi, dan penyaluran di Insani menggunakan mata uang Rupiah (IDR).
+  - Untuk aksi cetak kuitansi / dokumen resmi: Selalu gunakan icon `Printer`.
+  - Untuk tampilan kuitansi / tanda terima / bukti transaksi / struk: Gunakan `ReceiptText` (kuitansi bergaris teks nota tanpa simbol dollar `$`), `FileText`, atau `ScrollText`.
+  - Untuk keuangan, saldo, donasi, atau rekening: Gunakan icon representatif dari [Lucide Icons](https://lucide.dev/icons/) seperti `Wallet`, `CreditCard`, `Coins`, `Banknote`, `Landmark`, atau `HandCoins`.
 - **Pemilihan Icon Lucide:** Selalu gunakan icon yang representatif, fungsional, dan bermakna kontekstual dari katalog resmi [Lucide Icons](https://lucide.dev/icons/) (misalnya: `Info`, `ShieldCheck`, `CheckCircle2`, `Landmark`, `Building2`, `HelpCircle`, `HeartHandshake`, `TrendingUp`, dll).
 - **Aset Logo Resmi (Perbankan, E-Wallet, & Lembaga):** Seluruh logo lembaga pemerintahan, kementerian/regulator, perbankan, dan e-wallet wajib bersumber dari aset resmi SVG/vektor beresolusi tinggi, diutamakan dari [Wikimedia Commons](https://commons.wikimedia.org).
 
 </laravel-boost-guidelines>
+
