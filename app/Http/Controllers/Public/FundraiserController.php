@@ -24,6 +24,13 @@ class FundraiserController extends Controller
             return back()->with('error', 'Program ini tidak sedang aktif menerima donasi.');
         }
 
+        $isOwner = ((int) $program->created_by === (int) $user->id)
+            || ($program->campaignerProfile && (int) $program->campaignerProfile->user_id === (int) $user->id);
+
+        if ($isOwner) {
+            return back()->with('error', 'Sebagai pembuat program, Anda tidak dapat mendaftar sebagai fundraiser untuk program ini. Silakan bagikan tautan utama program Anda.');
+        }
+
         $validated = $request->validate([
             'target_amount' => ['nullable', 'numeric', 'min:10000', 'max:1000000000'],
             'personal_message' => ['nullable', 'string', 'max:500'],

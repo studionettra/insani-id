@@ -201,8 +201,14 @@ class ProgramListingController extends Controller
             ];
         });
 
+        $isProgramOwner = auth()->check() && (
+            (int) $program->created_by === (int) auth()->id() ||
+            ($program->campaignerProfile && (int) $program->campaignerProfile->user_id === (int) auth()->id())
+        );
+
         return Inertia::render('Public/Program/Show', [
             'program' => $program,
+            'isProgramOwner' => $isProgramOwner,
             'currentFundraiser' => $currentFundraiser,
             'topFundraisers' => $topFundraisers,
             'userFundraiser' => $userFundraiser,

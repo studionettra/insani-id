@@ -63,6 +63,56 @@ test('user can register as fundraiser for a published program and role is assign
     expect($freshUser->getAllPermissions()->pluck('name')->contains('fundraiser.view'))->toBeFalse();
 });
 
+test('campaign creator cannot register as fundraiser for their own program', function () {
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
+
+    $creator = User::factory()->create(['name' => 'Pembuat Campaign']);
+    $program = Program::factory()->published()->create([
+        'category_id' => $this->category->id,
+        'title' => 'Campaign Sendiri',
+        'slug' => 'campaign-sendiri',
+        'created_by' => $creator->id,
+    ]);
+
+    $response = $this->actingAs($creator)
+        ->from(route('program.show', $program->slug))
+        ->post(route('program.fundraiser.store', $program->slug), [
+            'target_amount' => 5000000,
+        ]);
+
+    $response->assertRedirect(route('program.show', $program->slug));
+    $response->assertSessionHas('error');
+
+    expect(Fundraiser::where('user_id', $creator->id)->where('program_id', $program->id)->exists())->toBeFalse();
+});
+
+test('campaign creator can register as fundraiser for another campaigner program', function () {
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
+
+    $creatorA = User::factory()->create(['name' => 'Campaigner A']);
+    $creatorB = User::factory()->create(['name' => 'Campaigner B']);
+
+    $programB = Program::factory()->published()->create([
+        'category_id' => $this->category->id,
+        'title' => 'Campaign Milik B',
+        'slug' => 'campaign-milik-b',
+        'created_by' => $creatorB->id,
+    ]);
+
+    $response = $this->actingAs($creatorA)
+        ->from(route('program.show', $programB->slug))
+        ->post(route('program.fundraiser.store', $programB->slug), [
+            'target_amount' => 5000000,
+        ]);
+
+    $response->assertRedirect(route('program.show', $programB->slug));
+    $response->assertSessionHas('success');
+
+    expect(Fundraiser::where('user_id', $creatorA->id)->where('program_id', $programB->id)->exists())->toBeTrue();
+});
+
 test('fundraiser cannot register twice for the same program and gets redirected with info', function () {
     $user = User::factory()->create(['name' => 'Siti Nurhaliza']);
 

@@ -146,6 +146,7 @@ interface FundraiserItem {
 
 interface Props {
     program: Program;
+    isProgramOwner?: boolean;
     auth: {
         user: {
             id: number;
@@ -194,7 +195,7 @@ interface Props {
     };
 }
 
-export default function ProgramShow({ program, auth, currentFundraiser, topFundraisers = [], userFundraiser, transparency }: Props) {
+export default function ProgramShow({ program, isProgramOwner = false, auth, currentFundraiser, topFundraisers = [], userFundraiser, transparency }: Props) {
     const { t, locale, isRtl } = useTranslation();
     const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur' | 'fundraiser'>(() => {
         if (typeof window !== 'undefined') {
@@ -794,30 +795,44 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
 
                                                 {/* Sisi Kanan: Dua Tombol Berdampingan */}
                                                 <div className="flex items-center gap-2.5 w-full md:w-auto">
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            if (!auth?.user) {
-                                                                window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-                                                                return;
-                                                            }
-                                                            setIsFundraiserModalOpen(true);
-                                                        }}
-                                                        className="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-xl px-4 py-2.5 h-10 shadow-xs transition-colors"
-                                                    >
-                                                        {userFundraiser ? t('Lihat Tautan Saya') : t('Gabung Jadi Fundraiser')}
-                                                    </Button>
+                                                    {isProgramOwner ? (
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            onClick={() => setIsInviteFundraiserModalOpen(true)}
+                                                            className="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-xl px-4 py-2.5 h-10 shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                                                        >
+                                                            <Users className="w-4 h-4" />
+                                                            {t('Ajak Jadi Fundraiser')}
+                                                        </Button>
+                                                    ) : (
+                                                        <>
+                                                            <Button
+                                                                type="button"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    if (!auth?.user) {
+                                                                        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                                                                        return;
+                                                                    }
+                                                                    setIsFundraiserModalOpen(true);
+                                                                }}
+                                                                className="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm rounded-xl px-4 py-2.5 h-10 shadow-xs transition-colors"
+                                                            >
+                                                                {userFundraiser ? t('Lihat Tautan Saya') : t('Gabung Jadi Fundraiser')}
+                                                            </Button>
 
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => setIsInviteFundraiserModalOpen(true)}
-                                                        className="flex-1 md:flex-initial border border-emerald-600/80 bg-white hover:bg-emerald-50 text-emerald-700 font-semibold text-xs sm:text-sm rounded-xl px-4 py-2.5 h-10 shadow-xs transition-colors"
-                                                    >
-                                                        {t('Ajak Jadi Fundraiser')}
-                                                    </Button>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => setIsInviteFundraiserModalOpen(true)}
+                                                                className="flex-1 md:flex-initial border border-emerald-600/80 bg-white hover:bg-emerald-50 text-emerald-700 font-semibold text-xs sm:text-sm rounded-xl px-4 py-2.5 h-10 shadow-xs transition-colors"
+                                                            >
+                                                                {t('Ajak Jadi Fundraiser')}
+                                                            </Button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -943,20 +958,31 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                             <Share2 className="w-5 h-5 mr-2" />
                                             {t('Bagikan Program Ini')}
                                         </Button>
-                                        <Button
-                                            onClick={() => {
-                                                if (!auth?.user) {
-                                                    window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
-                                                    return;
-                                                }
-                                                setIsFundraiserModalOpen(true);
-                                            }}
-                                            variant="outline"
-                                            className="w-full h-11 border-dashed border-emerald-400 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/70 transition-colors font-semibold flex items-center justify-center gap-2 rounded-xl"
-                                        >
-                                            <HandHelping className="w-4 h-4 text-emerald-600" />
-                                            {userFundraiser ? t('Lihat Tautan Fundraiser Saya') : t('Jadi Fundraiser Program Ini')}
-                                        </Button>
+                                        {isProgramOwner ? (
+                                            <Button
+                                                onClick={() => setIsInviteFundraiserModalOpen(true)}
+                                                variant="outline"
+                                                className="w-full h-11 border-dashed border-emerald-400 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/70 transition-colors font-semibold flex items-center justify-center gap-2 rounded-xl"
+                                            >
+                                                <Users className="w-4 h-4 text-emerald-600" />
+                                                {t('Ajak Relawan Fundraiser')}
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                onClick={() => {
+                                                    if (!auth?.user) {
+                                                        window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+                                                        return;
+                                                    }
+                                                    setIsFundraiserModalOpen(true);
+                                                }}
+                                                variant="outline"
+                                                className="w-full h-11 border-dashed border-emerald-400 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/70 transition-colors font-semibold flex items-center justify-center gap-2 rounded-xl"
+                                            >
+                                                <HandHelping className="w-4 h-4 text-emerald-600" />
+                                                {userFundraiser ? t('Lihat Tautan Fundraiser Saya') : t('Jadi Fundraiser Program Ini')}
+                                            </Button>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
