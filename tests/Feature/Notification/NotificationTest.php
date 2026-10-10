@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -775,4 +776,111 @@ test('moderasi kabar program oleh admin memicu notifikasi ProgramUpdateReviewedN
         return $n->update->moderation_status === 'approved'
             && $n->update->is_published === true;
     });
+});
+
+test('DonationReceivedNotification generates correct url based on recipient role', function () {
+    $campaigner = User::factory()->create();
+    $campaigner->assignRole('Campaigner Individu');
+
+    $finance = User::factory()->create();
+    $finance->assignRole('Keuangan');
+
+    $category = Category::create(['name' => ['id' => 'Kesehatan'], 'slug' => 'kesehatan']);
+    $program = Program::create([
+        'title' => ['id' => 'Bantu Adik Sembuh'],
+        'slug' => 'bantu-adik-sembuh',
+        'program_code' => 'PRG-NOTIF-03',
+        'story' => ['id' => 'Cerita'],
+        'cover_image' => 'cover.jpg',
+        'campaigner_type' => 'individual',
+        'category_id' => $category->id,
+        'created_by' => $campaigner->id,
+        'status' => 'published',
+        'target_amount' => 10000000,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 500000,
+        'status' => 'paid',
+        'donation_code' => 'DON-TEST-123',
+    ]);
+
+    $notification = new DonationReceivedNotification($donation);
+
+    $adminPayload = $notification->toArray($finance);
+    expect($adminPayload['url'])->toBe(route('admin.donations.index', ['search' => 'DON-TEST-123']));
+
+    $campaignerPayload = $notification->toArray($campaigner);
+    expect($campaignerPayload['url'])->toBe(route('akun.programs.show', $program->id));
+});
+
+test('campaigner clicking notification with legacy admin url is redirected to akun programs show instead of 403', function () {
+    $campaigner = User::factory()->create();
+    $campaigner->assignRole('Campaigner Individu');
+
+    $category = Category::create(['name' => ['id' => 'Kemanusiaan'], 'slug' => 'kemanusiaan']);
+    $program = Program::create([
+        'title' => ['id' => 'Bantuan Bencana'],
+        'slug' => 'bantuan-bencana',
+        'program_code' => 'PRG-NOTIF-04',
+        'story' => ['id' => 'Cerita bencana'],
+        'cover_image' => 'cover.jpg',
+        'campaigner_type' => 'individual',
+        'category_id' => $category->id,
+        'created_by' => $campaigner->id,
+        'status' => 'published',
+        'target_amount' => 20000000,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 1000000,
+        'status' => 'paid',
+        'donation_code' => 'DON-LEGACY-01',
+    ]);
+
+    $dbNotification = $campaigner->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => DonationReceivedNotification::class,
+        'data' => [
+            'title' => 'Donasi Berhasil Diterima',
+            'message' => 'Donasi Rp 1.000.000 dari Inisiator Kebaikan',
+            'url' => route('admin.donations.index', ['search' => 'DON-LEGACY-01']),
+            'category' => 'donation',
+            'icon' => 'heart',
+            'id_reference' => $donation->id,
+        ],
+    ]);
+
+    $response = $this->actingAs($campaigner)->get("/notifications/{$dbNotification->id}/go");
+
+    $response->assertRedirect(route('akun.programs.show', $program->id));
+    expect($dbNotification->fresh()->read_at)->not->toBeNull();
+});
+
+test('admin clicking notification with admin url is redirected directly to admin donations', function () {
+    $donation = Donation::factory()->create([
+        'amount' => 250000,
+        'status' => 'paid',
+        'donation_code' => 'DON-ADMIN-01',
+    ]);
+
+    $dbNotification = $this->admin->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => DonationReceivedNotification::class,
+        'data' => [
+            'title' => 'Donasi Berhasil Diterima',
+            'message' => 'Donasi Rp 250.000',
+            'url' => route('admin.donations.index', ['search' => 'DON-ADMIN-01']),
+            'category' => 'donation',
+            'icon' => 'heart',
+            'id_reference' => $donation->id,
+        ],
+    ]);
+
+    $response = $this->actingAs($this->admin)->get("/notifications/{$dbNotification->id}/go");
+
+    $response->assertRedirect(route('admin.donations.index', ['search' => 'DON-ADMIN-01']));
+    expect($dbNotification->fresh()->read_at)->not->toBeNull();
 });

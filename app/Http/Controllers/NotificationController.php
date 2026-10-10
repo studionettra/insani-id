@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Donation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -80,6 +81,40 @@ class NotificationController extends Controller
         }
 
         $targetUrl = $notification->data['url'] ?? route('dashboard');
+        $user = $request->user();
+
+        // Check if the target URL points to admin backend while user has no admin privileges
+        $isAdminTarget = is_string($targetUrl) && str_contains($targetUrl, '/admin');
+        $hasAdminAccess = rescue(fn () => $user->hasAnyRole([
+            'Administrator',
+            'Program Officer',
+            'Verifikator',
+            'Keuangan',
+            'Customer Service',
+            'Content Editor',
+            'Eksekutif',
+        ]), false) || rescue(fn () => $user->can('donation.view'), false);
+
+        if ($isAdminTarget && ! $hasAdminAccess) {
+            $category = $notification->data['category'] ?? null;
+            $idReference = $notification->data['id_reference'] ?? null;
+
+            if ($category === 'donation' && $idReference) {
+                $donation = Donation::with('program')->find($idReference);
+                if ($donation?->program && $donation->program->created_by === $user->id) {
+                    return redirect()->route('akun.programs.show', $donation->program_id);
+                }
+                if ($donation && $donation->donor_user_id === $user->id) {
+                    return redirect()->route('akun.donations.index');
+                }
+            }
+
+            if ($user->campaignerProfile || rescue(fn () => $user->hasAnyRole(['Campaigner Individu', 'Campaigner Lembaga']), false)) {
+                return redirect()->route('akun.programs.index');
+            }
+
+            return redirect()->route('dashboard');
+        }
 
         return redirect()->to($targetUrl);
     }
