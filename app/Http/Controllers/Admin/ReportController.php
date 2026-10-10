@@ -27,7 +27,9 @@ class ReportController extends Controller
         // 2. Third-Party Deductions: Gateway Fees
         $gatewayFeeQuery = DB::table('donations')
             ->join('payments', 'donations.id', '=', 'payments.donation_id')
-            ->where('donations.status', 'paid');
+            ->where('donations.status', 'paid')
+            ->whereIn('payments.gateway_status', ['PAID', 'SETTLEMENT', 'SETTLED'])
+            ->whereNotNull('payments.paid_at');
         if ($startDate && $endDate) {
             $gatewayFeeQuery->whereBetween('donations.paid_at', [$startDate, $endDate]);
         }
@@ -67,6 +69,8 @@ class ReportController extends Controller
             DB::table('donations')
                 ->join('payments', 'donations.id', '=', 'payments.donation_id')
                 ->where('donations.status', 'paid')
+                ->whereIn('payments.gateway_status', ['PAID', 'SETTLEMENT', 'SETTLED'])
+                ->whereNotNull('payments.paid_at')
                 ->sum('payments.gateway_fee'));
         $allTimeDisbursedGross = (float) Disbursement::whereIn('status', ['transferred'])
             ->selectRaw('SUM(requested_amount + platform_fee_amount) as total')
@@ -77,7 +81,9 @@ class ReportController extends Controller
         // 5. Payment Channel Performance Aggregation
         $channelRows = DB::table('donations')
             ->join('payments', 'donations.id', '=', 'payments.donation_id')
-            ->where('donations.status', 'paid');
+            ->where('donations.status', 'paid')
+            ->whereIn('payments.gateway_status', ['PAID', 'SETTLEMENT', 'SETTLED'])
+            ->whereNotNull('payments.paid_at');
         if ($startDate && $endDate) {
             $channelRows->whereBetween('donations.paid_at', [$startDate, $endDate]);
         }

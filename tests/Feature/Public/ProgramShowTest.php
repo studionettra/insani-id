@@ -29,7 +29,8 @@ it('renders public program detail page with transparency data successfully', fun
         'gateway' => 'xendit',
         'payment_method' => 'qris',
         'gateway_fee' => 3500,
-        'status' => 'paid',
+        'gateway_status' => 'PAID',
+        'paid_at' => now(),
     ]);
 
     // Create a transferred disbursement

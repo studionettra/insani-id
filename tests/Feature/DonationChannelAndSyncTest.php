@@ -110,3 +110,70 @@ test('it triggers fallback status sync when visiting status page for pending onl
     $donation->refresh();
     expect($donation->status)->toBe('paid');
 });
+
+test('it enforces QRIS maximum limit when payment_channel is omitted for online donation', function () {
+    $program = Program::factory()->create(['status' => 'published']);
+
+    // Attempting 15,000,000 without payment_channel should fallback to QRIS and fail validation
+    $response = $this->post(route('donation.store', ['program' => $program->slug]), [
+        'amount' => 15000000,
+        'donor_name' => 'Donatur Dermawan',
+        'donor_email' => 'donatur@example.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'online',
+        'payment_method' => 'qris',
+    ]);
+
+    $response->assertSessionHasErrors(['amount']);
+});
+
+test('it rejects invalid payment_channel for online donations', function () {
+    $program = Program::factory()->create(['status' => 'published']);
+
+    $response = $this->post(route('donation.store', ['program' => $program->slug]), [
+        'amount' => 50000,
+        'donor_name' => 'Donatur Dermawan',
+        'donor_email' => 'donatur@example.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'online',
+        'payment_method' => 'qris',
+        'payment_channel' => 'INVALID_CHANNEL_XYZ',
+    ]);
+
+    $response->assertSessionHasErrors(['payment_channel']);
+});
+
+test('program total_gateway_fees excludes unpaid or expired payment attempts for the same donation', function () {
+    $program = Program::factory()->create(['status' => 'published']);
+
+    // Donasi senilai 100.000 berstatus paid
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 100000,
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    // Percobaan 1: Expired dengan estimasi fee 4.440 (tidak boleh dihitung)
+    Payment::factory()->create([
+        'donation_id' => $donation->id,
+        'gateway' => 'midtrans',
+        'gateway_status' => 'EXPIRED',
+        'gateway_fee' => 4440,
+        'paid_amount' => null,
+        'paid_at' => null,
+    ]);
+
+    // Percobaan 2: Sukses via QRIS dengan fee 700 (hanya ini yang dihitung)
+    Payment::factory()->create([
+        'donation_id' => $donation->id,
+        'gateway' => 'midtrans',
+        'gateway_status' => 'PAID',
+        'gateway_fee' => 700,
+        'paid_amount' => 100000,
+        'paid_at' => now(),
+    ]);
+
+    // Program total gateway fees hanya boleh 700, bukan 5.140
+    expect((float) $program->total_gateway_fees)->toBe(700.0);
+});

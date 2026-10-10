@@ -148,6 +148,8 @@ class ProgramListingController extends Controller
                 ->join('payments', 'donations.id', '=', 'payments.donation_id')
                 ->where('donations.program_id', $program->id)
                 ->where('donations.status', 'paid')
+                ->whereIn('payments.gateway_status', ['PAID', 'SETTLEMENT', 'SETTLED'])
+                ->whereNotNull('payments.paid_at')
                 ->sum('payments.gateway_fee');
 
             $totalTransferredGross = (float) $transferredDisbursements->sum('requested_amount');

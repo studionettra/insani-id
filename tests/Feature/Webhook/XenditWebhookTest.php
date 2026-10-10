@@ -388,3 +388,91 @@ test('webhook saves explicit fees from payload and updates program available bal
         ->and((float) $program->net_collected_amount)->toBe(95560.0)
         ->and((float) $program->available_balance)->toBe(95560.0);
 });
+
+test('xendit webhook quarantines payment when paid_amount does not match donation amount', function () {
+    Queue::fake();
+
+    $program = Program::factory()->create([
+        'target_amount' => 1000000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-XENDIT-MISMATCH',
+        'amount' => 100000,
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::factory()->create([
+        'donation_id' => $donation->id,
+        'gateway' => 'xendit',
+        'gateway_reference_id' => 'DON-XENDIT-MISMATCH',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $payload = [
+        'external_id' => 'DON-XENDIT-MISMATCH',
+        'status' => 'PAID',
+        'amount' => 50000, // Nominal tidak cocok dengan 100.000
+        'paid_amount' => 50000,
+    ];
+
+    $response = $this->withHeaders([
+        'x-callback-token' => 'test-webhook-token',
+    ])->postJson(route('webhooks.xendit'), $payload);
+
+    $response->assertOk();
+    expect($response->json('message'))->toBe('Nominal mismatch; payment quarantined for review');
+
+    $payment->refresh();
+    expect($payment->gateway_status)->toBe('MISMATCH')
+        ->and($payment->paid_amount)->toBeNull();
+
+    $donation->refresh();
+    expect($donation->status)->toBe('pending');
+
+    $program->refresh();
+    expect((float) $program->collected_amount)->toBe(0.0);
+
+    Queue::assertNothingPushed();
+});
+
+test('xendit webhook ignores out-of-order expired webhook if payment is already paid', function () {
+    $program = Program::factory()->create(['collected_amount' => 100000]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-XENDIT-ORDER',
+        'amount' => 100000,
+        'status' => 'paid',
+    ]);
+
+    $payment = Payment::factory()->create([
+        'donation_id' => $donation->id,
+        'gateway' => 'xendit',
+        'gateway_reference_id' => 'DON-XENDIT-ORDER',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 100000,
+        'paid_at' => now(),
+    ]);
+
+    $payload = [
+        'external_id' => 'DON-XENDIT-ORDER',
+        'status' => 'EXPIRED',
+    ];
+
+    $response = $this->withHeaders([
+        'x-callback-token' => 'test-webhook-token',
+    ])->postJson(route('webhooks.xendit'), $payload);
+
+    $response->assertOk();
+    expect($response->json('message'))->toBe('Ignored out-of-order webhook; payment already settled');
+
+    $payment->refresh();
+    expect($payment->gateway_status)->toBe('PAID')
+        ->and((float) $payment->paid_amount)->toBe(100000.0);
+
+    $donation->refresh();
+    expect($donation->status)->toBe('paid');
+});

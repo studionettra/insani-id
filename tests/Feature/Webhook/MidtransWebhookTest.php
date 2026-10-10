@@ -278,3 +278,152 @@ test('midtrans calculateGatewayFee computes precise fees according to official p
     expect(MidtransCorePaymentService::calculateGatewayFee('manual', 100000))->toBe(0.0)
         ->and(MidtransCorePaymentService::calculateGatewayFee('unknown_channel', 100000))->toBe(0.0);
 });
+
+test('midtrans webhook quarantines payment when gross_amount does not match donation amount', function () {
+    Queue::fake();
+
+    $program = Program::factory()->create([
+        'target_amount' => 10000000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-MISMATCH-001',
+        'amount' => 100000,
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-MISMATCH-001',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $orderId = 'DON-MISMATCH-001';
+    $statusCode = '200';
+    $tamperedAmount = '50000.00'; // Donasi 100.000 tapi dibayar 50.000
+    $signature = generateMidtransSignature($orderId, $statusCode, $tamperedAmount, 'SB-Mid-server-testkey12345');
+
+    $response = $this->postJson(route('webhooks.midtrans'), [
+        'order_id' => $orderId,
+        'status_code' => $statusCode,
+        'gross_amount' => $tamperedAmount,
+        'signature_key' => $signature,
+        'transaction_status' => 'settlement',
+        'payment_type' => 'qris',
+    ]);
+
+    $response->assertStatus(200);
+    expect($response->json('message'))->toBe('Nominal mismatch; payment quarantined for review');
+
+    // Payment should be marked as MISMATCH
+    $payment->refresh();
+    expect($payment->gateway_status)->toBe('MISMATCH')
+        ->and($payment->paid_amount)->toBeNull();
+
+    // Donation must remain pending
+    $donation->refresh();
+    expect($donation->status)->toBe('pending');
+
+    // Program collected amount must NOT increase
+    $program->refresh();
+    expect((float) $program->collected_amount)->toBe(0.0);
+
+    // No notification should be dispatched
+    Queue::assertNothingPushed();
+});
+
+test('midtrans webhook ignores out-of-order expired webhook if payment is already paid', function () {
+    $program = Program::factory()->create(['collected_amount' => 100000]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-ORDER-001',
+        'amount' => 100000,
+        'status' => 'paid',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-ORDER-001',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 100000,
+        'paid_at' => now(),
+    ]);
+
+    $orderId = 'DON-ORDER-001';
+    $statusCode = '200';
+    $grossAmount = '100000.00';
+    $signature = generateMidtransSignature($orderId, $statusCode, $grossAmount, 'SB-Mid-server-testkey12345');
+
+    // Simulasikan webhook expire tiba belakangan
+    $response = $this->postJson(route('webhooks.midtrans'), [
+        'order_id' => $orderId,
+        'status_code' => $statusCode,
+        'gross_amount' => $grossAmount,
+        'signature_key' => $signature,
+        'transaction_status' => 'expire',
+    ]);
+
+    $response->assertStatus(200);
+    expect($response->json('message'))->toBe('Ignored out-of-order webhook; payment already settled');
+
+    // Status harus tetap PAID dan tidak tertimpa menjadi EXPIRED
+    $payment->refresh();
+    expect($payment->gateway_status)->toBe('PAID')
+        ->and((float) $payment->paid_amount)->toBe(100000.0);
+
+    $donation->refresh();
+    expect($donation->status)->toBe('paid');
+});
+
+test('midtrans webhook is idempotent and does not send duplicate notifications on repeat callbacks', function () {
+    Queue::fake();
+
+    $program = Program::factory()->create();
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'donation_code' => 'DON-IDEMP-001',
+        'amount' => 50000,
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-IDEMP-001',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $orderId = 'DON-IDEMP-001';
+    $statusCode = '200';
+    $grossAmount = '50000.00';
+    $signature = generateMidtransSignature($orderId, $statusCode, $grossAmount, 'SB-Mid-server-testkey12345');
+
+    $payload = [
+        'order_id' => $orderId,
+        'status_code' => $statusCode,
+        'gross_amount' => $grossAmount,
+        'signature_key' => $signature,
+        'transaction_status' => 'settlement',
+        'payment_type' => 'qris',
+    ];
+
+    // Callback pertama
+    $this->postJson(route('webhooks.midtrans'), $payload)->assertStatus(200);
+
+    // Callback kedua (duplicate retry dari gateway)
+    $this->postJson(route('webhooks.midtrans'), $payload)->assertStatus(200);
+
+    // Notifikasi hanya boleh di-push 1 kali
+    Queue::assertPushed(SendDonationPaidNotification::class, 1);
+});

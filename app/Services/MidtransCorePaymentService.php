@@ -676,6 +676,7 @@ class MidtransCorePaymentService
         $grossAmount = (float) ($data['gross_amount'] ?? $payment->donation?->amount ?? 0);
 
         // Map Midtrans transaction status to application gateway_status
+        $currentStatus = strtoupper((string) $payment->gateway_status);
         $gatewayStatus = 'PENDING';
         $isPaid = false;
 
@@ -686,6 +687,35 @@ class MidtransCorePaymentService
             $gatewayStatus = 'EXPIRED';
         } elseif (in_array($transactionStatus, ['cancel', 'deny'], true)) {
             $gatewayStatus = 'FAILED';
+        }
+
+        // Monotonic state protection: if payment is already PAID, ignore out-of-order downgrade syncs
+        if ($currentStatus === 'PAID' && ! $isPaid) {
+            $payment->update([
+                'raw_payload' => array_merge($payment->raw_payload ?? [], ['last_sync_ignored' => $data]),
+            ]);
+
+            return true;
+        }
+
+        // Check nominal match for paid transactions
+        if ($isPaid) {
+            $expectedAmount = (float) ($payment->donation?->amount ?? 0);
+            if (round($grossAmount, 2) !== round($expectedAmount, 2)) {
+                $payment->update([
+                    'gateway_status' => 'MISMATCH',
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], [
+                        'mismatch_sync' => $data,
+                        'mismatch_details' => [
+                            'received' => $grossAmount,
+                            'expected' => $expectedAmount,
+                            'detected_at' => now()->toIso8601String(),
+                        ],
+                    ]),
+                ]);
+
+                return false;
+            }
         }
 
         // Calculate Midtrans official gateway fee using centralized pricing logic

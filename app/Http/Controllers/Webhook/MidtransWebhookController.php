@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Services\MidtransCorePaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class MidtransWebhookController extends Controller
@@ -48,62 +49,118 @@ class MidtransWebhookController extends Controller
             return response()->json(['message' => 'Invalid signature'], 403);
         }
 
-        // Find payment record by gateway_reference_id or donation code
-        $payment = Payment::where('gateway_reference_id', $orderId)
-            ->where('gateway', 'midtrans')
-            ->first();
+        return DB::transaction(function () use ($orderId, $grossAmount, $transactionStatus, $fraudStatus, $paymentType, $payload) {
+            // Find payment record with pessimistic lock
+            $payment = Payment::with('donation')
+                ->where('gateway_reference_id', $orderId)
+                ->where('gateway', 'midtrans')
+                ->lockForUpdate()
+                ->first();
 
-        if (! $payment) {
-            // Fallback find by donation code
-            $payment = Payment::whereHas('donation', function ($q) use ($orderId) {
-                $q->where('donation_code', $orderId);
-            })->where('gateway', 'midtrans')->latest()->first();
-        }
+            if (! $payment) {
+                // Fallback find by donation code
+                $payment = Payment::with('donation')
+                    ->whereHas('donation', function ($q) use ($orderId) {
+                        $q->where('donation_code', $orderId);
+                    })
+                    ->where('gateway', 'midtrans')
+                    ->latest()
+                    ->lockForUpdate()
+                    ->first();
+            }
 
-        if (! $payment) {
-            Log::warning("Payment not found for Midtrans order {$orderId}");
+            if (! $payment) {
+                Log::warning("Payment not found for Midtrans order {$orderId}");
 
-            return response()->json(['message' => 'Payment not found'], 404);
-        }
+                return response()->json(['message' => 'Payment not found'], 404);
+            }
 
-        // Map Midtrans transaction status to application gateway_status
-        $gatewayStatus = 'PENDING';
-        $isPaid = false;
+            $currentStatus = strtoupper((string) $payment->gateway_status);
+            $isSettlement = ($transactionStatus === 'settlement' || ($transactionStatus === 'capture' && $fraudStatus === 'accept'));
+            $isExpire = ($transactionStatus === 'expire');
+            $isFailed = in_array($transactionStatus, ['cancel', 'deny'], true);
 
-        if ($transactionStatus === 'settlement' || ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
-            $gatewayStatus = 'PAID';
-            $isPaid = true;
-        } elseif ($transactionStatus === 'expire') {
-            $gatewayStatus = 'EXPIRED';
-        } elseif (in_array($transactionStatus, ['cancel', 'deny'], true)) {
-            $gatewayStatus = 'FAILED';
-        }
+            // Monotonic state protection: if payment is already PAID, ignore out-of-order downgrade callbacks
+            if ($currentStatus === 'PAID' && ! $isSettlement) {
+                Log::info("Ignored out-of-order Midtrans webhook for order {$orderId}. Current status is already PAID, received: {$transactionStatus}");
 
-        // Calculate Midtrans official gateway fee using centralized pricing logic
-        $amountFloat = (float) $grossAmount;
-        $fee = $isPaid ? MidtransCorePaymentService::calculateGatewayFee($paymentType, $amountFloat) : 0.0;
+                $payment->update([
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['ignored_webhook' => $payload]),
+                ]);
 
-        $updateData = [
-            'gateway_status' => $gatewayStatus,
-            'paid_amount' => $isPaid ? $amountFloat : null,
-            'gateway_fee' => $fee,
-            'paid_at' => $isPaid ? ($payment->paid_at ?? now()) : null,
-            'raw_payload' => array_merge($payment->raw_payload ?? [], ['webhook' => $payload]),
-        ];
+                return response()->json(['message' => 'Ignored out-of-order webhook; payment already settled'], 200);
+            }
 
-        // Capture VA number if present in webhook
-        if (! empty($payload['va_numbers'][0]['va_number'])) {
-            $updateData['payment_destination'] = $payload['va_numbers'][0]['va_number'];
-        } elseif (! empty($payload['permata_va_number'])) {
-            $updateData['payment_destination'] = $payload['permata_va_number'];
-        } elseif (! empty($payload['bill_key'])) {
-            $updateData['payment_destination'] = $payload['bill_key'];
-        }
+            // Handle settlement/capture
+            if ($isSettlement) {
+                $amountFloat = (float) $grossAmount;
+                $expectedAmount = (float) ($payment->donation?->amount ?? 0);
 
-        // Update payment (PaymentObserver will automatically handle donation status,
-        // comments, program accumulated amounts, and receipt email notifications)
-        $payment->update($updateData);
+                // Strict nominal comparison to prevent financial mismatch
+                if (round($amountFloat, 2) !== round($expectedAmount, 2)) {
+                    Log::error("Midtrans Webhook Nominal Mismatch for order {$orderId}", [
+                        'received_gross_amount' => $amountFloat,
+                        'expected_donation_amount' => $expectedAmount,
+                        'donation_code' => $payment->donation?->donation_code,
+                    ]);
 
-        return response()->json(['message' => 'Midtrans webhook processed successfully'], 200);
+                    $payment->update([
+                        'gateway_status' => 'MISMATCH',
+                        'raw_payload' => array_merge($payment->raw_payload ?? [], [
+                            'mismatch_webhook' => $payload,
+                            'mismatch_details' => [
+                                'received' => $amountFloat,
+                                'expected' => $expectedAmount,
+                                'detected_at' => now()->toIso8601String(),
+                            ],
+                        ]),
+                    ]);
+
+                    return response()->json(['message' => 'Nominal mismatch; payment quarantined for review'], 200);
+                }
+
+                $gatewayStatus = 'PAID';
+                $isPaid = true;
+                $fee = MidtransCorePaymentService::calculateGatewayFee($paymentType, $amountFloat);
+
+                $updateData = [
+                    'gateway_status' => $gatewayStatus,
+                    'paid_amount' => $amountFloat,
+                    'gateway_fee' => $fee,
+                    'paid_at' => $payment->paid_at ?? now(),
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['webhook' => $payload]),
+                ];
+            } elseif ($isExpire) {
+                $updateData = [
+                    'gateway_status' => 'EXPIRED',
+                    'paid_amount' => null,
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['webhook' => $payload]),
+                ];
+            } elseif ($isFailed) {
+                $updateData = [
+                    'gateway_status' => 'FAILED',
+                    'paid_amount' => null,
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['webhook' => $payload]),
+                ];
+            } else {
+                $updateData = [
+                    'gateway_status' => 'PENDING',
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['webhook' => $payload]),
+                ];
+            }
+
+            // Capture VA number if present in webhook
+            if (! empty($payload['va_numbers'][0]['va_number'])) {
+                $updateData['payment_destination'] = $payload['va_numbers'][0]['va_number'];
+            } elseif (! empty($payload['permata_va_number'])) {
+                $updateData['payment_destination'] = $payload['permata_va_number'];
+            } elseif (! empty($payload['bill_key'])) {
+                $updateData['payment_destination'] = $payload['bill_key'];
+            }
+
+            $payment->update($updateData);
+
+            return response()->json(['message' => 'Midtrans webhook processed successfully'], 200);
+        });
     }
 }

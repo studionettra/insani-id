@@ -9,6 +9,7 @@ use App\Models\Donation;
 use App\Models\Fundraiser;
 use App\Models\Payment;
 use App\Models\Program;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -94,7 +95,7 @@ class PaymentObserver
                 }
             });
 
-            if ($isNewlyPaid) {
+            if ($isNewlyPaid && Cache::add("donation_{$donation->id}_paid_events_dispatched", true, 300)) {
                 // Dispatch notification job to queue after the transaction commits
                 SendDonationPaidNotification::dispatch($donation)->afterCommit();
 

@@ -26,10 +26,17 @@ class StoreDonationRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $merges = [
             'donor_name' => is_string($this->donor_name) ? $this->sanitizeContent($this->donor_name) : $this->donor_name,
             'message' => is_string($this->message) ? $this->sanitizeContent($this->message) : $this->message,
-        ]);
+        ];
+
+        if ($this->input('channel') === 'online' && ! $this->filled('payment_channel')) {
+            $merges['payment_channel'] = 'QRIS';
+            $merges['payment_method'] = $this->input('payment_method') ?: 'qris';
+        }
+
+        $this->merge($merges);
     }
 
     /**
@@ -87,12 +94,31 @@ class StoreDonationRequest extends FormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            $channelType = $this->input('channel');
             $channelCode = $this->input('payment_channel');
             $amount = (float) $this->input('amount');
 
-            if (! empty($channelCode) && $amount > 0) {
-                $channelDef = MidtransCorePaymentService::findChannel($channelCode, $this->input('channel'))
-                    ?? XenditPaymentService::findChannel($channelCode, $this->input('channel'));
+            if ($channelType === 'online') {
+                $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'online')
+                    ?? XenditPaymentService::findChannel($channelCode, 'online');
+
+                if (! $channelDef) {
+                    $validator->errors()->add('payment_channel', 'Kanal pembayaran online yang dipilih tidak valid.');
+
+                    return;
+                }
+
+                if (isset($channelDef['min_amount']) && $amount < $channelDef['min_amount']) {
+                    $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} minimal Rp ".number_format($channelDef['min_amount'], 0, ',', '.').'.');
+                }
+
+                if (isset($channelDef['max_amount']) && $amount > $channelDef['max_amount']) {
+                    $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} maksimal Rp ".number_format($channelDef['max_amount'], 0, ',', '.').'. Silakan gunakan Virtual Account atau Transfer Bank Manual.');
+                }
+            } elseif ($channelType === 'offline' && ! empty($channelCode)) {
+                $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'offline')
+                    ?? XenditPaymentService::findChannel($channelCode, 'offline');
+
                 if ($channelDef) {
                     if (isset($channelDef['min_amount']) && $amount < $channelDef['min_amount']) {
                         $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} minimal Rp ".number_format($channelDef['min_amount'], 0, ',', '.').'.');
@@ -125,6 +151,8 @@ class StoreDonationRequest extends FormRequest
             'channel.required' => 'Metode pembayaran wajib dipilih.',
             'channel.in' => 'Metode pembayaran tidak valid.',
             'payment_method.in' => 'Kategori pembayaran tidak valid.',
+            'payment_channel.required_if' => 'Kanal pembayaran online wajib dipilih.',
+            'payment_channel.required' => 'Kanal pembayaran online wajib dipilih.',
             'website_url.prohibited' => 'Terdeteksi aktivitas mencurigakan. Permintaan tidak dapat diproses.',
             'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).',
         ];
