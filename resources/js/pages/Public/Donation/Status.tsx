@@ -72,7 +72,7 @@ function getBankInstructions(channelCode: string, vaNumber: string, billerCode?:
                 'Pilih menu "Pembayaran" -> "Multi Payment".',
                 `Pilih penyedia jasa dengan kode ${billerCode || '70012'}.`,
                 `Masukkan Nomor Pelanggan: ${billKey || vaNumber}.`,
-                'Konfirmasi dan otorisasi dengan Token Mandiri Anda.'
+                'Konfirmasi transaksi dengan Token Mandiri Anda.'
             ]
         };
     }
@@ -97,7 +97,7 @@ function getBankInstructions(channelCode: string, vaNumber: string, billerCode?:
                 'Login ke BSI Net Banking.',
                 'Pilih menu "Pembayaran" -> "Virtual Account".',
                 `Masukkan Nomor Virtual Account: ${vaNumber}.`,
-                'Periksa rincian donasi dan selesaikan dengan otorisasi TAN / Token.'
+                'Periksa rincian donasi dan masukkan kode TAN / Token Anda.'
             ]
         };
     }
@@ -147,7 +147,7 @@ function getBankInstructions(channelCode: string, vaNumber: string, billerCode?:
                 'Login ke BNI Internet Banking.',
                 'Pilih menu "Transaksi" -> "Pembayaran Tagihan" -> "Virtual Account Billing".',
                 `Masukkan Nomor Virtual Account: ${vaNumber}.`,
-                'Otorisasi transaksi menggunakan BNI e-Secure token.'
+                'Selesaikan transaksi menggunakan BNI e-Secure token.'
             ]
         };
     }
@@ -195,7 +195,7 @@ function getBankInstructions(channelCode: string, vaNumber: string, billerCode?:
                 'Login ke PermataNet.',
                 'Pilih menu "Pembayaran" -> "Virtual Account".',
                 `Masukkan Nomor Virtual Account: ${vaNumber}.`,
-                'Konfirmasi pembayaran dan otorisasi dengan SMS Token.'
+                'Konfirmasi pembayaran dengan kode SMS Token.'
             ]
         };
     }
@@ -219,7 +219,7 @@ function getBankInstructions(channelCode: string, vaNumber: string, billerCode?:
             'Login ke layanan Internet Banking bank Anda.',
             'Pilih menu "Pembayaran Tagihan" -> "Virtual Account".',
             `Masukkan Nomor Virtual Account: ${vaNumber}.`,
-            'Verifikasi data dan otorisasi dengan token keamanan Anda.'
+            'Verifikasi data dan masukkan token keamanan Anda.'
         ]
     };
 }

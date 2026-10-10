@@ -374,7 +374,7 @@ export default function ProgramCreate({ categories }: Props) {
                             {/* Cover Image */}
                             <div className="md:col-span-2 space-y-1.5">
                                 <Label htmlFor="cover_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Gambar Utama (Cover) <span className="text-red-500">*</span>
+                                    Gambar Utama Program <span className="text-red-500">*</span>
                                 </Label>
                                 <input
                                     id="cover_image"

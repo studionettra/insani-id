@@ -196,7 +196,7 @@ export default function Receipt({ disbursement }: any) {
                                 <thead className="bg-slate-50 dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700 text-slate-600 dark:text-gray-300 text-xs uppercase font-semibold">
                                     <tr>
                                         <th className="py-3 px-4 sm:px-6 text-left">Deskripsi Transaksi Penyaluran</th>
-                                        <th className="py-3 px-4 sm:px-6 text-right">Jumlah (IDR)</th>
+                                        <th className="py-3 px-4 sm:px-6 text-right">Jumlah (Rp)</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 dark:divide-gray-800 text-slate-700 dark:text-gray-300">
@@ -297,11 +297,11 @@ export default function Receipt({ disbursement }: any) {
                         </div>
                     </div>
 
-                    {/* Footer Pengesahan, Catatan Amanah & Stempel Otorisasi Digital */}
+                    {/* Footer Pengesahan, Catatan Ketentuan & Stempel Pengesahan Digital */}
                     <div className="p-6 sm:p-10 border-t border-slate-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-end gap-8 text-xs">
                         <div className="space-y-2 text-slate-500 dark:text-gray-400 max-w-md">
                             <p className="font-bold text-slate-800 dark:text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
-                                <Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Catatan & Amanah:
+                                <Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Catatan Ketentuan:
                             </p>
                             <p className="leading-relaxed">
                                 Kuitansi ini merupakan bukti sah transaksi penyaluran dana dari platform Insani Indonesia kepada penggalang dana.
@@ -310,14 +310,14 @@ export default function Receipt({ disbursement }: any) {
                                 Penggalang dana berkewajiban menyampaikan laporan penyaluran di menu <strong>Kabar Terbaru</strong> secara berkala.
                             </p>
                             <p className="text-[11px] text-slate-400 font-mono pt-1">
-                                Otorisasi: {disbursement.receipt_number || `KW-DISB-${disbursement.id}`}-{disbursement.program_id}
+                                No. Pengesahan: {disbursement.receipt_number || `KW-DISB-${disbursement.id}`}-{disbursement.program_id}
                             </p>
                         </div>
 
                         <div className="text-center sm:text-right flex flex-col items-center sm:items-end min-w-[240px]">
                             <p className="text-slate-500 dark:text-gray-400 text-xs mb-3">Disahkan & Ditransfer Oleh:</p>
 
-                            {/* Stempel Otorisasi Digital Resmi */}
+                            {/* Stempel Pengesahan Digital Resmi */}
                             <div className="border-2 border-dashed border-emerald-600/80 dark:border-emerald-500/80 rounded-xl px-4 py-2.5 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 mb-3 shadow-2xs rotate-[-1deg]">
                                 <div className="flex items-center justify-center gap-1.5 font-black text-xs uppercase tracking-wider">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -329,7 +329,7 @@ export default function Receipt({ disbursement }: any) {
                             </div>
 
                             <p className="font-bold text-slate-900 dark:text-white text-sm">Tim Keuangan Insani Indonesia</p>
-                            <p className="text-slate-400 text-[11px] mt-0.5">Otorisasi Sistem Digital</p>
+                            <p className="text-slate-400 text-[11px] mt-0.5">Pengesahan Elektronik</p>
                         </div>
                     </div>
                 </div>

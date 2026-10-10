@@ -138,7 +138,7 @@ export default function Index({ program, disbursements, balanceBreakdown }: any)
                                     Data Donasi & Saldo Program
                                 </CardTitle>
                                 <CardDescription className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">
-                                    Ringkasan akumulasi donasi online, potongan biaya resmi, dan saldo siap dicairkan.
+                                    Ringkasan akumulasi donasi online, biaya transaksi resmi, dan saldo siap dicairkan.
                                 </CardDescription>
                             </div>
                             <Badge variant="outline" className="w-fit text-xs border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50 text-slate-600 dark:text-gray-300">
@@ -504,7 +504,7 @@ export default function Index({ program, disbursements, balanceBreakdown }: any)
                                                                 {Number(item.platform_fee_amount) > 0 || Number(item.gateway_fee) > 0 ? (
                                                                     <>
                                                                         <div className="flex justify-between items-center text-slate-600 dark:text-gray-400">
-                                                                            <span>Alokasi Donasi Program (Bruto):</span>
+                                                                            <span>Alokasi Donasi Terkumpul:</span>
                                                                             <span className="font-semibold text-slate-800 dark:text-gray-200 font-mono tabular-nums">
                                                                                 {formatRupiah(
                                                                                     Number(item.requested_amount) +

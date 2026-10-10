@@ -342,7 +342,7 @@ export default function ProgramEdit({ categories, program }: Props) {
                             {/* Cover Image */}
                             <div className="md:col-span-2 space-y-1.5">
                                 <Label htmlFor="cover_image" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Gambar Utama (Cover)
+                                    Gambar Utama Program
                                 </Label>
                                 <input
                                     id="cover_image"

@@ -369,7 +369,7 @@ export default function ReportIndex({
                     {/* Card 2: Potongan Payment Gateway (Midtrans) */}
                     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-xs flex flex-col justify-between">
                         <div className="flex items-center justify-between gap-2 mb-3">
-                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Potongan Midtrans</span>
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Biaya Midtrans</span>
                             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
                                 <CreditCard className="w-4 h-4" />
                             </div>
@@ -538,7 +538,7 @@ export default function ReportIndex({
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center text-rose-600 dark:text-rose-400">
-                                            <span>Potongan Biaya Payment Gateway</span>
+                                            <span>Biaya Payment Gateway</span>
                                             <span className="font-semibold">
                                                 - {formatCurrency(financialSummary.total_gateway_fees)}
                                             </span>
@@ -553,7 +553,7 @@ export default function ReportIndex({
                                 {/* Arus Kas Keluar */}
                                 <div>
                                     <p className="font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-[11px] mb-2">
-                                        2. Realisasi Penyaluran Program (Outflow)
+                                        2. Realisasi Penyaluran Program
                                     </p>
                                     <div className="space-y-2 bg-gray-50/60 dark:bg-gray-800/40 rounded-lg p-3">
                                         <div className="flex justify-between items-center text-gray-700 dark:text-gray-300">
@@ -568,7 +568,7 @@ export default function ReportIndex({
                                             <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
                                                 <span className="flex items-center gap-1.5">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
-                                                    <span>Program Mandiri Yayasan (Internal)</span>
+                                                    <span>Program Mandiri Yayasan</span>
                                                     <span className="text-gray-400">({financialSummary.internal_disbursements_count} trx)</span>
                                                 </span>
                                                 <span className="font-medium text-gray-800 dark:text-gray-200">
@@ -578,7 +578,7 @@ export default function ReportIndex({
                                             <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
                                                 <span className="flex items-center gap-1.5">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
-                                                    <span>Program Mitra Penggalang (Campaigner)</span>
+                                                    <span>Program Mitra Penggalang</span>
                                                     <span className="text-gray-400">({financialSummary.campaigner_disbursements_count} trx)</span>
                                                 </span>
                                                 <span className="font-medium text-gray-800 dark:text-gray-200">
@@ -600,7 +600,7 @@ export default function ReportIndex({
                                             </span>
                                         </div>
                                         <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center font-bold text-blue-700 dark:text-blue-400">
-                                            <span>Kas Bersih Disalurkan (Netto)</span>
+                                            <span>Nominal Bersih Disalurkan</span>
                                             <span>{formatCurrency(financialSummary.total_disbursed_nett)}</span>
                                         </div>
                                     </div>
@@ -689,7 +689,7 @@ export default function ReportIndex({
                                         <TableHead className="font-semibold">Kategori</TableHead>
                                         <TableHead className="font-semibold text-right">Donasi Berhasil</TableHead>
                                         <TableHead className="font-semibold text-right">Total Donasi Masuk</TableHead>
-                                        <TableHead className="font-semibold text-right">Potongan Gateway</TableHead>
+                                        <TableHead className="font-semibold text-right">Biaya Gateway</TableHead>
                                         <TableHead className="font-semibold text-right">Nominal Bersih</TableHead>
                                         <TableHead className="font-semibold text-right">Rata-rata / Trx</TableHead>
                                         <TableHead className="font-semibold text-right">Pangsa (%)</TableHead>
@@ -785,7 +785,7 @@ export default function ReportIndex({
                                 </div>
                             </div>
 
-                            {/* Saluran Relawan (Fundraiser) */}
+                            {/* Saluran Relawan */}
                             <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-xs">
                                 <div className="flex items-center justify-between gap-2 mb-3">
                                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
@@ -873,7 +873,7 @@ export default function ReportIndex({
                                         ) : (
                                             <TableRow>
                                                 <TableCell colSpan={6} className="text-center py-8 text-gray-500 text-xs">
-                                                    Belum ada transaksi donasi melalui kanal relawan (fundraiser) pada rentang tanggal ini.
+                                                    Belum ada transaksi donasi melalui kanal relawan pada rentang tanggal ini.
                                                 </TableCell>
                                             </TableRow>
                                         )}
@@ -960,7 +960,7 @@ export default function ReportIndex({
                             <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
                                 <h3 className="font-semibold text-gray-900 dark:text-white">Ekspor Laporan Donasi & Keuangan</h3>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    Unduh data transaksi donasi lengkap dengan kanal pembayaran, potongan Midtrans, nominal bersih, dan info relawan.
+                                    Unduh data transaksi donasi lengkap dengan kanal pembayaran, biaya Midtrans, nominal bersih, dan info relawan.
                                 </p>
                             </div>
                             <div className="p-6 space-y-4">

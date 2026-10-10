@@ -213,7 +213,7 @@ export default function AdminProgramDisbursementCreate({ program, metrics, recen
                                     {/* Input Nominal */}
                                     <div className="space-y-2">
                                         <Label htmlFor="requested_amount" className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                            Nominal Penyaluran (IDR) <span className="text-red-500">*</span>
+                                            Nominal Penyaluran (Rp) <span className="text-red-500">*</span>
                                         </Label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-sm text-gray-400">
@@ -544,7 +544,7 @@ export default function AdminProgramDisbursementCreate({ program, metrics, recen
                                                 Dana telah ditransfer oleh Finance / Bendahara
                                             </span>
                                             <span className="text-gray-500 leading-relaxed block mt-0.5">
-                                                Status akan langsung ditandai <strong>Ditransfer (Transferred)</strong> dan memotong saldo kas amanah sistem.
+                                                Status akan langsung ditandai <strong>Ditransfer</strong> dan memotong saldo dana program.
                                             </span>
                                         </div>
                                     </label>

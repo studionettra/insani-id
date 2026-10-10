@@ -351,7 +351,7 @@ export default function ProgramShow({ program }: Props) {
                                 className="border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-300"
                                 onClick={() => setIsCloseConfirmOpen(true)}
                             >
-                                <Ban className="w-4 h-4 mr-1.5" /> Tutup Program (Manual)
+                                <Ban className="w-4 h-4 mr-1.5" /> Tutup Program
                             </Button>
                         )}
                     </div>
@@ -486,7 +486,7 @@ export default function ProgramShow({ program }: Props) {
                                                 Keuangan & Penyaluran Kas Program
                                             </h3>
                                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                Rekonsiliasi donasi masuk, realisasi penyaluran, dan sisa kas amanah
+                                                Rekonsiliasi donasi masuk, realisasi pencairan, dan sisa saldo dana
                                             </p>
                                         </div>
                                     </div>
@@ -494,7 +494,7 @@ export default function ProgramShow({ program }: Props) {
                                     {program.campaigner_type === 'internal' && (
                                         <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs self-start sm:self-auto">
                                             <Link href={`/admin/programs/${program.id}/disbursements/create`}>
-                                                <HandCoins className="w-4 h-4 mr-1.5" /> Salurkan Dana Program
+                                                <HandCoins className="w-4 h-4 mr-1.5" /> Cairkan Dana Program
                                             </Link>
                                         </Button>
                                     )}
@@ -516,7 +516,7 @@ export default function ProgramShow({ program }: Props) {
                                             <p className="text-lg font-bold text-red-600 dark:text-red-400 mt-1">
                                                 - {formatCurrency(program.financial_metrics?.total_gateway_fees ?? 0)}
                                             </p>
-                                            <span className="text-[11px] text-gray-400">Potongan gateway BI</span>
+                                            <span className="text-[11px] text-gray-400">Biaya payment gateway</span>
                                         </div>
 
                                         <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40">
@@ -539,7 +539,7 @@ export default function ProgramShow({ program }: Props) {
                                             <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300 mt-1">
                                                 {formatCurrency(program.financial_metrics?.available_balance ?? 0)}
                                             </p>
-                                            <span className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90">Saldo kas amanah program</span>
+                                            <span className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90">Saldo siap dicairkan</span>
                                         </div>
                                     </div>
 
@@ -569,7 +569,7 @@ export default function ProgramShow({ program }: Props) {
                                                 {program.campaigner_type === 'internal' && ((program.financial_metrics?.available_balance ?? 0) > 0) && (
                                                     <Button asChild size="sm" className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
                                                         <Link href={`/admin/programs/${program.id}/disbursements/create`}>
-                                                            <HandCoins className="w-4 h-4 mr-1.5" /> Salurkan Dana Program Sekarang
+                                                            <HandCoins className="w-4 h-4 mr-1.5" /> Cairkan Dana Program Sekarang
                                                         </Link>
                                                     </Button>
                                                 )}
@@ -970,7 +970,7 @@ export default function ProgramShow({ program }: Props) {
                                         </div>
                                     )}
                                     <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
-                                        <span className="text-gray-400">Pengunjung (Views)</span>
+                                        <span className="text-gray-400">Jumlah Pengunjung</span>
                                         <span className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
                                             <Eye className="w-3.5 h-3.5 text-gray-400" />
                                             {(program.views_count || 0).toLocaleString('id-ID')}

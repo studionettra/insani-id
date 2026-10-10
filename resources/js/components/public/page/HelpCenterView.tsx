@@ -345,7 +345,7 @@ const FAQ_DATA: FaqItem[] = [
             <div className="space-y-2 text-slate-600">
                 <p>Insani Indonesia beroperasi secara transparan sesuai UU No. 9 Tahun 1961 dan ketentuan Kementerian Sosial RI:</p>
                 <ul className="list-disc pl-5 space-y-1.5">
-                    <li>Sebesar <strong>5%</strong> (maksimal 10% sesuai regulasi) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform, verifikasi kurator lapangan, dan pemeliharaan server, yang <strong>dipotong saat pencairan dana (disbursement)</strong>.</li>
+                    <li>Sebesar <strong>5%</strong> (maksimal 10% sesuai regulasi) untuk program sosial, kemanusiaan umum, dan kesehatan sebagai biaya operasional platform, verifikasi kurator lapangan, dan pemeliharaan server, yang <strong>dipotong saat pencairan dana</strong>.</li>
                     <li><strong>0% (bebas potongan platform)</strong> untuk program tanggap bencana alam darurat tertentu.</li>
                     <li>Biaya transaksi pembayaran digital pihak ketiga (payment gateway perbankan/QRIS) dipotong sesuai tarif standar resmi Bank Indonesia.</li>
                 </ul>
