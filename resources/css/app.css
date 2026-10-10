@@ -1035,8 +1035,8 @@ span.flatpickr-weekday,
 /* Official Print Settings */
 @media print {
   @page {
-    size: A5 portrait;
-    margin: 6mm 7mm;
+    size: A4 portrait;
+    margin: 8mm 10mm;
   }
 
   html,
