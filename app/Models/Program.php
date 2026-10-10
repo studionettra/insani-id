@@ -36,6 +36,8 @@ class Program extends Model
         'cover_image',
         'video_url',
         'status',
+        'is_featured',
+        'featured_order',
         'views_count',
         'rejection_notes',
         'published_at',
@@ -46,6 +48,8 @@ class Program extends Model
         'target_amount' => 'decimal:2',
         'is_continuous' => 'boolean',
         'collected_amount' => 'decimal:2',
+        'is_featured' => 'boolean',
+        'featured_order' => 'integer',
         'views_count' => 'integer',
         'deadline' => 'date',
         'published_at' => 'datetime',
@@ -161,6 +165,23 @@ class Program extends Model
     public function reports()
     {
         return $this->hasMany(ProgramReport::class);
+    }
+
+    public function scopePublishedActive($query)
+    {
+        return $query->where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('deadline')
+                    ->orWhere('deadline', '>=', now()->toDateString());
+            });
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->publishedActive()
+            ->where('is_featured', true)
+            ->orderByRaw('featured_order IS NULL, featured_order ASC')
+            ->latest('published_at');
     }
 
     public function getActivitylogOptions(): LogOptions

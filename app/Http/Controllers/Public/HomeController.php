@@ -40,11 +40,28 @@ class HomeController extends Controller
                 return $cat;
             });
 
-        $latestPrograms = Program::with('category')
-            ->where('status', 'published')
-            ->latest()
+        // 1. Ambil program unggulan aktif terurut (maksimal 3)
+        $featuredPrograms = Program::with('category')
+            ->featured()
             ->take(3)
             ->get();
+
+        $featuredCount = $featuredPrograms->count();
+        $homePrograms = $featuredPrograms;
+
+        // 2. Jika kurang dari 3, lengkapi kuota dengan program published aktif terbaru
+        if ($featuredCount < 3) {
+            $needed = 3 - $featuredCount;
+            $fallbackPrograms = Program::with('category')
+                ->publishedActive()
+                ->whereNotIn('id', $featuredPrograms->pluck('id'))
+                ->latest('published_at')
+                ->latest('id')
+                ->take($needed)
+                ->get();
+
+            $homePrograms = $featuredPrograms->concat($fallbackPrograms);
+        }
 
         $latestBlogs = BlogPostCache::published()
             ->latest('published_at')
@@ -61,7 +78,7 @@ class HomeController extends Controller
             'stats' => $stats,
             'partners' => $partners,
             'focusPrograms' => $focusPrograms,
-            'programs' => $latestPrograms,
+            'programs' => $homePrograms,
             'blogs' => $latestBlogs,
             'testimonials' => $testimonials,
         ]);

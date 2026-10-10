@@ -53,4 +53,12 @@ class ProgramFactory extends Factory
             'status' => 'pending_verification',
         ]);
     }
+
+    public function featured(?int $order = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_featured' => true,
+            'featured_order' => $order,
+        ]);
+    }
 }

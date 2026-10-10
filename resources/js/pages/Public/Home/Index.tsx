@@ -299,6 +299,12 @@ return;
                                             <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-zinc-900 shadow-sm">
                                                 {t(getLocalizedValue(program.category?.name, locale))}
                                             </div>
+                                            {Boolean(program.is_featured) && (
+                                                <div className="absolute top-4 right-4 bg-amber-500/90 text-white backdrop-blur-sm px-2.5 py-1 rounded-full text-[11px] font-bold shadow-sm flex items-center gap-1">
+                                                    <Star className="w-3 h-3 fill-current" />
+                                                    <span>{t('Pilihan Insani')}</span>
+                                                </div>
+                                            )}
                                         </div>
                                         
                                         <div className="p-6 flex flex-col flex-grow">

@@ -354,6 +354,7 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         Route::middleware('permission:program.view')->group(function () {
             Route::resource('programs', ProgramController::class);
             Route::put('/programs/{id}/status', [ProgramController::class, 'updateStatus'])->name('programs.update-status');
+            Route::patch('/programs/{program}/toggle-featured', [ProgramController::class, 'toggleFeatured'])->name('programs.toggle-featured');
             Route::post('/programs/{id}/translate', [ProgramController::class, 'translate'])->name('programs.translate');
             Route::resource('programs.updates', AdminProgramUpdateController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::put('programs/{program}/updates/{update}/moderation', [AdminProgramUpdateController::class, 'updateModeration'])->name('programs.updates.moderation');

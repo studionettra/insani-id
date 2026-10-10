@@ -18,7 +18,8 @@ import {
     AlertCircle,
     XCircle,
     FileText,
-    Ban
+    Ban,
+    Star
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
@@ -55,6 +56,8 @@ interface Program {
     collected_amount: number;
     views_count?: number;
     status: string;
+    is_featured?: boolean;
+    featured_order?: number | null;
     published_at: string | null;
 }
 
@@ -94,7 +97,20 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
     const [searchInput, setSearchInput] = useState(filters.search || '');
     const [programToDelete, setProgramToDelete] = useState<any>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [togglingFeaturedId, setTogglingFeaturedId] = useState<number | null>(null);
     const isFirstRender = useRef(true);
+
+    const handleToggleFeatured = (program: Program) => {
+        setTogglingFeaturedId(program.id);
+        router.patch(
+            `/admin/programs/${program.id}/toggle-featured`,
+            {},
+            {
+                preserveScroll: true,
+                onFinish: () => setTogglingFeaturedId(null),
+            }
+        );
+    };
 
     // Apply filters helper
     const applyFilters = (newFilters: {
@@ -429,6 +445,7 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
                                 <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Kategori</TableHead>
                                 <TableHead className="font-semibold text-gray-700 dark:text-gray-300 min-w-[170px]">Pembuat / Mitra</TableHead>
                                 <TableHead className="font-semibold text-gray-700 dark:text-gray-300 min-w-[190px]">Donasi Terkumpul</TableHead>
+                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-center">Unggulan</TableHead>
                                 <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-center">Dilihat</TableHead>
                                 <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
                                 <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-300">Aksi</TableHead>
@@ -483,6 +500,22 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
                                                     percentageFormat="badge"
                                                 />
                                             </div>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleFeatured(program)}
+                                                disabled={togglingFeaturedId === program.id}
+                                                title={program.is_featured ? `Program Unggulan #${program.featured_order || 1} (Klik untuk nonaktifkan)` : "Jadikan Program Unggulan Beranda"}
+                                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                                                    program.is_featured
+                                                        ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 shadow-2xs'
+                                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 border border-transparent'
+                                                }`}
+                                            >
+                                                <Star className={`w-3.5 h-3.5 ${program.is_featured ? 'fill-amber-400 text-amber-500' : 'text-gray-400'}`} />
+                                                <span>{program.is_featured ? `Unggulan #${program.featured_order || 1}` : 'Biasa'}</span>
+                                            </button>
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">

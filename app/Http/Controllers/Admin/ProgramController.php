@@ -110,6 +110,8 @@ class ProgramController extends Controller
             'story' => 'required',
             'cover_image' => 'required|image|max:2048',
             'video_url' => 'nullable|url',
+            'is_featured' => 'nullable|boolean',
+            'featured_order' => 'nullable|integer|min:1|max:99',
         ]);
 
         $translationService = app(TranslationService::class);
@@ -154,6 +156,8 @@ class ProgramController extends Controller
         $program->deadline = $request->deadline;
         $program->cover_image = $coverImagePath;
         $program->video_url = $request->video_url;
+        $program->is_featured = $request->boolean('is_featured');
+        $program->featured_order = $request->filled('featured_order') ? $request->integer('featured_order') : null;
 
         // Internal programs go straight to published
         $program->status = 'published';
@@ -235,6 +239,8 @@ class ProgramController extends Controller
             'story' => 'required',
             'cover_image' => 'nullable|image|max:2048',
             'video_url' => 'nullable|url',
+            'is_featured' => 'nullable|boolean',
+            'featured_order' => 'nullable|integer|min:1|max:99',
         ]);
 
         $translationService = app(TranslationService::class);
@@ -269,6 +275,8 @@ class ProgramController extends Controller
         $program->is_continuous = $isContinuous;
         $program->deadline = $request->deadline;
         $program->video_url = $request->video_url;
+        $program->is_featured = $request->boolean('is_featured');
+        $program->featured_order = $request->filled('featured_order') ? $request->integer('featured_order') : null;
 
         if ($request->hasFile('cover_image')) {
             $coverImagePath = $request->file('cover_image')->store('programs/covers', 'public');
@@ -351,5 +359,31 @@ class ProgramController extends Controller
         TranslateProgramJob::dispatch($program, true);
 
         return redirect()->back()->with('success', 'Penerjemahan program ke Bahasa Inggris dan Arab telah dimasukkan ke dalam antrean.');
+    }
+
+    /**
+     * Toggle featured status of a program for homepage spotlight.
+     */
+    public function toggleFeatured(Request $request, Program $program)
+    {
+        $newStatus = ! $program->is_featured;
+        $program->is_featured = $newStatus;
+
+        if (! $newStatus) {
+            $program->featured_order = null;
+        } elseif ($request->filled('featured_order')) {
+            $program->featured_order = $request->integer('featured_order');
+        } elseif (! $program->featured_order) {
+            $maxOrder = Program::where('is_featured', true)->max('featured_order') ?? 0;
+            $program->featured_order = min(99, $maxOrder + 1);
+        }
+
+        $program->save();
+
+        $message = $newStatus
+            ? 'Program berhasil dijadikan program unggulan di beranda.'
+            : 'Program telah dihapus dari program unggulan beranda.';
+
+        return redirect()->back()->with('success', $message);
     }
 }

@@ -1,7 +1,8 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, Save, CaseSensitive, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Save, CaseSensitive, ShieldCheck, Star } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
 import RichTextEditor from '@/components/rich-text-editor';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -40,6 +41,8 @@ export default function ProgramCreate({ categories }: Props) {
         deadline: '',
         cover_image: null as File | null,
         video_url: '',
+        is_featured: false,
+        featured_order: '',
     });
 
     const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -369,6 +372,49 @@ export default function ProgramCreate({ categories }: Props) {
                                     className="w-full border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus-visible:ring-[#1A56DB]"
                                 />
                                 {errors.video_url && <p className="mt-1 text-xs text-red-500">{errors.video_url}</p>}
+                            </div>
+
+                            {/* Kurasi Beranda Publik (Program Unggulan) */}
+                            <div className="md:col-span-2 p-4 rounded-xl border border-amber-200/80 bg-amber-50/40 dark:border-amber-900/50 dark:bg-amber-950/20 space-y-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="space-y-0.5">
+                                        <div className="flex items-center gap-2">
+                                            <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+                                            <Label htmlFor="is_featured" className="text-sm font-semibold text-gray-900 dark:text-white cursor-pointer">
+                                                Tampilkan sebagai Program Unggulan di Beranda
+                                            </Label>
+                                        </div>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            Program akan diprioritaskan tampil pada etalase utama beranda publik ("Saatnya Menjadi Inisiator Kebaikan").
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="is_featured"
+                                        checked={Boolean(data.is_featured)}
+                                        onCheckedChange={(checked) => setData('is_featured', checked)}
+                                    />
+                                </div>
+
+                                {data.is_featured && (
+                                    <div className="pt-2.5 border-t border-amber-200/60 dark:border-amber-900/40 flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <Label htmlFor="featured_order" className="text-xs font-semibold text-gray-700 dark:text-gray-300 shrink-0">
+                                            Nomor Urut Prioritas (Opsional):
+                                        </Label>
+                                        <Input
+                                            id="featured_order"
+                                            type="number"
+                                            min="1"
+                                            max="99"
+                                            placeholder="Contoh: 1 (posisi paling depan)"
+                                            value={data.featured_order || ''}
+                                            onChange={(e) => setData('featured_order', e.target.value)}
+                                            className="w-full sm:w-48 h-8 text-xs bg-white dark:bg-gray-800"
+                                        />
+                                        <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                                            Urutan prioritas 1, 2, atau 3. Kosongkan jika ingin diurutkan otomatis berdasarkan waktu publikasi.
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Cover Image */}
