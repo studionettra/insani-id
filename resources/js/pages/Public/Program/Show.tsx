@@ -160,6 +160,7 @@ interface Props {
         total_collected: number;
         total_gateway_fees: number;
         net_collected: number;
+        allocated_for_program?: number;
         total_disbursed: number;
         total_platform_fees: number;
         total_transferred_nett: number;
@@ -208,6 +209,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     });
     const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
     const [visibleFundraisersCount, setVisibleFundraisersCount] = useState(5);
+    const [visibleDonorsCount, setVisibleDonorsCount] = useState(10);
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isFundraiserModalOpen, setIsFundraiserModalOpen] = useState(false);
@@ -719,38 +721,53 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    program.comments.map((comment: any) => (
-                                                        <div key={comment.id} className="flex gap-3.5 sm:gap-4 border-b border-slate-100 pb-5 last:border-0 items-start">
-                                                            <div className="w-10 h-10 rounded-full bg-insani-blue/10 flex items-center justify-center text-insani-blue font-bold flex-shrink-0 text-sm">
-                                                                {comment.name.charAt(0).toUpperCase()}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-start justify-between gap-3 mb-1">
-                                                                    <div className="min-w-0">
-                                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                                            <span className="font-bold text-slate-800 text-sm sm:text-base truncate">{comment.name}</span>
-                                                                        </div>
-                                                                        <span className="text-xs text-slate-400 block mt-0.5">
-                                                                            {format(new Date(comment.created_at), 'd MMM yyyy', { locale: dateId })}
-                                                                        </span>
-                                                                    </div>
-                                                                    {comment.donation?.amount && (
-                                                                        <div className="text-right flex-shrink-0">
-                                                                            <span className="text-[11px] text-slate-400 block font-normal leading-tight">{t('Berdonasi')}</span>
-                                                                            <span className="font-bold text-sm sm:text-base text-insani-blue tracking-tight">
-                                                                                {formatCurrency(comment.donation.amount)}
+                                                    <>
+                                                        {program.comments.slice(0, visibleDonorsCount).map((comment: any) => (
+                                                            <div key={comment.id} className="flex gap-3.5 sm:gap-4 border-b border-slate-100 pb-5 last:border-0 items-start">
+                                                                <div className="w-10 h-10 rounded-full bg-insani-blue/10 flex items-center justify-center text-insani-blue font-bold flex-shrink-0 text-sm">
+                                                                    {comment.name.charAt(0).toUpperCase()}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-start justify-between gap-3 mb-1">
+                                                                        <div className="min-w-0">
+                                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                                <span className="font-bold text-slate-800 text-sm sm:text-base truncate">{comment.name}</span>
+                                                                            </div>
+                                                                            <span className="text-xs text-slate-400 block mt-0.5">
+                                                                                {format(new Date(comment.created_at), 'd MMM yyyy', { locale: dateId })}
                                                                             </span>
                                                                         </div>
+                                                                        {comment.donation?.amount && (
+                                                                            <div className="text-right flex-shrink-0">
+                                                                                <span className="text-[11px] text-slate-400 block font-normal leading-tight">{t('Berdonasi')}</span>
+                                                                                <span className="font-bold text-sm sm:text-base text-insani-blue tracking-tight">
+                                                                                    {formatCurrency(comment.donation.amount)}
+                                                                                </span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {comment.body && (
+                                                                        <p className="text-slate-600 text-sm leading-relaxed mt-1.5 break-words">
+                                                                            {comment.body}
+                                                                        </p>
                                                                     )}
                                                                 </div>
-                                                                {comment.body && (
-                                                                    <p className="text-slate-600 text-sm leading-relaxed mt-1.5 break-words">
-                                                                        {comment.body}
-                                                                    </p>
-                                                                )}
                                                             </div>
-                                                        </div>
-                                                    ))
+                                                        ))}
+
+                                                        {program.comments.length > visibleDonorsCount && (
+                                                            <div className="text-center pt-2">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => setVisibleDonorsCount(prev => prev + 10)}
+                                                                    className="text-xs sm:text-sm font-semibold border-slate-200 text-slate-600 hover:text-insani-blue hover:border-insani-blue/40 rounded-xl h-10 px-5 shadow-xs transition-all"
+                                                                >
+                                                                    {t('Muat Lebih Banyak Donatur')} ({program.comments.length - visibleDonorsCount} {t('lainnya')})
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                             </div>
                                         </div>
