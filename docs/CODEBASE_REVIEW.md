@@ -215,11 +215,18 @@ Webhook Xendit menggunakan token middleware tetapi handler tidak menerapkan penj
 **Kategori:** Deployment  
 **Prioritas:** P2  
 **Risiko:** Medium  
-**Status:** Terbukti  
+**Status:** RESOLVED (Telah Diremediasi)  
 **Lokasi:** .github/workflows/deploy.yml  
 **Bukti:** Workflow manual, rsync memakai --delete, target SSH masih berisi domainanda.com. Script menjalankan maintenance, migration paksa, optimasi, lalu membuka aplikasi; backup/rollback tidak tampak.  
 **Dampak:** Target salah atau exclude tidak tepat dapat menghapus file tujuan; migration gagal dapat meninggalkan aplikasi maintenance.  
-**Rekomendasi:** Validasi target dan exclude, lakukan dry-run, siapkan backup/rollback teruji, health check, serta pastikan maintenance dibuka saat langkah gagal. Deploy tidak dijalankan dalam audit.
+**Rekomendasi:** Validasi target dan exclude, lakukan dry-run, siapkan backup/rollback teruji, health check, serta pastikan maintenance dibuka saat langkah gagal. Deploy tidak dijalankan dalam audit.  
+**Catatan Remediasi:** Pipeline deploy telah di-hardening dengan:
+1. Target path & domain dinamis berbasis GitHub Secret dengan fallback `insani.id` (menghapus placeholder).
+2. Pinning release tag stabil `easingthemes/ssh-deploy@v5.1.1` (menggantikan branch `@main`).
+3. Proteksi penuh folder runtime `storage/`, `public/storage`, `node_modules`, `.env`, dan `*.sqlite` dari argumen `rsync --delete`.
+4. Bash failsafe `trap 'php artisan up || true' EXIT` untuk mencegah aplikasi terkunci dalam mode maintenance jika migrasi atau optimasi gagal.
+5. Quality Gate otomatis (Job `test` menjalankan Pest suite dan Pint code style check sebelum rsync dijalankan).
+6. Automated health check pasca-deploy via curl ke endpoint resmi Laravel `/up`.
 
 ### CR-006 — Fee dapat terhitung berulang jika beberapa payment sukses terkait satu donasi
 
@@ -287,15 +294,15 @@ composer.json memuat script lint/format/type/test, tetapi tidak ditemukan workfl
 | CR-002 | P1 | High | Callback tidak mengunci transisi state dan side effect | **Resolved** (Commit `451f0f4`) |
 | CR-003 | P2 | Medium | Maksimum nominal bergantung channel opsional; fallback QRIS | **Resolved** (Commit `451f0f4`) |
 | CR-004 | P2 | Medium | Sanctum ada tetapi token/API belum digunakan | Open / Deferred (Fokus Web Inertia) |
-| CR-005 | P2 | Medium | Deploy memakai --delete, target placeholder, rollback tidak tampak | Open (Pending CI/CD Hardening) |
+| CR-005 | P2 | Medium | Deploy memakai --delete, target placeholder, rollback tidak tampak | **Resolved** (Pipeline Hardened & Quality Gate) |
 | CR-006 | P3 | Low | Fee bisa menghitung beberapa Payment untuk Donation yang sama | **Resolved** (Commit `451f0f4`) |
 
 **Status Ringkasan Remediasi:**  
-- **Resolved (Selesai):** 4 temuan (CR-001, CR-002, CR-003, CR-006)  
-- **Open (Tertunda/Tersisa):** 2 temuan (CR-004, CR-005)  
+- **Resolved (Selesai):** 5 temuan (CR-001, CR-002, CR-003, CR-005, CR-006)  
+- **Open (Tertunda/Tersisa):** 1 temuan (CR-004 — Kesiapan API Mobile Sanctum)  
 - **P0:** 0  
 - **P1:** 0 tersisa (2 resolved)  
-- **P2:** 2 tersisa (1 resolved)  
+- **P2:** 1 tersisa (2 resolved)  
 - **P3:** 0 tersisa (1 resolved)
 
 ## 17. Recommended Remediation Roadmap

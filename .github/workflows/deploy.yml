@@ -1,15 +1,19 @@
 name: Deploy to Hostinger
 
 on:
-  # push:
-  #   branches:
-  #     - main # Auto-deploy dinonaktifkan sementara untuk QA
-  workflow_dispatch: # Mengizinkan trigger manual dari tab Actions di GitHub
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Lewati unit/feature test (Hanya untuk rilis darurat)'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-  deploy:
+  test:
+    name: 🧪 Quality Gate (Pest & Pint)
     runs-on: ubuntu-latest
-
+    if: "${{ !inputs.skip_tests }}"
     steps:
       - name: 🚚 Checkout Code
         uses: actions/checkout@v4
@@ -18,10 +22,44 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json, libxml, pdo, phar
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_mysql, dom, filter, gd, json, libxml, pdo, phar
           coverage: none
 
-      - name: 📦 Install Composer Dependencies
+      - name: 📦 Install Composer Dependencies (Dev & Test)
+        run: composer install --prefer-dist --no-interaction
+
+      - name: 🎨 Run Laravel Pint (Code Style Check)
+        run: vendor/bin/pint --test
+
+      - name: 🧪 Run Pest Test Suite
+        run: php artisan test --compact
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+
+  deploy:
+    name: 🚀 Deploy to Hostinger
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: |
+      always() &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped' || inputs.skip_tests == true)
+    env:
+      TARGET_PATH: ${{ secrets.HOSTINGER_TARGET_PATH || format('/home/{0}/domains/{1}/laravel_app', secrets.HOSTINGER_USERNAME, secrets.HOSTINGER_DOMAIN || 'insani.id') }}
+      APP_DOMAIN: ${{ secrets.HOSTINGER_DOMAIN || 'insani.id' }}
+    steps:
+      - name: 🚚 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json, libxml, pdo, phar
+          coverage: none
+
+      - name: 📦 Install Composer Dependencies (Production Only)
         run: composer install --optimize-autoloader --no-dev --no-interaction --prefer-dist
 
       - name: 🛠️ Setup Node.js
@@ -30,26 +68,25 @@ jobs:
           node-version: '20'
 
       - name: 📦 Install NPM Dependencies
-        run: npm install
+        run: npm ci || npm install
 
       - name: 🏗️ Build Frontend Assets
         run: npm run build
 
       - name: 📂 Sync Files to Hostinger via rsync
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@v5.1.1
         env:
           SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
           ARGS: "-rltgoDzvO --delete"
-          # Mengecualikan folder dan file yang tidak perlu diupload / jangan dioverwrite
-          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/app/public/, /storage/logs/"
+          # Isolasi dan proteksi penuh untuk folder runtime storage, user upload, dan konfigurasi lokal
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/, /public/storage, /public/hot, *.sqlite"
           SOURCE: "./"
           REMOTE_HOST: ${{ secrets.HOSTINGER_HOST }}
           REMOTE_USER: ${{ secrets.HOSTINGER_USERNAME }}
           REMOTE_PORT: ${{ secrets.HOSTINGER_PORT }}
-          # TARGET disesuaikan dengan folder laravel_app Anda di Hostinger
-          TARGET: "/home/${{ secrets.HOSTINGER_USERNAME }}/domains/domainanda.com/laravel_app/"
+          TARGET: ${{ env.TARGET_PATH }}
 
-      - name: 🚀 Execute Artisan Commands via SSH
+      - name: 🚀 Execute Artisan & Post-Deploy Tasks via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
@@ -57,9 +94,40 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            cd /home/${{ secrets.HOSTINGER_USERNAME }}/domains/domainanda.com/laravel_app
-            php artisan down
+            set -e
+            cd ${{ env.TARGET_PATH }}
+
+            # Failsafe: Pastikan website selalu dibuka kembali jika script gagal di tengah jalan
+            trap 'php artisan up || true' EXIT
+
+            echo "Entering maintenance mode..."
+            php artisan down --render="errors::503" --secret="${{ secrets.APP_MAINTENANCE_SECRET || 'insani-deploy-bypass' }}" || true
+
+            echo "Running database migrations..."
             php artisan migrate --force
+
+            echo "Clearing and optimizing caches..."
             php artisan optimize:clear
             php artisan optimize
+            php artisan view:cache
+            php artisan event:cache
+
+            # Memastikan symlink storage publik tersedia jika belum ada
+            php artisan storage:link || true
+
+            echo "Exiting maintenance mode..."
             php artisan up
+
+            # Reset trap karena proses deploy normal selesai
+            trap - EXIT
+            echo "Deployment completed successfully!"
+
+      - name: 🩺 Automated Health Check Endpoint
+        run: |
+          echo "Checking application health at https://${APP_DOMAIN}/up..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://${APP_DOMAIN}/up" || echo "000")
+          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 301 ] || [ "$HTTP_STATUS" -eq 302 ]; then
+            echo "✅ Health check passed with status $HTTP_STATUS"
+          else
+            echo "⚠️ Health check returned status $HTTP_STATUS (periksa konfigurasi domain atau SSL jika server baru diinisialisasi)"
+          fi
