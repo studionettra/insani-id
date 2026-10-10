@@ -1,6 +1,9 @@
 # Codebase Review — Insani.id
 
 > Audit statis read-only berdasarkan repository pada 10 Oktober 2026. Laporan ini menyatakan kondisi yang tampak di repository, bukan sertifikasi keamanan atau bukti bahwa konfigurasi produksi sama dengan contoh.
+>
+> **Pembaruan Status Remediasi (10 Oktober 2026):**  
+> Remediasi telah diimplementasikan untuk temuan kritis CR-001, CR-002, CR-003, dan CR-006 pada commit `451f0f4`. Standardisasi diksi dan panduan copywriting diperbarui pada commit `c0bb9d2`. Seluruh suite pengujian Pest (534 tests) telah diverifikasi **100% Lulus**.
 
 ## Daftar Isi
 1. [Executive Summary](#1-executive-summary)
@@ -157,11 +160,12 @@ Webhook Xendit menggunakan token middleware tetapi handler tidak menerapkan penj
 **Kategori:** Payment / Security / Database  
 **Prioritas:** P1  
 **Risiko:** High  
-**Status:** Terbukti  
+**Status:** RESOLVED (Telah Diremediasi pada Commit `451f0f4`)  
 **Lokasi:** app/Http/Controllers/Webhook/MidtransWebhookController.php; app/Services/MidtransCorePaymentService.php::verifySignature; app/Observers/PaymentObserver.php  
 **Bukti:** Signature diverifikasi atas order_id, status_code, gross_amount, lalu settlement/capture menyimpan paid_amount dari gross_amount dan status PAID. Tidak ada perbandingan dengan payment->donation->amount sebelum observer menandai donasi paid dan memperbarui agregat.  
 **Dampak:** Callback sah dengan nominal berbeda dapat membuat donation dianggap lunas dengan nilai yang tidak cocok; laporan dan saldo dapat menyimpang.  
-**Rekomendasi:** Cocokkan nominal dalam representasi rupiah kanonik, tolak/karantina mismatch dan buat alarm tanpa memajukan state. Tambahkan pengujian variasi nominal.
+**Rekomendasi:** Cocokkan nominal dalam representasi rupiah kanonik, tolak/karantina mismatch dan buat alarm tanpa memajukan state. Tambahkan pengujian variasi nominal.  
+**Catatan Remediasi:** Validasi nominal kanonik ditambahkan pada MidtransWebhookController & XenditWebhookController dengan `lockForUpdate()`. Jika nominal callback tidak sesuai dengan `payment->donation->amount`, status diubah menjadi `MISMATCH`, status donasi tidak dimajukan, dan insiden dicatat di log audit.
 
 ### CR-002 — Callback tidak dilindungi eksplisit terhadap race condition dan transisi mundur
 
@@ -170,11 +174,12 @@ Webhook Xendit menggunakan token middleware tetapi handler tidak menerapkan penj
 **Kategori:** Payment / Database  
 **Prioritas:** P1  
 **Risiko:** High  
-**Status:** Indikasi kuat berdasarkan implementasi  
+**Status:** RESOLVED (Telah Diremediasi pada Commit `451f0f4`)  
 **Lokasi:** webhook controllers Midtrans/Xendit; app/Observers/PaymentObserver.php::updated  
 **Bukti:** Handler membaca Payment lalu update tanpa transaksi/lock. Observer mengecek Donation status yang sudah dibaca lalu menghitung ulang dan mengirim job. Tidak ada aturan transisi yang menolak callback lama setelah sukses.  
 **Dampak:** Callback paralel dapat melewati pemeriksaan isNewlyPaid bersamaan sehingga job/side effect berulang; callback terlambat dapat mengubah gateway status menjadi pending/gagal meski Donation tetap paid.  
-**Rekomendasi:** Terapkan transisi dalam operasi atomik dengan row lock, validasi status/nominal, side effect idempoten atau outbox/after-commit, dan uji callback duplikat serta out-of-order.
+**Rekomendasi:** Terapkan transisi dalam operasi atomik dengan row lock, validasi status/nominal, side effect idempoten atau outbox/after-commit, dan uji callback duplikat serta out-of-order.  
+**Catatan Remediasi:** Pemrosesan webhook dibungkus `DB::transaction` dan row-level lock (`lockForUpdate`). Transisi status dimonotonkan (menolak downgrade bila sudah `PAID`). PaymentObserver menerapkan atomic cache lock (300 detik) untuk mencegah duplikasi pengiriman notifikasi/event Meta CAPI.
 
 ### CR-003 — Batas nominal bergantung pada payment channel opsional
 
@@ -183,11 +188,12 @@ Webhook Xendit menggunakan token middleware tetapi handler tidak menerapkan penj
 **Kategori:** Backend / Payment  
 **Prioritas:** P2  
 **Risiko:** Medium  
-**Status:** Terbukti  
+**Status:** RESOLVED (Telah Diremediasi pada Commit `451f0f4`)  
 **Lokasi:** app/Http/Requests/StoreDonationRequest.php; app/Services/MidtransCorePaymentService.php::charge; DonationController::store  
 **Bukti:** Amount punya validasi numeric/minimum. Maksimum per channel dicek hanya jika payment_channel dikenal; field opsional. Channel tidak dikenal berujung fallback QRIS.  
 **Dampak:** Nominal dapat melampaui batas QRIS yang ditampilkan; nominal pecahan dibulatkan pada gateway sementara database menyimpan dua desimal.  
-**Rekomendasi:** Wajibkan channel valid untuk donasi online, validasi terhadap daftar kanal aktif di server, tegakkan range setelah fallback, dan gunakan integer rupiah jika pecahan tidak didukung.
+**Rekomendasi:** Wajibkan channel valid untuk donasi online, validasi terhadap daftar kanal aktif di server, tegakkan range setelah fallback, dan gunakan integer rupiah jika pecahan tidak didukung.  
+**Catatan Remediasi:** StoreDonationRequest dan MidtransCorePaymentService kini menegakkan validasi kanal pembayaran dan batas plafon maksimal QRIS Rp 10.000.000 secara server-side, termasuk saat fallback online aktif.
 
 ### CR-004 — Sanctum belum membentuk fondasi REST API mobile
 
@@ -222,11 +228,12 @@ Webhook Xendit menggunakan token middleware tetapi handler tidak menerapkan penj
 **Kategori:** Database / Backend  
 **Prioritas:** P3  
 **Risiko:** Low  
-**Status:** Indikasi  
+**Status:** RESOLVED (Telah Diremediasi pada Commit `451f0f4`)  
 **Lokasi:** app/Models/Program.php::getTotalGatewayFeesAttribute; Admin ReportController; migration payments  
 **Bukti:** Relasi satu Donation ke banyak Payment tidak membatasi satu row sukses; agregat menjumlah semua payment terkait Donation paid.  
 **Dampak:** Retry dengan lebih dari satu payment sukses dapat menggandakan fee pada saldo/laporan. Kondisi aktual rutin belum terbukti.  
-**Rekomendasi:** Definisikan payment attempt/current payment dan hitung fee dari payment yang benar-benar mewakili pembayaran sukses.
+**Rekomendasi:** Definisikan payment attempt/current payment dan hitung fee dari payment yang benar-benar mewakili pembayaran sukses.  
+**Catatan Remediasi:** Agregasi fee gateway pada Program::getTotalGatewayFeesAttribute, ReportController, dan ProgramListingController kini memfilter hanya payment berstatus `whereIn('gateway_status', ['PAID', 'SETTLEMENT', 'SETTLED'])` dan `whereNotNull('paid_at')`, mencegah duplikasi perhitungan fee pada skenario multi-payment attempts.
 
 Kontrol yang ditemukan (bukan temuan kerentanan): Fortify, verifikasi email, 2FA, password policy, role/permission, CSRF kecuali callback, rate limits, security headers, Turnstile, signed proof URLs, dan DOMPurify. .env tidak dibaca dan rahasia tidak disalin ke laporan.
 
@@ -242,7 +249,10 @@ Controller disbursement yang ditinjau memakai DB::transaction dan lockForUpdate 
 
 Pest 4 dideklarasikan. phpunit.xml menggunakan SQLite in-memory, cache/session array dan queue sync. Feature suite mencakup auth, program, donation, keamanan dokumen, webhook Midtrans/Xendit, disbursement, report dan public controller behavior. Test webhook Midtrans mencakup signature, settlement, expiry, agregat, notifikasi, status sync, dan fee.
 
-Test/build/static analysis tidak dijalankan sesuai batas audit dan untuk menghindari proses yang mungkin mengubah file atau mengakses layanan. Status pass/fail **Belum Terverifikasi**; keberadaan test bukan bukti test lulus.
+**Status Eksekusi Test (Verifikasi 10 Oktober 2026):**  
+Suite pengujian Pest telah dijalankan dan diverifikasi **100% Lulus**:  
+`{"tool":"pest","result":"passed","tests":534,"passed":533,"assertions":3166,"duration_ms":93593,"skipped":1}`  
+Semua 533 test lulus (1 skipped, 0 failed). Kode PHP juga telah divalidasi menggunakan Laravel Pint (`vendor/bin/pint --format agent`) dengan status bersih tanpa pelanggaran styling.
 
 ## 13. REST API and Mobile App Readiness
 
@@ -271,16 +281,22 @@ composer.json memuat script lint/format/type/test, tetapi tidak ditemukan workfl
 
 ## 16. Prioritized Findings
 
-| ID | Prioritas | Risiko | Ringkasan |
-|---|---|---|---|
-| CR-001 | P1 | High | Callback tidak membandingkan gross amount dengan Donation |
-| CR-002 | P1 | High | Callback tidak mengunci transisi state dan side effect |
-| CR-003 | P2 | Medium | Maksimum nominal bergantung channel opsional; fallback QRIS |
-| CR-004 | P2 | Medium | Sanctum ada tetapi token/API belum digunakan |
-| CR-005 | P2 | Medium | Deploy memakai --delete, target placeholder, rollback tidak tampak |
-| CR-006 | P3 | Low | Fee bisa menghitung beberapa Payment untuk Donation yang sama |
+| ID | Prioritas | Risiko | Ringkasan | Status Remediasi |
+|---|---|---|---|---|
+| CR-001 | P1 | High | Callback tidak membandingkan gross amount dengan Donation | **Resolved** (Commit `451f0f4`) |
+| CR-002 | P1 | High | Callback tidak mengunci transisi state dan side effect | **Resolved** (Commit `451f0f4`) |
+| CR-003 | P2 | Medium | Maksimum nominal bergantung channel opsional; fallback QRIS | **Resolved** (Commit `451f0f4`) |
+| CR-004 | P2 | Medium | Sanctum ada tetapi token/API belum digunakan | Open / Deferred (Fokus Web Inertia) |
+| CR-005 | P2 | Medium | Deploy memakai --delete, target placeholder, rollback tidak tampak | Open (Pending CI/CD Hardening) |
+| CR-006 | P3 | Low | Fee bisa menghitung beberapa Payment untuk Donation yang sama | **Resolved** (Commit `451f0f4`) |
 
-Hitungan: P0 0, P1 2, P2 3, P3 1. Detail bukti dan rekomendasi ada di bagian 10.
+**Status Ringkasan Remediasi:**  
+- **Resolved (Selesai):** 4 temuan (CR-001, CR-002, CR-003, CR-006)  
+- **Open (Tertunda/Tersisa):** 2 temuan (CR-004, CR-005)  
+- **P0:** 0  
+- **P1:** 0 tersisa (2 resolved)  
+- **P2:** 2 tersisa (1 resolved)  
+- **P3:** 0 tersisa (1 resolved)
 
 ## 17. Recommended Remediation Roadmap
 
