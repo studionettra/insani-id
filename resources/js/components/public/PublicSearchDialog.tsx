@@ -407,7 +407,7 @@ export default function PublicSearchDialog() {
                                                     </div>
                                                     <div>
                                                         <div className="text-xs font-semibold text-zinc-900 group-hover:text-teal-700">
-                                                            {t('Pusat Bantuan & FAQ')}
+                                                            {t('Pusat Bantuan & Tanya Jawab')}
                                                         </div>
                                                         <div className="text-[11px] text-zinc-400">
                                                             {t('Panduan donatur & narahubung')}
@@ -431,7 +431,7 @@ export default function PublicSearchDialog() {
                                                             {t('Panduan Logo Resmi')}
                                                         </div>
                                                         <div className="text-[11px] text-zinc-400">
-                                                            {t('Identitas brand & aset unduh')}
+                                                            {t('Identitas visual & unduh aset')}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -674,7 +674,7 @@ export default function PublicSearchDialog() {
                                                                             {faq.question}
                                                                         </div>
                                                                         <div className="text-[10px] text-zinc-400 capitalize">
-                                                                            {t('Kategori')}: {faq.category} • {t('Buka Solusi FAQ')}
+                                                                            {t('Kategori')}: {faq.category} • {t('Lihat Solusi')}
                                                                         </div>
                                                                     </div>
                                                                 </div>
