@@ -79,6 +79,7 @@ interface Props {
         status: string;
         search?: string | null;
         category_id?: string | null;
+        featured?: string | null;
     };
     counts: {
         all: number;
@@ -87,6 +88,7 @@ interface Props {
         individu: number;
         pending_verification: number;
         pending_in_tab: number;
+        featured?: number;
     };
     categories: CategoryOption[];
 }
@@ -118,12 +120,14 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
         status?: string;
         search?: string | null;
         category_id?: string | null;
+        featured?: string | null;
     }) => {
         const updated = {
             type: newFilters.type !== undefined ? newFilters.type : (filters.type || 'semua'),
             status: newFilters.status !== undefined ? newFilters.status : (filters.status || 'semua'),
             search: newFilters.search !== undefined ? newFilters.search : (filters.search || ''),
             category_id: newFilters.category_id !== undefined ? newFilters.category_id : (filters.category_id || ''),
+            featured: newFilters.featured !== undefined ? newFilters.featured : (filters.featured || ''),
         };
 
         const query: Record<string, string> = {};
@@ -131,8 +135,14 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
         if (updated.status && updated.status !== 'semua') query.status = updated.status;
         if (updated.search && updated.search.trim()) query.search = updated.search.trim();
         if (updated.category_id) query.category_id = String(updated.category_id);
+        if (updated.featured) query.featured = String(updated.featured);
 
         router.get('/admin/programs', query, { preserveState: true, replace: true });
+    };
+
+    const handleToggleFeaturedFilter = () => {
+        const nextFeatured = filters.featured === '1' ? null : '1';
+        applyFilters({ featured: nextFeatured });
     };
 
     // Debounce search input
@@ -172,7 +182,8 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
         (filters.type && filters.type !== 'semua') ||
         (filters.status && filters.status !== 'semua') ||
         Boolean(filters.search) ||
-        Boolean(filters.category_id);
+        Boolean(filters.category_id) ||
+        Boolean(filters.featured);
 
     const handleConfirmDelete = () => {
         if (!programToDelete) return;
@@ -229,16 +240,16 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
         }
     };
 
-    const getCampaignerBadge = (program: Program) => {
+    const getCampaignerInfo = (program: Program) => {
         if (program.campaigner_type === 'internal') {
             return (
-                <div className="space-y-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        <Building2 className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                        Internal Yayasan
-                    </span>
-                    <div className="text-xs font-medium text-gray-900 dark:text-white truncate max-w-[170px]" title={program.creator?.name || 'Staf Internal'}>
-                        {program.creator?.name || 'Staf Internal'}
+                <div className="space-y-0.5 min-w-0">
+                    <div className="text-xs font-semibold text-gray-900 dark:text-white truncate" title={program.creator?.name || 'Super Administrator'}>
+                        {program.creator?.name || 'Super Administrator'}
+                    </div>
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                        <Building2 className="w-3 h-3 text-blue-600 dark:text-blue-400 shrink-0" />
+                        <span className="truncate">Internal Yayasan</span>
                     </div>
                 </div>
             );
@@ -247,31 +258,28 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
         if (program.campaigner_type === 'lembaga') {
             const orgName = program.campaigner_profile?.nama_lembaga || program.campaigner_profile?.institution_name || program.creator?.name;
             return (
-                <div className="space-y-1">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                        <Users className="w-3 h-3 text-purple-600 dark:text-purple-400" />
-                        Mitra Lembaga
-                    </span>
-                    <div className="text-xs font-semibold text-gray-900 dark:text-white truncate max-w-[170px]" title={orgName}>
+                <div className="space-y-0.5 min-w-0">
+                    <div className="text-xs font-semibold text-gray-900 dark:text-white truncate" title={orgName}>
                         {orgName}
                     </div>
-                    {program.creator?.name && program.creator.name !== orgName && (
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[170px]">
-                            PIC: {program.creator.name}
-                        </div>
-                    )}
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                        <Users className="w-3 h-3 text-purple-600 dark:text-purple-400 shrink-0" />
+                        <span className="truncate">
+                            Mitra Lembaga{program.creator?.name && program.creator.name !== orgName ? ` • PIC: ${program.creator.name}` : ''}
+                        </span>
+                    </div>
                 </div>
             );
         }
 
         return (
-            <div className="space-y-1">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-                    <User className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                    Individu
-                </span>
-                <div className="text-xs font-medium text-gray-900 dark:text-white truncate max-w-[170px]" title={program.creator?.name}>
+            <div className="space-y-0.5 min-w-0">
+                <div className="text-xs font-semibold text-gray-900 dark:text-white truncate" title={program.creator?.name}>
                     {program.creator?.name || 'Campaigner'}
+                </div>
+                <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <User className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span className="truncate">Campaigner Individu</span>
                 </div>
             </div>
         );
@@ -404,129 +412,191 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
                         </div>
                     </div>
 
-                    {/* Status Filter Chips */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pt-1 border-t border-gray-100 dark:border-gray-800">
-                        <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 mr-1 flex items-center gap-1 shrink-0">
-                            <Filter className="w-3 h-3" /> Status:
-                        </span>
-                        {statusOptions.map((opt) => {
-                            const isSelected = (filters.status || 'semua') === opt.id;
-                            return (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => handleStatusChange(opt.id)}
-                                    className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5 ${
-                                        isSelected
-                                            ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-semibold shadow-xs'
-                                            : opt.highlight
-                                                ? 'bg-amber-100/80 text-amber-900 hover:bg-amber-200/80 dark:bg-amber-950/60 dark:text-amber-200 border border-amber-300/60 dark:border-amber-700'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                                    }`}
-                                >
-                                    <span>{opt.label}</span>
-                                    {opt.highlight && opt.count !== undefined && opt.count > 0 && (
-                                        <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${isSelected ? 'bg-amber-400 text-amber-950' : 'bg-amber-500 text-white'}`}>
-                                            {opt.count}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
+                    {/* Status Filter Chips & Quick Toggle Unggulan */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+                        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-0.5">
+                            <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 mr-1 flex items-center gap-1 shrink-0">
+                                <Filter className="w-3 h-3" /> Status:
+                            </span>
+                            {statusOptions.map((opt) => {
+                                const isSelected = (filters.status || 'semua') === opt.id;
+                                return (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => handleStatusChange(opt.id)}
+                                        className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                                            isSelected
+                                                ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 font-semibold shadow-xs'
+                                                : opt.highlight
+                                                    ? 'bg-amber-100/80 text-amber-900 hover:bg-amber-200/80 dark:bg-amber-950/60 dark:text-amber-200 border border-amber-300/60 dark:border-amber-700'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                                        }`}
+                                    >
+                                        <span>{opt.label}</span>
+                                        {opt.highlight && opt.count !== undefined && opt.count > 0 && (
+                                            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${isSelected ? 'bg-amber-400 text-amber-950' : 'bg-amber-500 text-white'}`}>
+                                                {opt.count}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Quick Toggle: Unggulan Beranda */}
+                        <div className="flex items-center shrink-0 self-start sm:self-auto pt-1 sm:pt-0">
+                            <button
+                                type="button"
+                                onClick={handleToggleFeaturedFilter}
+                                className={`px-3 py-1 text-xs font-medium rounded-full transition-all flex items-center gap-1.5 ${
+                                    filters.featured === '1'
+                                        ? 'bg-amber-500 text-white font-semibold shadow-xs ring-2 ring-amber-400/40'
+                                        : 'bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60'
+                                }`}
+                            >
+                                <Star className={`w-3.5 h-3.5 ${filters.featured === '1' ? 'fill-white text-white' : 'fill-amber-400 text-amber-500'}`} />
+                                <span>Unggulan Beranda</span>
+                                {(counts.featured || 0) > 0 && (
+                                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${filters.featured === '1' ? 'bg-amber-600 text-white' : 'bg-amber-200/80 text-amber-900 dark:bg-amber-900 dark:text-amber-200'}`}>
+                                        {counts.featured}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* Table Data */}
-                <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-x-auto shadow-xs">
-                    <Table>
-                        <TableHeader className="bg-gray-50/75 dark:bg-gray-800/60">
-                            <TableRow>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 min-w-[220px]">Kode / Judul</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 w-28">Cover</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Kategori</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 min-w-[170px]">Pembuat / Mitra</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 min-w-[190px]">Donasi Terkumpul</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-center">Unggulan</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300 text-center">Dilihat</TableHead>
-                                <TableHead className="font-semibold text-gray-700 dark:text-gray-300">Status</TableHead>
-                                <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-300">Aksi</TableHead>
+                <div className="rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-x-auto shadow-xs">
+                    <Table className="w-full table-fixed min-w-[960px]">
+                        <TableHeader className="bg-gray-50/80 dark:bg-gray-800/60">
+                            <TableRow className="hover:bg-transparent">
+                                <TableHead className="font-semibold text-xs text-gray-700 dark:text-gray-300 w-[40%]">Program</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-700 dark:text-gray-300 w-[18%]">Pembuat / Mitra</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-700 dark:text-gray-300 w-[20%]">Donasi Terkumpul</TableHead>
+                                <TableHead className="font-semibold text-xs text-gray-700 dark:text-gray-300 w-[11%]">Status</TableHead>
+                                <TableHead className="text-right font-semibold text-xs text-gray-700 dark:text-gray-300 w-[11%]">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {programs.data.length > 0 ? (
                                 programs.data.map((program) => (
                                     <TableRow key={program.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/50 transition-colors">
-                                        <TableCell>
-                                            <div className="font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug">
-                                                {getLocalizedValue(program.title)}
+                                        {/* 1. Program (Cover + Quick Star + Judul + Kode & Kategori) */}
+                                        <TableCell className="py-3 align-middle">
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative shrink-0">
+                                                    <img
+                                                        src={`/storage/${program.cover_image}`}
+                                                        alt={getLocalizedValue(program.title)}
+                                                        className="h-11 w-14 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-2xs"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 flex-1 space-y-1">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleToggleFeatured(program)}
+                                                            disabled={togglingFeaturedId === program.id}
+                                                            title={
+                                                                program.is_featured
+                                                                    ? `Program Unggulan #${program.featured_order || 1} (Klik untuk nonaktifkan)`
+                                                                    : 'Klik untuk jadikan Program Unggulan beranda'
+                                                            }
+                                                            className={`shrink-0 p-1 rounded-md transition-all ${
+                                                                program.is_featured
+                                                                    ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                                                                    : 'text-gray-300 hover:text-amber-500 hover:bg-gray-100 dark:text-gray-600 dark:hover:text-amber-400 dark:hover:bg-gray-800'
+                                                            }`}
+                                                        >
+                                                            <Star
+                                                                className={`w-3.5 h-3.5 transition-transform hover:scale-110 ${
+                                                                    program.is_featured
+                                                                        ? 'fill-amber-400 text-amber-500'
+                                                                        : 'text-current'
+                                                                }`}
+                                                            />
+                                                        </button>
+
+                                                        <Link
+                                                            href={`/admin/programs/${program.id}`}
+                                                            className="font-semibold text-xs text-gray-900 dark:text-white line-clamp-1 leading-snug hover:text-[#1A56DB] dark:hover:text-blue-400 transition-colors"
+                                                            title={getLocalizedValue(program.title)}
+                                                        >
+                                                            {getLocalizedValue(program.title)}
+                                                        </Link>
+
+                                                        {program.is_featured && (
+                                                            <span className="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                                                #{program.featured_order || 1}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 pl-6.5">
+                                                        <span className="font-mono text-[10.5px]">
+                                                            {program.program_code}
+                                                        </span>
+                                                        <span>•</span>
+                                                        <span className="text-gray-600 dark:text-gray-300 font-medium">
+                                                            {getLocalizedValue(program.category?.name, 'Umum')}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="font-mono text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                {program.program_code}
-                                            </div>
                                         </TableCell>
-                                        <TableCell>
-                                            <img
-                                                src={`/storage/${program.cover_image}`}
-                                                alt={getLocalizedValue(program.title)}
-                                                className="h-16 w-24 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-2xs"
-                                                onError={(e) => {
-                                                    // Fallback image
-                                                    (e.target as HTMLImageElement).src = '/images/placeholder.jpg';
-                                                }}
-                                            />
+
+                                        {/* 2. Pembuat / Mitra (Tipografi Hierarkis Tanpa Badge Soup) */}
+                                        <TableCell className="py-3 align-middle">
+                                            {getCampaignerInfo(program)}
                                         </TableCell>
-                                        <TableCell>
-                                            <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-                                                {getLocalizedValue(program.category?.name, 'N/A')}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            {getCampaignerBadge(program)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col gap-1.5">
+
+                                        {/* 3. Donasi Terkumpul (Terstruktur Simetris) */}
+                                        <TableCell className="py-3 align-middle">
+                                            <div className="space-y-1.5">
                                                 <div className="flex items-baseline justify-between gap-1">
-                                                    <span className="font-bold text-gray-900 dark:text-white text-sm">
+                                                    <span className="font-bold text-gray-900 dark:text-white text-xs">
                                                         {formatCurrency(program.collected_amount)}
                                                     </span>
+                                                    <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                                                        {program.target_amount && parseFloat(program.target_amount) > 0
+                                                            ? `${Math.min(100, Math.round((program.collected_amount / parseFloat(program.target_amount)) * 100))}%`
+                                                            : 'Fleksibel'}
+                                                    </span>
                                                 </div>
-                                                <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                                                    Target: {program.target_amount && parseFloat(program.target_amount) > 0 ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
+                                                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                                    <div
+                                                        className="bg-[#1A56DB] h-1.5 rounded-full transition-all duration-300"
+                                                        style={{
+                                                            width: `${Math.min(100, program.target_amount && parseFloat(program.target_amount) > 0 ? (program.collected_amount / parseFloat(program.target_amount)) * 100 : 0)}%`,
+                                                        }}
+                                                    />
                                                 </div>
-                                                <DonationProgressBar
-                                                    collectedAmount={program.collected_amount}
-                                                    targetAmount={program.target_amount}
-                                                    size="xs"
-                                                    percentagePlacement="top-right"
-                                                    percentageFormat="badge"
-                                                />
+                                                <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                                                    <span className="truncate">
+                                                        {program.target_amount && parseFloat(program.target_amount) > 0
+                                                            ? `Target: ${formatCurrency(parseFloat(program.target_amount))}`
+                                                            : 'Tanpa Target'}
+                                                    </span>
+                                                    <span className="flex items-center gap-1 shrink-0 ml-1.5" title={`${(program.views_count || 0).toLocaleString('id-ID')} tayangan`}>
+                                                        <Eye className="w-3 h-3 text-gray-400" />
+                                                        {(program.views_count || 0).toLocaleString('id-ID')}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleToggleFeatured(program)}
-                                                disabled={togglingFeaturedId === program.id}
-                                                title={program.is_featured ? `Program Unggulan #${program.featured_order || 1} (Klik untuk nonaktifkan)` : "Jadikan Program Unggulan Beranda"}
-                                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                                                    program.is_featured
-                                                        ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60 shadow-2xs'
-                                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 border border-transparent'
-                                                }`}
-                                            >
-                                                <Star className={`w-3.5 h-3.5 ${program.is_featured ? 'fill-amber-400 text-amber-500' : 'text-gray-400'}`} />
-                                                <span>{program.is_featured ? `Unggulan #${program.featured_order || 1}` : 'Biasa'}</span>
-                                            </button>
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                                <Eye className="w-3.5 h-3.5 text-slate-400" />
-                                                {(program.views_count || 0).toLocaleString('id-ID')}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
+
+                                        {/* 4. Status (Vertikal Tengah Simetris) */}
+                                        <TableCell className="py-3 align-middle">
                                             {getStatusBadge(program.status)}
                                         </TableCell>
-                                        <TableCell className="text-right">
+
+                                        {/* 5. Aksi (Rata Kanan Rapi) */}
+                                        <TableCell className="text-right py-3 align-middle">
                                             <div className="flex items-center justify-end space-x-1">
                                                 {auth?.user?.id && Number(program.created_by) === Number(auth.user.id) && (
                                                     <Button variant="ghost" size="icon" asChild title="Kelola Kabar Program" className="h-8 w-8 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/50">
@@ -554,7 +624,7 @@ export default function ProgramsIndex({ programs, filters, counts, categories }:
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center py-12">
+                                    <TableCell colSpan={5} className="text-center py-12">
                                         <div className="flex flex-col items-center justify-center max-w-sm mx-auto text-gray-500 dark:text-gray-400">
                                             <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full mb-3 text-gray-400">
                                                 <AlertCircle className="w-6 h-6" />

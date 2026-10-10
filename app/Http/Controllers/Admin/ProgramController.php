@@ -27,6 +27,7 @@ class ProgramController extends Controller
         $status = $request->input('status', 'semua');
         $search = $request->input('search');
         $categoryId = $request->input('category_id');
+        $featured = $request->input('featured');
 
         $query = Program::with(['category', 'creator', 'campaignerProfile'])->orderBy('created_at', 'desc');
 
@@ -40,6 +41,10 @@ class ProgramController extends Controller
 
         if ($categoryId) {
             $query->where('category_id', $categoryId);
+        }
+
+        if ($featured === '1' || $featured === 'true') {
+            $query->where('is_featured', true)->orderBy('featured_order', 'asc');
         }
 
         if ($search) {
@@ -67,9 +72,13 @@ class ProgramController extends Controller
             'pending_in_tab' => $type !== 'semua'
                 ? Program::where('campaigner_type', $type)->where('status', 'pending_verification')->count()
                 : Program::where('status', 'pending_verification')->count(),
+            'featured' => Program::where('is_featured', true)->count(),
         ];
 
-        $categories = Category::where('is_active', true)->select('id', 'name')->get();
+        $categories = Category::where('is_active', true)
+            ->orderBy('sort_order', 'asc')
+            ->select('id', 'name')
+            ->get();
 
         return Inertia::render('Admin/Programs/Index', [
             'programs' => $programs,
@@ -78,6 +87,7 @@ class ProgramController extends Controller
                 'status' => $status,
                 'search' => $search,
                 'category_id' => $categoryId ? (string) $categoryId : null,
+                'featured' => $featured ? (string) $featured : null,
             ],
             'counts' => $counts,
             'categories' => $categories,

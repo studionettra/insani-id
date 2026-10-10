@@ -367,7 +367,7 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
 
     // Countdown timer for expiry
     useEffect(() => {
-        if (donation.status !== 'pending' || donation.channel !== 'online') {
+        if (donation.status !== 'pending') {
             setTimeLeft(null);
             return;
         }
@@ -375,13 +375,18 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
         let expiryTimestamp: number | null = null;
         const rawExpiry = rawPayload?.expiry_time;
 
-        if (rawExpiry) {
-            // Midtrans format: "YYYY-MM-DD HH:mm:ss"
-            const iso = String(rawExpiry).replace(' ', 'T');
-            expiryTimestamp = new Date(iso).getTime();
-        } else if (donation.created_at) {
-            const durationMinutes = paymentMethod === 'virtual_account' ? 24 * 60 : 30;
-            expiryTimestamp = new Date(donation.created_at).getTime() + durationMinutes * 60 * 1000;
+        if (donation.channel === 'online') {
+            if (rawExpiry) {
+                // Midtrans format: "YYYY-MM-DD HH:mm:ss"
+                const iso = String(rawExpiry).replace(' ', 'T');
+                expiryTimestamp = new Date(iso).getTime();
+            } else if (donation.created_at) {
+                const durationMinutes = paymentMethod === 'virtual_account' ? 24 * 60 : 30;
+                expiryTimestamp = new Date(donation.created_at).getTime() + durationMinutes * 60 * 1000;
+            }
+        } else if (donation.channel === 'offline' && donation.created_at) {
+            // Transfer Bank Manual: Batas waktu 24 jam sejak pembuatan tagihan
+            expiryTimestamp = new Date(donation.created_at).getTime() + 24 * 60 * 60 * 1000;
         }
 
         if (!expiryTimestamp || isNaN(expiryTimestamp)) return;
@@ -1040,12 +1045,18 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
                             {/* Instructions for Manual Transfer */}
                             {donation.channel === 'offline' && donation.status === 'pending' && (
                                 <div className="bg-amber-50 rounded-2xl p-5 border border-amber-200 text-sm space-y-4">
-                                    <div>
-                                        <h4 className="font-bold text-amber-900 text-base">Instruksi Transfer Manual</h4>
-                                        <p className="text-amber-800 mt-1 text-xs sm:text-sm leading-relaxed">
-                                            Silakan transfer tepat sebesar <strong>{formatCurrency(Number(donation.amount))}</strong> ke rekening resmi {selectedBank?.bank_name ? <strong>{selectedBank.bank_name}</strong> : foundationName} di bawah ini:
-                                        </p>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-amber-200/70">
+                                        <h4 className="font-bold text-amber-950 text-base">Instruksi Transfer Manual</h4>
+                                        {timeLeft !== null && (
+                                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-amber-300 text-amber-900 rounded-full text-xs font-semibold self-start sm:self-auto shadow-2xs">
+                                                <Clock className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                                                <span>Batas waktu: {formatCountdown(timeLeft)}</span>
+                                            </div>
+                                        )}
                                     </div>
+                                    <p className="text-amber-800 text-xs sm:text-sm leading-relaxed">
+                                        Silakan transfer tepat sebesar <strong>{formatCurrency(Number(donation.amount))}</strong> ke rekening resmi {selectedBank?.bank_name ? <strong>{selectedBank.bank_name}</strong> : foundationName} di bawah ini sebelum batas waktu berakhir:
+                                    </p>
 
                                     {selectedBank && (
                                         <div className="flex justify-between items-center bg-white p-3.5 sm:p-4 rounded-xl border border-amber-200/80 shadow-xs">
