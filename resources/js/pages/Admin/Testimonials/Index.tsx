@@ -171,7 +171,6 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
             onSuccess: () => {
                 setIsCreateModalOpen(false);
                 reset();
-                toast.success('Testimoni berhasil ditambahkan.');
             },
         });
     };
@@ -184,7 +183,6 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
             onSuccess: () => {
                 setIsEditModalOpen(false);
                 reset();
-                toast.success('Testimoni berhasil diperbarui.');
             },
         });
     };
@@ -196,7 +194,6 @@ export default function TestimonialsIndex({ testimonials, filters }: Props) {
             onSuccess: () => {
                 setItemToDelete(null);
                 setIsDeleting(false);
-                toast.success('Testimoni berhasil dihapus.');
             },
             onError: () => {
                 setIsDeleting(false);

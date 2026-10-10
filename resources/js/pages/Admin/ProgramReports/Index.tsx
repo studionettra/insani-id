@@ -212,7 +212,6 @@ export default function ProgramReportsIndex({
         putStatus(`/admin/program-reports/${selectedReport.id}/status`, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Status investigasi laporan berhasil diperbarui.');
                 setIsDetailModalOpen(false);
             },
         });
@@ -230,7 +229,6 @@ export default function ProgramReportsIndex({
         postTakedown(`/admin/program-reports/${selectedReport.id}/takedown`, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Program berhasil ditutup dan laporan diselesaikan.');
                 setIsTakedownModalOpen(false);
                 setIsDetailModalOpen(false);
             },

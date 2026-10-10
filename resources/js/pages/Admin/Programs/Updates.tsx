@@ -99,7 +99,6 @@ export default function AdminProgramUpdates({ program, updates }: Props) {
         router.put(`/admin/programs/${program.id}/updates/${item.id}/moderation`, {
             moderation_status: 'approved',
         }, {
-            onSuccess: () => toast.success('Laporan kabar berhasil disetujui dan dipublikasikan.'),
             onFinish: () => setIsModerating(false),
         });
     };
@@ -116,7 +115,6 @@ export default function AdminProgramUpdates({ program, updates }: Props) {
             rejection_reason: rejectionReason.trim(),
         }, {
             onSuccess: () => {
-                toast.success('Laporan kabar berhasil ditolak dengan catatan.');
                 setUpdateToReject(null);
                 setRejectionReason('');
             },

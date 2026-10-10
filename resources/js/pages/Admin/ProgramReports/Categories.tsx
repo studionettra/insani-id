@@ -178,7 +178,6 @@ export default function ProgramReportCategoriesIndex({ categories, filters = {} 
             onSuccess: () => {
                 setIsCreateModalOpen(false);
                 reset();
-                toast.success('Kategori laporan berhasil ditambahkan.');
             },
         });
     };
@@ -192,7 +191,6 @@ export default function ProgramReportCategoriesIndex({ categories, filters = {} 
                 setIsEditModalOpen(false);
                 setEditingCategory(null);
                 reset();
-                toast.success('Kategori laporan berhasil diperbarui.');
             },
         });
     };
@@ -203,9 +201,6 @@ export default function ProgramReportCategoriesIndex({ categories, filters = {} 
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => {
-                    toast.success(`Kategori berhasil ${cat.is_active ? 'dinonaktifkan' : 'diaktifkan'}.`);
-                },
             }
         );
     };
@@ -219,7 +214,6 @@ export default function ProgramReportCategoriesIndex({ categories, filters = {} 
             onSuccess: () => {
                 setIsDeleting(false);
                 setCategoryToDelete(null);
-                toast.success('Kategori laporan berhasil dihapus.');
             },
             onError: (err: any) => {
                 setIsDeleting(false);

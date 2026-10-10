@@ -246,9 +246,6 @@ export default function SiteSettingsIndex({ settings, bankAccounts = [] }: Props
         post('/admin/site-settings', {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Pengaturan website berhasil disimpan!');
-            },
             onError: () => {
                 toast.error('Gagal menyimpan. Silakan periksa tab yang memiliki pesan error.');
             },

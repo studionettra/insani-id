@@ -91,9 +91,6 @@ export default function PaymentGatewayTab({
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => {
-                    toast.success(`Status rekening ${account.bank_name} berhasil ${account.is_active ? 'dinonaktifkan' : 'diaktifkan'}.`);
-                },
                 onError: () => {
                     toast.error(`Gagal mengubah status rekening ${account.bank_name}.`);
                 },
