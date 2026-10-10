@@ -52,7 +52,7 @@ class CategorySeeder extends Seeder
                     'ar' => 'حاضرون في قلب الأزمة: سعي إنساني لمكافحة الجوع',
                 ],
                 'impact_description' => [
-                    'id' => "Di tengah realita di atas, Insani hadir dengan dua pendekatan: penyediaan pangan langsung bagi yang membutuhkan hari ini, dan pembangunan infrastruktur pangan yang menopang ketahanan jangka panjang. Cakupan program membentang dari pelosok Nusantara hingga kantong-kantong krisis kemanusiaan dunia — Palestina, Suriah, Yaman, Rohingya, dan Somalia.\n\n• Bantuan Sembako (123 Program · 33.269 Penerima Manfaat): Distribusi bahan pangan pokok sebagai lini pertama pertahanan melawan kerawanan pangan.\n• Bantuan Pangan Siap Santap (29 Program · 6.827 Penerima Manfaat): Makanan siap konsumsi untuk kondisi darurat dan momentum ibadah.\n• Inovasi Agrikultur: Program rintisan pemberdayaan kemandirian produksi pangan tepat guna di lahan terbatas.",
+                    'id' => "Di tengah realita di atas, Insani hadir dengan dua pendekatan: penyediaan pangan langsung bagi yang membutuhkan hari ini, dan pembangunan infrastruktur pangan yang menopang ketahanan jangka panjang. Cakupan program membentang dari pelosok Nusantara hingga kantong-kantong krisis kemanusiaan dunia — Palestina, Suriah, Yaman, Rohingya, dan Somalia.\n\n• Bantuan Sembako (123 Program · 33.269 Penerima Manfaat): Distribusi bahan pangan pokok untuk memenuhi kebutuhan mendesak keluarga prasejahtera.\n• Bantuan Pangan Siap Santap (29 Program · 6.827 Penerima Manfaat): Makanan siap konsumsi untuk kondisi darurat dan momentum ibadah.\n• Inovasi Agrikultur: Program rintisan pemberdayaan kemandirian produksi pangan tepat guna di lahan terbatas.",
                     'en' => "Amidst these harsh realities, Insani intervenes through a two-pronged strategy: immediate emergency food relief for those in urgent need today, and sustainable food infrastructure supporting long-term food security. Our footprint extends from remote Indonesian archipelago to global humanitarian flashpoints — Palestine, Syria, Yemen, Rohingya, and Somalia.\n\n• Food Packages (123 Programs · 33,269 Beneficiaries): Distribution of staple foods as the first line of defense against food insecurity.\n• Ready-to-Eat Meals (29 Programs · 6,827 Beneficiaries): Nutritious prepared meals for urgent crisis response and seasonal relief.\n• Agricultural Innovation: Grassroots programs fostering self-reliant food production in constrained spaces.",
                     'ar' => "في ظل هذه الحقائق القاسية، تتدخل إنساني عبر مسارين متكاملين: توفير الإغاثة الغذائية الفورية لمن هم في أمس الحاجة اليوم، وبناء بنية تحتية مستدامة تعزز الأمن الغذائي على المدى الطويل من إندونيسيا إلى فلسطين وسوريا واليمن والروهينغا والصومال.\n\n• السلال الغذائية الأساسية (123 برنامجاً · 33,269 مستفيداً): خط الدفاع الأول لتوفير المواد التموينية الأساسية.\n• الوجبات الجاهزة (29 برنامجاً · 6,827 مستفيداً): وجبات طازجة للإغاثة الطارئة والمواسم الخيرية.\n• الابتكار الزراعي: برامج رائدة لتعزيز الاكتفاء الذاتي والإنتاج الغذائي في المساحات المحدودة.",
                 ],
@@ -62,7 +62,7 @@ class CategorySeeder extends Seeder
                         'tipe' => 'realita',
                         'value' => '~1,2 Juta',
                         'label' => [
-                            'id' => 'Warga Gaza hadapi kerawanan pangan fase krisis+',
+                            'id' => 'Warga Gaza menghadapi krisis kelaparan darurat',
                             'en' => 'Gaza residents facing crisis food insecurity+',
                             'ar' => 'سكان غزة يواجهون مرحلة أزمة انعدام الأمن الغذائي+',
                         ],
@@ -330,7 +330,7 @@ class CategorySeeder extends Seeder
                     'ar' => 'الحفاظ على نبض الرعاية الصحية في بؤر الأزمات',
                 ],
                 'impact_description' => [
-                    'id' => "Insani mengupayakan pemenuhan hak sehat melalui tiga pilar: layanan kesehatan yang menjangkau langsung masyarakat, bantuan pengobatan dan alat kesehatan, serta infrastruktur kesehatan — menjangkau Nusantara hingga Gaza, Yaman, Suriah, Afrika, dan Rohingya.\n\n• Layanan Kesehatan (6 Program · 206 Penerima Manfaat): Ambulans gratis, donor darah, medical check up, fogging, dan penyemprotan disinfektan.\n• Bantuan Kesehatan (10 Program · 544 Penerima Manfaat): Pengobatan dan alat kesehatan bagi yang tidak memiliki akses memadai.\n• Infrastruktur Kesehatan: Pembangunan sarana kesehatan permanen, termasuk armada ambulans.",
+                    'id' => "Insani mengupayakan pemenuhan hak sehat melalui tiga pilar: layanan kesehatan yang menjangkau langsung masyarakat, bantuan pengobatan dan alat kesehatan, serta infrastruktur kesehatan — menjangkau Nusantara hingga Gaza, Yaman, Suriah, Afrika, dan Rohingya.\n\n• Layanan Kesehatan (6 Program · 206 Penerima Manfaat): Ambulans gratis, donor darah, pemeriksaan kesehatan gratis, pengasapan sarang nyamuk, dan penyemprotan disinfektan.\n• Bantuan Kesehatan (10 Program · 544 Penerima Manfaat): Pengobatan dan alat kesehatan bagi yang tidak memiliki akses memadai.\n• Infrastruktur Kesehatan: Pembangunan sarana kesehatan permanen, termasuk armada ambulans.",
                     'en' => "Insani works to fulfill the right to healthcare across three essential pillars: mobile community health outreach, treatment subsidies and medical supplies, and healthcare infrastructure — spanning Indonesia to Gaza, Yemen, Syria, Africa, and Rohingya.\n\n• Direct Healthcare (6 Programs · 206 Beneficiaries): Free ambulances, blood drives, routine check-ups, and disease prevention sanitation.\n• Medical Aid (10 Programs · 544 Beneficiaries): Medical treatments and assistive devices for underprivileged patients.\n• Health Infrastructure: Developing healthcare facilities and maintaining rapid emergency ambulance fleets.",
                     'ar' => "تسعى إنساني لضمان الحق في الصحة عبر ثلاث ركائز: الخدمات الطبية الميدانية المباشرة، والإعانات العلاجية والأجهزة الطبية، والبنية التحتية الصحية من إندونيسيا إلى غزة واليمن وسوريا وأفريقيا والروهينغا.\n\n• الخدمات الصحية (6 برامج · 206 مستفيدين): سيارات الإسعاف المجانية، حملات التبرع بالدم، والفحوصات الدورية ومكافحة الأوبئة.\n• المساعدات العلاجية (10 برامج · 544 مستفيداً): توفير الأدوية والأجهزة التعويضية للمرضى الأشد احتياجاً.\n• البنية التحتية الصحية: تجهيز المرافق الطبية ودعم أسطول الإسعاف.",
                 ],
@@ -490,7 +490,7 @@ class CategorySeeder extends Seeder
                         'tipe' => 'realita',
                         'value' => '~658–700 Rb',
                         'label' => [
-                            'id' => 'Anak usia sekolah di Gaza hilang akses formal',
+                            'id' => 'Anak usia sekolah di Gaza kehilangan akses pendidikan formal',
                             'en' => 'School-age children in Gaza deprived of education',
                             'ar' => 'طفل في سن الدراسة بغزة فقدوا حق التعليم',
                         ],
@@ -585,7 +585,7 @@ class CategorySeeder extends Seeder
                     'ar' => 'التمكين الاقتصادي والمشاريع',
                 ],
                 'description' => [
-                    'id' => 'Mengubah ketergantungan menjadi kemandirian melalui siklus utuh: pelatihan vokasi, hibah modal usaha mikro, dan pendampingan bisnis berkelanjutan.',
+                    'id' => 'Mengubah ketergantungan menjadi kemandirian melalui tahapan terpadu: pelatihan keterampilan usaha, bantuan modal usaha mikro, dan pendampingan berkelanjutan.',
                     'en' => 'Transforming dependency into self-reliance through vocational skill training, micro-business seed capital, and sustainable business mentoring.',
                     'ar' => 'تحويل الاعتماد على المساعدة إلى الاستقلال المالي من خلال التدريب المهني ورؤوس أموال المشاريع والمتابعة المستمرة.',
                 ],
@@ -608,7 +608,7 @@ class CategorySeeder extends Seeder
                     'ar' => 'من الاعتماد على المساعدة إلى التمكين الذاتي',
                 ],
                 'impact_description' => [
-                    'id' => "Insani mengangkat sosio-ekonomi masyarakat lapisan bawah melalui tiga tahap yang saling menyambung: pelatihan keterampilan, permodalan usaha, dan pendampingan berkelanjutan.\n\n• Program Pelatihan: Pembekalan keterampilan usaha mikro, menjahit, desain, dan sablon.\n• Bantuan Pemodalan (3 Program · 17 Penerima Manfaat): Modal usaha gerobak, warung kelontong, hingga ternak.\n• Program Pendampingan (1 Program · 15 Penerima Manfaat): Pendampingan pasca-pemodalan agar usaha benar-benar naik kelas.",
+                    'id' => "Insani mendorong kemandirian keluarga prasejahtera melalui tiga tahapan terpadu: pelatihan keterampilan, permodalan usaha, dan pendampingan berkelanjutan.\n\n• Program Pelatihan: Pembekalan keterampilan usaha mikro, menjahit, desain, dan sablon.\n• Bantuan Pemodalan (3 Program · 17 Penerima Manfaat): Modal usaha gerobak, warung kelontong, hingga ternak.\n• Program Pendampingan (1 Program · 15 Penerima Manfaat): Pendampingan pasca-pemodalan agar usaha berkembang mandiri.",
                     'en' => "Insani empowers the socio-economic standing of marginalized communities through three interlinked steps: vocational skills training, enterprise capitalization, and ongoing business guidance.\n\n• Skill Training: Practical workshops in micro-business, tailoring, graphic design, and screen printing.\n• Capital Assistance (3 Programs · 17 Beneficiaries): Seed funding for food stalls, small grocery kiosks, and livestock.\n• Business Mentorship (1 Program · 15 Beneficiaries): Hands-on post-capital coaching ensuring sustainable enterprise growth.",
                     'ar' => "ترتقي إنساني بالمستوى المعيشي للفئات المتعففة عبر ثلاث مراحل متكاملة: التدريب المهني، والتمويل التأسيسي، والمرافقة التنموية المستمرة.\n\n• البرامج التدريبية: تزويد المستفيدين بالمهارات المهنية كالحياكة، التصميم، والطباعة وإدارة المشاريع.\n• الدعم التمويلي (3 برامج · 17 مستفيداً): رؤوس أموال لمشاريع الأكشاك والمتاجر وتربية الماشية.\n• برامج المتابعة والتوجيه (برنامج واحد · 15 مستفيداً): إشراف مستمر بعد التمويل لضمان نجاح المشاريع واستدامتها.",
                 ],
@@ -736,7 +736,7 @@ class CategorySeeder extends Seeder
                     'ar' => 'متأهبون، حاضرون، ولا نتوقف عند حدود الطوارئ',
                 ],
                 'impact_description' => [
-                    'id' => "Insani membangun fokus Tanggap Bencana sebagai satu siklus utuh: siaga sebelum bencana datang, darurat saat bencana terjadi, dan pemulihan jauh setelah sorotan publik meredup.\n\n• Siaga Bencana: Penguatan kapasitas relawan, kesiapan peralatan tanggap darurat, dan mitigasi lingkungan jangka panjang — investasi kesiapsiagaan yang menentukan seberapa besar dampak bencana di kemudian hari.\n• Darurat Bencana (27 Program · 12.955 Penerima Manfaat): SAR, dapur darurat, bantuan logistik korban, posko bencana, bantuan musim dingin bagi pengungsi.\n• Pemulihan Bencana (10 Program · 907 Penerima Manfaat): Trauma healing, HUNTARA, shelter pengungsian, pemulihan ekonomi pasca-bencana.",
+                    'id' => "Insani membangun fokus Tanggap Bencana sebagai satu siklus utuh: siaga sebelum bencana datang, darurat saat bencana terjadi, dan pemulihan jauh setelah sorotan publik meredup.\n\n• Siaga Bencana: Penguatan kapasitas relawan, kesiapan peralatan tanggap darurat, dan mitigasi lingkungan jangka panjang — langkah mitigasi awal yang memperkecil risiko dan korban jiwa saat bencana terjadi.\n• Darurat Bencana (27 Program · 12.955 Penerima Manfaat): SAR, dapur darurat, bantuan logistik korban, posko bencana, bantuan musim dingin bagi pengungsi.\n• Pemulihan Bencana (10 Program · 907 Penerima Manfaat): Dukungan pemulihan trauma, hunian sementara (huntara), tenda pengungsian darurat, dan pemulihan ekonomi pasca-bencana.",
                     'en' => "Insani structures its Disaster Response as a comprehensive full-cycle mandate: preparedness before disaster strikes, rapid relief during crises, and rehabilitation long after the headlines fade.\n\n• Disaster Readiness: Volunteer capacity building, emergency equipment deployment, and ecological mitigation investments.\n• Emergency Response (27 Programs · 12,955 Beneficiaries): Search and rescue operations, community kitchens, emergency supply kits, disaster posts, and refugee winterization aid.\n• Post-Disaster Recovery (10 Programs · 907 Beneficiaries): Trauma healing, transitional shelters (HUNTARA), sanitization, and community economic restoration.",
                     'ar' => "تتبنى إنساني في برنامج الاستجابة للكوارث دورة عمل متكاملة: الجاهزية المسبقة، الإغاثة الطارئة، وإعادة التأهيل بعد انحسار الأزمة.\n\n• الجاهزية والاستعداد: تدريب المتطوعين، صيانة معدات الإنقاذ، ومشاريع الحماية البيئية والوقائية.\n• الإغاثة الطارئة (27 برنامجاً · 12,955 مستفيداً): عمليات الإنقاذ، المطابخ الميدانية، المساعدات اللوجستية، ومخيمات الإيواء والإغاثة الشتوية.\n• التعافي وإعادة الإعمار (10 برامج · 907 مستفيدين): الدعم النفسي، بناء المآوي المؤقتة (هونتارا)، والتعافي الاقتصادي للأسر المنكوبة.",
                 ],
@@ -779,7 +779,7 @@ class CategorySeeder extends Seeder
                         'tipe' => 'realita',
                         'value' => '104.000',
                         'label' => [
-                            'id' => 'Warga Yaman mengungsi dlm 2 pekan (>57 rb anak)',
+                            'id' => 'Warga Yaman mengungsi dalam 2 pekan (>57 ribu anak)',
                             'en' => 'Yemenis displaced in 2 weeks (>57k children)',
                             'ar' => 'يمني نزحوا خلال أسبوعين (>57 ألف طفل)',
                         ],
