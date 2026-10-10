@@ -88,7 +88,7 @@ it('allows authorized admin to view financial report dashboard with accurate met
             ->where('financialSummary.total_donations_count', 1)
             ->where('financialSummary.total_gateway_fees', 700)
             ->where('financialSummary.net_collected_donations', 99300)
-            ->where('financialSummary.total_disbursed_gross', 50000)
+            ->where('financialSummary.total_disbursed_gross', 52500)
             ->where('financialSummary.total_platform_fees', 2500)
             ->where('financialSummary.total_bank_fees', 2500)
             ->where('financialSummary.total_disbursed_nett', 45000)
@@ -280,7 +280,8 @@ it('exports disbursements CSV with receipt number, platform fee, and bank fee', 
     $csvContent = ob_get_clean();
 
     expect($csvContent)->toContain('No Kuitansi');
-    expect($csvContent)->toContain('Potongan Platform 5%');
+    expect($csvContent)->toContain('Alokasi Program Bruto');
+    expect($csvContent)->toContain('Hak Lembaga 5%');
     expect($csvContent)->toContain('Biaya Bank BI-Fast');
     expect($csvContent)->toContain('Nominal Bersih Ditransfer');
     expect($csvContent)->toContain('KUI-DISB-999');

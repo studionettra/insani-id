@@ -62,6 +62,29 @@ class Disbursement extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function getMaskedAccountNumberAttribute(): string
+    {
+        $acc = preg_replace('/\s+/', '', (string) $this->bank_account_number);
+        $len = strlen($acc);
+        if ($len <= 4) {
+            return str_repeat('*', max(1, $len));
+        }
+        $lastFour = substr($acc, -4);
+        $hiddenLength = $len - 4;
+
+        if ($hiddenLength <= 4) {
+            $maskedPrefix = '****';
+        } elseif ($hiddenLength <= 8) {
+            $maskedPrefix = '*** ****';
+        } elseif ($hiddenLength <= 12) {
+            $maskedPrefix = '*** **** ****';
+        } else {
+            $maskedPrefix = '*** **** **** ****';
+        }
+
+        return "{$maskedPrefix} {$lastFour}";
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logAll()->logOnlyDirty();

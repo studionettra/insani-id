@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PopupMessageController;
 use App\Http\Controllers\Admin\ProgramController;
+use App\Http\Controllers\Admin\ProgramDisbursementController;
 use App\Http\Controllers\Admin\ProgramReportCategoryController;
 use App\Http\Controllers\Admin\ProgramReportController;
 use App\Http\Controllers\Admin\ProgramUpdateController as AdminProgramUpdateController;
@@ -356,6 +357,11 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::post('/programs/{id}/translate', [ProgramController::class, 'translate'])->name('programs.translate');
             Route::resource('programs.updates', AdminProgramUpdateController::class)->only(['index', 'store', 'update', 'destroy']);
             Route::put('programs/{program}/updates/{update}/moderation', [AdminProgramUpdateController::class, 'updateModeration'])->name('programs.updates.moderation');
+        });
+
+        Route::middleware('permission:disbursement.create')->group(function () {
+            Route::get('programs/{program}/disbursements/create', [ProgramDisbursementController::class, 'create'])->name('programs.disbursements.create');
+            Route::post('programs/{program}/disbursements', [ProgramDisbursementController::class, 'store'])->name('programs.disbursements.store');
         });
 
         Route::middleware('permission:disbursement.view')->group(function () {

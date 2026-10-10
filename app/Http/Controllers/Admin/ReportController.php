@@ -46,6 +46,21 @@ class ReportController extends Controller
         // Total alokasi bruto penyaluran dari rekening penampungan (mencakup hak campaigner dan alokasi hak lembaga)
         $totalDisbursedGross = (float) $disbursementQuery->selectRaw('SUM(requested_amount + platform_fee_amount) as total')->value('total');
 
+        // Breakdown Penyaluran Internal Yayasan vs Mitra Campaigner
+        $internalDisbursedAmount = (float) (clone $disbursementQuery)
+            ->whereHas('program', fn ($q) => $q->where('campaigner_type', 'internal'))
+            ->sum('requested_amount');
+        $internalDisbursementsCount = (int) (clone $disbursementQuery)
+            ->whereHas('program', fn ($q) => $q->where('campaigner_type', 'internal'))
+            ->count();
+
+        $campaignerDisbursedAmount = (float) (clone $disbursementQuery)
+            ->whereHas('program', fn ($q) => $q->where('campaigner_type', '!=', 'internal'))
+            ->sum('requested_amount');
+        $campaignerDisbursementsCount = (int) (clone $disbursementQuery)
+            ->whereHas('program', fn ($q) => $q->where('campaigner_type', '!=', 'internal'))
+            ->count();
+
         // 4. Escrow & Cashflow Balance
         // Point-in-time total escrow fund currently held across all programs
         $allTimeNetCollected = (float) (Donation::where('status', 'paid')->sum('amount') -
@@ -230,6 +245,10 @@ class ReportController extends Controller
                 'total_platform_fees' => $totalPlatformFees,
                 'total_bank_fees' => $totalBankFees,
                 'total_disbursed_nett' => $totalDisbursedNett,
+                'internal_disbursed_amount' => $internalDisbursedAmount,
+                'internal_disbursements_count' => $internalDisbursementsCount,
+                'campaigner_disbursed_amount' => $campaignerDisbursedAmount,
+                'campaigner_disbursements_count' => $campaignerDisbursementsCount,
                 'escrow_balance' => $currentEscrowBalance,
                 'period_net_cashflow' => $periodNetCashflow,
             ],

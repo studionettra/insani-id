@@ -168,12 +168,36 @@ class ProgramController extends Controller
      */
     public function show(string $id)
     {
-        $program = Program::with(['category', 'creator', 'campaignerProfile', 'galleries', 'documents', 'updates' => fn ($q) => $q->latest()])->findOrFail($id);
+        $program = Program::with([
+            'category',
+            'creator',
+            'campaignerProfile',
+            'galleries',
+            'documents',
+            'updates' => fn ($q) => $q->latest(),
+            'disbursements' => fn ($q) => $q->with('approvedBy')->latest(),
+        ])->findOrFail($id);
+
+        $availableBalance = (float) $program->available_balance;
+        $totalCollected = (float) $program->total_collected_amount;
+        $totalGatewayFees = (float) $program->total_gateway_fees;
+        $totalDisbursed = (float) $program->total_disbursed_amount;
+        $platformFeePercent = (float) $program->platform_fee_percent;
+        $platformFeeAmount = (float) $program->platform_fee_amount;
 
         return Inertia::render('Admin/Programs/Show', [
             'program' => array_merge($program->toArray(), [
                 'title_translations' => $program->getTranslations('title'),
                 'story_translations' => $program->getTranslations('story'),
+                'disbursements' => $program->disbursements,
+                'financial_metrics' => [
+                    'total_collected' => $totalCollected,
+                    'total_gateway_fees' => $totalGatewayFees,
+                    'total_disbursed' => $totalDisbursed,
+                    'available_balance' => $availableBalance,
+                    'platform_fee_percent' => $platformFeePercent,
+                    'platform_fee_amount' => $platformFeeAmount,
+                ],
             ]),
         ]);
     }

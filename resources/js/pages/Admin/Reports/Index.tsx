@@ -42,6 +42,10 @@ interface FinancialSummary {
     total_platform_fees: number;
     total_bank_fees: number;
     total_disbursed_nett: number;
+    internal_disbursed_amount: number;
+    internal_disbursements_count: number;
+    campaigner_disbursed_amount: number;
+    campaigner_disbursements_count: number;
     escrow_balance: number;
     period_net_cashflow: number;
 }
@@ -122,6 +126,10 @@ export default function ReportIndex({
         total_platform_fees: 0,
         total_bank_fees: 0,
         total_disbursed_nett: 0,
+        internal_disbursed_amount: 0,
+        internal_disbursements_count: 0,
+        campaigner_disbursed_amount: 0,
+        campaigner_disbursements_count: 0,
         escrow_balance: 0,
         period_net_cashflow: 0,
     },
@@ -395,10 +403,10 @@ export default function ReportIndex({
                         </div>
                     </div>
 
-                    {/* Card 4: Dana Disalurkan ke Mitra */}
+                    {/* Card 4: Total Realisasi Penyaluran */}
                     <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-xs flex flex-col justify-between">
                         <div className="flex items-center justify-between gap-2 mb-3">
-                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Dana Disalurkan ke Mitra</span>
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Dana Disalurkan</span>
                             <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#1A56DB] dark:text-blue-400 flex items-center justify-center">
                                 <CheckCircle2 className="w-4 h-4" />
                             </div>
@@ -407,9 +415,12 @@ export default function ReportIndex({
                             <p className="text-xl font-bold text-gray-900 dark:text-white">
                                 {formatCurrency(financialSummary.total_disbursed_nett)}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {financialSummary.total_disbursements_count.toLocaleString('id-ID')} pencairan selesai
-                            </p>
+                            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex flex-col gap-0.5">
+                                <span>{financialSummary.total_disbursements_count.toLocaleString('id-ID')} penyaluran selesai</span>
+                                <span className="text-[10px] text-gray-400">
+                                    (Internal: {formatCurrency(financialSummary.internal_disbursed_amount)} • Mitra: {formatCurrency(financialSummary.campaigner_disbursed_amount)})
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -546,13 +557,38 @@ export default function ReportIndex({
                                     </p>
                                     <div className="space-y-2 bg-gray-50/60 dark:bg-gray-800/40 rounded-lg p-3">
                                         <div className="flex justify-between items-center text-gray-700 dark:text-gray-300">
-                                            <span>Total Alokasi Penyaluran Program</span>
+                                            <span>Total Alokasi Bruto Penyaluran</span>
                                             <span className="font-semibold text-gray-900 dark:text-white">
                                                 {formatCurrency(financialSummary.total_disbursed_gross)}
                                             </span>
                                         </div>
+
+                                        {/* Sub-breakdown Internal vs Mitra */}
+                                        <div className="pl-3 border-l-2 border-blue-200 dark:border-blue-900 space-y-1.5 my-1.5 text-[11px]">
+                                            <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
+                                                <span className="flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
+                                                    <span>Program Mandiri Yayasan (Internal)</span>
+                                                    <span className="text-gray-400">({financialSummary.internal_disbursements_count} trx)</span>
+                                                </span>
+                                                <span className="font-medium text-gray-800 dark:text-gray-200">
+                                                    {formatCurrency(financialSummary.internal_disbursed_amount)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-gray-600 dark:text-gray-400">
+                                                <span className="flex items-center gap-1.5">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                                                    <span>Program Mitra Penggalang (Campaigner)</span>
+                                                    <span className="text-gray-400">({financialSummary.campaigner_disbursements_count} trx)</span>
+                                                </span>
+                                                <span className="font-medium text-gray-800 dark:text-gray-200">
+                                                    {formatCurrency(financialSummary.campaigner_disbursed_amount)}
+                                                </span>
+                                            </div>
+                                        </div>
+
                                         <div className="flex justify-between items-center text-indigo-600 dark:text-indigo-400">
-                                            <span>Alokasi Hak Operasional Lembaga 5%</span>
+                                            <span>Alokasi Hak Operasional Lembaga 5% (Khusus Mitra)</span>
                                             <span className="font-semibold">
                                                 - {formatCurrency(financialSummary.total_platform_fees)}
                                             </span>
@@ -564,7 +600,7 @@ export default function ReportIndex({
                                             </span>
                                         </div>
                                         <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center font-bold text-blue-700 dark:text-blue-400">
-                                            <span>Kas Bersih Ditransfer ke Rekening Campaigner</span>
+                                            <span>Kas Bersih Disalurkan (Netto)</span>
                                             <span>{formatCurrency(financialSummary.total_disbursed_nett)}</span>
                                         </div>
                                     </div>
@@ -612,7 +648,7 @@ export default function ReportIndex({
                                             2. Bagi Hasil Platform (5%)
                                         </p>
                                         <p>
-                                            Dipungut secara otomatis saat pencairan disetujui untuk mendukung operasional lembaga sesuai regulasi izin pengumpulan dana masyarakat (PUB).
+                                            Dipungut secara otomatis saat pencairan program mitra disetujui untuk mendukung operasional lembaga sesuai regulasi izin pengumpulan dana masyarakat (PUB). Program inisiatif mandiri internal yayasan bebas biaya operasional (0%).
                                         </p>
                                     </div>
 

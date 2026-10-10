@@ -3,43 +3,48 @@ import { format } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
 import DOMPurify from 'dompurify';
 import {
-    ArrowLeft,
-    CheckCircle,
-    XCircle,
-    Info,
-    Ban,
-    User,
-    Calendar,
     AlertTriangle,
-    Megaphone,
-    ShieldCheck,
-    Plus,
+    ArrowLeft,
+    Ban,
+    Building2,
+    Calendar,
+    CheckCircle,
     CheckCircle2,
-    Clock,
-    Languages,
-    RefreshCcw,
-    Loader2,
     Edit,
-    ExternalLink
+    ExternalLink,
+    Eye,
+    FileText,
+    HandCoins,
+    Info,
+    Languages,
+    Megaphone,
+    Plus,
+    Printer,
+    ReceiptText,
+    RefreshCcw,
+    ShieldCheck,
+    User,
+    Wallet,
+    XCircle,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import TranslationStatusCard from '@/components/admin/TranslationStatusCard';
+import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
-    DialogDescription
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatCurrency, formatDate, getLocalizedValue } from '@/lib/utils';
-import DonationProgressBar from '@/components/donation/DonationProgressBar';
 
 interface Program {
     id: number;
@@ -48,8 +53,8 @@ interface Program {
     program_code: string;
     category: any;
     campaigner_type: string;
-    creator: { name: string, email: string, phone: string };
-    campaignerProfile?: { institution_name: string, pic_name: string, type: string };
+    creator: { name: string; email: string; phone: string };
+    campaignerProfile?: { institution_name: string; pic_name: string; type: string };
     collected_amount: number;
     target_amount: string | null;
     status: string;
@@ -60,8 +65,19 @@ interface Program {
     video_url: string | null;
     rejection_notes: string | null;
     created_by: number;
+    views_count?: number;
+    created_at?: string;
     title_translations?: { id?: string; en?: string; ar?: string };
     story_translations?: { id?: string; en?: string; ar?: string };
+    financial_metrics?: {
+        total_collected: number;
+        total_gateway_fees: number;
+        total_disbursed: number;
+        available_balance: number;
+        platform_fee_percent: number;
+        platform_fee_amount: number;
+    };
+    disbursements?: Array<any>;
     updates?: Array<{
         id: number;
         title: string;
@@ -102,7 +118,7 @@ const AdminProgramUpdateCard = ({ update, programId }: { update: any; programId:
                             Draf
                         </Badge>
                     )}
-                    <Button asChild variant="ghost" size="sm" className="h-7 px-2.5 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-950/40">
+                    <Button asChild variant="ghost" size="sm" className="h-7 px-2.5 text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:brand-300 hover:bg-brand-50 dark:hover:bg-brand-950/40">
                         <Link href={`/admin/programs/${programId}/updates`}>
                             Kelola
                         </Link>
@@ -142,10 +158,36 @@ export default function ProgramShow({ program }: Props) {
     const isCreator = Boolean(auth?.user?.id && Number(program.created_by) === Number(auth.user.id));
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
 
+    // Initial tab determination: check query param first, then fallback based on context
+    const getInitialTab = (): 'finances' | 'story' | 'updates' => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            if (tabParam === 'finances' || tabParam === 'story' || tabParam === 'updates') {
+                return tabParam;
+            }
+        }
+        if (program.status === 'pending_verification') {
+            return 'story';
+        }
+        return 'finances';
+    };
+
+    const [activeTab, setActiveTab] = useState<'finances' | 'story' | 'updates'>(getInitialTab);
+
+    const handleTabChange = (tab: 'finances' | 'story' | 'updates') => {
+        setActiveTab(tab);
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tab);
+            window.history.replaceState({}, '', url.toString());
+        }
+    };
+
     const { data: rejectData, setData: setRejectData, post: postReject, processing: rejectProcessing, errors: rejectErrors } = useForm({
         _method: 'put',
         status: 'rejected',
-        rejection_notes: ''
+        rejection_notes: '',
     });
 
     const [isApproveConfirmOpen, setIsApproveConfirmOpen] = useState(false);
@@ -184,38 +226,38 @@ export default function ProgramShow({ program }: Props) {
     const handleApproveConfirm = () => {
         setIsUpdatingStatus(true);
         router.put(`/admin/programs/${program.id}/status`, {
-            status: 'published'
+            status: 'published',
         }, {
             onFinish: () => {
                 setIsUpdatingStatus(false);
                 setIsApproveConfirmOpen(false);
-            }
+            },
         });
     };
 
     const handleRejectSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         postReject(`/admin/programs/${program.id}/status`, {
-            onSuccess: () => setIsRejectModalOpen(false)
+            onSuccess: () => setIsRejectModalOpen(false),
         });
     };
 
     const handleCloseConfirm = () => {
         setIsUpdatingStatus(true);
         router.put(`/admin/programs/${program.id}/status`, {
-            status: 'closed_manual'
+            status: 'closed_manual',
         }, {
             onFinish: () => {
                 setIsUpdatingStatus(false);
                 setIsCloseConfirmOpen(false);
-            }
+            },
         });
     };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'published':
-                return <Badge variant="outline" className="bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30 border-0 font-medium">Aktif</Badge>;
+                return <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 dark:ring-emerald-500/30 border-0 font-medium">Aktif</Badge>;
             case 'pending_verification':
                 return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 dark:bg-amber-950/40 dark:text-amber-400 ring-1 ring-inset ring-yellow-600/20 dark:ring-amber-500/30 border-0 font-medium">Menunggu Verifikasi</Badge>;
             case 'completed':
@@ -231,38 +273,65 @@ export default function ProgramShow({ program }: Props) {
         }
     };
 
+    const getCampaignerBadge = () => {
+        if (program.campaigner_type === 'internal') {
+            return (
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 font-medium">
+                    <Building2 className="w-3 h-3 mr-1" /> Internal Yayasan
+                </Badge>
+            );
+        }
+        if (program.campaigner_type === 'lembaga' || program.campaignerProfile?.type === 'lembaga') {
+            return (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200 dark:border-blue-800 font-medium">
+                    <Building2 className="w-3 h-3 mr-1" /> Mitra Lembaga
+                </Badge>
+            );
+        }
+        return (
+            <Badge variant="outline" className="bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-medium">
+                <User className="w-3 h-3 mr-1" /> Mitra Individu
+            </Badge>
+        );
+    };
+
     return (
         <>
             <Head title={`Detail Program: ${getLocalizedValue(program.title)}`} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-6">
+            <div className="flex h-full flex-1 flex-col gap-6 p-4 sm:p-6 lg:p-8">
+                {/* Back Button */}
                 <div>
-                    <Button variant="outline" size="sm" asChild className="mb-6 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300">
-                        <Link href="/admin/programs"><ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Manajemen Program</Link>
+                    <Button variant="outline" size="sm" asChild className="border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300">
+                        <Link href="/admin/programs">
+                            <ArrowLeft className="w-4 h-4 mr-2" /> Kembali ke Manajemen Program
+                        </Link>
                     </Button>
                 </div>
 
                 {errors.status && (
-                    <div className="p-4 bg-yellow-50 dark:bg-amber-950/30 border border-yellow-200 dark:border-amber-900/50 text-yellow-800 dark:text-amber-200 rounded-md flex items-start">
+                    <div className="p-4 bg-yellow-50 dark:bg-amber-950/30 border border-yellow-200 dark:border-amber-900/50 text-yellow-800 dark:text-amber-200 rounded-xl flex items-start">
                         <AlertTriangle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
                         <p className="text-sm font-medium">{errors.status}</p>
                     </div>
                 )}
 
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                {/* Header Utama & Action Bar Terpadu */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-gray-100 dark:border-gray-800">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Detail Program</h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Tinjau informasi program donasi.
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                            {getStatusBadge(program.status)}
+                            {getCampaignerBadge()}
+                            <span className="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 rounded-md font-semibold">
+                                {program.program_code}
+                            </span>
+                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white leading-snug">
+                            {getLocalizedValue(program.title)}
+                        </h1>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                        {getStatusBadge(program.status)}
-                        <Button variant="outline" size="sm" asChild className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <Link href={`/admin/programs/${program.id}/edit`}>
-                                <Edit className="w-4 h-4 mr-1.5" /> Edit Program
-                            </Link>
-                        </Button>
+
+                    <div className="flex items-center flex-wrap gap-2 self-start lg:self-auto">
                         {program.slug && (
                             <Button variant="outline" size="sm" asChild className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                                 <a href={`/program/${program.slug}`} target="_blank" rel="noopener noreferrer">
@@ -270,262 +339,522 @@ export default function ProgramShow({ program }: Props) {
                                 </a>
                             </Button>
                         )}
+                        <Button variant="outline" size="sm" asChild className="border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <Link href={`/admin/programs/${program.id}/edit`}>
+                                <Edit className="w-4 h-4 mr-1.5" /> Edit Program
+                            </Link>
+                        </Button>
+                        {program.status === 'published' && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-300"
+                                onClick={() => setIsCloseConfirmOpen(true)}
+                            >
+                                <Ban className="w-4 h-4 mr-1.5" /> Tutup Program (Manual)
+                            </Button>
+                        )}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                {/* Top Metrics Ribbon (4 Kartu Ringkas) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Stat 1: Total Donasi Masuk & Progress Bar */}
+                    <div className="p-4.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs flex flex-col justify-between">
+                        <div>
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Donasi Masuk</span>
+                            <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                                {formatCurrency(program.financial_metrics?.total_collected ?? program.collected_amount)}
+                            </p>
+                        </div>
+                        <div className="mt-3">
+                            <DonationProgressBar
+                                collectedAmount={program.collected_amount}
+                                targetAmount={program.target_amount}
+                                size="xs"
+                                percentagePlacement="top-right"
+                                percentageFormat="badge"
+                            />
+                        </div>
+                    </div>
 
-                    {/* Left Column - Details */}
-                    <div className="xl:col-span-2 space-y-6">
+                    {/* Stat 2: Sisa Kas Tersedia (Available Balance) */}
+                    <div className="p-4.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-xs flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400">
+                                Sisa Kas Tersedia
+                            </span>
+                            <div className="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
+                                <Wallet className="w-3.5 h-3.5" />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
+                                {formatCurrency(program.financial_metrics?.available_balance ?? 0)}
+                            </p>
+                            <span className="text-[11px] text-emerald-600 dark:text-emerald-400">
+                                {program.campaigner_type === 'internal' ? 'Bebas potongan fee platform' : 'Tersedia untuk dicairkan'}
+                            </span>
+                        </div>
+                    </div>
 
-                        {program.status === 'rejected' && program.rejection_notes && (
-                            <div className="rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-5">
-                                <div className="flex items-start">
-                                    <Info className="h-5 w-5 text-red-600 dark:text-red-400 mr-3 mt-0.5 shrink-0" />
+                    {/* Stat 3: Total Telah Disalurkan */}
+                    <div className="p-4.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Telah Disalurkan</span>
+                            <span className="text-xs text-gray-400">{program.disbursements?.length || 0} termin</span>
+                        </div>
+                        <div>
+                            <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+                                {formatCurrency(program.financial_metrics?.total_disbursed ?? 0)}
+                            </p>
+                            <span className="text-[11px] text-gray-400">Realisasi transfer lapangan</span>
+                        </div>
+                    </div>
+
+                    {/* Stat 4: Kabar & Dokumentasi */}
+                    <div className="p-4.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs flex flex-col justify-between">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Laporan Penyaluran</span>
+                            <Megaphone className="w-4 h-4 text-[#1A56DB] dark:text-blue-400" />
+                        </div>
+                        <div>
+                            <p className="text-xl font-bold text-gray-900 dark:text-white mt-1">
+                                {program.updates?.length || 0} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">Kabar</span>
+                            </p>
+                            <span className="text-[11px] text-gray-400">Dokumentasi transparansi donatur</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Content Layout (2 Columns) */}
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                    {/* Left Column: Tabbed Content (8 cols) */}
+                    <div className="xl:col-span-8 space-y-4">
+                        {/* Tab Navigation Pill Bar */}
+                        <div className="flex items-center flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 pb-3">
+                            <button
+                                type="button"
+                                onClick={() => handleTabChange('finances')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                                    activeTab === 'finances'
+                                        ? 'bg-[#1A56DB] text-white shadow-xs'
+                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                }`}
+                            >
+                                <Wallet className="w-4 h-4" />
+                                <span>Keuangan & Penyaluran Kas</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleTabChange('story')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                                    activeTab === 'story'
+                                        ? 'bg-[#1A56DB] text-white shadow-xs'
+                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                }`}
+                            >
+                                <FileText className="w-4 h-4" />
+                                <span>Konten & Cerita Program</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleTabChange('updates')}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+                                    activeTab === 'updates'
+                                        ? 'bg-[#1A56DB] text-white shadow-xs'
+                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                }`}
+                            >
+                                <Megaphone className="w-4 h-4" />
+                                <span>Kabar & Dokumentasi ({program.updates?.length || 0})</span>
+                            </button>
+                        </div>
+
+                        {/* TAB 1: KEUANGAN & PENYALURAN KAS */}
+                        {activeTab === 'finances' && (
+                            <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-xs">
+                                <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
+                                            <Wallet className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                                                Keuangan & Penyaluran Kas Program
+                                            </h3>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Rekonsiliasi donasi masuk, realisasi penyaluran, dan sisa kas amanah
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {program.campaigner_type === 'internal' && (
+                                        <Button asChild size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs self-start sm:self-auto">
+                                            <Link href={`/admin/programs/${program.id}/disbursements/create`}>
+                                                <HandCoins className="w-4 h-4 mr-1.5" /> Salurkan Dana Program
+                                            </Link>
+                                        </Button>
+                                    )}
+                                </div>
+
+                                <div className="p-6 space-y-6">
+                                    {/* 4 Financial Summary Cards */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Donasi Masuk</span>
+                                            <p className="text-lg font-bold text-gray-900 dark:text-white mt-1">
+                                                {formatCurrency(program.financial_metrics?.total_collected ?? program.collected_amount)}
+                                            </p>
+                                            <span className="text-[11px] text-gray-400">Penerimaan donatur</span>
+                                        </div>
+
+                                        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Biaya Transaksi Digital</span>
+                                            <p className="text-lg font-bold text-red-600 dark:text-red-400 mt-1">
+                                                - {formatCurrency(program.financial_metrics?.total_gateway_fees ?? 0)}
+                                            </p>
+                                            <span className="text-[11px] text-gray-400">Potongan gateway BI</span>
+                                        </div>
+
+                                        <div className="p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Total Telah Disalurkan</span>
+                                            <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-1">
+                                                {formatCurrency(program.financial_metrics?.total_disbursed ?? 0)}
+                                            </p>
+                                            <span className="text-[11px] text-gray-400">{program.disbursements?.length || 0} termin pencairan</span>
+                                        </div>
+
+                                        <div className="p-4 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/60 dark:bg-emerald-950/20">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-400">
+                                                    Sisa Kas Tersedia
+                                                </span>
+                                                <div className="w-5 h-5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
+                                                    <Wallet className="w-3 h-3" />
+                                                </div>
+                                            </div>
+                                            <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300 mt-1">
+                                                {formatCurrency(program.financial_metrics?.available_balance ?? 0)}
+                                            </p>
+                                            <span className="text-[11px] text-emerald-600/90 dark:text-emerald-400/90">Saldo kas amanah program</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Riwayat Penyaluran Dana Tabel */}
                                     <div>
-                                        <h4 className="text-red-900 dark:text-red-200 font-semibold mb-1">Program Ditolak</h4>
-                                        <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-                                            <strong>Catatan Penolakan:</strong> {program.rejection_notes}
-                                        </p>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="font-semibold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                                                <ReceiptText className="w-4 h-4 text-gray-500" />
+                                                <span>Riwayat Penyaluran Dana Program</span>
+                                            </h4>
+                                            <span className="text-xs text-gray-500">
+                                                Total: {program.disbursements?.length || 0} Penyaluran
+                                            </span>
+                                        </div>
+
+                                        {(!program.disbursements || program.disbursements.length === 0) ? (
+                                            <div className="p-8 text-center rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-800/30">
+                                                <Wallet className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2 opacity-50" />
+                                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Belum ada riwayat pencairan atau penyaluran dana
+                                                </p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                                                    {program.campaigner_type === 'internal'
+                                                        ? 'Dana kas yang terkumpul dapat disalurkan secara bertahap sesuai kebutuhan operasional dan RAB lapangan.'
+                                                        : 'Penyaluran dana untuk program mitra akan tercatat di sini setelah campaigner mengajukan pencairan dan disetujui.'}
+                                                </p>
+                                                {program.campaigner_type === 'internal' && ((program.financial_metrics?.available_balance ?? 0) > 0) && (
+                                                    <Button asChild size="sm" className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
+                                                        <Link href={`/admin/programs/${program.id}/disbursements/create`}>
+                                                            <HandCoins className="w-4 h-4 mr-1.5" /> Salurkan Dana Program Sekarang
+                                                        </Link>
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
+                                                <table className="w-full text-xs text-left">
+                                                    <thead className="bg-gray-50 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
+                                                        <tr>
+                                                            <th className="px-4 py-3 font-semibold">Tgl / No. Kuitansi</th>
+                                                            <th className="px-4 py-3 font-semibold">Keperluan & Target</th>
+                                                            <th className="px-4 py-3 font-semibold">Rekening Penerima</th>
+                                                            <th className="px-4 py-3 font-semibold text-right">Nominal</th>
+                                                            <th className="px-4 py-3 font-semibold text-center">Status</th>
+                                                            <th className="px-4 py-3 font-semibold text-right">Aksi</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                                        {program.disbursements.map((d: any) => (
+                                                            <tr key={d.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30">
+                                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                                    <span className="font-mono font-bold text-purple-700 bg-purple-50 dark:bg-purple-950/40 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 text-[11px] block w-fit">
+                                                                        {d.receipt_number || `#${d.id}`}
+                                                                    </span>
+                                                                    <span className="text-[11px] text-gray-400 mt-1 block">
+                                                                        {d.transferred_at ? formatDate(d.transferred_at) : formatDate(d.created_at)}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 max-w-xs">
+                                                                    <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                                        {d.distribution_plan || '-'}
+                                                                    </p>
+                                                                    <p className="text-[11px] text-gray-500 mt-0.5">
+                                                                        {d.beneficiary_target ? `Target: ${d.beneficiary_target}` : ''} {d.location ? `• ${d.location}` : ''}
+                                                                    </p>
+                                                                </td>
+                                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                                    <p className="font-medium text-gray-800 dark:text-gray-200">
+                                                                        {d.bank_account_name || '-'}
+                                                                    </p>
+                                                                    <p className="text-[11px] text-gray-400 font-mono">
+                                                                        {d.bank_name} - {d.bank_account_number}
+                                                                    </p>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-right whitespace-nowrap">
+                                                                    <span className="font-bold text-emerald-700 dark:text-emerald-400">
+                                                                        {formatCurrency(d.nett_amount ?? d.requested_amount)}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 py-3 text-center whitespace-nowrap">
+                                                                    {d.status === 'transferred' ? (
+                                                                        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 text-[10px]">
+                                                                            Ditransfer
+                                                                        </Badge>
+                                                                    ) : d.status === 'approved' ? (
+                                                                        <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border-blue-200 text-[10px]">
+                                                                            Disetujui
+                                                                        </Badge>
+                                                                    ) : (
+                                                                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-200 text-[10px]">
+                                                                            {d.status}
+                                                                        </Badge>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-4 py-3 text-right whitespace-nowrap">
+                                                                    <div className="flex items-center justify-end gap-1.5">
+                                                                        <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-600 dark:text-gray-300">
+                                                                            <Link href={`/admin/disbursements/${d.id}/receipt`} target="_blank">
+                                                                                <Printer className="w-3.5 h-3.5 mr-1" /> Kuitansi
+                                                                            </Link>
+                                                                        </Button>
+                                                                        <Button asChild variant="outline" size="sm" className="h-7 px-2 text-xs">
+                                                                            <Link href={`/admin/disbursements/${d.id}`}>
+                                                                                Detail
+                                                                            </Link>
+                                                                        </Button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-sm">
-                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
-                                <h3 className="font-semibold text-gray-900 dark:text-white">
-                                    Informasi Utama
-                                </h3>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-6">
-                                    <img
-                                        src={`/storage/${program.cover_image}`}
-                                        alt={getLocalizedValue(program.title)}
-                                        className="w-full h-64 sm:h-[400px] object-cover rounded-lg border border-gray-100 dark:border-gray-800"
-                                    />
-                                </div>
-
-                                <div className="mb-4">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <Languages className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-                                            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Pratinjau Bahasa Konten:</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg self-start sm:self-auto border border-transparent dark:border-gray-700">
-                                            <button
-                                                type="button"
-                                                onClick={() => setPreviewLocale('id')}
-                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                                                    previewLocale === 'id'
-                                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs font-semibold'
-                                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                                                }`}
-                                            >
-                                                🇮🇩 ID
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setPreviewLocale('en')}
-                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                                                    previewLocale === 'en'
-                                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs font-semibold'
-                                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                                                }`}
-                                            >
-                                                🇬🇧 EN {hasEn ? '✓' : ''}
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setPreviewLocale('ar')}
-                                                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                                                    previewLocale === 'ar'
-                                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs font-semibold'
-                                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                                                }`}
-                                            >
-                                                🇸🇦 AR {hasAr ? '✓' : ''}
-                                            </button>
-                                        </div>
+                        {/* TAB 2: KONTEN & CERITA PROGRAM */}
+                        {activeTab === 'story' && (
+                            <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-xs">
+                                <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="w-4 h-4 text-[#1A56DB]" />
+                                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                                            Informasi Konten & Cerita
+                                        </h3>
                                     </div>
-                                </div>
-
-                                <h2
-                                    dir={previewLocale === 'ar' ? 'rtl' : 'ltr'}
-                                    className={`text-2xl font-bold text-gray-900 dark:text-white mb-2 leading-tight ${
-                                        previewLocale === 'ar' ? 'text-right font-arabic' : 'text-left'
-                                    }`}
-                                >
-                                    {currentTitle || (
-                                        <span className="text-gray-400 dark:text-gray-500 italic font-normal">
-                                            (Judul belum diterjemahkan ke {previewLocale === 'en' ? 'Bahasa Inggris' : 'Bahasa Arab'})
-                                        </span>
-                                    )}
-                                </h2>
-                                <p className="text-gray-500 dark:text-gray-400 mb-6 font-mono text-sm tracking-wide">Kode: {program.program_code}</p>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                                    <div className="bg-gray-50 dark:bg-gray-800/60 p-5 rounded-lg border border-gray-100 dark:border-gray-800">
-                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">Target Donasi</p>
-                                        <p className="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">
-                                             {program.target_amount ? formatCurrency(parseFloat(program.target_amount)) : 'Tanpa Target'}
-                                        </p>
-                                    </div>
-                                    <div className="bg-blue-50 dark:bg-blue-950/40 p-5 rounded-lg border border-blue-100 dark:border-blue-900/60">
-                                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wider">Terkumpul</p>
-                                        <p className="font-bold text-2xl text-[#1A56DB] dark:text-blue-400 tracking-tight">
-                                             {formatCurrency(program.collected_amount)}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="mb-8 p-4 rounded-xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-                                    <DonationProgressBar
-                                        collectedAmount={program.collected_amount}
-                                        targetAmount={program.target_amount}
-                                        size="md"
-                                        percentagePlacement="top-right"
-                                        percentageFormat="badge"
-                                        label="Persentase Ketercapaian Donasi"
-                                    />
-                                </div>
-
-                                <div>
-                                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Cerita Program</h4>
-                                    {currentStory ? (
-                                        <div
-                                            dir={previewLocale === 'ar' ? 'rtl' : 'ltr'}
-                                            className={`prose prose-slate dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-[#1A56DB] dark:prose-a:text-blue-400 prose-headings:text-gray-900 dark:prose-headings:text-white prose-strong:text-gray-900 dark:prose-strong:text-white prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500 break-words overflow-hidden ${
-                                                previewLocale === 'ar' ? 'text-right font-arabic' : 'text-left prose-p:text-justify'
+                                    <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg border border-transparent dark:border-gray-700">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPreviewLocale('id')}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                                                previewLocale === 'id'
+                                                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs font-semibold'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                             }`}
-                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentStory) }}
+                                        >
+                                            🇮🇩 ID
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPreviewLocale('en')}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                                                previewLocale === 'en'
+                                                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs font-semibold'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                            }`}
+                                        >
+                                            🇬🇧 EN {hasEn ? '✓' : ''}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPreviewLocale('ar')}
+                                            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                                                previewLocale === 'ar'
+                                                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs font-semibold'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                                            }`}
+                                        >
+                                            🇸🇦 AR {hasAr ? '✓' : ''}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="p-6">
+                                    <div className="mb-6">
+                                        <img
+                                            src={`/storage/${program.cover_image}`}
+                                            alt={getLocalizedValue(program.title)}
+                                            className="w-full h-64 sm:h-[380px] object-cover rounded-xl border border-gray-100 dark:border-gray-800"
                                         />
-                                    ) : (
-                                        <div className="p-8 text-center rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40">
-                                            <Languages className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                                            <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                                                Belum ada terjemahan cerita dalam {previewLocale === 'en' ? 'Bahasa Inggris (EN)' : 'Bahasa Arab (AR)'}
+                                    </div>
+
+                                    <h2
+                                        dir={previewLocale === 'ar' ? 'rtl' : 'ltr'}
+                                        className={`text-2xl font-bold text-gray-900 dark:text-white mb-2 leading-tight ${
+                                            previewLocale === 'ar' ? 'text-right font-arabic' : 'text-left'
+                                        }`}
+                                    >
+                                        {currentTitle || (
+                                            <span className="text-gray-400 dark:text-gray-500 italic font-normal">
+                                                (Judul belum diterjemahkan ke {previewLocale === 'en' ? 'Bahasa Inggris' : 'Bahasa Arab'})
+                                            </span>
+                                        )}
+                                    </h2>
+                                    <p className="text-gray-500 dark:text-gray-400 mb-6 font-mono text-xs tracking-wide">
+                                        Kode Program: {program.program_code}
+                                    </p>
+
+                                    <div className="border-t border-gray-100 dark:border-gray-800 pt-6">
+                                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Cerita Program</h4>
+                                        {currentStory ? (
+                                            <div
+                                                dir={previewLocale === 'ar' ? 'rtl' : 'ltr'}
+                                                className={`prose prose-slate dark:prose-invert max-w-none prose-p:leading-relaxed prose-a:text-[#1A56DB] dark:prose-a:text-blue-400 prose-headings:text-gray-900 dark:prose-headings:text-white prose-strong:text-gray-900 dark:prose-strong:text-white prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:mx-auto prose-li:marker:text-gray-400 dark:prose-li:marker:text-gray-500 break-words overflow-hidden ${
+                                                    previewLocale === 'ar' ? 'text-right font-arabic' : 'text-left prose-p:text-justify'
+                                                }`}
+                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentStory) }}
+                                            />
+                                        ) : (
+                                            <div className="p-8 text-center rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-800/40">
+                                                <Languages className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                                <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                                    Belum ada terjemahan cerita dalam {previewLocale === 'en' ? 'Bahasa Inggris (EN)' : 'Bahasa Arab (AR)'}
+                                                </p>
+                                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">
+                                                    Program ini belum memiliki teks terjemahan cerita. Anda dapat memicu proses translasi otomatis kapan saja.
+                                                </p>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={handleTranslate}
+                                                    disabled={isTranslating}
+                                                    className="bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-brand-950/50 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800 shadow-xs"
+                                                >
+                                                    <RefreshCcw className={`w-4 h-4 mr-1.5 text-brand-600 dark:text-brand-400 ${isTranslating ? 'animate-spin' : ''}`} />
+                                                    {isTranslating ? 'Memproses Terjemahan...' : 'Terjemahkan ke EN & AR Sekarang'}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* TAB 3: KABAR & DOKUMENTASI PENYALURAN */}
+                        {activeTab === 'updates' && (
+                            <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-xs">
+                                <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="p-2 rounded-lg bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400">
+                                            <Megaphone className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 dark:text-white">
+                                                Kabar & Cerita Penyaluran
+                                            </h3>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                Laporan perkembangan lapangan dan transparansi donasi ({program.updates?.length || 0} kabar)
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <Button asChild size="sm" className="bg-[#1A56DB] hover:bg-[#1e40af] text-white shadow-xs self-start sm:self-auto">
+                                        <Link href={`/admin/programs/${program.id}/updates`}>
+                                            <Plus className="w-4 h-4 mr-1.5" /> Kelola & Tambah Kabar
+                                        </Link>
+                                    </Button>
+                                </div>
+
+                                <div className="p-6 space-y-5">
+                                    {!isCreator && program.campaigner_type !== 'internal' && (
+                                        <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 flex items-start gap-3">
+                                            <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                            <div className="text-xs leading-relaxed">
+                                                <p className="font-bold text-amber-950 dark:text-amber-100 mb-0.5">Pengelolaan Kabar Mandiri</p>
+                                                Program ini dibuat oleh Campaigner <strong className="text-amber-950 dark:text-amber-100">{program.creator?.name || 'Eksternal'}</strong>. Sesuai kebijakan integritas platform, kabar terbaru dan laporan penyaluran dikelola secara independen oleh Campaigner yang bersangkutan.
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {(!program.updates || program.updates.length === 0) ? (
+                                        <div className="text-center py-10 px-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
+                                            <Megaphone className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2 opacity-50" />
+                                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Belum ada kabar penyaluran yang diterbitkan
                                             </p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">
-                                                Program ini belum memiliki teks terjemahan cerita. Anda dapat memicu proses translasi otomatis kapan saja.
+                                                Dokumentasi penyaluran donasi meningkatkan transparansi dan kepercayaan donatur di halaman publik.
                                             </p>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handleTranslate}
-                                                disabled={isTranslating}
-                                                className="bg-white dark:bg-gray-800 hover:bg-brand-50 dark:hover:bg-brand-950/50 text-brand-600 dark:text-brand-400 border-brand-200 dark:border-brand-800 shadow-xs"
-                                            >
-                                                <RefreshCcw className={`w-4 h-4 mr-1.5 text-brand-600 dark:text-brand-400 ${isTranslating ? 'animate-spin' : ''}`} />
-                                                {isTranslating ? 'Memproses Terjemahan...' : 'Terjemahkan ke EN & AR Sekarang'}
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Kabar & Cerita Penyaluran Program Card */}
-                        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-sm">
-                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div className="flex items-center gap-2.5">
-                                    <div className="p-2 rounded-lg bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400">
-                                        <Megaphone className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900 dark:text-white">
-                                            Kabar & Cerita Penyaluran
-                                        </h3>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            Laporan perkembangan dan transparansi penyaluran donasi
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <Button asChild size="sm" variant={isCreator ? "default" : "outline"} className={isCreator ? "bg-brand-600 hover:bg-brand-700 text-white shadow-xs self-start sm:self-auto" : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 self-start sm:self-auto"}>
-                                    <Link href={`/admin/programs/${program.id}/updates`}>
-                                        <Plus className="w-4 h-4 mr-1.5" /> Kelola Kabar ({program.updates?.length || 0})
-                                    </Link>
-                                </Button>
-                            </div>
-
-                            <div className="p-6 space-y-5">
-                                {!isCreator && (
-                                    <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 flex items-start gap-3">
-                                        <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                                        <div className="text-xs leading-relaxed">
-                                            <p className="font-bold text-amber-950 dark:text-amber-100 mb-0.5">Pengelolaan Kabar Mandiri</p>
-                                            Program ini dibuat oleh Campaigner <strong className="text-amber-950 dark:text-amber-100">{program.creator?.name || 'Eksternal'}</strong>. Sesuai kebijakan integritas platform, kabar terbaru dan laporan penyaluran dikelola secara independen oleh Campaigner yang bersangkutan.
-                                        </div>
-                                    </div>
-                                )}
-
-                                {(!program.updates || program.updates.length === 0) ? (
-                                    <div className="text-center py-8 px-4 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20">
-                                        <Megaphone className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2 opacity-50" />
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-                                            {isCreator
-                                                ? 'Anda belum menambahkan kabar terbaru atau dokumentasi penyaluran.'
-                                                : 'Campaigner belum mempublikasikan kabar terbaru untuk program ini.'}
-                                        </p>
-                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-                                            Dokumentasi penyaluran membantu meningkatkan transparansi dan kepercayaan donatur.
-                                        </p>
-                                        {isCreator && (
                                             <Button asChild variant="outline" size="sm" className="border-brand-300 dark:border-brand-700 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40">
                                                 <Link href={`/admin/programs/${program.id}/updates`}>
                                                     <Plus className="w-4 h-4 mr-1.5" /> Tambah Kabar Sekarang
                                                 </Link>
                                             </Button>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {program.updates.slice(0, 3).map((update: any) => (
-                                            <AdminProgramUpdateCard key={update.id} update={update} programId={program.id} />
-                                        ))}
-
-                                        {program.updates.length > 3 && (
-                                            <div className="pt-2 text-center">
-                                                <Button asChild variant="outline" size="sm" className="w-full text-xs border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                                    <Link href={`/admin/programs/${program.id}/updates`}>
-                                                        Lihat Semua Kabar ({program.updates.length}) & Kelola
-                                                    </Link>
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {program.updates.map((update: any) => (
+                                                <AdminProgramUpdateCard key={update.id} update={update} programId={program.id} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
-                    {/* Right Column - Sidebar */}
-                    <div className="space-y-6">
-                        {/* Action Card for Verification */}
+                    {/* Right Column: Unified Sidebar (4 cols) */}
+                    <div className="xl:col-span-4 space-y-5">
+                        {/* 1. Action Card for Verification (Only for pending programs) */}
                         {program.status === 'pending_verification' && (
-                            <div className="rounded-lg border border-yellow-200 dark:border-amber-900/60 bg-yellow-50 dark:bg-amber-950/20 overflow-hidden sticky top-6 shadow-xs">
-                                <div className="border-b border-yellow-200/60 dark:border-amber-900/40 bg-yellow-100/50 dark:bg-amber-950/40 py-4 px-6">
-                                    <h3 className="font-semibold text-yellow-900 dark:text-amber-200 flex items-center">
+                            <div className="rounded-xl border border-yellow-200 dark:border-amber-900/60 bg-yellow-50 dark:bg-amber-950/20 overflow-hidden shadow-xs">
+                                <div className="border-b border-yellow-200/60 dark:border-amber-900/40 bg-yellow-100/50 dark:bg-amber-950/40 py-3.5 px-5">
+                                    <h3 className="font-semibold text-yellow-900 dark:text-amber-200 flex items-center text-sm">
                                         <AlertTriangle className="h-4 w-4 mr-2" />
-                                        Aksi Verifikasi
+                                        Aksi Verifikasi Program
                                     </h3>
                                 </div>
-                                <div className="p-6 space-y-4">
-                                    <p className="text-sm text-yellow-800 dark:text-amber-300 leading-relaxed">
-                                        Program ini menunggu persetujuan Anda sebelum dapat dipublikasikan dan menerima donasi.
+                                <div className="p-5 space-y-4">
+                                    <p className="text-xs text-yellow-800 dark:text-amber-300 leading-relaxed">
+                                        Program ini diajukan dan menunggu persetujuan Anda sebelum dapat dipublikasikan dan menerima donasi publik.
                                     </p>
-                                    <div className="pt-2 space-y-3">
+                                    <div className="space-y-2">
                                         <Button
-                                            className="w-full bg-green-600 hover:bg-green-700 text-white shadow-sm"
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs text-xs h-9"
                                             onClick={() => setIsApproveConfirmOpen(true)}
                                         >
                                             <CheckCircle className="mr-2 h-4 w-4" /> Setujui & Publikasikan
                                         </Button>
                                         <Button
                                             variant="outline"
-                                            className="w-full border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-300 dark:hover:border-red-700"
+                                            className="w-full border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs h-9"
                                             onClick={() => setIsRejectModalOpen(true)}
                                         >
                                             <XCircle className="mr-2 h-4 w-4" /> Tolak Program
@@ -535,129 +864,119 @@ export default function ProgramShow({ program }: Props) {
                             </div>
                         )}
 
-                        {program.status === 'published' && (
-                            <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                                <div className="p-6">
-                                    <Button
-                                        variant="outline"
-                                        className="w-full text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 border-red-200 dark:border-red-900/50"
-                                        onClick={() => setIsCloseConfirmOpen(true)}
-                                    >
-                                        <Ban className="mr-2 h-4 w-4" />
-                                        Tutup Program (Manual)
-                                    </Button>
+                        {/* Catatan Penolakan (Jika ditolak) */}
+                        {program.status === 'rejected' && program.rejection_notes && (
+                            <div className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-4.5">
+                                <div className="flex items-start">
+                                    <Info className="h-5 w-5 text-red-600 dark:text-red-400 mr-2.5 mt-0.5 shrink-0" />
+                                    <div>
+                                        <h4 className="text-red-900 dark:text-red-200 font-semibold text-xs mb-1">Catatan Penolakan</h4>
+                                        <p className="text-xs text-red-700 dark:text-red-300 leading-relaxed">
+                                            {program.rejection_notes}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        {isCreator && (
-                            <div className="rounded-lg border border-brand-200 dark:border-brand-900/50 bg-brand-50/40 dark:bg-brand-950/30 p-5 shadow-sm">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Megaphone className="w-4 h-4 text-brand-600 dark:text-brand-400" />
-                                    <span className="text-xs font-bold text-brand-900 dark:text-brand-200">Kabar Program Anda</span>
-                                </div>
-                                <p className="text-xs text-brand-700 dark:text-brand-300 mb-3 leading-relaxed">
-                                    Program ini Anda buat. Anda memiliki akses untuk menerbitkan kabar cerita dan dokumentasi progres.
-                                </p>
-                                <Button asChild size="sm" className="w-full bg-brand-600 hover:bg-brand-700 text-white shadow-xs">
-                                    <Link href={`/admin/programs/${program.id}/updates`}>
-                                        <Plus className="w-3.5 h-3.5 mr-1.5" /> Kelola Kabar ({program.updates?.length || 0})
-                                    </Link>
-                                </Button>
-                            </div>
-                        )}
-
-                        {/* Translation Status Card */}
+                        {/* 2. Translation Status Card */}
                         <TranslationStatusCard
                             hasId={hasId}
                             hasEn={hasEn}
                             hasAr={hasAr}
                             onTranslate={handleTranslate}
                             isTranslating={isTranslating}
-                            description="Status kelengkapan terjemahan judul dan cerita program dalam 3 bahasa."
+                            description="Status kelengkapan terjemahan judul dan cerita dalam 3 bahasa resmi."
                         />
 
-                        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
-                                <h3 className="font-semibold text-gray-900 dark:text-white">
-                                    Informasi Metadata
+                        {/* 3. Unified Information & Attribution Card */}
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs overflow-hidden">
+                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-3.5 px-5 flex items-center justify-between">
+                                <h3 className="font-semibold text-gray-900 dark:text-white text-sm flex items-center gap-2">
+                                    <Info className="w-4 h-4 text-[#1A56DB]" />
+                                    <span>Informasi & Atribusi Program</span>
                                 </h3>
+                                {getCampaignerBadge()}
                             </div>
-                            <div className="p-6 space-y-5">
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Kategori</p>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">{program.category?.name?.id || 'N/A'}</p>
-                                </div>
-
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Batas Waktu</p>
-                                    <div className="flex items-center">
-                                        <Calendar className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500" />
-                                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                                            {program.deadline ? formatDate(program.deadline) : 'Tanpa batas waktu (∞)'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {program.published_at && (
-                                    <div>
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Dipublikasikan Pada</p>
-                                        <p className="font-medium text-gray-900 dark:text-gray-100">{formatDate(program.published_at)}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-                            <div className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-4 px-6">
-                                <h3 className="font-semibold text-gray-900 dark:text-white flex items-center">
-                                    <User className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                    Informasi Pembuat
-                                </h3>
-                            </div>
-                            <div className="p-6 space-y-5">
-                                <div>
-                                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tipe Campaigner</p>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100 capitalize">{program.campaigner_type}</p>
-                                </div>
-
-                                {program.campaigner_type === 'internal' ? (
-                                    <div>
-                                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama Staf Internal</p>
-                                        <p className="font-medium text-gray-900 dark:text-gray-100">{program.creator?.name}</p>
-                                    </div>
-                                ) : (
-                                    <>
+                            <div className="p-5 space-y-4 text-xs">
+                                {/* Section: Inisiator & PIC */}
+                                <div className="p-3 bg-gray-50/70 dark:bg-gray-800/50 rounded-lg space-y-2 border border-gray-100 dark:border-gray-800">
+                                    <span className="font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-[10px] block">
+                                        Inisiator & Penanggung Jawab
+                                    </span>
+                                    {program.campaigner_type === 'internal' ? (
                                         <div>
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                                {((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga') ? 'Nama Lembaga' : 'Nama Penggalang'}
-                                            </p>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100">
-                                                {((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga')
-                                                    ? ((program as any).campaigner_profile?.nama_lembaga || (program as any).campaigner_profile?.institution_name || program.campaignerProfile?.institution_name || program.creator?.name)
-                                                    : program.creator?.name}
+                                            <p className="font-bold text-gray-900 dark:text-white text-sm">Tim Internal Yayasan</p>
+                                            <p className="text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Staf Pengelola: <span className="text-gray-800 dark:text-gray-200 font-medium">{program.creator?.name || 'Staf Yayasan'}</span>
                                             </p>
                                         </div>
-                                        {((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga') && program.creator?.name && (
+                                    ) : (
+                                        <div className="space-y-1.5">
                                             <div>
-                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">PIC Lembaga</p>
-                                                <p className="font-medium text-gray-900 dark:text-gray-100">{program.creator.name}</p>
-                                            </div>
-                                        )}
-                                        <div>
-                                            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Email Kontak</p>
-                                            <p className="font-medium text-gray-900 dark:text-gray-100">{program.creator?.email || 'N/A'}</p>
-                                        </div>
-                                        {(program.creator?.phone || (program as any).campaigner_profile?.phone) && (
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">No. Telepon / WhatsApp</p>
-                                                <p className="font-medium text-gray-900 dark:text-gray-100">
-                                                    {(program as any).campaigner_profile?.phone || program.creator?.phone}
+                                                <p className="text-gray-400 text-[11px]">Nama Penggalang / Lembaga:</p>
+                                                <p className="font-bold text-gray-900 dark:text-white text-sm">
+                                                    {(program as any).campaigner_profile?.nama_lembaga || (program as any).campaigner_profile?.institution_name || program.campaignerProfile?.institution_name || program.creator?.name}
                                                 </p>
                                             </div>
-                                        )}
-                                    </>
-                                )}
+                                            {program.creator?.name && ((program as any).campaigner_profile?.type === 'lembaga' || program.campaignerProfile?.type === 'lembaga') && (
+                                                <p className="text-gray-600 dark:text-gray-300">
+                                                    PIC: <span className="font-medium text-gray-900 dark:text-white">{program.creator.name}</span>
+                                                </p>
+                                            )}
+                                            {program.creator?.email && (
+                                                <p className="text-gray-600 dark:text-gray-300">
+                                                    Email: <span className="font-medium text-gray-900 dark:text-white">{program.creator.email}</span>
+                                                </p>
+                                            )}
+                                            {((program as any).campaigner_profile?.phone || program.creator?.phone) && (
+                                                <p className="text-gray-600 dark:text-gray-300">
+                                                    WA / Telp: <span className="font-medium text-gray-900 dark:text-white font-mono">{(program as any).campaigner_profile?.phone || program.creator?.phone}</span>
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Section: Metadata Rincian */}
+                                <div className="space-y-2.5 pt-1">
+                                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                                        <span className="text-gray-400">Kategori</span>
+                                        <span className="font-medium text-gray-900 dark:text-white">
+                                            {getLocalizedValue(program.category?.name, 'N/A')}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                                        <span className="text-gray-400">Batas Waktu</span>
+                                        <span className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                                            {program.deadline ? formatDate(program.deadline) : 'Tanpa Batas (∞)'}
+                                        </span>
+                                    </div>
+                                    {program.published_at && (
+                                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                                            <span className="text-gray-400">Dipublikasikan</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">
+                                                {formatDate(program.published_at)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {program.created_at && (
+                                        <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                                            <span className="text-gray-400">Dibuat Pada</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">
+                                                {formatDate(program.created_at)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                                        <span className="text-gray-400">Pengunjung (Views)</span>
+                                        <span className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                                            <Eye className="w-3.5 h-3.5 text-gray-400" />
+                                            {(program.views_count || 0).toLocaleString('id-ID')}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -675,7 +994,9 @@ export default function ProgramShow({ program }: Props) {
                     </DialogHeader>
                     <form onSubmit={handleRejectSubmit}>
                         <div className="px-6 py-4">
-                            <Label htmlFor="rejection_notes" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Catatan Penolakan <span className="text-red-500">*</span></Label>
+                            <Label htmlFor="rejection_notes" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                                Catatan Penolakan <span className="text-red-500">*</span>
+                            </Label>
                             <Textarea
                                 id="rejection_notes"
                                 value={rejectData.rejection_notes}
@@ -688,8 +1009,12 @@ export default function ProgramShow({ program }: Props) {
                             {rejectErrors.rejection_notes && <p className="mt-1.5 text-xs text-red-500">{rejectErrors.rejection_notes}</p>}
                         </div>
                         <DialogFooter className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
-                            <Button type="button" variant="outline" onClick={() => setIsRejectModalOpen(false)} className="border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Batal</Button>
-                            <Button type="submit" variant="destructive" disabled={rejectProcessing} className="bg-red-600 hover:bg-red-700 text-white">Kirim Penolakan</Button>
+                            <Button type="button" variant="outline" onClick={() => setIsRejectModalOpen(false)} className="border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                                Batal
+                            </Button>
+                            <Button type="submit" variant="destructive" disabled={rejectProcessing} className="bg-red-600 hover:bg-red-700 text-white">
+                                Kirim Penolakan
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
@@ -717,15 +1042,13 @@ export default function ProgramShow({ program }: Props) {
                 onConfirm={handleCloseConfirm}
             />
         </>
-
-
     );
 }
 
 ProgramShow.layout = {
     breadcrumbs: [
         {
-            title: 'ProgramShow',
+            title: 'Detail Program',
             href: '/admin/programs',
         },
     ],

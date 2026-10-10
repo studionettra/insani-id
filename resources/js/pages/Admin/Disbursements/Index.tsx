@@ -9,7 +9,17 @@ import admin from '@/routes/admin';
 
 export default function Index({ disbursements, filters }: any) {
     const handleTabChange = (value: string) => {
-        router.get(admin.disbursements.index().url, { status: value }, { preserveState: true });
+        router.get(admin.disbursements.index().url, {
+            status: value,
+            type: filters.type || 'all',
+        }, { preserveState: true });
+    };
+
+    const handleTypeChange = (typeVal: string) => {
+        router.get(admin.disbursements.index().url, {
+            status: filters.status || 'pending',
+            type: typeVal,
+        }, { preserveState: true });
     };
 
     const getStatusBadge = (status: string) => {
@@ -39,15 +49,55 @@ export default function Index({ disbursements, filters }: any) {
                     </div>
                 </div>
 
-                <Tabs defaultValue={filters.status || 'pending'} onValueChange={handleTabChange} className="w-full">
-                    <TabsList className="bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                        <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Menunggu Peninjauan</TabsTrigger>
-                        <TabsTrigger value="approved" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Disetujui</TabsTrigger>
-                        <TabsTrigger value="transferred" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditransfer</TabsTrigger>
-                        <TabsTrigger value="rejected" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditolak</TabsTrigger>
-                        <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Semua</TabsTrigger>
-                    </TabsList>
-                </Tabs>
+                {/* Filter Controls Bar */}
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <Tabs defaultValue={filters.status || 'pending'} onValueChange={handleTabChange} className="w-full lg:w-auto">
+                        <TabsList className="bg-gray-100 border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                            <TabsTrigger value="pending" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Menunggu Peninjauan</TabsTrigger>
+                            <TabsTrigger value="approved" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Disetujui</TabsTrigger>
+                            <TabsTrigger value="transferred" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditransfer</TabsTrigger>
+                            <TabsTrigger value="rejected" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Ditolak</TabsTrigger>
+                            <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-sm dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-white dark:text-gray-400">Semua</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
+
+                    {/* Filter Type Pills */}
+                    <div className="flex items-center gap-1.5 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold self-start lg:self-auto">
+                        <button
+                            type="button"
+                            onClick={() => handleTypeChange('all')}
+                            className={`px-3 py-1.5 rounded-md transition-all ${
+                                (!filters.type || filters.type === 'all')
+                                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Semua Inisiator
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleTypeChange('internal')}
+                            className={`px-3 py-1.5 rounded-md transition-all ${
+                                filters.type === 'internal'
+                                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Internal Yayasan
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleTypeChange('campaigner')}
+                            className={`px-3 py-1.5 rounded-md transition-all ${
+                                filters.type === 'campaigner'
+                                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-xs'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
+                        >
+                            Mitra Penggalang
+                        </button>
+                    </div>
+                </div>
 
                 <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-sm overflow-hidden flex flex-col">
                     <div className="overflow-x-auto">
@@ -80,6 +130,17 @@ export default function Index({ disbursements, filters }: any) {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    {item.program?.campaigner_type === 'internal' ? (
+                                                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 text-[10px] py-0 font-medium">
+                                                            Internal Yayasan
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 text-[10px] py-0 font-medium">
+                                                            Mitra Penggalang
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                                 <div className="line-clamp-1 max-w-xs">{getLocalizedValue(item.program?.title, 'id', 'Program')}</div>
                                                 <div className="text-xs text-gray-500 mt-0.5">
                                                     {item.bank_name} &bull; <span className="font-mono">{item.bank_account_number}</span> ({item.bank_account_name})

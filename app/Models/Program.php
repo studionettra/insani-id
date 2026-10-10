@@ -120,11 +120,19 @@ class Program extends Model
 
     public function getPlatformFeePercentAttribute(): float
     {
+        if ($this->campaigner_type === 'internal') {
+            return 0.0;
+        }
+
         return (float) ($this->category?->platform_fee_percent ?? 0);
     }
 
     public function getPlatformFeeAmountAttribute(): float
     {
+        if ($this->campaigner_type === 'internal') {
+            return 0.0;
+        }
+
         return (float) round($this->net_collected_amount * ($this->platform_fee_percent / 100));
     }
 

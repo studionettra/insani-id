@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, ReceiptText, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ChevronDown, ChevronUp, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, ReceiptText, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -18,17 +18,71 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { trackShareProgram, trackViewContent } from '@/lib/analytics';
 import { formatCurrency, formatDate, getYouTubeEmbedUrl, getLocalizedValue, sanitizeHtml } from '@/lib/utils';
 
-const UpdateCard = ({ update }: { update: any }) => {
+const UpdateCard = ({
+    update,
+    campaignerName,
+    campaignerType,
+}: {
+    update: any;
+    campaignerName?: string;
+    campaignerType?: string;
+}) => {
     const { t, locale } = useTranslation();
     const [expanded, setExpanded] = useState(false);
+    const disb = update.disbursement;
 
     return (
-        <div className="border border-slate-100 rounded-xl p-5 hover:border-insani-blue/20 transition-colors bg-white shadow-sm">
+        <div className="border border-slate-100 rounded-xl p-5 hover:border-insani-blue/20 transition-colors bg-white shadow-sm text-left">
             <div className="flex items-center gap-2 mb-3 text-sm text-slate-500">
-                <Calendar className="w-4 h-4" />
+                <Calendar className="w-4 h-4 text-slate-400" />
                 {format(new Date(update.created_at), 'd MMMM yyyy HH:mm', { locale: dateId })}
             </div>
             <h3 className="font-bold text-lg text-slate-800 mb-3">{getLocalizedValue(update.title, locale)}</h3>
+
+            {/* Banner Penyaluran Resmi Ala Kitabisa jika terhubung ke pencairan */}
+            {disb && (
+                <div className="mb-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                {campaignerType === 'internal' ? 'I' : (campaignerName ? campaignerName.charAt(0).toUpperCase() : 'P')}
+                            </div>
+                            <span className="text-xs font-semibold text-slate-700">
+                                {campaignerName || t('Penggalang Dana')}
+                            </span>
+                        </div>
+                        {disb.receipt_number && (
+                            <span className="font-mono text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                {disb.receipt_number}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="text-base sm:text-lg font-bold text-slate-900">
+                        {t('Penyaluran Dana')} {formatCurrency(disb.nett_amount ?? disb.requested_amount)}
+                    </div>
+
+                    <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                        <div>
+                            {t('Ke rekening Bank')} <span className="font-semibold text-slate-900">{disb.bank_name || 'BSI'}</span>{' '}
+                            <span className="font-mono text-slate-800 tracking-wider">{disb.bank_account_number || disb.bank_account_number_masked || '*** **** 4448'}</span>
+                        </div>
+                        {disb.bank_account_name && (
+                            <div className="text-slate-600 mt-0.5">
+                                a/n <span className="font-medium text-slate-900 uppercase">{disb.bank_account_name}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {disb.distribution_plan && (
+                        <div className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-2 border-t border-slate-200/60">
+                            <span className="text-slate-500 font-medium">{t('Rencana Penggunaan Dana Penyaluran')} : </span>
+                            <span>{disb.distribution_plan}</span>
+                        </div>
+                    )}
+                </div>
+            )}
+
             <div className="relative">
                 <div
                     className={`text-slate-600 text-sm leading-relaxed prose prose-sm max-w-none prose-img:max-w-full prose-img:h-auto prose-img:rounded-md break-words overflow-hidden transition-all duration-300 ${expanded ? '' : 'max-h-40'}`}
@@ -41,7 +95,7 @@ const UpdateCard = ({ update }: { update: any }) => {
             <div className="mt-2 text-center">
                 <button
                     onClick={() => setExpanded(!expanded)}
-                    className="text-insani-blue font-medium text-sm hover:underline focus:outline-none"
+                    className="text-insani-blue font-medium text-sm hover:underline focus:outline-none cursor-pointer"
                 >
                     {expanded ? t('Tutup') : t('Baca Selengkapnya')}
                 </button>
@@ -110,6 +164,9 @@ interface Props {
         total_platform_fees: number;
         total_transferred_nett: number;
         available_balance: number;
+        campaign_duration?: string;
+        last_updated_at?: string;
+        platform_fee_percent?: number;
         disbursements: Array<{
             id: number;
             receipt_number?: string;
@@ -117,10 +174,21 @@ interface Props {
             platform_fee_amount: number;
             bank_fee?: number;
             nett_amount: number;
+            bank_name?: string;
+            bank_account_number?: string;
+            bank_account_number_masked?: string;
+            bank_account_name?: string;
             distribution_plan?: string;
             beneficiary_target?: string;
             location?: string;
             transferred_at?: string;
+            transferred_at_formatted?: string;
+            transferred_at_human?: string;
+            program_update?: {
+                id: number;
+                slug: string;
+                title: any;
+            } | null;
         }>;
     };
 }
@@ -147,6 +215,7 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
     const [isInviteFundraiserModalOpen, setIsInviteFundraiserModalOpen] = useState(false);
     const [inviteCopied, setInviteCopied] = useState(false);
     const [isTransparencyModalOpen, setIsTransparencyModalOpen] = useState(false);
+    const [isPlatformFeeOpen, setIsPlatformFeeOpen] = useState(false);
 
     const disbursementsList = useMemo(() => {
         const raw = transparency?.disbursements;
@@ -593,7 +662,12 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                             ) : (
                                                 <>
                                                     {program.updates.slice(0, visibleUpdatesCount).map((update: any) => (
-                                                        <UpdateCard key={update.id} update={update} />
+                                                        <UpdateCard
+                                                            key={update.id}
+                                                            update={update}
+                                                            campaignerName={campaignerName}
+                                                            campaignerType={program.campaigner_type}
+                                                        />
                                                     ))}
                                                     {program.updates.length > visibleUpdatesCount && (
                                                         <div className="text-center mt-6">
@@ -1278,10 +1352,10 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                 </DialogContent>
             </Dialog>
 
-            {/* Modal Rincian Penggunaan Dana (Transparansi Finansial) */}
+            {/* Modal Rincian Penggunaan Dana (Standar Transparansi 4-Layer ala Kitabisa) */}
             <Dialog open={isTransparencyModalOpen} onOpenChange={setIsTransparencyModalOpen}>
-                <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto p-6 bg-white rounded-2xl">
-                    <DialogHeader className="text-left pb-2 border-b border-slate-100">
+                <DialogContent className="sm:max-w-xl max-h-[88vh] overflow-y-auto p-5 sm:p-6 bg-white rounded-2xl">
+                    <DialogHeader className="text-left pb-3 border-b border-slate-100">
                         <div className="flex items-center gap-2.5">
                             <div className="w-9 h-9 rounded-full bg-blue-50 text-insani-blue flex items-center justify-center font-bold shrink-0">
                                 <ReceiptText className="w-4.5 h-4.5" />
@@ -1290,79 +1364,213 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                 <DialogTitle className="text-lg font-bold text-slate-900">
                                     {t('Rincian Penggunaan Dana', 'Rincian Penggunaan Dana')}
                                 </DialogTitle>
-                                <DialogDescription className="text-xs text-slate-500">
-                                    {t('Transparansi penerimaan dan penyaluran dana program secara terbuka & akuntabel.', 'Transparansi penerimaan dan penyaluran dana program secara terbuka & akuntabel.')}
+                                <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                                    {t('Data terakhir diperbarui pada', 'Data terakhir diperbarui pada')} {transparency?.last_updated_at || format(new Date(), 'dd MMM yyyy - HH:mm') + ' WIB'}
                                 </DialogDescription>
                             </div>
                         </div>
                     </DialogHeader>
 
-                    <div className="space-y-5 pt-3">
-                        {/* Ringkasan Saldo & Pos Keuangan */}
-                        <div className="bg-slate-50/80 rounded-xl p-4 border border-slate-100 space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">{t('Ringkasan Alokasi')}</span>
-                                <span className="text-[11px] text-slate-400">{t('Update Real-time')}</span>
+                    <div className="space-y-4 pt-2">
+                        {/* Layer 1: Status & Durasi Pengumpulan Dana */}
+                        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-left">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
+                                <Wallet className="w-4 h-4" />
                             </div>
-
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between items-center text-slate-700">
-                                    <span className="flex items-center gap-1.5">
-                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                        {t('Total Donasi Masuk (Gross)')}
-                                    </span>
-                                    <span className="font-bold text-slate-900">
-                                        {formatCurrency(transparency?.total_collected ?? program.collected_amount)}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center text-slate-600 text-xs pl-3.5">
-                                    <span className="flex items-center gap-1 text-slate-500">
-                                        &bull; {t('Biaya Transaksi Pembayaran Digital')}
-                                    </span>
-                                    <span className="font-medium text-red-500">
-                                        - {formatCurrency(transparency?.total_gateway_fees ?? 0)}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center text-slate-600 text-xs pl-3.5">
-                                    <span className="flex items-center gap-1 text-slate-500">
-                                        &bull; {t('Biaya Operasional Platform (5% saat pencairan)')}
-                                    </span>
-                                    <span className="font-medium text-red-500">
-                                        - {formatCurrency(transparency?.total_platform_fees ?? 0)}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center text-slate-700 pt-2 border-t border-slate-200">
-                                    <span className="flex items-center gap-1.5">
-                                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                                        {t('Total Dana Telah Dicairkan')}
-                                    </span>
-                                    <span className="font-bold text-amber-600">
-                                        {formatCurrency(transparency?.total_disbursed ?? 0)}
-                                    </span>
-                                </div>
-
-                                <div className="flex justify-between items-center p-2.5 rounded-lg bg-emerald-50 border border-emerald-100 font-bold text-slate-900 mt-2">
-                                    <span className="text-emerald-800 text-xs sm:text-sm">
-                                        {t('Sisa Saldo Belum Dicairkan')}
-                                    </span>
-                                    <span className="text-emerald-700 text-sm sm:text-base">
-                                        {formatCurrency(transparency?.available_balance ?? 0)}
-                                    </span>
-                                </div>
+                            <div>
+                                <h4 className="text-xs font-bold text-slate-900">
+                                    {t('Status Dana Terkumpul', 'Status Dana Terkumpul')}
+                                </h4>
+                                <p className="text-xs text-slate-600 mt-0.5">
+                                    {t('Penggalang dana sudah mengumpulkan dana selama', 'Penggalang dana sudah mengumpulkan dana selama')} <strong className="text-slate-800">{transparency?.campaign_duration || 'beberapa hari'}</strong>.
+                                </p>
                             </div>
                         </div>
 
-                        {/* Riwayat Penyaluran yang Telah Ditransfer */}
-                        <div>
-                            <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                                <span>{t('Riwayat Penyaluran Dana', 'Riwayat Penyaluran Dana')}</span>
+                        {/* Baris Total Dana Terkumpul (Gross) */}
+                        <div className="flex justify-between items-center px-1">
+                            <div className="flex items-center gap-2">
+                                <span className="bg-sky-500 text-white font-bold text-[11px] px-2 py-0.5 rounded-full shrink-0">
+                                    100%
+                                </span>
+                                <span className="text-sm font-bold text-slate-900">
+                                    {t('Dana terkumpul', 'Dana terkumpul')}
+                                </span>
+                            </div>
+                            <span className="text-base font-extrabold text-slate-900">
+                                {formatCurrency(transparency?.total_collected ?? program.collected_amount)}
+                            </span>
+                        </div>
+
+                        {/* Layer 2: Kartu Alokasi Program (Latar Biru Muda Kontras) */}
+                        {(() => {
+                            const feePercent = Number(transparency?.platform_fee_percent ?? (program.campaigner_type === 'internal' ? 0 : 5));
+                            const programAllocPercent = Math.max(0, 100 - feePercent);
+                            const allocatedAmount = transparency?.allocated_for_program ?? ((transparency?.total_collected ?? program.collected_amount) - (transparency?.total_platform_fees ?? 0));
+
+                            return (
+                                <div className="bg-sky-50/70 border border-sky-100 rounded-2xl p-4 space-y-3.5 text-left">
+                                    <div className="flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <span className="bg-sky-500 text-white font-bold text-[11px] px-2 py-0.5 rounded-full shrink-0">
+                                                {programAllocPercent}%
+                                            </span>
+                                            <span className="text-xs sm:text-sm font-bold text-slate-800">
+                                                {t('Dana untuk penggalangan dana', 'Dana untuk penggalangan dana')}
+                                            </span>
+                                        </div>
+                                        <span className="font-bold text-slate-900 text-sm sm:text-base">
+                                            {formatCurrency(allocatedAmount)}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2 text-xs pl-7">
+                                        <div className="flex justify-between items-center text-slate-600">
+                                            <span>{t('Biaya layanan pembayaran*', 'Biaya layanan pembayaran*')}</span>
+                                            <span className="font-medium text-slate-700">
+                                                {formatCurrency(transparency?.total_gateway_fees ?? 0)}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex justify-between items-center text-slate-600">
+                                            <span>{t('Sudah dicairkan**', 'Sudah dicairkan**')}</span>
+                                            <span className="font-medium text-slate-700">
+                                                {formatCurrency(transparency?.total_disbursed ?? 0)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2.5 border-t border-sky-200/60 flex justify-between items-center">
+                                        <span className="text-xs sm:text-sm font-bold text-slate-900">
+                                            {t('Belum dicairkan***', 'Belum dicairkan***')}
+                                        </span>
+                                        <span className="font-extrabold text-base sm:text-lg text-slate-900">
+                                            {formatCurrency(transparency?.available_balance ?? 0)}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+
+                        {/* Layer 3: Accordion Biaya Operasional Platform */}
+                        {(() => {
+                            const feePercent = Number(transparency?.platform_fee_percent ?? (program.campaigner_type === 'internal' ? 0 : 5));
+                            const feeAmount = transparency?.total_platform_fees ?? 0;
+
+                            return (
+                                <div className="border border-slate-200 rounded-xl overflow-hidden transition-all bg-white">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsPlatformFeeOpen(!isPlatformFeeOpen)}
+                                        className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 transition-colors text-left cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className={`font-bold text-[11px] px-2 py-0.5 rounded-full shrink-0 ${
+                                                feePercent === 0 ? 'bg-emerald-600 text-white' : 'bg-sky-500 text-white'
+                                            }`}>
+                                                {feePercent}%
+                                            </span>
+                                            <span className="text-xs sm:text-sm font-bold text-slate-800">
+                                                {feePercent === 0
+                                                    ? t('0% Bebas Biaya Operasional Platform', '0% Bebas Biaya Operasional Platform')
+                                                    : t('Biaya Operasional Insani', 'Biaya Operasional Insani')}
+                                            </span>
+                                        </div>
+                                        {isPlatformFeeOpen ? (
+                                            <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                                        )}
+                                    </button>
+
+                                    {isPlatformFeeOpen && (
+                                        <div className="p-4 pt-1 border-t border-slate-100 bg-slate-50/50 space-y-2 text-left">
+                                            <p className="text-base font-extrabold text-slate-900">
+                                                {formatCurrency(feeAmount)}
+                                            </p>
+                                            <p className="text-xs text-slate-600 leading-relaxed">
+                                                {feePercent === 0 ? (
+                                                    <>
+                                                        {t('Program ini tidak dikenakan biaya operasional platform (100% donasi dialokasikan untuk kegiatan program dan penerima manfaat).')}
+                                                        <a
+                                                            href="/syarat-ketentuan#biaya-operasional"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-600 hover:underline font-semibold ml-1.5 inline-flex items-center gap-0.5"
+                                                        >
+                                                            {t('Selengkapnya', 'Selengkapnya')} ↗
+                                                        </a>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {t('Biaya operasional platform digunakan untuk pemeliharaan sistem keamanan transaksi digital, pendampingan lapangan, dan akuntabilitas yayasan.')}
+                                                        <a
+                                                            href="/syarat-ketentuan#biaya-operasional"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-blue-600 hover:underline font-semibold ml-1.5 inline-flex items-center gap-0.5"
+                                                        >
+                                                            {t('Selengkapnya', 'Selengkapnya')} ↗
+                                                        </a>
+                                                    </>
+                                                )}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
+
+                        {/* Layer 4: Catatan Kaki Legal Asterisk (*, **, ***) Ber-anchor S&K */}
+                        <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-4 space-y-3 text-left text-xs leading-relaxed text-amber-950">
+                            <div className="flex items-start gap-2">
+                                <span className="font-bold text-amber-800 shrink-0">*</span>
+                                <p>
+                                    {t('Biaya yang dibayarkan kepada penyedia layanan pemrosesan transaksi digital sesuai metode pembayaran yang digunakan, serta biaya layanan teknologi platform dan pendukung transaksi.')}
+                                    <a
+                                        href="/syarat-ketentuan#biaya-transaksi"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-700 hover:underline font-semibold ml-1 inline-flex items-center gap-0.5"
+                                    >
+                                        {t('Baca lebih lengkap.', 'Baca lebih lengkap.')} ↗
+                                    </a>
+                                </p>
+                            </div>
+
+                            <div className="flex items-start gap-2">
+                                <span className="font-bold text-amber-800 shrink-0">**</span>
+                                <p>
+                                    {t('Akumulasi dana yang telah dicairkan kepada penggalang dana/pelaksana program dan biaya riil lainnya yang telah dibayarkan.')}
+                                </p>
+                            </div>
+
+                            <div className="flex items-start gap-2">
+                                <span className="font-bold text-amber-800 shrink-0">***</span>
+                                <p>
+                                    {t('Dana yang dapat dicairkan dan dikelola oleh penggalang dana, dapat disesuaikan apabila terdapat biaya lainnya yang masih berjalan sesuai kesepakatan.')}
+                                    <a
+                                        href="/syarat-ketentuan#ketentuan-pencairan"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-700 hover:underline font-semibold ml-1 inline-flex items-center gap-0.5"
+                                    >
+                                        {t('Baca selengkapnya di sini.', 'Baca selengkapnya di sini.')} ↗
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Layer 5: Riwayat Penyaluran Dana yang Telah Ditransfer (Gaya Kitabisa) */}
+                        <div className="pt-2">
+                            <div className="flex items-center justify-between mb-3">
+                                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                    {t('Riwayat Penyaluran Dana', 'Riwayat Penyaluran Dana')}
+                                </h4>
                                 <Badge variant="secondary" className="text-[10px] font-semibold bg-slate-100 text-slate-600">
                                     {disbursementsList.length} {t('Penyaluran')}
                                 </Badge>
-                            </h4>
+                            </div>
 
                             {disbursementsList.length === 0 ? (
                                 <div className="flex items-start gap-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-left">
@@ -1373,35 +1581,68 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                     </div>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
-                                    {disbursementsList.map((item: any) => (
-                                        <div key={item.id} className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-blue-200 transition-colors">
-                                            <div className="flex justify-between items-start gap-2 mb-1.5">
-                                                <div>
-                                                    <span className="font-mono text-xs font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                                                        {item.receipt_number || `#${item.id}`}
+                                <div className="space-y-4">
+                                    {disbursementsList.slice(0, 2).map((item: any, idx: number) => (
+                                        <div
+                                            key={item.id}
+                                            className={`text-left space-y-1.5 ${
+                                                idx > 0 ? 'pt-4 border-t border-slate-100' : ''
+                                            }`}
+                                        >
+                                            {/* Baris 1: Waktu Relatif & Nomor Kuitansi */}
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-slate-400 font-normal">
+                                                    {item.transferred_at_human || (item.transferred_at ? formatDate(item.transferred_at) : '-')}
+                                                </span>
+                                                {item.receipt_number && (
+                                                    <span className="font-mono text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                                                        {item.receipt_number}
                                                     </span>
-                                                    <span className="text-[11px] text-slate-400 block mt-1">
-                                                        {item.transferred_at ? formatDate(item.transferred_at) : '-'}
-                                                    </span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="text-xs text-slate-500 block leading-tight">{t('Nominal Disalurkan')}</span>
-                                                    <span className="font-bold text-sm text-emerald-700">
-                                                        {formatCurrency(item.nett_amount)}
-                                                    </span>
-                                                </div>
+                                                )}
                                             </div>
 
+                                            {/* Baris 2: Inisiator (Avatar + Nama) */}
+                                            <div className="flex items-center gap-2 pt-0.5">
+                                                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                                    {program.campaigner_type === 'internal' ? 'I' : (campaignerName ? campaignerName.charAt(0).toUpperCase() : 'P')}
+                                                </div>
+                                                <span className="text-xs font-semibold text-slate-700">
+                                                    {campaignerName}
+                                                </span>
+                                            </div>
+
+                                            {/* Baris 3: Judul Transaksi (Heading Tebal) */}
+                                            <div className="text-base sm:text-lg font-bold text-slate-900 pt-0.5">
+                                                {t('Penyaluran Dana')} {formatCurrency(item.nett_amount ?? item.requested_amount)}
+                                            </div>
+
+                                            {/* Baris 4: Rekening Penerima Bank & Masked Number */}
+                                            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                                                <div>
+                                                    {t('Ke rekening Bank')}{' '}
+                                                    <span className="font-semibold text-slate-800">{item.bank_name || 'BSI'}</span>{' '}
+                                                    <span className="font-mono text-slate-700 tracking-wider">
+                                                        {item.bank_account_number || item.bank_account_number_masked || '*** **** 4448'}
+                                                    </span>
+                                                </div>
+                                                {item.bank_account_name && (
+                                                    <div className="text-slate-600 mt-0.5">
+                                                        a/n <span className="font-medium text-slate-800 uppercase">{item.bank_account_name}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Baris 5: Rencana Penggunaan Dana Penyaluran */}
                                             {item.distribution_plan && (
-                                                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed">
-                                                    <span className="font-semibold text-slate-700 block mb-0.5">{t('Rencana / Keperluan')}:</span>
-                                                    {item.distribution_plan}
+                                                <div className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-1">
+                                                    <span className="text-slate-500 font-medium">{t('Rencana Penggunaan Dana Penyaluran')} : </span>
+                                                    <span>{item.distribution_plan}</span>
                                                 </div>
                                             )}
 
+                                            {/* Baris 6: Target & Lokasi jika ada */}
                                             {(item.beneficiary_target || item.location) && (
-                                                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px] text-slate-500">
+                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 pt-0.5">
                                                     {item.beneficiary_target && (
                                                         <span><strong>{t('Target')}:</strong> {item.beneficiary_target}</span>
                                                     )}
@@ -1410,19 +1651,54 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                                     )}
                                                 </div>
                                             )}
+
+                                            {/* Baris 7: Tautan ke Laporan Penyaluran Lapangan Terkait */}
+                                            {item.program_update && (
+                                                <div className="pt-1.5">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setActiveTab('kabar');
+                                                            setIsTransparencyModalOpen(false);
+                                                        }}
+                                                        className="inline-flex items-center gap-1.5 text-xs text-insani-blue hover:underline font-semibold cursor-pointer"
+                                                    >
+                                                        <FileText className="w-3.5 h-3.5" />
+                                                        <span>{t('Lihat Laporan Penyaluran Lapangan Terkait', 'Lihat Laporan Penyaluran Lapangan Terkait')} ↗</span>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
+
+                                    {/* Progressive Disclosure Button jika total item > 2 */}
+                                    {disbursementsList.length > 2 && (
+                                        <div className="pt-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveTab('kabar');
+                                                    setIsTransparencyModalOpen(false);
+                                                }}
+                                                className="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-insani-blue transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                                            >
+                                                <span>{t('Lihat Seluruh :count Riwayat Penyaluran di Kabar Terbaru ↗').replace(':count', disbursementsList.length.toString())}</span>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
 
-                        {/* Edukasi Transparansi */}
+                        {/* Layer 6: Edukasi Transparansi & Akuntabilitas Yayasan */}
                         <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-blue-50/60 border border-blue-100 text-[11px] text-blue-900/80 leading-relaxed text-left">
                             <ShieldCheck className="w-4 h-4 text-insani-blue shrink-0 mt-0.5" />
                             <div>
                                 <p className="font-semibold text-blue-950 mb-0.5">{t('Komitmen Akuntabilitas Insani Indonesia')}</p>
                                 <p>
-                                    {t('Insani menerapkan audit berlapis. Dana hanya dapat dicairkan oleh campaigner terverifikasi dengan rincian penyaluran yang jelas, dan pengajuan berikutnya diwajibkan menyertakan laporan kabar penyaluran yang telah disetujui.')}
+                                    {program.campaigner_type === 'internal'
+                                        ? t('Program ini diselenggarakan langsung oleh Yayasan Insani Indonesia dengan tata kelola akuntabel dan diaudit berkala sesuai regulasi Kementerian Sosial RI.')
+                                        : t('Insani menerapkan audit berlapis. Dana hanya dapat dicairkan oleh campaigner terverifikasi dengan rincian penyaluran yang jelas, dan pengajuan berikutnya diwajibkan menyertakan laporan kabar penyaluran yang telah disetujui.')}
                                 </p>
                             </div>
                         </div>

@@ -15,10 +15,20 @@ class DisbursementController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status', 'pending');
+        $type = $request->query('type', 'all');
 
-        $disbursements = Disbursement::with('program')
+        $disbursements = Disbursement::with(['program.creator', 'program.campaignerProfile', 'program.category'])
             ->when($status !== 'all', function ($query) use ($status) {
                 return $query->where('status', $status);
+            })
+            ->when($type !== 'all', function ($query) use ($type) {
+                return $query->whereHas('program', function ($q) use ($type) {
+                    if ($type === 'internal') {
+                        $q->where('campaigner_type', 'internal');
+                    } else {
+                        $q->where('campaigner_type', '!=', 'internal');
+                    }
+                });
             })
             ->latest()
             ->paginate(15)
@@ -28,6 +38,7 @@ class DisbursementController extends Controller
             'disbursements' => $disbursements,
             'filters' => [
                 'status' => $status,
+                'type' => $type,
             ],
         ]);
     }

@@ -4,6 +4,7 @@ use App\Models\Disbursement;
 use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Program;
+use App\Models\ProgramUpdate;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -32,7 +33,7 @@ it('renders public program detail page with transparency data successfully', fun
     ]);
 
     // Create a transferred disbursement
-    Disbursement::create([
+    $disb = Disbursement::create([
         'program_id' => $program->id,
         'requested_amount' => 300000,
         'platform_fee_percent' => 5,
@@ -50,6 +51,16 @@ it('renders public program detail page with transparency data successfully', fun
         'transferred_at' => now(),
     ]);
 
+    ProgramUpdate::create([
+        'program_id' => $program->id,
+        'disbursement_id' => $disb->id,
+        'title' => ['id' => 'Laporan Penyaluran Beras'],
+        'content' => ['id' => 'Beras telah disalurkan kepada 50 KK.'],
+        'created_by' => $user->id,
+        'is_published' => true,
+        'moderation_status' => 'approved',
+    ]);
+
     $response = $this->get("/program/{$program->slug}");
 
     $response->assertOk();
@@ -64,6 +75,11 @@ it('renders public program detail page with transparency data successfully', fun
         ->where('transparency.total_transferred_nett', 282500)
         ->where('transparency.available_balance', 196500) // 500000 - 3500 - 300000 = 196500
         ->has('transparency.disbursements', 1)
+        ->where('transparency.disbursements.0.bank_name', 'BCA')
+        ->where('transparency.disbursements.0.bank_account_name', 'John Doe')
+        ->where('transparency.disbursements.0.bank_account_number', '*** **** 7890')
+        ->where('transparency.disbursements.0.bank_account_number_masked', '*** **** 7890')
+        ->where('transparency.disbursements.0.program_update.id', fn ($id) => ! empty($id))
     );
 });
 
