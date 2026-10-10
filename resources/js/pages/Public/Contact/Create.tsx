@@ -451,7 +451,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                 href="/pusat-bantuan"
                                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition-all"
                             >
-                                {t('Kunjungi Pusat Bantuan & FAQ Lengkap')} {isRtl ? '←' : '→'}
+                                {t('Kunjungi Pusat Bantuan & Tanya Jawab Lengkap')} {isRtl ? '←' : '→'}
                             </Link>
                         </div>
                     </div>

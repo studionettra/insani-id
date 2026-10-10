@@ -377,7 +377,7 @@ export default function MarketingIntegrationTab({
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                Atur slot unit iklan Google AdSense dan file otorisasi ads.txt.
+                                Atur slot unit iklan Google AdSense dan file verifikasi ads.txt.
                             </p>
                         </div>
                     </div>
@@ -498,7 +498,7 @@ export default function MarketingIntegrationTab({
                         <div className="flex items-center justify-between">
                             <Label htmlFor="ads_txt_content" className="text-xs font-semibold flex items-center gap-2">
                                 <Globe className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Isi Berkas ads.txt (Otorisasi Publisher)</span>
+                                <span>Isi Berkas ads.txt (Verifikasi Penayang Iklan)</span>
                             </Label>
                             <a 
                                 href="/ads.txt" 

@@ -180,7 +180,7 @@ export default function AnnouncementTab({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                         <div>
-                            <Label htmlFor="announcement_link" className="text-xs font-semibold">Tautan Target / Link Halaman (Opsional)</Label>
+                            <Label htmlFor="announcement_link" className="text-xs font-semibold">Tautan Tujuan (Opsional)</Label>
                             <Input
                                 id="announcement_link"
                                 value={data.announcement_link}

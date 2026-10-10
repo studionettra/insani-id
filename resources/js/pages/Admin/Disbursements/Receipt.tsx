@@ -222,7 +222,7 @@ export default function Receipt({ disbursement }: any) {
                                                 <tr>
                                                     <td className="py-3.5 px-4 sm:px-6">
                                                         <p className="font-medium text-slate-700 dark:text-gray-300">Biaya Transaksi Payment Gateway</p>
-                                                        <p className="text-xs text-slate-500 dark:text-gray-400">Pemrosesan otomatis via QRIS & Virtual Account (Midtrans)</p>
+                                                        <p className="text-xs text-slate-500 dark:text-gray-400">Pemrosesan transaksi gerbang pembayaran QRIS & Virtual Account</p>
                                                     </td>
                                                     <td className="py-3.5 px-4 sm:px-6 text-right text-rose-600 dark:text-rose-400 font-semibold font-mono tabular-nums">
                                                         - {formatRupiah(disbursement.gateway_fee)}

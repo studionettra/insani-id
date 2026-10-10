@@ -152,7 +152,7 @@ export default function Show({ disbursement }: any) {
                                         </>
                                     ) : (
                                         <div className="flex justify-between items-center text-gray-600">
-                                            <span>Nominal Pengajuan Campaigner</span>
+                                            <span>Nominal Pengajuan Penggalang Dana</span>
                                             <span className="font-medium text-gray-900 font-mono tabular-nums">{formatRupiah(disbursement.requested_amount)}</span>
                                         </div>
                                     )}
@@ -161,7 +161,7 @@ export default function Show({ disbursement }: any) {
                                         <span className="font-medium text-red-600 font-mono tabular-nums">- {formatRupiah(disbursement.bank_fee || 2500)}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-2.5 border-t border-gray-100 font-bold text-gray-900">
-                                        <span>Total Bersih Diterima Campaigner</span>
+                                        <span>Total Bersih Diterima Penggalang Dana</span>
                                         <span className="text-emerald-700 text-base">{formatRupiah(disbursement.nett_amount)}</span>
                                     </div>
                                 </div>
@@ -264,7 +264,7 @@ export default function Show({ disbursement }: any) {
                                 <div className="p-6 space-y-4">
                                     {disbursement.notes && (
                                         <div>
-                                            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Catatan Tambahan Campaigner</h4>
+                                            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Catatan Tambahan Penggalang Dana</h4>
                                             <p className="text-sm text-gray-700 bg-gray-50 p-3.5 rounded-lg border border-gray-100">{disbursement.notes}</p>
                                         </div>
                                     )}
@@ -377,7 +377,7 @@ export default function Show({ disbursement }: any) {
                                                 </button>
                                             </div>
                                             <p>2. Ke Rekening: <span className="font-mono font-semibold">{disbursement.bank_name} {disbursement.bank_account_number}</span> a.n. <span className="font-semibold">{disbursement.bank_account_name}</span></p>
-                                            <p>3. Unggah resi/bukti transfer di bawah ini untuk menerbitkan kuitansi resmi & notifikasi email ke campaigner.</p>
+                                            <p>3. Unggah resi/bukti transfer di bawah ini untuk menerbitkan kuitansi resmi & notifikasi email ke penggalang dana.</p>
                                         </div>
                                         
                                         <div className="space-y-2">

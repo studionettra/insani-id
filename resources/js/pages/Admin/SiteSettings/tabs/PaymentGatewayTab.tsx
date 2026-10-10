@@ -432,7 +432,7 @@ export default function PaymentGatewayTab({
                         <div>
                             <h2 className="text-base font-semibold text-gray-900 dark:text-white">Rekening Transfer Manual Yayasan</h2>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                Rekening resmi yayasan tanpa potongan biaya gateway (100% donasi diterima penuh). Terhubung langsung dengan menu Rekening Bank.
+                                Rekening resmi yayasan tanpa biaya payment gateway (100% donasi diterima penuh). Terhubung langsung dengan menu Rekening Bank.
                             </p>
                         </div>
                     </div>

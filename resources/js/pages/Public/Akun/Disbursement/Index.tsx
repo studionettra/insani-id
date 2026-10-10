@@ -210,7 +210,7 @@ export default function Index({ program, disbursements, balanceBreakdown }: any)
                                             Biaya Transaksi Payment Gateway
                                         </div>
                                         <div className="text-xs text-slate-500 dark:text-gray-400">
-                                            Pemrosesan otomatis via QRIS & Virtual Account (Midtrans)
+                                            Pemrosesan otomatis transaksi QRIS & Virtual Account
                                         </div>
                                     </div>
                                     <span className="text-sm font-semibold text-rose-600 dark:text-rose-400 shrink-0">

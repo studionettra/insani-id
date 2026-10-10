@@ -772,7 +772,7 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
                                                 <div className="space-y-3">
                                                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
                                                         <div>
-                                                            <span className="block text-xs text-slate-500 font-medium">Kode Perusahaan (Biller Code)</span>
+                                                            <span className="block text-xs text-slate-500 font-medium">Kode Perusahaan</span>
                                                             <span className="font-mono text-lg sm:text-xl font-extrabold text-slate-800 tracking-wider">
                                                                 {billerCode}
                                                             </span>
@@ -789,7 +789,7 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
 
                                                     <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
                                                         <div>
-                                                            <span className="block text-xs text-slate-500 font-medium">Nomor Tagihan / Pelanggan (Bill Key)</span>
+                                                            <span className="block text-xs text-slate-500 font-medium">Nomor Tagihan / Pelanggan</span>
                                                             <span className="font-mono text-lg sm:text-xl font-extrabold text-slate-800 tracking-wider">
                                                                 {billKey}
                                                             </span>

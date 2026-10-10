@@ -539,7 +539,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                 : 'border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                         }`}
                     >
-                        <span>Berhasil (Paid)</span>
+                        <span>Berhasil</span>
                         {counts && (
                             <span
                                 className={`rounded-full px-2 py-0.5 text-xs font-bold ${
