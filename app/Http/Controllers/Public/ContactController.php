@@ -56,7 +56,9 @@ class ContactController extends Controller
         ]);
 
         if (! $response->json('success')) {
-            return back()->withErrors(['cf-turnstile-response' => __('Verifikasi keamanan gagal.')]);
+            return back()
+                ->withErrors(['cf-turnstile-response' => __('Verifikasi keamanan gagal. Silakan coba kembali.')])
+                ->with('error', __('Verifikasi keamanan gagal. Silakan coba kembali.'));
         }
 
         $message = ContactMessage::create([

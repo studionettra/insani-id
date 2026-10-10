@@ -1,7 +1,8 @@
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
-import { MapPin, Phone, Mail, Clock, CheckCircle2, UserPlus, Wallet, Handshake, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, CheckCircle2, AlertCircle, Send, Loader2, UserPlus, Wallet, Handshake, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +13,8 @@ import useTranslation from '@/hooks/use-translation';
 export default function ContactCreate({ faqs = [] }: any) {
     const { t, locale, isRtl } = useTranslation();
     const { flash, siteSettings } = usePage().props as any;
-    const [isSuccess, setIsSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
 
     const formatWaUrl = (raw: string | undefined, defaultNum: string) => {
@@ -107,24 +109,57 @@ export default function ContactCreate({ faqs = [] }: any) {
 
     useEffect(() => {
         if (flash?.success) {
-            setIsSuccess(true);
+            setSuccessMessage(flash.success);
+            setErrorMessage(null);
             reset();
 
             // Reset Turnstile
             if (widgetIdRef.current !== null && window.turnstile) {
                 window.turnstile.reset(widgetIdRef.current);
+                setData('cf-turnstile-response', '');
             }
-
-            // Auto hide success message after 5 seconds
-            setTimeout(() => setIsSuccess(false), 5000);
+        }
+        if (flash?.error) {
+            setErrorMessage(flash.error);
         }
     }, [flash]);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage(null);
+
+        if (!data['cf-turnstile-response']) {
+            const turnstileMsg = t('Harap selesaikan verifikasi keamanan (captcha) terlebih dahulu.');
+            setErrorMessage(turnstileMsg);
+            toast.error(turnstileMsg);
+            return;
+        }
+
         post('/kontak', {
             preserveScroll: true,
-            onError: () => {
+            onSuccess: (page: any) => {
+                const flashSuccess = page.props?.flash?.success || t('Terima kasih, pesan Anda telah berhasil dikirim. Kami akan segera menghubungi Anda.');
+                setSuccessMessage(flashSuccess);
+                setErrorMessage(null);
+                toast.success(flashSuccess);
+                reset();
+
+                // Reset Turnstile widget
+                if (widgetIdRef.current !== null && window.turnstile) {
+                    window.turnstile.reset(widgetIdRef.current);
+                    setData('cf-turnstile-response', '');
+                }
+
+                // Auto hide inline success banner after 8 seconds
+                setTimeout(() => {
+                    setSuccessMessage(null);
+                }, 8000);
+            },
+            onError: (errs) => {
+                const firstError = (Object.values(errs)[0] as string) || t('Gagal mengirim pesan. Silakan periksa kembali formulir Anda.');
+                setErrorMessage(firstError);
+                toast.error(firstError);
+
                 // If there's an error (e.g. invalid turnstile), reset the widget
                 if (widgetIdRef.current !== null && window.turnstile) {
                     window.turnstile.reset(widgetIdRef.current);
@@ -259,10 +294,25 @@ export default function ContactCreate({ faqs = [] }: any) {
                                 <div className={`absolute top-0 ${isRtl ? 'left-0' : 'right-0'} w-32 h-32 bg-insani-blue/5 rounded-full blur-3xl`}></div>
                                 <h2 className="text-2xl font-bold text-gray-900 mb-8">{t('Kirim Kami Pesan')}</h2>
                                 
-                                {isSuccess && (
-                                    <div className="mb-8 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start text-emerald-800">
-                                        <CheckCircle2 className={`w-6 h-6 ${isRtl ? 'ml-3' : 'mr-3'} shrink-0 text-emerald-500`} />
-                                        <p className="font-medium text-sm leading-relaxed">{flash.success}</p>
+                                {/* Alert Pesan Sukses */}
+                                {successMessage && (
+                                    <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start text-emerald-800 shadow-2xs">
+                                        <CheckCircle2 className={`w-5 h-5 ${isRtl ? 'ml-3' : 'mr-3'} shrink-0 text-emerald-600 mt-0.5`} />
+                                        <div>
+                                            <h4 className="font-bold text-sm text-emerald-900 mb-0.5">{t('Pesan Berhasil Terkirim!')}</h4>
+                                            <p className="font-medium text-xs leading-relaxed text-emerald-700">{successMessage}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Alert Pesan Gagal */}
+                                {errorMessage && (
+                                    <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start text-rose-800 shadow-2xs">
+                                        <AlertCircle className={`w-5 h-5 ${isRtl ? 'ml-3' : 'mr-3'} shrink-0 text-rose-600 mt-0.5`} />
+                                        <div>
+                                            <h4 className="font-bold text-sm text-rose-900 mb-0.5">{t('Gagal Mengirim Pesan')}</h4>
+                                            <p className="font-medium text-xs leading-relaxed text-rose-700">{errorMessage}</p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -335,10 +385,20 @@ export default function ContactCreate({ faqs = [] }: any) {
 
                                     <Button 
                                         type="submit" 
-                                        className="w-full bg-[#3d3d3d] hover:bg-black text-white h-12 text-base font-semibold rounded-lg"
-                                        disabled={processing || !data['cf-turnstile-response']}
+                                        className="w-full bg-insani-blue hover:bg-insani-darkblue text-white h-12 text-base font-semibold rounded-xl shadow-md hover:shadow-lg transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                                        disabled={processing}
                                     >
-                                        {processing ? t('Mengirim...') : t('Kirim')}
+                                        {processing ? (
+                                            <>
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                <span>{t('Mengirim Pesan...')}</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Send className="w-4 h-4" />
+                                                <span>{t('Kirim Pesan')}</span>
+                                            </>
+                                        )}
                                     </Button>
                                 </form>
                             </div>
