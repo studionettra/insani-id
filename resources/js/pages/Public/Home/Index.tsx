@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Star, Quote, Handshake } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowUpRight, Star, Quote, Handshake, MessageSquareQuote } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -449,7 +449,8 @@ return;
                 <section className="py-24 bg-zinc-50/70 border-t border-zinc-100 relative overflow-hidden">
                     <div className="max-w-7xl mx-auto px-6 lg:px-8">
                         <FadeIn className="text-center max-w-2xl mx-auto mb-16">
-                            <span className="text-xs font-bold uppercase tracking-wider text-brand-600 mb-2 block">
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-insani-blue border border-blue-200/60 shadow-2xs mb-4">
+                                <MessageSquareQuote className="w-3.5 h-3.5" />
                                 {t('Cerita Kebaikan')}
                             </span>
                             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-950 mb-4">
