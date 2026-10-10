@@ -334,7 +334,7 @@ export default function SiteSettingsIndex({ settings, bankAccounts = [] }: Props
                         />
                     )}
 
-                    {/* Tab 4: Legalitas & Kwitansi */}
+                    {/* Tab 4: Legalitas & Kuitansi */}
                     {activeTab === 'legal' && (
                         <LegalReceiptTab
                             data={data}

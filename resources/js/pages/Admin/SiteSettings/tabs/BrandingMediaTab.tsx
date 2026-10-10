@@ -51,8 +51,8 @@ export default function BrandingMediaTab({
                     <div className="space-y-4">
                         <ImageDropzone
                             id="site_logo"
-                            label="Logo Utama Website (Light Mode & Kwitansi)"
-                            helperText="Digunakan pada header halaman publik, navbar admin, dan kop e-kwitansi resmi. Format PNG/SVG transparan direkomendasikan."
+                            label="Logo Utama Website (Light Mode & Kuitansi)"
+                            helperText="Digunakan pada header halaman publik, navbar admin, dan kop e-kuitansi resmi. Format PNG/SVG transparan direkomendasikan."
                             previewUrl={previews.logo}
                             currentStorageUrl={settings.site_logo}
                             onFileSelected={(file) => onFileChange('site_logo', file)}

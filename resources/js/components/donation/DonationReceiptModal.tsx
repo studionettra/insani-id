@@ -70,7 +70,7 @@ export default function DonationReceiptModal({ receipt, onClose }: Props) {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-insani-blue"></div>
                     </div>
                     <iframe 
-                        src={`/donasi/kwitansi/${receipt.donation_code}?hide_back_btn=1`}
+                        src={`/donasi/kuitansi/${receipt.donation_code}?hide_back_btn=1`}
                         className="w-full h-full rounded-lg sm:rounded-xl bg-white border-0 shadow-sm relative z-10"
                         title="Kuitansi Donasi"
                         onLoad={(e) => {

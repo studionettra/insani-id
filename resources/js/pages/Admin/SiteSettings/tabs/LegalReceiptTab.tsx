@@ -30,7 +30,7 @@ export default function LegalReceiptTab({
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Kolom Kiri: Form Legalitas & Kwitansi */}
+            {/* Kolom Kiri: Form Legalitas & Kuitansi */}
             <div className="lg:col-span-7 space-y-6">
                 {/* Card 1: Legalitas Yayasan */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5">
@@ -154,15 +154,15 @@ export default function LegalReceiptTab({
                     </div>
                 </div>
 
-                {/* Card 2: Pengesahan Kwitansi Donasi */}
+                {/* Card 2: Pengesahan Kuitansi Donasi */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 shadow-xs space-y-5">
                     <div className="flex items-center gap-3 border-b border-gray-100 dark:border-gray-700/70 pb-4">
                         <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
                             <FileCheck className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Pengesahan Kwitansi Donasi</h2>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">Pejabat penandatangan, stempel resmi, dan tanda tangan pada e-kwitansi donatur.</p>
+                            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Pengesahan Kuitansi Donasi</h2>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Pejabat penandatangan, stempel resmi, dan tanda tangan pada e-kuitansi donatur.</p>
                         </div>
                     </div>
 
@@ -197,7 +197,7 @@ export default function LegalReceiptTab({
                             <ImageDropzone
                                 id="receipt_stamp_image"
                                 label="Stempel Resmi Yayasan"
-                                helperText="Format PNG transparan. Diletakkan bertumpuk dengan tanda tangan pada kwitansi."
+                                helperText="Format PNG transparan. Diletakkan bertumpuk dengan tanda tangan pada kuitansi."
                                 previewUrl={previews.stamp}
                                 currentStorageUrl={settings.receipt_stamp_image}
                                 onFileSelected={(file) => onFileChange('receipt_stamp_image', file)}
@@ -266,7 +266,7 @@ export default function LegalReceiptTab({
                     <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/70">
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-900 dark:text-white">
                             <FileCheck className="w-4 h-4 text-emerald-600" />
-                            <span>Simulasi Pengesahan Kwitansi</span>
+                            <span>Simulasi Pengesahan Kuitansi</span>
                         </div>
                         <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" /> Sah Terverifikasi
@@ -315,7 +315,7 @@ export default function LegalReceiptTab({
                                 </span>
                             </div>
 
-                            <div className="relative w-24 h-14 flex items-center justify-center">
+                            <div className="relative w-28 h-14 flex items-center justify-center">
                                 {activeStampUrl && (
                                     <img 
                                         src={activeStampUrl} 
@@ -331,9 +331,15 @@ export default function LegalReceiptTab({
                                     />
                                 )}
                                 {!activeStampUrl && !activeSignatureUrl && (
-                                    <span className="text-[10px] text-gray-400 italic text-center">
-                                        (Stempel/TTD belum diunggah)
-                                    </span>
+                                    <div className="border border-emerald-600/80 bg-emerald-50 dark:bg-emerald-950/40 rounded px-2 py-1 text-center shadow-2xs">
+                                        <div className="flex items-center justify-center gap-1 font-extrabold text-[8px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+                                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                            LUNAS - TERVERIFIKASI
+                                        </div>
+                                        <span className="text-[7px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mt-0.5">
+                                            Segel Elektronik
+                                        </span>
+                                    </div>
                                 )}
                             </div>
                         </div>

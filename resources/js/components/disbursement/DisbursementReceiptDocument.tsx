@@ -294,27 +294,47 @@ export default function DisbursementReceiptDocument({
                     </div>
                 </div>
 
-                {/* Pihak Yayasan (Pengesahan Elektronik Resmi) */}
+                {/* Pihak Yayasan (Pengesahan Resmi / Elektronik) */}
                 <div className="flex flex-col justify-between items-center h-28">
                     <p className="text-[11px] text-slate-600">Disahkan & Ditransfer Oleh,</p>
 
-                    {/* Segel Pengesahan Resmi */}
-                    <div className="border border-emerald-600 bg-emerald-50/70 rounded px-3 py-1 text-emerald-900 flex flex-col items-center justify-center shadow-2xs">
-                        <div className="flex items-center gap-1 font-black text-[10px] uppercase tracking-wider text-emerald-800">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                            LUNAS - TERVERIFIKASI
+                    {/* Stempel Resmi & TTD Pejabat atau Segel Elektronik Fallback */}
+                    {siteSettings?.receipt_stamp_image || siteSettings?.receipt_signature_image ? (
+                        <div className="relative w-40 h-16 flex items-center justify-center my-0.5">
+                            {siteSettings.receipt_stamp_image && (
+                                <img 
+                                    src={siteSettings.receipt_stamp_image.startsWith('http') ? siteSettings.receipt_stamp_image : `/storage/${siteSettings.receipt_stamp_image}`} 
+                                    alt="Stempel Resmi Yayasan" 
+                                    className="absolute inset-0 w-full h-full object-contain opacity-85 -rotate-6 pointer-events-none" 
+                                />
+                            )}
+                            {siteSettings.receipt_signature_image && (
+                                <img 
+                                    src={siteSettings.receipt_signature_image.startsWith('http') ? siteSettings.receipt_signature_image : `/storage/${siteSettings.receipt_signature_image}`} 
+                                    alt="Tanda Tangan Pejabat" 
+                                    className="relative h-14 object-contain z-10" 
+                                />
+                            )}
                         </div>
-                        <span className="text-[8.5px] font-bold text-emerald-700 uppercase tracking-widest mt-0.5">
-                            {foundationName}
-                        </span>
-                    </div>
+                    ) : (
+                        /* Segel Pengesahan Elektronik Fallback */
+                        <div className="border border-emerald-600 bg-emerald-50/70 rounded px-3 py-1 text-emerald-900 flex flex-col items-center justify-center shadow-2xs my-1">
+                            <div className="flex items-center gap-1 font-black text-[10px] uppercase tracking-wider text-emerald-800">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                LUNAS - TERVERIFIKASI
+                            </div>
+                            <span className="text-[8.5px] font-bold text-emerald-700 uppercase tracking-widest mt-0.5">
+                                {foundationName}
+                            </span>
+                        </div>
+                    )}
 
                     <div className="w-full">
                         <p className="font-bold text-slate-900 text-xs">
                             {signatoryName}
                         </p>
                         <p className="text-[10px] text-slate-500 mt-0.5">
-                            {signatoryTitle} • Pengesahan Elektronik
+                            {signatoryTitle} • Pengesahan Resmi
                         </p>
                     </div>
                 </div>

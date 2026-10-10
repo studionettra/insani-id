@@ -413,7 +413,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                 const isHomeActive = isActive('/');
                 const isFocusActive = isActive('/fokus-program');
                 const isProgramActive = isActive('/program');
-                const isCekDonasiActive = isActive('/cek-donasi') || isActive('/donasi/status') || isActive('/donasi/kwitansi');
+                const isCekDonasiActive = isActive('/cek-donasi') || isActive('/donasi/status') || isActive('/donasi/kuitansi') || isActive('/donasi/kwitansi');
 
                 return (
                     <nav className="md:hidden fixed bottom-0 w-full bg-white/95 backdrop-blur-xl border-t border-gray-200/60 z-50 flex items-center justify-around py-1.5 pb-safe shadow-[0_-4px_16px_rgba(0,0,0,0.06)] print:hidden">

@@ -50,9 +50,9 @@ export const SITE_SETTINGS_TABS: TabDefinition[] = [
     {
         key: 'legal',
         category: 'identity',
-        label: 'Legalitas & Kwitansi',
+        label: 'Legalitas & Kuitansi',
         shortLabel: 'Legalitas',
-        description: 'SK Kemenkumham, izin PUB, NPWP, & stempel kwitansi resmi',
+        description: 'SK Kemenkumham, izin PUB, NPWP, & stempel kuitansi resmi',
         icon: ShieldCheck,
         fields: [
             'legal_foundation_name', 'legal_sk_kemenkumham', 'legal_sk_label',

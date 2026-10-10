@@ -1428,7 +1428,7 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                 variant="outline"
                                                 onClick={() =>
                                                     window.open(
-                                                        `/donasi/kwitansi/${selectedDonation.donation_code}`,
+                                                        `/donasi/kuitansi/${selectedDonation.donation_code}`,
                                                         '_blank',
                                                     )
                                                 }

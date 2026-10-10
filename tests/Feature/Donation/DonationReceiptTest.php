@@ -177,7 +177,14 @@ test('it displays legal details and handles receipt rendering properly', functio
 
     $response->assertOk();
     $response->assertSee('Bantuan Peduli Bencana');
-    $response->assertSee('Verifikasi Kwitansi Resmi');
+    $response->assertSee('Verifikasi Kuitansi Resmi');
     $response->assertSee('legal-text');
     $response->assertSee('legal-foundation');
+});
+
+test('it redirects legacy /donasi/kwitansi/{code} route to /donasi/kuitansi/{code} with 301 status', function () {
+    $response = $this->get('/donasi/kwitansi/DON-TEST-CODE');
+
+    $response->assertRedirect('/donasi/kuitansi/DON-TEST-CODE');
+    $response->assertStatus(301);
 });

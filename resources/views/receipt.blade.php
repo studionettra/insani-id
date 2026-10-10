@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kwitansi Donasi Resmi - {{ $donation->donation_code }}</title>
+    <title>Kuitansi Donasi Resmi - {{ $donation->donation_code }}</title>
     <link rel="icon" href="{{ !empty($settings['site_favicon']) ? asset('storage/' . $settings['site_favicon']) : asset('favicon-insani.svg') }}" type="image/svg+xml">
     <style>
         * {
@@ -681,7 +681,7 @@
                         @endphp
                         <img src="{{ $qrCodeUrl }}" alt="QR Verifikasi" class="qr-image">
                         <div class="qr-text">
-                            <p><strong>Verifikasi Kwitansi Resmi</strong></p>
+                            <p><strong>Verifikasi Kuitansi Resmi</strong></p>
                             <p>Pindai kode QR untuk memverifikasi keaslian donasi secara online.</p>
                         </div>
                     </div>
@@ -703,11 +703,26 @@
                         @endif
                         
                         <div class="sign-box" style="position: relative; height: 75px; margin: 4px 0; display: flex; align-items: center; justify-content: flex-end;">
-                            @if(!empty($settings['receipt_stamp_image']))
-                                <img src="{{ asset('storage/' . $settings['receipt_stamp_image']) }}" alt="Stempel Resmi" class="stamp-img" style="position: absolute; right: 25px; height: 70px; opacity: 0.85; z-index: 1; pointer-events: none;">
-                            @endif
-                            @if(!empty($settings['receipt_signature_image']))
-                                <img src="{{ asset('storage/' . $settings['receipt_signature_image']) }}" alt="Tanda Tangan" class="signature-img" style="position: relative; height: 55px; z-index: 2;">
+                            @if(!empty($settings['receipt_stamp_image']) || !empty($settings['receipt_signature_image']))
+                                @if(!empty($settings['receipt_stamp_image']))
+                                    <img src="{{ asset('storage/' . $settings['receipt_stamp_image']) }}" alt="Stempel Resmi" class="stamp-img" style="position: absolute; right: 25px; height: 70px; opacity: 0.85; z-index: 1; pointer-events: none;">
+                                @endif
+                                @if(!empty($settings['receipt_signature_image']))
+                                    <img src="{{ asset('storage/' . $settings['receipt_signature_image']) }}" alt="Tanda Tangan" class="signature-img" style="position: relative; height: 55px; z-index: 2;">
+                                @endif
+                            @else
+                                <div style="border: 1px solid #059669; background: #ecfdf5; border-radius: 6px; padding: 6px 14px; text-align: center; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+                                    <div style="display: flex; align-items: center; gap: 4px; font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #065f46;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="m9 12 2 2 4-4"></path>
+                                        </svg>
+                                        LUNAS - TERVERIFIKASI
+                                    </div>
+                                    <span style="font-size: 9px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">
+                                        {{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}
+                                    </span>
+                                </div>
                             @endif
                         </div>
 
@@ -715,7 +730,7 @@
                             {{ $settings['receipt_signatory_name'] ?? 'Pengurus Yayasan' }}
                         </div>
                         <p class="sign-subtitle">
-                            {{ $settings['receipt_signatory_title'] ?? 'Bagian Keuangan & Donasi' }}
+                            {{ $settings['receipt_signatory_title'] ?? 'Divisi Keuangan & Donasi' }}
                         </p>
                     </div>
                 </div>
