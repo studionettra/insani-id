@@ -64,7 +64,7 @@ class SendProgramUpdateReminder extends Command
                         Log::error("Failed sending WA reminder for program {$program->id}: ".$e->getMessage());
                     }
 
-                    if ($program->creator?->email) {
+                    if ($program->creator?->email && ! str_contains($program->creator->email, '@anonymized.insani.id')) {
                         try {
                             Mail::raw(
                                 "Halo {$program->creator->name},\n\nDana untuk program '{$program->title}' telah dicairkan {$days} hari yang lalu. Sebagai bentuk transparansi kepada para donatur, kami mohon untuk segera memposting Kabar Terbaru / Laporan Penyaluran melalui dashboard Anda di ".url('/akun/programs/'.$program->id.'/updates').".\n\nTerima kasih,\nTim Insani Indonesia",

@@ -83,7 +83,7 @@ export default function DeleteUser() {
                                             className="rounded-xl border-gray-200 dark:border-gray-700"
                                         />
 
-                                        <InputError message={errors.password} className="text-xs" />
+                                        <InputError message={errors.password || (errors as any).general} className="text-xs font-medium" />
                                     </div>
 
                                     <DialogFooter className="gap-2 pt-2">

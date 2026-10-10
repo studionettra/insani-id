@@ -59,7 +59,7 @@ class Disbursement extends Model
 
     public function approvedBy()
     {
-        return $this->belongsTo(User::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by')->withTrashed();
     }
 
     public function getMaskedAccountNumberAttribute(): string

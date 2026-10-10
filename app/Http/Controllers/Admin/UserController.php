@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\User\DeleteUserAction;
 use App\Http\Controllers\Controller;
 use App\Models\CampaignerProfile;
 use App\Models\User;
@@ -234,13 +235,13 @@ class UserController extends Controller
     /**
      * Remove the specified user from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $user, DeleteUserAction $deleteUserAction)
     {
         if ($user->id === auth()->id()) {
             return redirect()->back()->with('error', 'You cannot delete yourself.');
         }
 
-        $user->delete();
+        $deleteUserAction->execute($user, isSelfService: false);
 
         return redirect()->back()->with('success', 'User deleted successfully.');
     }

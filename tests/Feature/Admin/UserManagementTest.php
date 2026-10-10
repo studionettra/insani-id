@@ -175,6 +175,7 @@ test('it allows admin to delete other accounts', function () {
     $response->assertSessionHas('success', 'User deleted successfully.');
 
     expect(User::where('id', $targetUser->id)->exists())->toBeFalse();
+    expect(User::withTrashed()->find($targetUser->id)?->email)->toContain('@anonymized.insani.id');
 });
 
 test('unauthorized users without permission cannot access user management', function () {

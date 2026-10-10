@@ -53,7 +53,7 @@ class CheckProgramStatus extends Command
             $this->line("Marked program ID {$program->id} as completed.");
 
             // Notify creator
-            if ($program->creator) {
+            if (! empty($program->creator?->email) && ! str_contains($program->creator->email, '@anonymized.insani.id')) {
                 try {
                     Mail::to($program->creator->email)->send(new ProgramCompletedNotification($program));
                     Log::info("Program completed notification sent to {$program->creator->email} for program ID {$program->id}");

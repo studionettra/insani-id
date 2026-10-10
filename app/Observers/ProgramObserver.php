@@ -23,7 +23,7 @@ class ProgramObserver
             if ($program->collected_amount >= $program->target_amount) {
                 $program->status = 'completed';
 
-                if ($program->creator) {
+                if (! empty($program->creator?->email) && ! str_contains($program->creator->email, '@anonymized.insani.id')) {
                     try {
                         Mail::to($program->creator->email)
                             ->send(new ProgramCompletedNotification($program));

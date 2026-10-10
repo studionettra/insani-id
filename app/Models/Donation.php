@@ -49,7 +49,7 @@ class Donation extends Model
 
     public function donor()
     {
-        return $this->belongsTo(User::class, 'donor_user_id');
+        return $this->belongsTo(User::class, 'donor_user_id')->withTrashed();
     }
 
     public function fundraiser()
@@ -59,7 +59,7 @@ class Donation extends Model
 
     public function fundraiserUser()
     {
-        return $this->belongsTo(User::class, 'fundraiser_user_id');
+        return $this->belongsTo(User::class, 'fundraiser_user_id')->withTrashed();
     }
 
     public function payments()
