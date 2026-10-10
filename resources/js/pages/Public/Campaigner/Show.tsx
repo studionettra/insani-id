@@ -135,7 +135,7 @@ export default function CampaignerShow({ campaigner, stats, activePrograms = [],
                                         </h1>
                                         <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80 border border-emerald-200/80 font-semibold text-xs px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
                                             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                                            {isLembaga ? t('Lembaga Terverifikasi') : t('Penggalang Terverifikasi')}
+                                            {t('Akun Terverifikasi')}
                                         </Badge>
                                     </div>
 

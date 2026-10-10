@@ -460,7 +460,7 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                             <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         </p>
                         <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                            <span>{program.campaigner_type === 'internal' ? t('Pengelola Resmi Platform') : (isLembaga ? t('Lembaga Terverifikasi') : t('Akun Terverifikasi'))}</span>
+                            <span>{t('Akun Terverifikasi')}</span>
                         </p>
                     </div>
                 </div>
