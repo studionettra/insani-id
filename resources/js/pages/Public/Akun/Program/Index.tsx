@@ -406,7 +406,7 @@ export default function AkunProgramIndex({ programs, quota }: Props) {
 
                         <div className="space-y-4 text-sm">
                             <div className="p-3 bg-blue-50/60 dark:bg-blue-950/30 rounded-xl border border-blue-100 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-300 leading-relaxed">
-                                Standar kuota aktif untuk mitra lembaga adalah <strong>{quota?.max_slots || 3} slot</strong>. Anda dapat mengajukan kuota yang lebih besar kepada Superadmin dengan menyertakan alasan dan rencana program.
+                                Standar kuota aktif untuk mitra lembaga adalah <strong>{quota?.max_slots || 3} slot</strong>. Anda dapat mengajukan kuota yang lebih besar kepada Tim Insani dengan menyertakan alasan dan rencana program.
                             </div>
 
                             <div>

@@ -67,7 +67,7 @@ class CampaignerProgramController extends Controller
         if ($profile && ! $profile->hasAvailableSlot()) {
             return redirect()->route('akun.programs.index')->with(
                 'error',
-                "Batas kuota {$profile->max_campaign_slots} campaign aktif Anda telah tercapai. Selesaikan campaign yang sedang berjalan atau ajukan penambahan slot kuota ke Superadmin."
+                "Batas kuota {$profile->max_campaign_slots} program aktif Anda telah tercapai. Selesaikan program yang sedang berjalan atau ajukan penambahan kuota ke Tim Insani."
             );
         }
 

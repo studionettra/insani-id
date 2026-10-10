@@ -25,7 +25,7 @@ class CampaignerSlotRequestController extends Controller
         }
 
         if ($profile->hasPendingSlotRequest()) {
-            return back()->with('error', 'Anda masih memiliki permohonan penambahan slot yang sedang dalam proses peninjauan oleh Superadmin.');
+            return back()->with('error', 'Anda masih memiliki permohonan penambahan kuota yang sedang dalam proses peninjauan oleh Tim Insani.');
         }
 
         $currentSlots = $profile->max_campaign_slots ?? 3;
@@ -60,6 +60,6 @@ class CampaignerSlotRequestController extends Controller
             Notification::send($admins->unique('id'), new CampaignSlotRequestedNotification($slotRequest));
         }
 
-        return back()->with('success', "Pengajuan penambahan menjadi {$validated['requested_slots']} slot campaign berhasil dikirim. Tim Superadmin akan segera meninjau permohonan Anda.");
+        return back()->with('success', "Pengajuan penambahan menjadi {$validated['requested_slots']} slot program berhasil dikirim. Tim Insani akan segera meninjau permohonan Anda.");
     }
 }

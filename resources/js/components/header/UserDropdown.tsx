@@ -92,7 +92,7 @@ export default function UserDropdown() {
     if (isSuperadmin) {
       return (
         <span className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 rounded-md border border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60">
-          <Shield className="w-2.5 h-2.5" /> Superadmin
+          <Shield className="w-2.5 h-2.5" /> Administrator
         </span>
       );
     }
@@ -151,7 +151,7 @@ export default function UserDropdown() {
             {user?.name || "User"}
           </span>
           <span className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
-            {isSuperadmin ? "Superadmin" : roles[0] || "Akun"}
+            {isSuperadmin ? "Administrator" : roles[0] || "Akun"}
           </span>
         </div>
 

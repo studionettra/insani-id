@@ -291,7 +291,7 @@ export default function SlotRequestsIndex({ slotRequests, filters, counts }: Pro
                                                 ) : (
                                                     <div className="space-y-0.5 text-xs">
                                                         <div className="font-semibold text-gray-900 dark:text-white">
-                                                            {req.reviewer?.name || 'Superadmin'}
+                                                            {req.reviewer?.name || 'Tim Insani'}
                                                         </div>
                                                         {req.reviewed_at && (
                                                             <div className="text-[11px] text-gray-400">

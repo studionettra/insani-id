@@ -49,7 +49,7 @@ class CampaignSlotRequestReviewedNotification extends Notification implements Sh
             return $mail
                 ->subject('[Insani] Alhamdulillah! Pengajuan Tambahan Slot Campaign Anda Disetujui')
                 ->greeting("Assalamu’alaikum Warahmatullahi Wabarakatuh, {$orgName}.")
-                ->line('Kabar gembira! Permohonan penambahan kuota slot campaign aktif Anda di Insani Indonesia telah **disetujui** oleh Tim Superadmin.')
+                ->line('Kabar gembira! Permohonan penambahan kuota slot program aktif Anda di Insani Indonesia telah **disetujui** oleh Tim Insani.')
                 ->line("• **Batas Kuota Baru**: **{$newSlots} campaign aktif**")
                 ->line('Kini Anda dapat mempublikasikan lebih banyak program galang dana kebaikan untuk menjangkau para donatur dermawan.')
                 ->action('Lihat Kuota & Buat Program', route('akun.programs.index'))
