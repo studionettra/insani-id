@@ -40,12 +40,84 @@ class ContactController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value)) {
+                        return;
+                    }
+                    if (preg_match('#<[a-z!/][\s\S]*>#i', $value) || strip_tags($value) !== $value) {
+                        $fail(__('Nama tidak boleh mengandung tag HTML atau skrip.'));
+
+                        return;
+                    }
+                    if (preg_match('/\p{Extended_Pictographic}/u', $value)) {
+                        $fail(__('Nama tidak boleh mengandung emoji atau simbol grafis.'));
+
+                        return;
+                    }
+                },
+            ],
+            'email' => 'required|email|max:150',
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30',
+                'regex:/^[0-9\s\+\-\(\)]*$/',
+            ],
+            'subject' => [
+                'required',
+                'string',
+                'max:150',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value)) {
+                        return;
+                    }
+                    if (preg_match('#<[a-z!/][\s\S]*>#i', $value) || strip_tags($value) !== $value) {
+                        $fail(__('Subjek tidak boleh mengandung tag HTML atau skrip.'));
+
+                        return;
+                    }
+                    if (preg_match('/\p{Extended_Pictographic}/u', $value)) {
+                        $fail(__('Subjek tidak boleh mengandung emoji atau simbol grafis.'));
+
+                        return;
+                    }
+                },
+            ],
+            'message' => [
+                'required',
+                'string',
+                'min:10',
+                'max:2000',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value)) {
+                        return;
+                    }
+                    if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $value)) {
+                        $fail(__('Pesan mengandung karakter yang tidak diizinkan.'));
+
+                        return;
+                    }
+                    if (preg_match('#<[a-z!/][\s\S]*>#i', $value) || strip_tags($value) !== $value) {
+                        $fail(__('Pesan tidak boleh mengandung tag HTML atau kode skrip.'));
+
+                        return;
+                    }
+                    if (preg_match('/\p{Extended_Pictographic}/u', $value)) {
+                        $fail(__('Pesan tidak boleh mengandung karakter emoji atau simbol grafis. Mohon gunakan teks biasa.'));
+
+                        return;
+                    }
+                },
+            ],
             'cf-turnstile-response' => 'required|string',
+        ], [
+            'phone.regex' => __('Nomor telepon hanya boleh memuat angka, spasi, dan simbol +, -, ().'),
+            'message.min' => __('Pesan terlalu pendek, minimal 10 karakter.'),
+            'message.max' => __('Pesan terlalu panjang, maksimal 2.000 karakter.'),
         ]);
 
         // Verify Turnstile
@@ -61,12 +133,17 @@ class ContactController extends Controller
                 ->with('error', __('Verifikasi keamanan gagal. Silakan coba kembali.'));
         }
 
+        $cleanMessage = trim(strip_tags(str_replace("\0", '', $validated['message'])));
+        $cleanName = trim(strip_tags(str_replace("\0", '', $validated['name'])));
+        $cleanSubject = trim(strip_tags(str_replace("\0", '', $validated['subject'])));
+        $cleanPhone = ! empty($validated['phone']) ? trim(strip_tags(str_replace("\0", '', $validated['phone']))) : null;
+
         $message = ContactMessage::create([
-            'name' => $validated['name'],
+            'name' => $cleanName,
             'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'subject' => $validated['subject'],
-            'message' => $validated['message'],
+            'phone' => $cleanPhone,
+            'subject' => $cleanSubject,
+            'message' => $cleanMessage,
         ]);
 
         // Send Email Notification (Queued)

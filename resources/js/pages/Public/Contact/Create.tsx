@@ -321,6 +321,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                         <Input 
                                             placeholder={t('Nama Lengkap')}
                                             id="name" 
+                                            maxLength={100}
                                             value={data.name} 
                                             onChange={e => setData('name', e.target.value)} 
                                             required 
@@ -335,6 +336,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                             placeholder={t('WhatsApp')}
                                             id="phone" 
                                             type="tel"
+                                            maxLength={30}
                                             value={data.phone} 
                                             onChange={e => setData('phone', e.target.value)} 
                                             className="bg-slate-50/50 border-slate-200 focus:border-insani-blue focus:ring-insani-blue/20 h-12 rounded-xl"
@@ -348,6 +350,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                             placeholder={t('Email')}
                                             id="email" 
                                             type="email"
+                                            maxLength={150}
                                             value={data.email} 
                                             onChange={e => setData('email', e.target.value)} 
                                             required 
@@ -365,6 +368,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                             placeholder={t('Pesan Atau Masukan')}
                                             id="message" 
                                             rows={5}
+                                            maxLength={2000}
                                             value={data.message} 
                                             onChange={e => {
                                                 setData('message', e.target.value);
@@ -374,6 +378,12 @@ export default function ContactCreate({ faqs = [] }: any) {
                                             className="bg-slate-50/50 border-slate-200 focus:border-insani-blue focus:ring-insani-blue/20 resize-none rounded-xl"
                                             disabled={processing}
                                         />
+                                        <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                                            <span>{t('Gunakan teks biasa tanpa emoji atau kode HTML (Min. 10 karakter)')}</span>
+                                            <span className={data.message.length > 1900 ? 'text-amber-500 font-medium' : ''}>
+                                                {data.message.length}/2000
+                                            </span>
+                                        </div>
                                         {errors.message && <p className="text-sm text-red-500">{errors.message}</p>}
                                     </div>
 
