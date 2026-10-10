@@ -729,11 +729,6 @@ export default function ProgramShow({ program, auth, currentFundraiser, topFundr
                                                                     <div className="min-w-0">
                                                                         <div className="flex items-center gap-2 flex-wrap">
                                                                             <span className="font-bold text-slate-800 text-sm sm:text-base truncate">{comment.name}</span>
-                                                                            {comment.donation_id && (
-                                                                                <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-4.5 bg-amber-50 text-amber-700 hover:bg-amber-50 border border-amber-200/60 font-semibold rounded-full">
-                                                                                    {t('Donatur')}
-                                                                                </Badge>
-                                                                            )}
                                                                         </div>
                                                                         <span className="text-xs text-slate-400 block mt-0.5">
                                                                             {format(new Date(comment.created_at), 'd MMM yyyy', { locale: dateId })}
