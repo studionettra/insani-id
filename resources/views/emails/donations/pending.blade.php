@@ -13,7 +13,7 @@ Pesan donasi Anda telah kami terima dan saat ini berstatus **MENUNGGU PEMBAYARAN
 @if($donation->channel === 'online')
 Silakan klik tombol di bawah ini untuk melihat rincian pembayaran (QRIS / E-Wallet / Virtual Account) dan menyelesaikan donasi Anda:
 
-@component('mail::button', ['url' => ($donation->payments->first()?->gateway == 'xendit' && $donation->payments->first()?->checkout_url) ? $donation->payments->first()->checkout_url : route('donation.status', ['donationCode' => $donation->donation_code]), 'color' => 'success'])
+@component('mail::button', ['url' => route('donation.status', ['donationCode' => $donation->donation_code]), 'color' => 'success'])
 Selesaikan Pembayaran Sekarang
 @endcomponent
 

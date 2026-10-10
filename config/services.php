@@ -18,11 +18,6 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
-    'xendit' => [
-        'api_key' => env('XENDIT_API_KEY'),
-        'webhook_token' => env('XENDIT_WEBHOOK_TOKEN'),
-    ],
-
     'midtrans' => [
         'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
         'client_key' => env('MIDTRANS_CLIENT_KEY'),

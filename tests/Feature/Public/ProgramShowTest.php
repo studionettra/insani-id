@@ -26,7 +26,7 @@ it('renders public program detail page with transparency data successfully', fun
     ]);
     Payment::create([
         'donation_id' => $donation->id,
-        'gateway' => 'xendit',
+        'gateway' => 'midtrans',
         'payment_method' => 'qris',
         'gateway_fee' => 3500,
         'gateway_status' => 'PAID',

@@ -94,7 +94,7 @@ const FAQ_DATA: FaqItem[] = [
         id: 'perbedaan-pembayaran',
         category: 'donatur',
         question: 'Apa perbedaan metode pembayaran otomatis dan transfer manual bank?',
-        keywords: ['otomatis', 'manual', 'verifikasi otomatis', 'konfirmasi manual', 'xendit', 'qris'],
+        keywords: ['otomatis', 'manual', 'verifikasi otomatis', 'konfirmasi manual', 'midtrans', 'qris'],
         answer: (
             <div className="space-y-3 text-slate-600">
                 <ul className="list-disc pl-5 space-y-2">

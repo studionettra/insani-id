@@ -12,7 +12,6 @@ use App\Models\Fundraiser;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Services\MidtransCorePaymentService;
-use App\Services\XenditPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -22,8 +21,7 @@ use Illuminate\Support\Str;
 class DonationController extends Controller
 {
     public function __construct(
-        protected MidtransCorePaymentService $midtrans,
-        protected ?XenditPaymentService $xendit = null
+        protected MidtransCorePaymentService $midtrans
     ) {}
 
     public function create(Request $request, Program $program)
@@ -33,7 +31,7 @@ class DonationController extends Controller
             abort(404);
         }
 
-        $isOnlineAvailable = $this->midtrans->isConfigured() || ! empty(config('services.xendit.api_key'));
+        $isOnlineAvailable = $this->midtrans->isConfigured();
         $channels = MidtransCorePaymentService::getAvailableChannels();
         $vaNotice = AppSetting::get('midtrans_va_maintenance_notice', 'Layanan Virtual Account otomatis sedang dalam integrasi perbankan berkala. Anda dapat berdonasi secara instan menggunakan QRIS (mendukung semua M-Banking: BCA, Mandiri, BRI, BNI, BSI) atau melalui Transfer Manual BSI & BRI.');
 
@@ -179,29 +177,6 @@ class DonationController extends Controller
 
                     return back()->with('error', 'Gagal membuat tagihan donasi: '.($charge['message'] ?? 'Kesalahan gateway pembayaran.'));
                 }
-            } elseif ($this->xendit && ! empty(config('services.xendit.api_key'))) {
-                // Fallback legacy Xendit jika Midtrans belum diisi
-                $invoice = $this->xendit->createInvoice($donation, $selectedChannel);
-
-                if ($invoice['status'] === 'success') {
-                    Payment::create([
-                        'donation_id' => $donation->id,
-                        'payment_method' => $validated['payment_method'] ?? 'virtual_account',
-                        'payment_channel' => $selectedChannel,
-                        'checkout_url' => $invoice['invoice_url'] ?? null,
-                        'gateway' => 'xendit',
-                        'gateway_reference_id' => $invoice['external_id'],
-                        'gateway_status' => 'PENDING',
-                    ]);
-
-                    Mail::to($donation->donor_email)->queue(new DonationPendingNotification($donation));
-
-                    return inertia()->location($invoice['invoice_url']);
-                } else {
-                    $donation->update(['status' => 'failed']);
-
-                    return back()->with('error', 'Gagal membuat tagihan donasi: '.$invoice['message']);
-                }
             } else {
                 $donation->update(['status' => 'failed']);
 
@@ -211,8 +186,7 @@ class DonationController extends Controller
             // Offline/Manual transfer
             $channelCode = $validated['payment_channel'] ?? 'MANUAL_BSI';
             $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'offline')
-                ?? MidtransCorePaymentService::findChannel($channelCode)
-                ?? XenditPaymentService::findChannel($channelCode, 'offline');
+                ?? MidtransCorePaymentService::findChannel($channelCode);
 
             Payment::create([
                 'donation_id' => $donation->id,
@@ -242,13 +216,6 @@ class DonationController extends Controller
                 $this->midtrans->syncPaymentStatus($paymentMidtrans);
                 $donation->refresh();
                 $donation->load(['program', 'payments']);
-            } elseif ($this->xendit) {
-                $paymentXendit = $donation->payments()->where('gateway', 'xendit')->latest()->first();
-                if ($paymentXendit) {
-                    $this->xendit->syncInvoiceStatus($paymentXendit);
-                    $donation->refresh();
-                    $donation->load(['program', 'payments']);
-                }
             }
         }
 
@@ -300,8 +267,7 @@ class DonationController extends Controller
 
                 // 3. Fallback to channel definition
                 if (! $selectedBankAccount) {
-                    $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'offline')
-                        ?? XenditPaymentService::findChannel($channelCode, 'offline');
+                    $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'offline');
                     if ($channelDef) {
                         $selectedBankAccount = [
                             'id' => 0,

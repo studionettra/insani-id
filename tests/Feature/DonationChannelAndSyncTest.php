@@ -3,7 +3,7 @@
 use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Program;
-use App\Services\XenditPaymentService;
+use App\Services\MidtransCorePaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -78,30 +78,30 @@ test('it triggers fallback status sync when visiting status page for pending onl
 
     $payment = Payment::factory()->create([
         'donation_id' => $donation->id,
-        'gateway' => 'xendit',
+        'gateway' => 'midtrans',
         'gateway_reference_id' => 'DON-SYNC-TEST',
-        'gateway_status' => 'PENDING',
+        'gateway_status' => 'pending',
     ]);
 
-    $mockService = Mockery::mock(XenditPaymentService::class);
-    $mockService->shouldReceive('syncInvoiceStatus')
+    $mockService = Mockery::mock(MidtransCorePaymentService::class);
+    $mockService->shouldReceive('syncPaymentStatus')
         ->once()
         ->withArgs(function ($arg) use ($payment) {
             return $arg->id === $payment->id;
         })
         ->andReturnUsing(function ($arg) {
             $arg->update([
-                'gateway_status' => 'SETTLED',
+                'gateway_status' => 'settlement',
                 'paid_amount' => 100000,
                 'paid_at' => now(),
                 'payment_method' => 'qris',
-                'payment_channel' => 'QRIS',
+                'payment_channel' => 'qris',
             ]);
 
             return true;
         });
 
-    $this->app->instance(XenditPaymentService::class, $mockService);
+    $this->app->instance(MidtransCorePaymentService::class, $mockService);
 
     $response = $this->get(route('donation.status', ['donationCode' => 'DON-SYNC-TEST']));
 

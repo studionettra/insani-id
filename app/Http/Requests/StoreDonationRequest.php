@@ -7,7 +7,6 @@ use App\Rules\NoProfanityRule;
 use App\Rules\NoUrlRule;
 use App\Rules\TurnstileRule;
 use App\Services\MidtransCorePaymentService;
-use App\Services\XenditPaymentService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -99,8 +98,7 @@ class StoreDonationRequest extends FormRequest
             $amount = (float) $this->input('amount');
 
             if ($channelType === 'online') {
-                $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'online')
-                    ?? XenditPaymentService::findChannel($channelCode, 'online');
+                $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'online');
 
                 if (! $channelDef) {
                     $validator->errors()->add('payment_channel', 'Kanal pembayaran online yang dipilih tidak valid.');
@@ -116,8 +114,7 @@ class StoreDonationRequest extends FormRequest
                     $validator->errors()->add('amount', "Nominal donasi untuk metode {$channelDef['name']} maksimal Rp ".number_format($channelDef['max_amount'], 0, ',', '.').'. Silakan gunakan Virtual Account atau Transfer Bank Manual.');
                 }
             } elseif ($channelType === 'offline' && ! empty($channelCode)) {
-                $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'offline')
-                    ?? XenditPaymentService::findChannel($channelCode, 'offline');
+                $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'offline');
 
                 if ($channelDef) {
                     if (isset($channelDef['min_amount']) && $amount < $channelDef['min_amount']) {

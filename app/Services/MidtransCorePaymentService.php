@@ -300,6 +300,30 @@ class MidtransCorePaymentService
             }
         }
 
+        // Master channel definitions for historical records or lookup
+        $masterDefinitions = [
+            'BSI' => ['name' => 'BSI Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'BRI' => ['name' => 'BRI Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'BNI' => ['name' => 'BNI Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'MANDIRI' => ['name' => 'Mandiri Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'BCA' => ['name' => 'BCA Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'PERMATA' => ['name' => 'Permata Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'CIMB' => ['name' => 'CIMB Niaga Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'DANAMON' => ['name' => 'Danamon Virtual Account', 'category' => 'virtual_account', 'method' => 'virtual_account', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+            'QRIS' => ['name' => 'QRIS', 'category' => 'qris', 'method' => 'qris', 'channel' => 'online', 'min_amount' => 1000, 'max_amount' => 10000000],
+            'SHOPEEPAY' => ['name' => 'ShopeePay', 'category' => 'ewallet', 'method' => 'ewallet', 'channel' => 'online', 'min_amount' => 1000, 'max_amount' => 10000000],
+            'GOPAY' => ['name' => 'GoPay', 'category' => 'ewallet', 'method' => 'ewallet', 'channel' => 'online', 'min_amount' => 1000, 'max_amount' => 10000000],
+            'CREDIT_CARD' => ['name' => 'Kartu Kredit / Debit', 'category' => 'credit_card', 'method' => 'credit_card', 'channel' => 'online', 'min_amount' => 10000, 'max_amount' => 50000000],
+        ];
+
+        $normalizedCode = str_ends_with($codeUpper, '_VA') ? substr($codeUpper, 0, -3) : $codeUpper;
+        if (isset($masterDefinitions[$normalizedCode])) {
+            $def = $masterDefinitions[$normalizedCode];
+            if ($channelType === null || $def['channel'] === $channelType) {
+                return array_merge(['code' => $codeUpper, 'subtitle' => 'Verifikasi Otomatis'], $def);
+            }
+        }
+
         return null;
     }
 

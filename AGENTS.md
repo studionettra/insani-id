@@ -73,7 +73,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Project Rules
 
 - This project contains committed, area-grouped rules in `.ai/rules` when that directory exists (settled decisions, non-obvious traps, standing constraints). Framework and package guidelines that only apply to specific paths (testing, frontend, components) also live there, under `.ai/rules/boost` — this is not just recorded decisions, it is load-bearing guidance you have not seen inline. Before you enter plan mode or create/edit any file, you MUST first: open @.ai/rules/index.md (it maps file globs to rule files), read every rule file whose globs cover the path(s) in scope, and run `grep -rin 'keyword' .ai/rules` to catch what a path match alone misses. Do not write code until you have read and are following every matching rule. If `.ai/rules` does not exist, continue without it.
-- Record durable rules with `record-rule` so the next agent or teammate inherits them instead of working them out again. Pass a `glob` (e.g. `app/Http/Controllers/**`), a short `title`, and a few-line `note`. Always use `record-rule`, never your native memory or notes tool — native memory is personal and session-scoped; only `.ai/rules` is shared with the team and persists in the repo.
+- Record a rule with `record-rule` only when the user explicitly asks for one. Instructions for the work at hand are not rules, no matter how emphatic: "remove this typo", "use X here" are work to do, not rules to record. Never record a rule on your own initiative, as a byproduct of a change, or to summarize what you just did. When the user does ask, pass a `glob` (e.g. `app/Http/Controllers/**`), a short `title`, and a few-line `note`. Use `record-rule` rather than your native memory or notes tool, because native memory is personal and session-scoped, while only `.ai/rules` is shared with the team and persists in the repo.
 
 ## Artisan
 
@@ -103,13 +103,17 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 # Deployment
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
+- Activate the `deploying-to-cloud` skill whenever deploying to Laravel Cloud, configuring Cloud environments or resources, using the Cloud CLI, or troubleshooting Cloud deployments.
 
 === tests rules ===
 
 # Test Enforcement
 
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+- Add or update tests for behavior and logic changes when a test provides meaningful regression coverage.
+- Pure copy, styling, and layout-only changes do not require new or updated tests.
+- When test coverage applies, run the affected tests and ensure they pass.
+- Test the changed behavior and its important failure modes, but do not add tests beyond them.
+- Read the `testing-best-practices` skill before writing tests.
 
 === inertia-laravel/core rules ===
 
@@ -179,65 +183,25 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 === pest/core rules ===
 
-## Pest
+# Pest
 
-- This project uses Pest for testing. Create tests: `php artisan make:test --pest {name}`.
-- The `{name}` argument should not include the test suite directory. Use `php artisan make:test --pest SomeFeatureTest` instead of `php artisan make:test --pest Feature/SomeFeatureTest`.
-- Run tests: `php artisan test --compact` or filter: `php artisan test --compact --filter=testName`.
-- Do NOT delete tests without approval.
+- This project uses Pest. Create tests with `php artisan make:test --pest {name}`.
+- Do not include the test suite directory in `{name}`. Use `SomeFeatureTest`, not `Feature/SomeFeatureTest`.
+- Read the `testing-best-practices` skill for guidance on coverage, naming, structure, dependency isolation, and review.
+- Do not delete tests or test files without approval. They are part of the application.
+
+## Running Tests
+
+- Run the narrowest set of tests that covers the change. Pass a file path or `--filter=testName` to `php artisan test --compact`.
+- Rerun a test after each change to it.
+- Run `vendor/bin/pest` to call the test runner directly. It accepts the same file path and `--filter=testName` arguments.
+- After the feature tests pass, ask the user to run the complete suite with `php artisan test --compact`.
 
 === inertia-react/core rules ===
 
 # Inertia + React
 
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
-
-=== design-and-ui rules ===
-
-# Design, Icons, and Asset Guidelines
-
-- **Larangan Icon Sparkles:** DILARANG menggunakan icon `Sparkles`, `PencilSparkles`, atau varian kilau/bintang sejenis di seluruh antarmuka aplikasi. Icon ini diasosiasikan dengan AI gimmick / cliché dan tidak cocok untuk citra lembaga filantropi & yayasan resmi.
-- **Larangan Icon Berlogo Dollar ($) & Pemilihan Icon Finansial/Kuitansi:** DILARANG menggunakan icon yang menampilkan grafis simbol mata uang Dollar (`$`) seperti `DollarSign`, `CircleDollarSign`, `BadgeDollarSign`, serta icon `Receipt` (karena icon bawaan `Receipt` di katalog Lucide memiliki simbol dollar `$` di dalamnya). Seluruh transaksi, donasi, dan penyaluran di Insani menggunakan mata uang Rupiah (IDR).
-  - Untuk aksi cetak kuitansi / dokumen resmi: Selalu gunakan icon `Printer`.
-  - Untuk tampilan kuitansi / tanda terima / bukti transaksi / struk: Gunakan `ReceiptText` (kuitansi bergaris teks nota tanpa simbol dollar `$`), `FileText`, atau `ScrollText`.
-  - Untuk keuangan, saldo, donasi, atau rekening: Gunakan icon representatif dari [Lucide Icons](https://lucide.dev/icons/) seperti `Wallet`, `CreditCard`, `Coins`, `Banknote`, `Landmark`, atau `HandCoins`.
-- **Pemilihan Icon Lucide:** Selalu gunakan icon yang representatif, fungsional, dan bermakna kontekstual dari katalog resmi [Lucide Icons](https://lucide.dev/icons/) (misalnya: `Info`, `ShieldCheck`, `CheckCircle2`, `Landmark`, `Building2`, `HelpCircle`, `HeartHandshake`, `TrendingUp`, dll).
-- **Aset Logo Resmi (Perbankan, E-Wallet, & Lembaga):** Seluruh logo lembaga pemerintahan, kementerian/regulator, perbankan, dan e-wallet wajib bersumber dari aset resmi SVG/vektor beresolusi tinggi, diutamakan dari [Wikimedia Commons](https://commons.wikimedia.org).
-
-=== diction-and-ux-writing rules ===
-
-# Panduan Diksi, Terminologi, dan UX Writing Indonesia
-
-- **Larangan Diksi Over-Formalization (AI-Speak):**
-  - DILARANG menggunakan kata "Otorisasi", "Otoritas Keuangan", atau "Otorisasi Sistem Digital". Gunakan istilah baku yang lugas: "Disetujui Tim", "Verifikasi Keuangan", atau "Pengesahan Elektronik".
-  - DILARANG menggunakan kata "Saldo kas amanah program" atau "Kas amanah sistem" pada label metrik keuangan. Gunakan istilah akuntansi baku: "Saldo Dana Program", "Saldo Siap Dicairkan", atau "Total Dana Terkumpul".
-  - DILARANG menggunakan frasa "Potongan gateway BI" atau mengaitkan Bank Indonesia sebagai pemotong fee transaksi komersial. Gunakan: "Biaya Payment Gateway" atau "Biaya Transaksi Digital".
-  - DILARANG menggunakan kata "Salurkan Dana Program" untuk tombol/alur pencairan dana rekening (disbursement). Gunakan: "Cairkan Dana Program" atau "Ajukan Pencairan Dana". Kata "Penyaluran Bantuan" hanya digunakan untuk distribusi bantuan fisik ke penerima manfaat.
-
-- **Larangan Pencampuran Istilah Asing Dwibahasa (Anti Bilingual Clutter):**
-  - DILARANG menulis label antarmuka dengan menempelkan istilah bahasa Inggris di dalam tanda kurung di samping istilah bahasa Indonesia, seperti:
-    - ❌ "Ditransfer (Transferred)" -> ✅ Gunakan: "Ditransfer"
-    - ❌ "Menunggu (Pending)" -> ✅ Gunakan: "Menunggu Verifikasi"
-    - ❌ "Disetujui (Approved)" -> ✅ Gunakan: "Disetujui"
-    - ❌ "Ditolak (Rejected)" -> ✅ Gunakan: "Ditolak"
-    - ❌ "Draf (Draft)" -> ✅ Gunakan: "Draf"
-    - ❌ "Pengunjung (Views)" -> ✅ Gunakan: "Jumlah Pengunjung"
-    - ❌ "Gambar Utama (Cover)" -> ✅ Gunakan: "Gambar Utama"
-    - ❌ "Program Mandiri Yayasan (Internal)" -> ✅ Gunakan: "Program Mandiri Yayasan"
-    - ❌ "Program Mitra Penggalang (Campaigner)" -> ✅ Gunakan: "Program Mitra Penggalang"
-    - ❌ "Kas Bersih Disalurkan (Netto)" -> ✅ Gunakan: "Nominal Bersih Disalurkan"
-    - ❌ "Saluran Relawan (Fundraiser)" -> ✅ Gunakan: "Saluran Relawan"
-    - ❌ "pencairan dana (disbursement)" -> ✅ Gunakan: "pencairan dana"
-  - Seluruh teks antarmuka berbahasa Indonesia wajib 100% menggunakan bahasa Indonesia yang bersih, percaya diri, dan konsisten.
-  - Pengecualian hanya diperbolehkan untuk akronim/singkatan perbankan & teknologi resmi yang telah diserap secara nasional: QRIS, Virtual Account, SMS, PIN, OTP, KYC, URL, IDR/Rp.
-
-- **Glosarium Padanan Kata Baku Insani.id:**
-  - *Disbursement* -> Pencairan Dana (ke rekening penggalang/mitra yayasan).
-  - *Distribution / Realization* -> Penyaluran Bantuan / Realisasi Program (ke penerima manfaat).
-  - *Approval / Approved* -> Disetujui / Terverifikasi.
-  - *Rejection / Rejected* -> Ditolak / Perlu Perbaikan.
-  - *Gateway Fee* -> Biaya Transaksi / Biaya Payment Gateway.
-  - *Available Balance* -> Saldo Siap Dicairkan.
 
 </laravel-boost-guidelines>
 

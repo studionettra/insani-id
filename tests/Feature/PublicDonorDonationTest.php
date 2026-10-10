@@ -8,11 +8,8 @@ use App\Models\Donation;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Models\User;
-use App\Services\XenditPaymentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use Xendit\Invoice\InvoiceApi;
-use Xendit\XenditSdkException;
 
 uses(RefreshDatabase::class);
 
@@ -115,9 +112,8 @@ test('scheduled update reminder command runs successfully', function () {
         ->assertSuccessful();
 });
 
-test('online donation returns friendly error when Xendit API key is not configured', function () {
+test('online donation returns friendly error when Midtrans server key is not configured', function () {
     config([
-        'services.xendit.api_key' => null,
         'services.midtrans.server_key' => null,
     ]);
 
@@ -140,33 +136,6 @@ test('online donation returns friendly error when Xendit API key is not configur
         'program_id' => $this->program->id,
         'channel' => 'online',
         'status' => 'failed',
-    ]);
-});
-
-test('XenditPaymentService handles XenditSdkException with stdClass response object without error', function () {
-    config(['services.xendit.api_key' => 'dummy_api_key']);
-
-    $mockApi = \Mockery::mock(InvoiceApi::class);
-    $mockErrorObj = new \stdClass;
-    $mockErrorObj->error_code = 'NO_API_KEY';
-    $mockErrorObj->message = 'No API Key detected.';
-
-    $exception = new XenditSdkException($mockErrorObj, '400', 'No API Key detected.');
-    $mockApi->shouldReceive('createInvoice')->andThrow($exception);
-
-    $service = new XenditPaymentService($mockApi);
-
-    $donation = Donation::factory()->create([
-        'program_id' => $this->program->id,
-        'amount' => 50000,
-        'status' => 'pending',
-    ]);
-
-    $result = $service->createInvoice($donation);
-
-    expect($result)->toBe([
-        'status' => 'error',
-        'message' => 'No API Key detected.',
     ]);
 });
 

@@ -18,7 +18,7 @@ class PaymentFactory extends Factory
         return [
             'donation_id' => Donation::factory(),
             'payment_method' => fake()->randomElement(['virtual_account', 'ewallet', 'qris', 'credit_card', 'bank_transfer_manual']),
-            'gateway' => fake()->randomElement(['xendit', 'midtrans', 'manual']),
+            'gateway' => fake()->randomElement(['midtrans', 'manual']),
             'gateway_reference_id' => fake()->optional()->uuid(),
             'gateway_status' => fake()->randomElement(['PENDING', 'PAID', 'EXPIRED', 'FAILED']),
             'paid_amount' => null,

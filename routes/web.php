@@ -57,7 +57,6 @@ use App\Http\Controllers\Public\PublicCampaignerProfileController;
 use App\Http\Controllers\Public\SearchController;
 use App\Http\Controllers\Public\SitemapController;
 use App\Http\Controllers\Webhook\MidtransWebhookController;
-use App\Http\Controllers\Webhook\XenditWebhookController;
 use App\Models\AppSetting;
 use App\Models\BlogPostCache;
 use Illuminate\Http\Request;
@@ -214,9 +213,6 @@ Route::get('/api/public/search', [SearchController::class, 'search'])
     ->name('api.public.search');
 
 // Webhooks
-Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle'])
-    ->middleware(['throttle:120,1', 'verify.xendit-callback-token'])
-    ->name('webhooks.xendit');
 Route::post('/webhooks/midtrans', [MidtransWebhookController::class, 'handle'])
     ->middleware('throttle:120,1')
     ->name('webhooks.midtrans');

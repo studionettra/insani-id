@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Services\MidtransCorePaymentService;
-use App\Services\XenditPaymentService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -73,10 +72,9 @@ class Payment extends Model
             || ($paymentMethod === 'bank_transfer_manual')
             || str_starts_with($upperChannel, 'MANUAL_');
 
-        // 1. Try finding channel definition in MidtransCorePaymentService or XenditPaymentService
+        // 1. Try finding channel definition in MidtransCorePaymentService
         if (! empty($cleanChannel)) {
-            $def = MidtransCorePaymentService::findChannel($cleanChannel)
-                ?? XenditPaymentService::findChannel($cleanChannel);
+            $def = MidtransCorePaymentService::findChannel($cleanChannel);
             if ($def && ! empty($def['name'])) {
                 return $def['name'];
             }

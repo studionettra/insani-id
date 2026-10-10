@@ -7,7 +7,6 @@ use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\NoCache;
 use App\Http\Middleware\SecurityHeaders;
-use App\Http\Middleware\VerifyXenditCallbackToken;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -56,11 +55,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'no-cache' => NoCache::class,
-            'verify.xendit-callback-token' => VerifyXenditCallbackToken::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
-            'webhooks/xendit',
             'webhooks/midtrans',
             'analytics/*',
         ]);

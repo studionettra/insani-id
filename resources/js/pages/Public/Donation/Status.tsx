@@ -350,7 +350,7 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
         }
     }, [donation.status, donation.donation_code, donation.amount, title, latestPayment, donation.payment_method]);
 
-    // Real-time auto-polling for pending online payments (Midtrans & Xendit)
+    // Real-time auto-polling for pending online payments (Midtrans)
     useEffect(() => {
         if (donation.status !== 'pending' || donation.channel !== 'online') {
             return;
@@ -920,20 +920,7 @@ export default function Status({ donation, selectedBankAccount, proofUrl: propPr
                                         </div>
                                     )}
 
-                                    {/* 4. LEGACY XENDIT FALLBACK BUTTON (If invoice URL is present and not Midtrans) */}
-                                    {!isMidtrans && latestPayment?.checkout_url && (
-                                        <div className="p-4 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-3">
-                                            <a 
-                                                href={latestPayment.checkout_url} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="w-full min-h-[48px] inline-flex items-center justify-center gap-2 bg-insani-blue hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3 px-4 rounded-xl shadow-xs transition-all text-sm"
-                                            >
-                                                <span>Lanjutkan ke Pembayaran</span>
-                                                <ExternalLink className="w-4 h-4 shrink-0" />
-                                            </a>
-                                        </div>
-                                    )}
+
 
                                     {/* Real-time Status Check & Auto-sync Footer Notice */}
                                     <div className="p-4 bg-blue-50/60 border border-blue-200/70 rounded-2xl space-y-3">
