@@ -74,18 +74,18 @@ class PageSeeder extends Seeder
             [
                 'slug' => 'pusat-bantuan',
                 'title' => [
-                    'id' => 'Pusat Bantuan & FAQ',
+                    'id' => 'Pusat Bantuan & Tanya Jawab',
                     'en' => 'Help Center & FAQ',
                     'ar' => 'مركز المساعدة والأسئلة الشائعة',
                 ],
                 'file' => base_path('docs/policy/pusat-bantuan.html'),
                 'meta_title' => [
-                    'id' => 'Pusat Bantuan & FAQ - Insani Indonesia',
+                    'id' => 'Pusat Bantuan & Tanya Jawab - Insani Indonesia',
                     'en' => 'Help Center & FAQ - Insani Indonesia',
                     'ar' => 'مركز المساعدة والأسئلة الشائعة - إنساني إندونيسيا',
                 ],
                 'meta_description' => [
-                    'id' => 'Pusat bantuan dan tanya jawab (FAQ) seputar layanan dan program Insani Indonesia.',
+                    'id' => 'Pusat bantuan dan tanya jawab seputar layanan dan program Insani Indonesia.',
                     'en' => 'Help center and frequently asked questions (FAQ) about Insani Indonesia programs and services.',
                     'ar' => 'مركز المساعدة والأسئلة الشائعة حول برامج وخدمات إنساني إندونيسيا.',
                 ],
@@ -93,7 +93,7 @@ class PageSeeder extends Seeder
             [
                 'slug' => 'logo',
                 'title' => [
-                    'id' => 'Panduan Logo & Identitas Brand',
+                    'id' => 'Panduan Logo & Identitas Visual',
                     'en' => 'Logo & Brand Guidelines',
                     'ar' => 'دليل الشعار والهوية البصرية',
                 ],

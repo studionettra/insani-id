@@ -23,8 +23,8 @@ class TestimonialSeeder extends Seeder
             ],
             [
                 'name' => 'Siti Rahmawati, S.Pd',
-                'role' => 'Relawan Fundraiser Peduli Pendidikan',
-                'content' => 'Fitur Fundraiser sangat memudahkan saya mengajak teman-teman kantor patungan membangun ruang kelas anak yatim. Dasbor pelacakannya real-time dan mudah dipantau.',
+                'role' => 'Relawan Penggalang Peduli Pendidikan',
+                'content' => 'Program Relawan Penggalang sangat memudahkan saya mengajak rekan kerja bersama-sama membantu ruang kelas anak yatim. Dasbor pelacakannya transparan dan langsung terpantau.',
                 'rating' => 5,
                 'is_active' => true,
                 'sort_order' => 2,
@@ -32,7 +32,7 @@ class TestimonialSeeder extends Seeder
             [
                 'name' => 'Budi Prasetyo',
                 'role' => 'Donatur Tanggap Bencana',
-                'content' => 'Sistem pembayarannya sangat cepat dengan QRIS dan virtual account tanpa ribet upload bukti transfer. Respon adminnya juga sangat cepat dan ramah.',
+                'content' => 'Sistem pembayarannya sangat cepat dengan QRIS dan virtual account tanpa perlu unggah bukti transfer. Respons adminnya juga sangat cepat dan ramah.',
                 'rating' => 5,
                 'is_active' => true,
                 'sort_order' => 3,

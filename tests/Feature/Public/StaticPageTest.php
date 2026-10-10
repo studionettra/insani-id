@@ -31,8 +31,8 @@ it('can access policy pages via clean URL aliases', function (string $url, strin
     ['/syarat-ketentuan', 'Syarat & Ketentuan'],
     ['/kebijakan-privasi', 'Kebijakan Privasi'],
     ['/cara-donasi', 'Cara Berdonasi'],
-    ['/pusat-bantuan', 'Pusat Bantuan & FAQ'],
-    ['/logo', 'Panduan Logo & Identitas Brand'],
+    ['/pusat-bantuan', 'Pusat Bantuan & Tanya Jawab'],
+    ['/logo', 'Panduan Logo & Identitas Visual'],
 ]);
 
 it('redirects /faq to /pusat-bantuan', function () {

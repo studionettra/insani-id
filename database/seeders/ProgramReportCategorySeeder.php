@@ -134,7 +134,7 @@ class ProgramReportCategorySeeder extends Seeder
                     'ar' => 'لا توجد تحديثات أو أخبار جديدة',
                 ],
                 'description' => [
-                    'id' => 'Penggalang dana tidak memberikan transparansi penyaluran atau update kondisi terbaru penerima manfaat.',
+                    'id' => 'Penggalang dana tidak memberikan transparansi penyaluran atau pembaruan kondisi terbaru penerima manfaat.',
                     'en' => 'Campaigner has not provided transparent distribution updates or beneficiary condition reports.',
                     'ar' => 'لم يقدم صاحب الحملة تحديثات شفافة حول التوزيع أو تقارير حالة المستفيد.',
                 ],
@@ -199,7 +199,7 @@ class ProgramReportCategorySeeder extends Seeder
                 'slug' => 'pasien-sudah-pulang',
                 'sort_order' => 14,
                 'name' => [
-                    'id' => 'Pasien sudah pulang dari RS',
+                    'id' => 'Pasien sudah pulang dari rumah sakit',
                     'en' => 'Patient has been discharged from hospital',
                     'ar' => 'المريض خرج بالفعل من المستشفى',
                 ],
