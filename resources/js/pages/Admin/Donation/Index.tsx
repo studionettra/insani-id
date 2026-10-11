@@ -394,9 +394,6 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                     : null,
                             );
                         }
-                        toast.success(
-                            'Donasi manual berhasil diverifikasi dan dikonfirmasi!',
-                        );
                     },
                     onError: (errors) => {
                         if (errors.transfer_proof) {

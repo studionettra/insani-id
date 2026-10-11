@@ -205,12 +205,6 @@ export default function ProgramShow({ program }: Props) {
         setIsTranslating(true);
         router.post(`/admin/programs/${program.id}/translate`, {}, {
             preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Penerjemahan program sedang diproses di antrean.');
-            },
-            onError: () => {
-                toast.error('Gagal memicu penerjemahan program.');
-            },
             onFinish: () => {
                 setIsTranslating(false);
             },
