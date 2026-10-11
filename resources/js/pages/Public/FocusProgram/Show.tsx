@@ -31,6 +31,84 @@ interface FocusProgramShowProps {
     otherPillars: any[];
 }
 
+interface PillarGalleryCopy {
+    crisisBadge: string;
+    crisisTitle: string;
+    distributionBadge: string;
+    distributionTitle: string;
+    distributionDesc: string;
+}
+
+const getPillarGalleryCopy = (slug?: string, isDisaster?: boolean): PillarGalleryCopy => {
+    switch (slug) {
+        case 'ketahanan-pangan':
+            return {
+                crisisBadge: 'Dokumentasi Realitas Lapangan',
+                crisisTitle: 'Potret Kerawanan Pangan di Lapangan',
+                distributionBadge: 'Dokumentasi Penyaluran',
+                distributionTitle: 'Aksi Nyata Penyaluran Bantuan Pangan',
+                distributionDesc: 'Penyaluran bantuan pangan dan makanan siap santap langsung kepada para penerima manfaat.',
+            };
+        case 'ketersediaan-air':
+            return {
+                crisisBadge: 'Dokumentasi Realitas Lapangan',
+                crisisTitle: 'Potret Krisis Air Bersih di Lapangan',
+                distributionBadge: 'Dokumentasi Penyaluran',
+                distributionTitle: 'Aksi Nyata Penyaluran Air & Infrastruktur',
+                distributionDesc: 'Penyaluran air bersih dan pembangunan fasilitas sanitasi langsung bagi warga yang membutuhkan.',
+            };
+        case 'kesehatan-bersama':
+            return {
+                crisisBadge: 'Dokumentasi Realitas Lapangan',
+                crisisTitle: 'Potret Keterbatasan Layanan Medis di Lapangan',
+                distributionBadge: 'Dokumentasi Layanan Medis',
+                distributionTitle: 'Aksi Nyata Layanan & Bantuan Medis',
+                distributionDesc: 'Layanan kesehatan keliling dan penyaluran bantuan medis langsung bagi masyarakat yang membutuhkan.',
+            };
+        case 'pendidikan-berkualitas':
+            return {
+                crisisBadge: 'Dokumentasi Realitas Lapangan',
+                crisisTitle: 'Potret Realitas Akses Pendidikan di Lapangan',
+                distributionBadge: 'Dokumentasi Program',
+                distributionTitle: 'Realisasi Beasiswa & Fasilitas Belajar',
+                distributionDesc: 'Penyaluran beasiswa dan perlengkapan belajar langsung kepada para santri dan siswa penerima manfaat.',
+            };
+        case 'pemberdayaan-ekonomi':
+            return {
+                crisisBadge: 'Dokumentasi Realitas Lapangan',
+                crisisTitle: 'Potret Tantangan Ekonomi Keluarga Prasejahtera',
+                distributionBadge: 'Dokumentasi Program',
+                distributionTitle: 'Realisasi Modal Usaha & Pendampingan',
+                distributionDesc: 'Penyaluran bantuan modal dan pendampingan langsung untuk mendorong kemandirian para pelaku usaha mikro.',
+            };
+        case 'tanggap-bencana':
+            return {
+                crisisBadge: 'Dokumentasi Wilayah Terdampak',
+                crisisTitle: 'Situasi Terkini di Wilayah Terdampak Bencana',
+                distributionBadge: 'Dokumentasi Tanggap Darurat',
+                distributionTitle: 'Aksi Cepat Tanggap & Logistik Darurat',
+                distributionDesc: 'Penyaluran logistik darurat, posko bantuan, dan pendampingan langsung bagi para penyintas bencana.',
+            };
+        default:
+            if (isDisaster) {
+                return {
+                    crisisBadge: 'Dokumentasi Wilayah Terdampak',
+                    crisisTitle: 'Situasi Terkini di Wilayah Terdampak Bencana',
+                    distributionBadge: 'Dokumentasi Tanggap Darurat',
+                    distributionTitle: 'Aksi Cepat Tanggap & Logistik Darurat',
+                    distributionDesc: 'Penyaluran logistik darurat, posko bantuan, dan pendampingan langsung bagi para penyintas bencana.',
+                };
+            }
+            return {
+                crisisBadge: 'Dokumentasi Realitas Lapangan',
+                crisisTitle: 'Potret Realitas di Lapangan',
+                distributionBadge: 'Dokumentasi Penyaluran',
+                distributionTitle: 'Aksi Nyata Penyaluran & Kegiatan Program',
+                distributionDesc: 'Penyaluran bantuan dan realisasi program langsung kepada para penerima manfaat di lapangan.',
+            };
+    }
+};
+
 export default function FocusProgramShow({ pillar, programs, otherPillars }: FocusProgramShowProps) {
     const { t, locale } = useTranslation();
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -50,6 +128,9 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
     const capaianMetrics = allMetrics.filter((m: any) => m.tipe !== 'realita');
     const gallery = Array.isArray(pillar.distribution_gallery) ? pillar.distribution_gallery : [];
     const crisisGallery = Array.isArray(pillar.crisis_gallery) ? pillar.crisis_gallery : [];
+
+    // Helper to get adaptive copy based on pillar character
+    const galleryCopy = getPillarGalleryCopy(pillar.slug, pillar.is_disaster_category);
 
     // Helper to get YouTube Embed URL
     const getYouTubeEmbedUrl = (url: string | null) => {
@@ -236,7 +317,7 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                 ) : (
                                     <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 flex items-center gap-4 text-slate-500 text-sm">
                                         <TrendingUp className="w-6 h-6 text-brand-600 shrink-0" />
-                                        <span>{t('Data dan metrik dampak krisis sedang diperbarui oleh tim riset Insani.')}</span>
+                                        <span>{t('Data dan informasi realitas lapangan sedang diperbarui oleh tim riset Insani.')}</span>
                                     </div>
                                 )}
                             </div>
@@ -249,10 +330,10 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                                     <div>
                                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-wider mb-2 border border-rose-100">
                                             <ImageIcon className="w-3.5 h-3.5" />
-                                            <span>{t('Dokumentasi Realita Lapangan')}</span>
+                                            <span>{t(galleryCopy.crisisBadge)}</span>
                                         </div>
                                         <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
-                                            {t('Potret Situasi & Kondisi Riil di Titik Krisis')}
+                                            {t(galleryCopy.crisisTitle)}
                                         </h3>
                                     </div>
                                     {crisisGallery.length > 0 && (
@@ -414,14 +495,14 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                             <div>
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 text-brand-600 text-xs font-bold uppercase tracking-wider mb-3">
                                     <ImageIcon className="w-3.5 h-3.5" />
-                                    <span>{t('Dokumentasi Penyaluran')}</span>
+                                    <span>{t(galleryCopy.distributionBadge)}</span>
                                 </div>
                                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
-                                    {t('Jejak Langkah Distribusi di Lapangan')}
+                                    {t(galleryCopy.distributionTitle)}
                                 </h2>
                             </div>
                             <p className="text-slate-500 text-sm max-w-md">
-                                {t('Dokumentasi transparan penyaluran bantuan langsung dari tim relawan Insani Indonesia kepada para penerima manfaat.')}
+                                {t(galleryCopy.distributionDesc)}
                             </p>
                         </FadeIn>
 
