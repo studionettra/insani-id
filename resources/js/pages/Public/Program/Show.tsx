@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { format, differenceInDays } from 'date-fns';
 import { id as dateId } from 'date-fns/locale/id';
-import { Share2, Calendar, ShieldCheck, CheckCircle, MessageCircle, ChevronRight, ChevronDown, ChevronUp, ArrowLeft, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, ReceiptText, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck } from 'lucide-react';
+import { Share2, Calendar, ShieldCheck, CheckCircle, CheckCircle2, MessageCircle, ChevronRight, ChevronDown, ChevronUp, ArrowLeft, ArrowRight, Copy, Check, ExternalLink, HandHelping, Users, Target, TrendingUp, Heart, ReceiptText, FileText, Info, Wallet, Flag, Link2, Building2, UserCheck, Clock, Printer } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
@@ -22,10 +22,12 @@ const UpdateCard = ({
     update,
     campaignerName,
     campaignerType,
+    onViewDisbursement,
 }: {
     update: any;
     campaignerName?: string;
     campaignerType?: string;
+    onViewDisbursement?: () => void;
 }) => {
     const { t, locale } = useTranslation();
     const [expanded, setExpanded] = useState(false);
@@ -39,46 +41,29 @@ const UpdateCard = ({
             </div>
             <h3 className="font-bold text-lg text-slate-800 mb-3">{getLocalizedValue(update.title, locale)}</h3>
 
-            {/* Banner Penyaluran Resmi Ala Kitabisa jika terhubung ke pencairan */}
+            {/* Badge Rujukan Kuitansi Pencairan Resmi (Elegan & Bersih) */}
             {disb && (
-                <div className="mb-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                                {campaignerType === 'internal' ? 'I' : (campaignerName ? campaignerName.charAt(0).toUpperCase() : 'P')}
-                            </div>
-                            <span className="text-xs font-semibold text-slate-700">
-                                {campaignerName || t('Penggalang Dana')}
-                            </span>
-                        </div>
+                <div className="mb-4 flex items-center justify-between gap-2 p-2.5 px-3 rounded-xl bg-emerald-50/80 border border-emerald-200/70 text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <ReceiptText className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="font-semibold text-emerald-900 truncate">
+                            {t('Laporan Realisasi Pencairan')}
+                        </span>
                         {disb.receipt_number && (
-                            <span className="font-mono text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                            <span className="font-mono text-[10px] font-semibold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded border border-emerald-300/60 shrink-0">
                                 {disb.receipt_number}
                             </span>
                         )}
                     </div>
-
-                    <div className="text-base sm:text-lg font-bold text-slate-900">
-                        {t('Penyaluran Dana')} {formatCurrency(disb.nett_amount ?? disb.requested_amount)}
-                    </div>
-
-                    <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                        <div>
-                            {t('Ke rekening Bank')} <span className="font-semibold text-slate-900">{disb.bank_name || 'BSI'}</span>{' '}
-                            <span className="font-mono text-slate-800 tracking-wider">{disb.bank_account_number || disb.bank_account_number_masked || '*** **** 4448'}</span>
-                        </div>
-                        {disb.bank_account_name && (
-                            <div className="text-slate-600 mt-0.5">
-                                a/n <span className="font-medium text-slate-900 uppercase">{disb.bank_account_name}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    {disb.distribution_plan && (
-                        <div className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-2 border-t border-slate-200/60">
-                            <span className="text-slate-500 font-medium">{t('Rencana Penggunaan Dana Penyaluran')} : </span>
-                            <span>{disb.distribution_plan}</span>
-                        </div>
+                    {onViewDisbursement && (
+                        <button
+                            type="button"
+                            onClick={onViewDisbursement}
+                            className="text-[11px] font-bold text-insani-blue hover:underline shrink-0 inline-flex items-center gap-0.5 cursor-pointer"
+                        >
+                            <span>{t('Rincian Pencairan')}</span>
+                            <span>→</span>
+                        </button>
                     )}
                 </div>
             )}
@@ -197,13 +182,14 @@ interface Props {
 
 export default function ProgramShow({ program, isProgramOwner = false, auth, currentFundraiser, topFundraisers = [], userFundraiser, transparency }: Props) {
     const { t, locale, isRtl } = useTranslation();
-    const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur' | 'fundraiser'>(() => {
+    const [activeTab, setActiveTab] = useState<'cerita' | 'kabar' | 'donatur' | 'fundraiser' | 'pencairan'>(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             const tabParam = params.get('tab');
-            if (tabParam === 'fundraiser' || tabParam === 'donatur' || tabParam === 'kabar' || tabParam === 'cerita') {
+            if (tabParam === 'pencairan' || tabParam === 'fundraiser' || tabParam === 'donatur' || tabParam === 'kabar' || tabParam === 'cerita') {
                 return tabParam;
             }
+            if (window.location.hash === '#pencairan') return 'pencairan';
             if (window.location.hash === '#fundraiser') return 'fundraiser';
         }
         return 'cerita';
@@ -211,6 +197,8 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
     const [visibleUpdatesCount, setVisibleUpdatesCount] = useState(5);
     const [visibleFundraisersCount, setVisibleFundraisersCount] = useState(5);
     const [visibleDonorsCount, setVisibleDonorsCount] = useState(10);
+    const [visibleDisbursementsCount, setVisibleDisbursementsCount] = useState(5);
+    const [expandedDisbursementIds, setExpandedDisbursementIds] = useState<Record<string | number, boolean>>({});
     const [isShareOpen, setIsShareOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isFundraiserModalOpen, setIsFundraiserModalOpen] = useState(false);
@@ -219,6 +207,24 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
     const [inviteCopied, setInviteCopied] = useState(false);
     const [isTransparencyModalOpen, setIsTransparencyModalOpen] = useState(false);
     const [isPlatformFeeOpen, setIsPlatformFeeOpen] = useState(false);
+
+    const isDisbursementExpanded = (id: string | number, index: number) => {
+        if (expandedDisbursementIds[id] !== undefined) {
+            return expandedDisbursementIds[id];
+        }
+        // Item teratas (index === 0) default terbuka, sisanya tertutup
+        return index === 0;
+    };
+
+    const toggleDisbursementExpanded = (id: string | number, index: number) => {
+        setExpandedDisbursementIds((prev) => {
+            const currentlyExpanded = prev[id] !== undefined ? prev[id] : index === 0;
+            return {
+                ...prev,
+                [id]: !currentlyExpanded,
+            };
+        });
+    };
 
     const disbursementsList = useMemo(() => {
         const raw = transparency?.disbursements;
@@ -638,6 +644,12 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                                         >
                                             {t('Fundraiser')} <Badge variant="secondary" className="ml-2 text-xs">{topFundraisers?.length || 0}</Badge>
                                         </button>
+                                        <button
+                                            onClick={() => setActiveTab('pencairan')}
+                                            className={`pb-4 px-4 font-semibold text-sm whitespace-nowrap transition-colors border-b-2 ${activeTab === 'pencairan' ? 'border-insani-blue text-insani-blue' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            {t('Pencairan Dana')} <Badge variant="secondary" className="ml-2 text-xs">{disbursementsList.length}</Badge>
+                                        </button>
                                     </div>
 
                                     {/* Tab Content: Cerita */}
@@ -670,6 +682,7 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                                                             update={update}
                                                             campaignerName={campaignerName}
                                                             campaignerType={program.campaigner_type}
+                                                            onViewDisbursement={() => setActiveTab('pencairan')}
                                                         />
                                                     ))}
                                                     {program.updates.length > visibleUpdatesCount && (
@@ -908,6 +921,252 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                                                         </div>
                                                     )}
                                                 </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Tab Content: Pencairan Dana */}
+                                    {activeTab === 'pencairan' && (
+                                        <div className="animate-in fade-in slide-in-from-bottom-2 space-y-6">
+                                            {/* Header Ringkasan Finansial Transparansi Program */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 text-left">
+                                                    <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                                        {t('Total Dicairkan')}
+                                                    </span>
+                                                    <span className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 block">
+                                                        {formatCurrency(transparency?.total_disbursed ?? 0)}
+                                                    </span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 text-left">
+                                                    <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                                                        {t('Frekuensi Pencairan')}
+                                                    </span>
+                                                    <span className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 block">
+                                                        {disbursementsList.length} {t('Tahap')}
+                                                    </span>
+                                                </div>
+                                                <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200/70 text-left">
+                                                    <span className="text-[11px] font-semibold text-sky-800 uppercase tracking-wider block">
+                                                        {t('Belum Dicairkan')}
+                                                    </span>
+                                                    <span className="text-lg sm:text-xl font-bold text-sky-950 mt-0.5 block">
+                                                        {formatCurrency(transparency?.available_balance ?? 0)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Empty State vs Filled State */}
+                                            {disbursementsList.length === 0 ? (
+                                                <div className="text-center py-10 px-4 sm:px-8 rounded-2xl bg-slate-50/70 border border-slate-200/80">
+                                                    <div className="w-14 h-14 rounded-2xl bg-blue-50 text-insani-blue border border-blue-100 flex items-center justify-center mx-auto mb-4 shadow-2xs">
+                                                        <ShieldCheck className="w-7 h-7" />
+                                                    </div>
+                                                    <h3 className="font-bold text-base sm:text-lg text-slate-900">
+                                                        {t('Belum Ada Pencairan Dana')}
+                                                    </h3>
+                                                    <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-lg mx-auto leading-relaxed">
+                                                        {t('Seluruh dana donasi yang telah terkumpul saat ini masih tersimpan aman di rekening amanah yayasan dan belum ditarik oleh penggalang dana.')}
+                                                    </p>
+
+                                                    {/* 3-Langkah Tata Kelola Pencairan (Transparansi Akuntabilitas) */}
+                                                    <div className="mt-8 pt-6 border-t border-slate-200/70">
+                                                        <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-4 text-center sm:text-left">
+                                                            {t('Tata Kelola & Standar Keamanan Pencairan Insani')}
+                                                        </p>
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
+                                                            <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 shadow-2xs">
+                                                                <div className="w-6 h-6 rounded-lg bg-blue-100 text-insani-blue text-xs font-bold flex items-center justify-center mb-2">
+                                                                    1
+                                                                </div>
+                                                                <h4 className="text-xs font-bold text-slate-900">{t('Pengajuan Rencana (RAB)')}</h4>
+                                                                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                                                                    {t('Penggalang wajib melampirkan rencana rincian kebutuhan dan target penerima manfaat.')}
+                                                                </p>
+                                                            </div>
+                                                            <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 shadow-2xs">
+                                                                <div className="w-6 h-6 rounded-lg bg-blue-100 text-insani-blue text-xs font-bold flex items-center justify-center mb-2">
+                                                                    2
+                                                                </div>
+                                                                <h4 className="text-xs font-bold text-slate-900">{t('Verifikasi Tim Insani')}</h4>
+                                                                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                                                                    {t('Pemeriksaan kepatuhan rekening penerima serta keabsahan dokumen legal pendukung.')}
+                                                                </p>
+                                                            </div>
+                                                            <div className="p-3.5 rounded-xl bg-white border border-slate-200/70 shadow-2xs">
+                                                                <div className="w-6 h-6 rounded-lg bg-blue-100 text-insani-blue text-xs font-bold flex items-center justify-center mb-2">
+                                                                    3
+                                                                </div>
+                                                                <h4 className="text-xs font-bold text-slate-900">{t('Transfer & Laporan Kabar')}</h4>
+                                                                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                                                                    {t('Dana ditransfer ke rekening resmi dan wajib dilaporkan secara berkala ke publik.')}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                                                        <Link href={`/program/${program.slug}/donasi`}>
+                                                            <Button className="bg-insani-blue hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl shadow-xs">
+                                                                {t('Donasi Sekarang')}
+                                                            </Button>
+                                                        </Link>
+                                                        <a
+                                                            href="/syarat-ketentuan#ketentuan-pencairan"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            <Button variant="outline" className="border-slate-200 text-slate-600 hover:text-insani-blue text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-xs">
+                                                                {t('Pelajari S&K Pencairan')} ↗
+                                                            </Button>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3.5">
+                                                    {disbursementsList.slice(0, visibleDisbursementsCount).map((item: any, idx: number) => {
+                                                        const isExpanded = isDisbursementExpanded(item.id, idx);
+
+                                                        return (
+                                                            <div
+                                                                key={item.id}
+                                                                className="rounded-2xl border border-slate-200/80 bg-white hover:border-insani-blue/40 transition-all shadow-xs text-left overflow-hidden"
+                                                            >
+                                                                {/* Clickable Header (Always Visible) */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleDisbursementExpanded(item.id, idx)}
+                                                                    className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 text-left hover:bg-slate-50/70 transition-colors select-none cursor-pointer"
+                                                                >
+                                                                    {/* Sisi Kiri: Tanggal, Kuitansi, Nama Bank */}
+                                                                    <div className="min-w-0 flex-1 space-y-1">
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <span className="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+                                                                                <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                                                                {item.transferred_at
+                                                                                    ? format(new Date(item.transferred_at), 'd MMM yyyy', { locale: dateId })
+                                                                                    : (item.transferred_at_human || '-')}
+                                                                            </span>
+                                                                            {item.receipt_number && (
+                                                                                <span className="font-mono text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
+                                                                                    {item.receipt_number}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-xs text-slate-600 truncate font-medium">
+                                                                            <span>{item.bank_name || 'Bank BSI'}</span>
+                                                                            {item.bank_account_number && (
+                                                                                <span className="text-slate-400 font-mono ml-1.5">
+                                                                                    ({item.bank_account_number})
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Sisi Kanan: Nominal, Badge Status, & Chevron */}
+                                                                    <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                                                                        <div className="text-right">
+                                                                            <span className="text-base sm:text-lg font-bold text-slate-900 block tracking-tight">
+                                                                                {formatCurrency(item.nett_amount ?? item.requested_amount)}
+                                                                            </span>
+                                                                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 mt-0.5">
+                                                                                <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                                                                                <span>{t('Ditransfer')}</span>
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                                                                            <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180 text-insani-blue' : ''}`} />
+                                                                        </div>
+                                                                    </div>
+                                                                </button>
+
+                                                                {/* Expanded Content Drawer */}
+                                                                {isExpanded && (
+                                                                    <div className="px-4 sm:px-5 pb-5 pt-3.5 border-t border-slate-100 space-y-3.5 animate-in fade-in slide-in-from-top-1 duration-200 bg-slate-50/30">
+                                                                        {/* Inisiator / Penggalang */}
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                                                                                {program.campaigner_type === 'internal' ? 'I' : (campaignerName ? campaignerName.charAt(0).toUpperCase() : 'P')}
+                                                                            </div>
+                                                                            <span className="text-xs font-semibold text-slate-700">
+                                                                                {campaignerName || t('Penggalang Dana')}
+                                                                            </span>
+                                                                            {item.transferred_at && (
+                                                                                <span className="text-[11px] text-slate-400 ml-auto">
+                                                                                    {format(new Date(item.transferred_at), 'd MMMM yyyy HH:mm', { locale: dateId })} WIB
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Rekening Tujuan */}
+                                                                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs sm:text-sm text-slate-700 space-y-1">
+                                                                            <div>
+                                                                                <span className="text-slate-500 font-medium">{t('Rekening Tujuan')}: </span>
+                                                                                <span className="font-semibold text-slate-800">{item.bank_name || 'Bank BSI'}</span>{' '}
+                                                                                <span className="font-mono text-slate-700 tracking-wider">
+                                                                                    {item.bank_account_number || item.bank_account_number_masked || '*** **** 4448'}
+                                                                                </span>
+                                                                            </div>
+                                                                            {item.bank_account_name && (
+                                                                                <div className="text-slate-600 text-xs">
+                                                                                    a/n <span className="font-medium text-slate-800 uppercase">{item.bank_account_name}</span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Rencana Penggunaan Dana Penyaluran */}
+                                                                        {item.distribution_plan && (
+                                                                            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-0.5">
+                                                                                <span className="text-slate-500 font-medium">{t('Rencana Penggunaan Dana')} : </span>
+                                                                                <span className="text-slate-800 font-medium">{item.distribution_plan}</span>
+                                                                            </div>
+                                                                        )}
+
+                                                                        {/* Target & Lokasi */}
+                                                                        {(item.beneficiary_target || item.location) && (
+                                                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 pt-0.5">
+                                                                                {item.beneficiary_target && (
+                                                                                    <span><strong>{t('Target')}:</strong> {item.beneficiary_target}</span>
+                                                                                )}
+                                                                                {item.location && (
+                                                                                    <span><strong>{t('Lokasi')}:</strong> {item.location}</span>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+
+                                                                        {/* Footer Aksi / Tautan Silang */}
+                                                                        {item.program_update && (
+                                                                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setActiveTab('kabar')}
+                                                                                    className="inline-flex items-center gap-1.5 text-xs text-insani-blue hover:underline font-semibold cursor-pointer"
+                                                                                >
+                                                                                    <FileText className="w-3.5 h-3.5" />
+                                                                                    <span>{t('Lihat Laporan Penyaluran Lapangan Terkait (Kabar)')} →</span>
+                                                                                </button>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    {/* Tombol Muat Lebih Banyak Pencairan */}
+                                                    {disbursementsList.length > visibleDisbursementsCount && (
+                                                        <div className="text-center pt-2">
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={() => setVisibleDisbursementsCount(prev => prev + 5)}
+                                                                className="text-xs sm:text-sm font-semibold border-slate-200 text-slate-600 hover:text-insani-blue hover:border-insani-blue/40 rounded-xl h-10 px-5 shadow-xs transition-all"
+                                                            >
+                                                                {t('Muat Lebih Banyak Pencairan Dana')} ({disbursementsList.length - visibleDisbursementsCount} {t('lainnya')})
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     )}
@@ -1471,7 +1730,21 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                                         </div>
 
                                         <div className="flex justify-between items-center text-slate-600">
-                                            <span>{t('Sudah dicairkan**', 'Sudah dicairkan**')}</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span>{t('Sudah dicairkan**', 'Sudah dicairkan**')}</span>
+                                                {disbursementsList.length > 0 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setIsTransparencyModalOpen(false);
+                                                            setActiveTab('pencairan');
+                                                        }}
+                                                        className="text-[11px] font-semibold text-insani-blue hover:underline cursor-pointer"
+                                                    >
+                                                        ({disbursementsList.length}x • Lihat →)
+                                                    </button>
+                                                )}
+                                            </div>
                                             <span className="font-medium text-slate-700">
                                                 {formatCurrency(transparency?.total_disbursed ?? 0)}
                                             </span>
@@ -1599,133 +1872,22 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                             </div>
                         </div>
 
-                        {/* Layer 5: Riwayat Penyaluran Dana yang Telah Ditransfer (Gaya Kitabisa) */}
-                        <div className="pt-2">
-                            <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                                    {t('Riwayat Penyaluran Dana', 'Riwayat Penyaluran Dana')}
-                                </h4>
-                                <Badge variant="secondary" className="text-[10px] font-semibold bg-slate-100 text-slate-600">
-                                    {disbursementsList.length} {t('Penyaluran')}
-                                </Badge>
-                            </div>
-
-                            {disbursementsList.length === 0 ? (
-                                <div className="flex items-start gap-2.5 p-3.5 bg-slate-50 rounded-xl border border-slate-100 text-left">
-                                    <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
-                                    <div>
-                                        <p className="text-xs font-medium text-slate-700">{t('Belum ada riwayat pencairan/penyaluran dana untuk program ini.')}</p>
-                                        <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{t('Setiap pencairan dan pertanggungjawaban akan dicatat otomatis di sini.')}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {disbursementsList.slice(0, 2).map((item: any, idx: number) => (
-                                        <div
-                                            key={item.id}
-                                            className={`text-left space-y-1.5 ${
-                                                idx > 0 ? 'pt-4 border-t border-slate-100' : ''
-                                            }`}
-                                        >
-                                            {/* Baris 1: Waktu Relatif & Nomor Kuitansi */}
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-xs text-slate-400 font-normal">
-                                                    {item.transferred_at_human || (item.transferred_at ? formatDate(item.transferred_at) : '-')}
-                                                </span>
-                                                {item.receipt_number && (
-                                                    <span className="font-mono text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                                                        {item.receipt_number}
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Baris 2: Inisiator (Avatar + Nama) */}
-                                            <div className="flex items-center gap-2 pt-0.5">
-                                                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px] shrink-0">
-                                                    {program.campaigner_type === 'internal' ? 'I' : (campaignerName ? campaignerName.charAt(0).toUpperCase() : 'P')}
-                                                </div>
-                                                <span className="text-xs font-semibold text-slate-700">
-                                                    {campaignerName}
-                                                </span>
-                                            </div>
-
-                                            {/* Baris 3: Judul Transaksi (Heading Tebal) */}
-                                            <div className="text-base sm:text-lg font-bold text-slate-900 pt-0.5">
-                                                {t('Penyaluran Dana')} {formatCurrency(item.nett_amount ?? item.requested_amount)}
-                                            </div>
-
-                                            {/* Baris 4: Rekening Penerima Bank & Masked Number */}
-                                            <div className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                                                <div>
-                                                    {t('Ke rekening Bank')}{' '}
-                                                    <span className="font-semibold text-slate-800">{item.bank_name || 'BSI'}</span>{' '}
-                                                    <span className="font-mono text-slate-700 tracking-wider">
-                                                        {item.bank_account_number || item.bank_account_number_masked || '*** **** 4448'}
-                                                    </span>
-                                                </div>
-                                                {item.bank_account_name && (
-                                                    <div className="text-slate-600 mt-0.5">
-                                                        a/n <span className="font-medium text-slate-800 uppercase">{item.bank_account_name}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Baris 5: Rencana Penggunaan Dana Penyaluran */}
-                                            {item.distribution_plan && (
-                                                <div className="text-xs sm:text-sm text-slate-700 leading-relaxed pt-1">
-                                                    <span className="text-slate-500 font-medium">{t('Rencana Penggunaan Dana Penyaluran')} : </span>
-                                                    <span>{item.distribution_plan}</span>
-                                                </div>
-                                            )}
-
-                                            {/* Baris 6: Target & Lokasi jika ada */}
-                                            {(item.beneficiary_target || item.location) && (
-                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 pt-0.5">
-                                                    {item.beneficiary_target && (
-                                                        <span><strong>{t('Target')}:</strong> {item.beneficiary_target}</span>
-                                                    )}
-                                                    {item.location && (
-                                                        <span><strong>{t('Lokasi')}:</strong> {item.location}</span>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {/* Baris 7: Tautan ke Laporan Penyaluran Lapangan Terkait */}
-                                            {item.program_update && (
-                                                <div className="pt-1.5">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setActiveTab('kabar');
-                                                            setIsTransparencyModalOpen(false);
-                                                        }}
-                                                        className="inline-flex items-center gap-1.5 text-xs text-insani-blue hover:underline font-semibold cursor-pointer"
-                                                    >
-                                                        <FileText className="w-3.5 h-3.5" />
-                                                        <span>{t('Lihat Laporan Penyaluran Lapangan Terkait', 'Lihat Laporan Penyaluran Lapangan Terkait')} ↗</span>
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-
-                                    {/* Progressive Disclosure Button jika total item > 2 */}
-                                    {disbursementsList.length > 2 && (
-                                        <div className="pt-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setActiveTab('kabar');
-                                                    setIsTransparencyModalOpen(false);
-                                                }}
-                                                className="w-full py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-insani-blue transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                                            >
-                                                <span>{t('Lihat Seluruh :count Riwayat Penyaluran di Kabar Terbaru ↗').replace(':count', disbursementsList.length.toString())}</span>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                        {/* Tautan Langsung Menuju Tab Pencairan Dana */}
+                        <div className="pt-1">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                    setIsTransparencyModalOpen(false);
+                                    setActiveTab('pencairan');
+                                }}
+                                className="w-full h-11 rounded-xl border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 hover:text-insani-blue transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                            >
+                                <ReceiptText className="w-4 h-4 text-insani-blue" />
+                                <span>
+                                    {t('Buka Riwayat Lengkap Pencairan Dana')} ({disbursementsList.length}) →
+                                </span>
+                            </Button>
                         </div>
 
                         {/* Layer 6: Edukasi Transparansi & Akuntabilitas Yayasan */}
