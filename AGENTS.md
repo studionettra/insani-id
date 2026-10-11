@@ -203,5 +203,64 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
+=== design-and-ui rules ===
+
+# Design, Icons, and Asset Guidelines
+
+- **Larangan Icon Sparkles:** DILARANG menggunakan icon `Sparkles`, `PencilSparkles`, atau varian kilau/bintang sejenis di seluruh antarmuka aplikasi. Icon ini diasosiasikan dengan AI gimmick / cliché dan tidak cocok untuk citra lembaga filantropi & yayasan resmi.
+- **Larangan Icon Berlogo Dollar ($) & Pemilihan Icon Finansial/Kuitansi:** DILARANG menggunakan icon yang menampilkan grafis simbol mata uang Dollar (`$`) seperti `DollarSign`, `CircleDollarSign`, `BadgeDollarSign`, serta icon `Receipt` (karena icon bawaan `Receipt` di katalog Lucide memiliki simbol dollar `$` di dalamnya). Seluruh transaksi, donasi, dan penyaluran di Insani menggunakan mata uang Rupiah (IDR).
+  - Untuk aksi cetak kuitansi / dokumen resmi: Selalu gunakan icon `Printer`.
+  - Untuk tampilan kuitansi / tanda terima / bukti transaksi / struk: Gunakan `ReceiptText` (kuitansi bergaris teks nota tanpa simbol dollar `$`), `FileText`, atau `ScrollText`.
+  - Untuk keuangan, saldo, donasi, atau rekening: Gunakan icon representatif dari [Lucide Icons](https://lucide.dev/icons/) seperti `Wallet`, `CreditCard`, `Coins`, `Banknote`, `Landmark`, atau `HandCoins`.
+- **Pemilihan Icon Lucide:** Selalu gunakan icon yang representatif, fungsional, dan bermakna kontekstual dari katalog resmi [Lucide Icons](https://lucide.dev/icons/) (misalnya: `Info`, `ShieldCheck`, `CheckCircle2`, `Landmark`, `Building2`, `HelpCircle`, `HeartHandshake`, `TrendingUp`, dll).
+- **Aset Logo Resmi (Perbankan, E-Wallet, & Lembaga):** Seluruh logo lembaga pemerintahan, kementerian/regulator, perbankan, dan e-wallet wajib bersumber dari aset resmi SVG/vektor beresolusi tinggi, diutamakan dari [Wikimedia Commons](https://commons.wikimedia.org).
+
+=== diction-and-ux-writing rules ===
+
+# Panduan Diksi, Terminologi, dan UX Writing Indonesia
+
+- **Larangan Diksi Over-Formalization & AI-Speak:**
+  - DILARANG menggunakan kata "Otorisasi", "Otoritas Keuangan", atau "Otorisasi Sistem Digital". Gunakan istilah baku yang lugas: "Disetujui Tim", "Verifikasi Keuangan", atau "Pengesahan Elektronik".
+  - DILARANG menggunakan kata "Saldo kas amanah program" atau "Kas amanah sistem" pada label metrik keuangan. Gunakan istilah akuntansi baku: "Saldo Dana Program", "Saldo Siap Dicairkan", atau "Total Dana Terkumpul".
+  - DILARANG menggunakan frasa "Potongan gateway BI" atau mengaitkan Bank Indonesia sebagai pemotong fee transaksi komersial. Gunakan: "Biaya Payment Gateway" atau "Biaya Transaksi Digital".
+  - DILARANG menggunakan kata "Salurkan Dana Program" untuk tombol/alur pencairan dana rekening (disbursement). Gunakan: "Cairkan Dana Program" atau "Ajukan Pencairan Dana". Kata "Penyaluran Bantuan" hanya digunakan untuk distribusi bantuan fisik ke penerima manfaat.
+  - HINDARI pleonasme dan kata bertumpuk birokratis (seperti "Potret Situasi & Kondisi Riil"). Gunakan diksi yang ringkas, percaya diri, dan wajar dibaca manusia.
+
+- **Larangan Diksi Puitis Klise / AI Metaphor (Anti Mock-Poetic):**
+  - DILARANG menggunakan metafora puitis buatan seperti "Jejak Langkah Distribusi", "Rentangan Tangan Kebaikan", "Binar Senyum Asa", atau "Untaian Harapan" pada heading antarmuka dan galeri. Gunakan istilah program yang lugas: "Aksi Nyata Penyaluran", "Realisasi Program", "Dokumentasi Penyaluran", atau "Pendampingan Lapangan".
+
+- **Prinsip Tunjukkan, Jangan Hanya Diklaim (Show, Don't Tell):**
+  - HINDARI mengklaim diri sendiri secara verbal seperti "Dokumentasi transparan penyaluran..." atau "Penyaluran terpercaya...". Biarkan integritas dan transparansi tercermin dari foto riil, data angka, laporan, dan kuitansi penerima manfaat.
+
+- **Kesesuaian Karakter Pilar Program (Context-Aware Tone):**
+  - Diksi kedaruratan ("Titik Krisis", "Distribusi Darurat", "Wilayah Bencana") HANYA digunakan pada pilar tanggap bencana atau situasi krisis akut.
+  - Untuk pilar pemberdayaan dan pendidikan, gunakan terminologi edukatif dan pembinaan ("Akses Pendidikan", "Tantangan Ekonomi", "Realisasi Program Beasiswa", "Pendampingan Usaha").
+
+- **Larangan Pencampuran Istilah Asing Dwibahasa (Anti Bilingual Clutter):**
+  - DILARANG menulis label antarmuka dengan menempelkan istilah bahasa Inggris di dalam tanda kurung di samping istilah bahasa Indonesia, seperti:
+    - ❌ "Ditransfer (Transferred)" -> ✅ Gunakan: "Ditransfer"
+    - ❌ "Menunggu (Pending)" -> ✅ Gunakan: "Menunggu Verifikasi"
+    - ❌ "Disetujui (Approved)" -> ✅ Gunakan: "Disetujui"
+    - ❌ "Ditolak (Rejected)" -> ✅ Gunakan: "Ditolak"
+    - ❌ "Draf (Draft)" -> ✅ Gunakan: "Draf"
+    - ❌ "Pengunjung (Views)" -> ✅ Gunakan: "Jumlah Pengunjung"
+    - ❌ "Gambar Utama (Cover)" -> ✅ Gunakan: "Gambar Utama"
+    - ❌ "Program Mandiri Yayasan (Internal)" -> ✅ Gunakan: "Program Mandiri Yayasan"
+    - ❌ "Program Mitra Penggalang (Campaigner)" -> ✅ Gunakan: "Program Mitra Penggalang"
+    - ❌ "Kas Bersih Disalurkan (Netto)" -> ✅ Gunakan: "Nominal Bersih Disalurkan"
+    - ❌ "Saluran Relawan (Fundraiser)" -> ✅ Gunakan: "Saluran Relawan"
+    - ❌ "pencairan dana (disbursement)" -> ✅ Gunakan: "pencairan dana"
+  - Seluruh teks antarmuka berbahasa Indonesia wajib 100% menggunakan bahasa Indonesia yang bersih, percaya diri, dan konsisten.
+  - Pengecualian hanya diperbolehkan untuk akronim/singkatan perbankan & teknologi resmi yang telah diserap secara nasional: QRIS, Virtual Account, SMS, PIN, OTP, KYC, URL, IDR/Rp.
+
+- **Glosarium Padanan Kata Baku Insani.id:**
+  - *Disbursement* -> Pencairan Dana (ke rekening penggalang/mitra yayasan).
+  - *Distribution / Realization* -> Penyaluran Bantuan / Realisasi Program (ke penerima manfaat).
+  - *Approval / Approved* -> Disetujui / Terverifikasi.
+  - *Rejection / Rejected* -> Ditolak / Perlu Perbaikan.
+  - *Gateway Fee* -> Biaya Transaksi / Biaya Payment Gateway.
+  - *Available Balance* -> Saldo Siap Dicairkan.
+
 </laravel-boost-guidelines>
+
 
