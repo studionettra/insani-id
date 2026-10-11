@@ -978,7 +978,7 @@ export default function Dashboard({
                         ) : (
                             // Campaigner: Program Saya in Left Column
                             <div className="flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 overflow-hidden shadow-xs">
-                                <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+                                <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800">
                                     <div>
                                         <h2 className="text-base font-bold text-gray-900 dark:text-white">
                                             Program Saya
@@ -987,13 +987,133 @@ export default function Dashboard({
                                             Daftar program kebaikan yang sedang Anda kelola.
                                         </p>
                                     </div>
-                                    <Button asChild variant="ghost" size="sm" className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold text-xs">
+                                    <Button asChild variant="ghost" size="sm" className="text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold text-xs shrink-0">
                                         <Link href="/akun/programs">
                                             Lihat Semua Program
                                         </Link>
                                     </Button>
                                 </div>
-                                <div className="p-0 overflow-x-auto custom-scrollbar">
+
+                                {/* Mobile View: Stacked Cards (Visible only on < md) */}
+                                <div className="block md:hidden divide-y divide-gray-100 dark:divide-gray-800">
+                                    {(campaignerStats?.myPrograms || []).length > 0 ? (
+                                        campaignerStats?.myPrograms?.map((program: any) => {
+                                            const hasTarget = Boolean(program?.target_amount && parseFloat(program.target_amount) > 0);
+                                            const progTitle = getProgramTitle(program?.title);
+
+                                            return (
+                                                <div key={program.id} className="p-4 flex flex-col gap-3 hover:bg-gray-50/60 dark:hover:bg-gray-800/40 transition-colors">
+                                                    {/* Top: Thumbnail + Title + Status */}
+                                                    <div className="flex items-start gap-3">
+                                                        <Link href={`/akun/programs/${program.id}`} className="shrink-0">
+                                                            {program.cover_image ? (
+                                                                <img 
+                                                                    src={program.cover_image.startsWith('http') ? program.cover_image : `/storage/${program.cover_image}`} 
+                                                                    alt={progTitle} 
+                                                                    className="w-16 h-12 rounded-lg aspect-video object-cover border border-gray-200/80 dark:border-gray-700/80 shrink-0 shadow-2xs"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-16 h-12 rounded-lg aspect-video bg-brand-50 dark:bg-brand-950/50 border border-brand-100 dark:border-brand-900/50 flex items-center justify-center text-brand-600 dark:text-brand-400 shrink-0">
+                                                                    <Target className="w-5 h-5" />
+                                                                </div>
+                                                            )}
+                                                        </Link>
+                                                        <div className="min-w-0 flex-1">
+                                                            <Link 
+                                                                href={`/akun/programs/${program.id}`}
+                                                                className="font-semibold text-gray-900 dark:text-white text-sm line-clamp-2 leading-snug hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                                                            >
+                                                                {progTitle}
+                                                            </Link>
+                                                            <div className="flex items-center gap-1.5 mt-1 text-xs text-gray-500 dark:text-gray-400 flex-wrap">
+                                                                <span className="font-medium text-gray-600 dark:text-gray-300">{getCategoryName(program?.category)}</span>
+                                                                {program.program_code && (
+                                                                    <>
+                                                                        <span className="text-gray-300 dark:text-gray-700">•</span>
+                                                                        <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500">{program.program_code}</span>
+                                                                    </>
+                                                                )}
+                                                                {program.status && program.status !== 'published' && (
+                                                                    <>
+                                                                        <span className="text-gray-300 dark:text-gray-700">•</span>
+                                                                        {renderStatusBadge(program.status)}
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Middle: Progress Bar & Target */}
+                                                    <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl p-3 flex flex-col gap-2 border border-gray-100 dark:border-gray-800/80">
+                                                        <div className="flex items-baseline justify-between text-xs">
+                                                            <div>
+                                                                <span className="text-[11px] text-gray-400 dark:text-gray-400 block">Terkumpul</span>
+                                                                <span className="font-bold text-gray-900 dark:text-white text-sm">
+                                                                    {formatCurrency(program.collected_amount || 0)}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <span className="text-[11px] text-gray-400 dark:text-gray-400 block">Target</span>
+                                                                {hasTarget ? (
+                                                                    <span className="font-semibold text-gray-800 dark:text-gray-200 text-xs">
+                                                                        {formatCurrency(parseFloat(program.target_amount))}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Fleksibel</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <DonationProgressBar
+                                                            collectedAmount={program.collected_amount || 0}
+                                                            targetAmount={program.target_amount}
+                                                            size="xs"
+                                                            percentagePlacement="top-right"
+                                                            percentageFormat="badge"
+                                                        />
+                                                    </div>
+
+                                                    {/* Bottom: Action Buttons & Deadline */}
+                                                    <div className="flex items-center justify-between gap-2 pt-0.5">
+                                                        {program.deadline ? (
+                                                            <span className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                                <Clock className="w-3 h-3 text-gray-400 shrink-0" />
+                                                                <span>Batas: {formatDate(program.deadline)}</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[11px] text-gray-400 dark:text-gray-500">Target terbuka</span>
+                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            <Button asChild variant="outline" size="sm" className="h-8 px-2.5 text-xs font-medium border-gray-200 dark:border-gray-700 dark:text-gray-300">
+                                                                <Link href={`/program/${program.slug}`} target="_blank">
+                                                                    <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                                                                    Lihat
+                                                                </Link>
+                                                            </Button>
+                                                            <Button asChild size="sm" className="h-8 px-3 text-xs font-semibold bg-[#1A56DB] hover:bg-[#1e40af] text-white">
+                                                                <Link href={`/akun/programs/${program.id}`}>
+                                                                    Detail
+                                                                </Link>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
+                                            <div className="w-12 h-12 rounded-full bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-3">
+                                                <Target className="w-6 h-6" />
+                                            </div>
+                                            <h3 className="font-bold text-gray-900 dark:text-white text-sm">Belum Ada Program</h3>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                Belum ada program kebaikan yang sedang Anda kelola saat ini.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Desktop View: Table (Visible only on md+) */}
+                                <div className="hidden md:block p-0 overflow-x-auto custom-scrollbar">
                                     <table className="w-full min-w-[640px] text-sm text-left">
                                         <thead className="bg-gray-50/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400 text-xs font-semibold uppercase tracking-wider border-b border-gray-100 dark:border-gray-800">
                                             <tr>
