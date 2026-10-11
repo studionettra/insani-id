@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppSetting;
 use App\Models\FinancialReport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,10 +44,55 @@ class FinancialReportController extends Controller
             ->sortDesc()
             ->values();
 
+        $parseMultilingual = function ($raw, array $default): array {
+            if (is_array($raw)) {
+                return array_merge($default, $raw);
+            }
+            if (is_string($raw) && str_starts_with(trim($raw), '{')) {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    return array_merge($default, $decoded);
+                }
+            }
+            if (is_string($raw) && $raw !== '') {
+                return array_merge($default, ['id' => $raw]);
+            }
+
+            return $default;
+        };
+
+        $settings = [
+            'financial_report_notice_enabled' => AppSetting::get('financial_report_notice_enabled', '1'),
+            'financial_report_notice_year' => AppSetting::get('financial_report_notice_year', (string) (date('Y') - 1)),
+            'financial_report_section_title' => $parseMultilingual(AppSetting::get('financial_report_section_title'), [
+                'id' => 'Laporan Keuangan & Annual Report',
+                'en' => 'Financial Reports & Annual Report',
+                'ar' => 'التقارير المالية والتقرير السنوي',
+            ]),
+            'financial_report_notice_headline' => $parseMultilingual(AppSetting::get('financial_report_notice_headline'), [
+                'id' => 'Laporan Keuangan Tahun Buku {year} Sedang Dalam Proses Finalisasi & Audit',
+                'en' => 'Financial Report for Fiscal Year {year} is Under Finalization & Independent Audit',
+                'ar' => 'التقرير المالي للسنة المالية {year} قيد التدقيق النهائي والمستقل',
+            ]),
+            'financial_report_notice_description' => $parseMultilingual(AppSetting::get('financial_report_notice_description'), [
+                'id' => 'Sebagai wujud pertanggungjawaban amanah donatur dan kepatuhan terhadap standar akuntansi entitas nirlaba, laporan keuangan tahunan Insani Indonesia saat ini sedang dalam proses rekapitulasi akhir dan audit independen oleh Kantor Akuntan Publik (KAP). Seluruh berkas akan dipublikasikan secara terbuka setelah proses audit selesai.',
+                'en' => "As an embodiment of donor accountability and compliance with non-profit accounting standards, Insani Indonesia's annual financial report is currently undergoing final reconciliation and an independent audit by a Certified Public Accountant (KAP). All official documents will be published openly upon completion of the audit process.",
+                'ar' => 'تجسيداً للمساءلة أمام المانحين والامتثال لمعايير المحاسبة للمنظمات غير الربحية، يخضع التقرير المالي السنوي لإنساني إندونيسيا حالياً للتسوية النهائية والتدقيق المستقل من قبل مكتب محاسب قانوني معتمد (KAP). سيتم نشر جميع الوثائق الرسمية بشفافية تامة فور انتهاء عملية التدقيق.',
+            ]),
+            'financial_report_wa_custom_text' => $parseMultilingual(AppSetting::get('financial_report_wa_custom_text'), [
+                'id' => 'Hubungi Layanan Donatur via WhatsApp',
+                'en' => 'Contact Donor Support via WhatsApp',
+                'ar' => 'تواصل مع خدمة المانحين عبر واتساب',
+            ]),
+            'financial_report_notice_stage' => AppSetting::get('financial_report_notice_stage', '2'),
+            'financial_report_wa_number' => AppSetting::get('financial_report_wa_number', ''),
+        ];
+
         return Inertia::render('Admin/FinancialReports/Index', [
             'reports' => $reports,
             'availableYears' => $availableYears,
             'filters' => $request->only(['search', 'year', 'category']),
+            'settings' => $settings,
         ]);
     }
 
@@ -184,5 +230,51 @@ class FinancialReportController extends Controller
         $financial_report->delete();
 
         return redirect()->back()->with('success', 'Laporan keuangan berhasil dihapus.');
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'financial_report_notice_enabled' => 'nullable|string|in:0,1',
+            'financial_report_notice_year' => 'nullable|string|max:10',
+            'financial_report_section_title' => 'nullable|array',
+            'financial_report_section_title.id' => 'nullable|string|max:255',
+            'financial_report_section_title.en' => 'nullable|string|max:255',
+            'financial_report_section_title.ar' => 'nullable|string|max:255',
+            'financial_report_notice_headline' => 'nullable|array',
+            'financial_report_notice_headline.id' => 'nullable|string|max:255',
+            'financial_report_notice_headline.en' => 'nullable|string|max:255',
+            'financial_report_notice_headline.ar' => 'nullable|string|max:255',
+            'financial_report_notice_description' => 'nullable|array',
+            'financial_report_notice_description.id' => 'nullable|string|max:1000',
+            'financial_report_notice_description.en' => 'nullable|string|max:1000',
+            'financial_report_notice_description.ar' => 'nullable|string|max:1000',
+            'financial_report_wa_custom_text' => 'nullable|array',
+            'financial_report_wa_custom_text.id' => 'nullable|string|max:150',
+            'financial_report_wa_custom_text.en' => 'nullable|string|max:150',
+            'financial_report_wa_custom_text.ar' => 'nullable|string|max:150',
+            'financial_report_notice_stage' => 'nullable|string|in:1,2,3',
+            'financial_report_wa_number' => 'nullable|string|max:30',
+        ]);
+
+        AppSetting::set('financial_report_notice_enabled', $validated['financial_report_notice_enabled'] ?? '1');
+        AppSetting::set('financial_report_notice_year', $validated['financial_report_notice_year'] ?? (string) (date('Y') - 1));
+        AppSetting::set('financial_report_notice_stage', $validated['financial_report_notice_stage'] ?? '2');
+        AppSetting::set('financial_report_wa_number', $validated['financial_report_wa_number'] ?? '');
+
+        $multilingualKeys = [
+            'financial_report_section_title',
+            'financial_report_notice_headline',
+            'financial_report_notice_description',
+            'financial_report_wa_custom_text',
+        ];
+
+        foreach ($multilingualKeys as $key) {
+            if (isset($validated[$key]) && is_array($validated[$key])) {
+                AppSetting::set($key, json_encode($validated[$key], JSON_UNESCAPED_UNICODE));
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pengaturan tampilan laporan keuangan berhasil diperbarui.');
     }
 }

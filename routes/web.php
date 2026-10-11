@@ -295,6 +295,7 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         });
 
         Route::middleware('permission:manage_financial_reports|report.view')->group(function () {
+            Route::post('financial-reports/settings', [AdminFinancialReportController::class, 'updateSettings'])->name('financial-reports.settings.update');
             Route::resource('financial-reports', AdminFinancialReportController::class)->except(['show', 'create', 'edit']);
         });
 

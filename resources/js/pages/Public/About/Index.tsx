@@ -17,7 +17,9 @@ import {
     Target,
     HeartHandshake,
     TrendingUp,
-    Quote
+    Quote,
+    Clock3,
+    MessageCircle
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
@@ -30,6 +32,37 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
     const { locale, siteSettings } = usePage().props as any;
     const { t } = useTranslation();
     const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+    // Pengaturan Tampilan Laporan Keuangan dari siteSettings
+    const noticeEnabled = siteSettings?.financial_report_notice_enabled !== '0';
+    const noticeYear = siteSettings?.financial_report_notice_year || String(new Date().getFullYear() - 1);
+    const noticeStage = siteSettings?.financial_report_notice_stage || '2';
+    const sectionTitle = getLocalizedValue(siteSettings?.financial_report_section_title, locale, 'Laporan Keuangan & Annual Report');
+    const rawHeadline = getLocalizedValue(
+        siteSettings?.financial_report_notice_headline,
+        locale,
+        'Laporan Keuangan Tahun Buku {year} Sedang Dalam Proses Finalisasi & Audit'
+    );
+    const noticeHeadline = rawHeadline.replace('{year}', noticeYear);
+    const noticeDesc = getLocalizedValue(
+        siteSettings?.financial_report_notice_description,
+        locale,
+        'Sebagai wujud pertanggungjawaban amanah donatur dan kepatuhan terhadap standar akuntansi entitas nirlaba, laporan keuangan tahunan Insani Indonesia saat ini sedang dalam proses rekapitulasi akhir dan audit independen oleh Kantor Akuntan Publik (KAP). Seluruh berkas akan dipublikasikan secara terbuka setelah proses audit selesai.'
+    );
+    const waCustomText = getLocalizedValue(siteSettings?.financial_report_wa_custom_text, locale, 'Hubungi Layanan Donatur via WhatsApp');
+
+    const rawWaNumber = siteSettings?.financial_report_wa_number || siteSettings?.contact_donor_support_wa || siteSettings?.contact_whatsapp || '081319456675';
+    const cleanWaNumber = String(rawWaNumber).replace(/\D/g, '').replace(/^0/, '62');
+    const waMessageText = locale === 'en'
+        ? `Hello Insani Indonesia Team, I would like to inquire about the financial report and foundation accountability for the fiscal year ${noticeYear}.`
+        : locale === 'ar'
+        ? `مرحباً فريق إنساني إندونيسيا، أود الاستفسار عن التقرير المالي ومساءلة المؤسسة للسنة المالية ${noticeYear}.`
+        : `Halo Tim Insani Indonesia, saya ingin menanyakan informasi mengenai laporan keuangan dan akuntabilitas yayasan untuk tahun buku ${noticeYear}.`;
+    const waMessage = encodeURIComponent(waMessageText);
+    const waUrl = `https://wa.me/${cleanWaNumber}?text=${waMessage}`;
+
+    const hasReports = financialReports && financialReports.length > 0;
+    const shouldShowSection = hasReports || noticeEnabled;
 
     const defaultVision = "Berkontribusi mewujudkan dunia tanpa krisis kemanusiaan yang menghadirkan keadilan sosial bagi segenap insan.";
     const localizedVision = getLocalizedValue(siteSettings?.about_vision, locale);
@@ -310,7 +343,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                             <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-insani-blue/5 via-cyan-500/5 to-transparent rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-500" />
                                             
                                             <div className="relative z-10 flex flex-col h-full">
-                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/90 text-insani-darkblue font-extrabold text-lg flex items-center justify-center group-hover:bg-insani-blue group-hover:text-white group-hover:border-insani-blue transition-all duration-300 shadow-2xs mb-4 shrink-0">
+                                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/90 text-insani-darkblue font-extrabold text-lg flex items-center justify-center group-hover:from-insani-blue group-hover:to-insani-darkblue group-hover:text-white group-hover:border-insani-blue group-hover:shadow-md group-hover:shadow-insani-blue/20 group-hover:scale-105 transition-all duration-300 shadow-2xs mb-4 shrink-0">
                                                     {letter}
                                                 </div>
                                                 <h4 className="font-bold text-[15px] sm:text-base text-slate-900 group-hover:text-insani-blue transition-colors mb-2 tracking-tight">
@@ -466,7 +499,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
             </section>
 
             {/* 3.5. Laporan Keuangan & Akuntabilitas Yayasan (Annual Report) */}
-            {financialReports && financialReports.length > 0 && (
+            {shouldShowSection && (
                 <section id="laporan-keuangan" className="py-24 bg-white border-t border-slate-200 relative overflow-hidden">
                     {/* Subtle background ambient gradient */}
                     <div className="absolute top-0 right-1/4 w-96 h-96 bg-insani-blue/5 rounded-full blur-3xl pointer-events-none -z-0"></div>
@@ -479,15 +512,214 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                 {t('Transparansi & Akuntabilitas Publik')}
                             </span>
                             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 tracking-tight">
-                                Laporan Keuangan & Annual Report
+                                {sectionTitle}
                             </h2>
                             <p className="text-slate-600 text-lg leading-relaxed">
-                                Sebagai wujud pertanggungjawaban amanah donatur dan kepatuhan hukum, seluruh laporan tahunan dan kinerja keuangan Insani Indonesia dipublikasikan secara terbuka dan dapat diunduh bebas oleh publik.
+                                {t('Sebagai wujud pertanggungjawaban amanah donatur dan kepatuhan hukum, seluruh laporan tahunan dan kinerja keuangan Insani Indonesia dipublikasikan secara terbuka dan dapat diunduh bebas oleh publik.')}
                             </p>
                         </div>
 
+                        {/* Banner Status Tahun Berjalan (Jika ada arsip lama & toggle aktif) */}
+                        {hasReports && noticeEnabled && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.4 }}
+                                className="mb-10 bg-slate-50/90 rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-5"
+                            >
+                                <div className="flex items-start sm:items-center gap-3.5">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                                        <Clock3 className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                                {t('Status Tahun Buku')} {noticeYear}
+                                            </span>
+                                            <span className="text-xs text-slate-500 font-medium">{t('Arsip tahun sebelumnya tersedia di bawah')}</span>
+                                        </div>
+                                        <h3 className="font-bold text-sm sm:text-base text-slate-900">
+                                            {noticeHeadline}
+                                        </h3>
+                                        <p className="text-xs text-slate-600 max-w-2xl mt-0.5 leading-relaxed">
+                                            {noticeDesc}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <a
+                                    href={waUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow transition-all shrink-0 active:scale-95"
+                                >
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                    <span>{waCustomText}</span>
+                                </a>
+                            </motion.div>
+                        )}
+
+                        {/* Jika Belum Ada Laporan: Kartu Tata Kelola Utama */}
+                        {!hasReports && noticeEnabled && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 25 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                                className="bg-slate-50/90 rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                                    <div className="lg:col-span-7 space-y-4">
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100/80 text-emerald-800 border border-emerald-300/60">
+                                            <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                                            <span>{t('Status Audit & Kepatuhan Tata Kelola')}</span>
+                                        </div>
+
+                                        <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug">
+                                            {noticeHeadline}
+                                        </h3>
+
+                                        <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
+                                            {noticeDesc}
+                                        </p>
+
+                                        {/* Tahapan Akuntabilitas Publik */}
+                                        <div className="pt-2">
+                                            <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider block mb-2.5">
+                                                {t('Tahapan Akuntabilitas Publik:')}
+                                            </span>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                {/* Tahap 1: Rekonsiliasi & Tutup Buku */}
+                                                <div className={`p-3 rounded-2xl border shadow-2xs transition-all ${
+                                                    noticeStage === '1'
+                                                        ? 'bg-emerald-50/80 border-emerald-200'
+                                                        : 'bg-white border-slate-200/80'
+                                                }`}>
+                                                    <span className={`text-[11px] font-bold flex items-center gap-1 mb-1 ${
+                                                        noticeStage === '1' ? 'text-emerald-800' : 'text-emerald-700'
+                                                    }`}>
+                                                        {noticeStage === '1' ? (
+                                                            <>
+                                                                <Clock3 className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '6s' }} />
+                                                                {t('Tahap 1 • Berjalan')}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                                {t('Tahap 1 • Selesai')}
+                                                            </>
+                                                        )}
+                                                    </span>
+                                                    <p className={`text-xs font-semibold ${noticeStage === '1' ? 'font-bold text-emerald-950' : 'text-slate-800'}`}>
+                                                        {t('Rekonsiliasi & Tutup Buku')}
+                                                    </p>
+                                                </div>
+
+                                                {/* Tahap 2: Audit Independen KAP */}
+                                                <div className={`p-3 rounded-2xl border shadow-2xs transition-all ${
+                                                    noticeStage === '2'
+                                                        ? 'bg-emerald-50/80 border-emerald-200'
+                                                        : noticeStage === '3'
+                                                        ? 'bg-white border-slate-200/80'
+                                                        : 'bg-white border-slate-200/80 opacity-80'
+                                                }`}>
+                                                    <span className={`text-[11px] font-bold flex items-center gap-1 mb-1 ${
+                                                        noticeStage === '2'
+                                                            ? 'text-emerald-800'
+                                                            : noticeStage === '3'
+                                                            ? 'text-emerald-700'
+                                                            : 'text-slate-400 font-semibold'
+                                                    }`}>
+                                                        {noticeStage === '2' ? (
+                                                            <>
+                                                                <Clock3 className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '6s' }} />
+                                                                {t('Tahap 2 • Berjalan')}
+                                                            </>
+                                                        ) : noticeStage === '3' ? (
+                                                            <>
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                                {t('Tahap 2 • Selesai')}
+                                                            </>
+                                                        ) : (
+                                                            t('Tahap 2 • Selanjutnya')
+                                                        )}
+                                                    </span>
+                                                    <p className={`text-xs font-semibold ${
+                                                        noticeStage === '2'
+                                                            ? 'font-bold text-emerald-950'
+                                                            : noticeStage === '3'
+                                                            ? 'text-slate-800'
+                                                            : 'text-slate-600'
+                                                    }`}>
+                                                        {t('Audit Independen KAP')}
+                                                    </p>
+                                                </div>
+
+                                                {/* Tahap 3: Pengesahan & Publikasi */}
+                                                <div className={`p-3 rounded-2xl border shadow-2xs transition-all ${
+                                                    noticeStage === '3'
+                                                        ? 'bg-emerald-50/80 border-emerald-200'
+                                                        : 'bg-white border-slate-200/80 opacity-80'
+                                                }`}>
+                                                    <span className={`text-[11px] font-bold flex items-center gap-1 mb-1 ${
+                                                        noticeStage === '3' ? 'text-emerald-800' : 'text-slate-400 font-semibold'
+                                                    }`}>
+                                                        {noticeStage === '3' ? (
+                                                            <>
+                                                                <Clock3 className="w-3.5 h-3.5 text-emerald-600 animate-spin" style={{ animationDuration: '6s' }} />
+                                                                {t('Tahap 3 • Berjalan')}
+                                                            </>
+                                                        ) : (
+                                                            t('Tahap 3 • Selanjutnya')
+                                                        )}
+                                                    </span>
+                                                    <p className={`text-xs font-semibold ${
+                                                        noticeStage === '3' ? 'font-bold text-emerald-950' : 'text-slate-600'
+                                                    }`}>
+                                                        {t('Pengesahan & Publikasi')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Kolom Kanan: Narahubung & Komitmen Transparansi */}
+                                    <div className="lg:col-span-5 bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-insani-blue/10 text-insani-blue flex items-center justify-center shrink-0">
+                                                <Building2 className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">{t('Prinsip Keterbukaan Informasi')}</h4>
+                                                <p className="text-xs text-slate-500">{t('Insani Indonesia berkomitmen pada akuntabilitas donasi.')}</p>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-xs text-slate-600 leading-relaxed">
+                                            {t('Bagi donatur perseorangan, mitra perusahaan (CSR), maupun lembaga yang memerlukan informasi keuangan interim khusus, tim kami siap membantu melalui layanan komunikasi resmi.')}
+                                        </p>
+
+                                        <a
+                                            href={waUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow transition-all active:scale-[0.98]"
+                                        >
+                                            <MessageCircle className="w-4 h-4" />
+                                            <span>{waCustomText}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
                         {/* Daftar Kartu Annual Report */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {hasReports && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {financialReports.map((report: any, index: number) => {
                                 const title = report.title_translations?.[locale] || (typeof report.title === 'object' ? report.title?.[locale] || report.title?.id : report.title);
                                 const summary = report.summary_translations?.[locale] || (typeof report.summary === 'object' ? report.summary?.[locale] || report.summary?.id : report.summary);
@@ -612,9 +844,10 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                 );
                             })}
                         </div>
-                    </div>
-                </section>
-            )}
+                    )}
+                </div>
+            </section>
+        )}
 
             {/* 4. FAQ Section Profil Yayasan */}
             {displayedFaqs && displayedFaqs.length > 0 && (

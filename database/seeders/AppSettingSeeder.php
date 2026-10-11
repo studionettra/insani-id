@@ -61,6 +61,32 @@ class AppSettingSeeder extends Seeder
                 'en' => 'Digital solidarity platform dedicated to bridging kindness and delivering real impact for communities under universal humanitarian values.',
                 'ar' => 'منصة تضامن رقمية مكرسة لمد جسور الخير وإحداث أثر حقيقي للمجتمعات في إطار القيم الإنسانية العالمية.',
             ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+
+            // Pengaturan Tampilan & Status Laporan Keuangan Multibahasa
+            ['key' => 'financial_report_notice_enabled', 'value' => '1', 'locale' => null],
+            ['key' => 'financial_report_notice_year', 'value' => (string) (date('Y') - 1), 'locale' => null],
+            ['key' => 'financial_report_section_title', 'value' => json_encode([
+                'id' => 'Laporan Keuangan & Annual Report',
+                'en' => 'Financial Reports & Annual Report',
+                'ar' => 'التقارير المالية والتقرير السنوي',
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+            ['key' => 'financial_report_notice_headline', 'value' => json_encode([
+                'id' => 'Laporan Keuangan Tahun Buku {year} Sedang Dalam Proses Finalisasi & Audit',
+                'en' => 'Financial Report for Fiscal Year {year} is Under Finalization & Independent Audit',
+                'ar' => 'التقرير المالي للسنة المالية {year} قيد التدقيق النهائي والمستقل',
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+            ['key' => 'financial_report_notice_description', 'value' => json_encode([
+                'id' => 'Sebagai wujud pertanggungjawaban amanah donatur dan kepatuhan terhadap standar akuntansi entitas nirlaba, laporan keuangan tahunan Insani Indonesia saat ini sedang dalam proses rekapitulasi akhir dan audit independen oleh Kantor Akuntan Publik (KAP). Seluruh berkas akan dipublikasikan secara terbuka setelah proses audit selesai.',
+                'en' => "As an embodiment of donor accountability and compliance with non-profit accounting standards, Insani Indonesia's annual financial report is currently undergoing final reconciliation and an independent audit by a Certified Public Accountant (KAP). All official documents will be published openly upon completion of the audit process.",
+                'ar' => 'تجسيداً للمساءلة أمام المانحين والامتثال لمعايير المحاسبة للمنظمات غير الربحية، يخضع التقرير المالي السنوي لإنساني إندونيسيا حالياً للتسوية النهائية والتدقيق المستقل من قبل مكتب محاسب قانوني معتمد (KAP). سيتم نشر جميع الوثائق الرسمية بشفافية تامة فور انتهاء عملية التدقيق.',
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+            ['key' => 'financial_report_wa_custom_text', 'value' => json_encode([
+                'id' => 'Hubungi Layanan Donatur via WhatsApp',
+                'en' => 'Contact Donor Support via WhatsApp',
+                'ar' => 'تواصل مع خدمة المانحين عبر واتساب',
+            ], JSON_UNESCAPED_UNICODE), 'locale' => null],
+            ['key' => 'financial_report_notice_stage', 'value' => '2', 'locale' => null],
+            ['key' => 'financial_report_wa_number', 'value' => '', 'locale' => null],
         ];
 
         foreach ($settings as $setting) {
