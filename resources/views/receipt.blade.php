@@ -687,10 +687,6 @@
                     </div>
 
                     <div class="signature-section">
-                        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-bottom: 6px;">
-                            <img src="{{ asset('images/legal/kemenkumham.svg') }}" alt="Kemenkumham RI" style="height: 24px; width: auto;" title="Kemenkumham RI">
-                            <img src="{{ asset('images/legal/djp-pajak.svg') }}" alt="DJP Pajak" style="height: 22px; width: auto;" title="Direktorat Jenderal Pajak">
-                        </div>
                         <p class="legal-foundation">{{ $settings['legal_foundation_name'] ?? 'Yayasan Peduli Insani Indonesia' }}</p>
                         @if(!empty($settings['legal_sk_kemenkumham']))
                             <p class="legal-text">{{ $settings['legal_sk_label'] ?? 'SK Kemenkumham' }}: {{ $settings['legal_sk_kemenkumham'] }}</p>

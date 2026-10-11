@@ -396,8 +396,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             &copy; {new Date().getFullYear()} {siteSettings?.legal_foundation_name || t('Yayasan Peduli Insani Indonesia')}. {t('Hak cipta dilindungi.')}
                         </p>
                         {siteSettings?.show_sk_in_footer !== '0' && (
-                            <div className="flex items-center gap-2 text-slate-300 bg-white/10 px-3 py-1.5 rounded-full border border-white/15">
-                                <img src="/images/legal/kemenkumham.svg" alt="Kemenkumham" className="w-4 h-4 object-contain shrink-0" />
+                            <div className="flex items-center text-slate-300 bg-white/10 px-3 py-1.5 rounded-full border border-white/15">
                                 <span className="text-[11px]">
                                     {siteSettings?.legal_sk_label || 'SK Kemenkumham RI'}: <strong className="font-mono text-white">{siteSettings?.legal_sk_kemenkumham || 'AHU-0002557.AH.01.04.Tahun 2019'}</strong>
                                 </span>
