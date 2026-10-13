@@ -427,3 +427,33 @@ test('midtrans webhook is idempotent and does not send duplicate notifications o
     // Notifikasi hanya boleh di-push 1 kali
     Queue::assertPushed(SendDonationPaidNotification::class, 1);
 });
+
+test('midtrans webhook returns 503 when server key is not configured', function () {
+    config(['services.midtrans.server_key' => '']);
+
+    $response = $this->postJson(route('webhooks.midtrans'), [
+        'order_id' => 'DON-UNCONFIGURED',
+        'status_code' => '200',
+        'gross_amount' => '50000.00',
+        'signature_key' => 'dummy',
+        'transaction_status' => 'settlement',
+    ]);
+
+    $response->assertStatus(503);
+    expect($response->json('message'))->toBe('Payment gateway is not configured');
+});
+
+test('midtrans verifySignature fails closed when server key is empty or whitespace', function () {
+    $service = new MidtransCorePaymentService(serverKey: '');
+
+    $orderId = 'DON-FORGED-001';
+    $statusCode = '200';
+    $grossAmount = '50000.00';
+    // Penyerang mencoba menghitung signature dengan key kosong
+    $forgedSignature = hash('sha512', $orderId.$statusCode.$grossAmount.'');
+
+    expect($service->verifySignature($orderId, $statusCode, $grossAmount, $forgedSignature))->toBeFalse();
+
+    $whitespaceService = new MidtransCorePaymentService(serverKey: '   ');
+    expect($whitespaceService->verifySignature($orderId, $statusCode, $grossAmount, $forgedSignature))->toBeFalse();
+});

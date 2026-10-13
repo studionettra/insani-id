@@ -671,6 +671,10 @@ class MidtransCorePaymentService
      */
     public function verifySignature(string $orderId, string $statusCode, string $grossAmount, string $receivedSignature): bool
     {
+        if (trim($this->serverKey) === '') {
+            return false;
+        }
+
         $calculatedSignature = hash('sha512', $orderId.$statusCode.$grossAmount.$this->serverKey);
 
         return hash_equals($calculatedSignature, $receivedSignature);

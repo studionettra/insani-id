@@ -35,6 +35,12 @@ class MidtransWebhookController extends Controller
             'payment_type' => $paymentType,
         ]);
 
+        if (! $this->midtrans->isConfigured()) {
+            Log::error('Rejected Midtrans Webhook: Server key is not configured in application settings.');
+
+            return response()->json(['message' => 'Payment gateway is not configured'], 503);
+        }
+
         if (empty($orderId) || empty($statusCode) || empty($grossAmount) || empty($signatureKey)) {
             return response()->json(['message' => 'Missing required webhook parameters'], 400);
         }
