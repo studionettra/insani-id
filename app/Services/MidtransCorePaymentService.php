@@ -832,12 +832,11 @@ class MidtransCorePaymentService
 
             if ($isSettlement) {
                 $expectedAmount = (float) ($lockedPayment->donation?->amount ?? 0);
-                $finalGrossAmount = $grossAmount > 0 ? $grossAmount : $expectedAmount;
 
-                // Strict nominal comparison to prevent financial mismatch
-                if (round($finalGrossAmount, 2) !== round($expectedAmount, 2)) {
-                    Log::error("Midtrans Sync Nominal Mismatch for order {$orderId}", [
-                        'received_gross_amount' => $finalGrossAmount,
+                // Strict nominal comparison to prevent financial mismatch: gross_amount wajib ada (> 0) dan cocok
+                if ($grossAmount <= 0 || round($grossAmount, 2) !== round($expectedAmount, 2)) {
+                    Log::error("Midtrans Sync Nominal Mismatch or Missing gross_amount for order {$orderId}", [
+                        'received_gross_amount' => $grossAmount,
                         'expected_donation_amount' => $expectedAmount,
                         'donation_code' => $lockedPayment->donation?->donation_code,
                     ]);
@@ -847,8 +846,9 @@ class MidtransCorePaymentService
                         'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], [
                             'mismatch_sync' => $data,
                             'mismatch_details' => [
-                                'received' => $finalGrossAmount,
+                                'received' => $grossAmount,
                                 'expected' => $expectedAmount,
+                                'reason' => $grossAmount <= 0 ? 'missing_or_invalid_gross_amount' : 'amount_mismatch',
                                 'detected_at' => now()->toIso8601String(),
                             ],
                         ]),
@@ -859,11 +859,11 @@ class MidtransCorePaymentService
 
                 $gatewayStatus = 'PAID';
                 $isPaid = true;
-                $fee = self::calculateGatewayFee($paymentType, $finalGrossAmount);
+                $fee = self::calculateGatewayFee($paymentType, $grossAmount);
 
                 $updateData = [
                     'gateway_status' => $gatewayStatus,
-                    'paid_amount' => $finalGrossAmount,
+                    'paid_amount' => $grossAmount,
                     'gateway_fee' => $fee,
                     'paid_at' => $lockedPayment->paid_at ?? now(),
                     'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync' => $data]),

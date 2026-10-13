@@ -614,3 +614,44 @@ test('program total_gateway_fees deduplicates when donation has multiple settled
     // Total gateway fees harus tetap 4440 (bukan 8880) karena deduplikasi per donasi
     expect($program->total_gateway_fees)->toBe(4440.0);
 });
+
+test('midtrans syncPaymentStatus quarantines payment to MISMATCH if gross_amount is missing or zero', function () {
+    Http::fake([
+        'https://api.sandbox.midtrans.com/v2/DON-SYNC-NOGROSS/status' => Http::response([
+            'status_code' => '200',
+            'transaction_status' => 'settlement',
+            'gross_amount' => '0',
+            'payment_type' => 'qris',
+        ], 200),
+    ]);
+
+    $program = Program::factory()->create([
+        'target_amount' => 500000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 100000,
+        'donation_code' => 'DON-SYNC-NOGROSS',
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-SYNC-NOGROSS',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    $service = app(MidtransCorePaymentService::class);
+    $result = $service->syncPaymentStatus($payment);
+
+    expect($result)->toBeFalse();
+
+    $payment->refresh();
+    expect($payment->gateway_status)->toBe('MISMATCH')
+        ->and($payment->raw_payload['mismatch_details']['reason'])->toBe('missing_or_invalid_gross_amount');
+});

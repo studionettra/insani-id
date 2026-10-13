@@ -114,7 +114,7 @@ class MidtransWebhookController extends Controller
                 $expectedAmount = (float) ($payment->donation?->amount ?? 0);
 
                 // Strict nominal comparison to prevent financial mismatch
-                if (round($amountFloat, 2) !== round($expectedAmount, 2)) {
+                if ($amountFloat <= 0 || round($amountFloat, 2) !== round($expectedAmount, 2)) {
                     Log::error("Midtrans Webhook Nominal Mismatch for order {$orderId}", [
                         'received_gross_amount' => $amountFloat,
                         'expected_donation_amount' => $expectedAmount,
@@ -128,6 +128,7 @@ class MidtransWebhookController extends Controller
                             'mismatch_details' => [
                                 'received' => $amountFloat,
                                 'expected' => $expectedAmount,
+                                'reason' => $amountFloat <= 0 ? 'missing_or_invalid_gross_amount' : 'amount_mismatch',
                                 'detected_at' => now()->toIso8601String(),
                             ],
                         ]),
