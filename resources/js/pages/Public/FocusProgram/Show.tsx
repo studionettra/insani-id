@@ -707,35 +707,6 @@ export default function FocusProgramShow({ pillar, programs, otherPillars }: Foc
                 </section>
             )}
 
-            {/* 7. Bottom Quick Donate Call to Action */}
-            <section className="py-20 bg-insani-darkblue text-white text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-insani-blue/20 via-transparent to-transparent"></div>
-                <div className="max-w-4xl mx-auto px-4 relative z-10">
-                    <FadeIn>
-                        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                            {t('Bersama Nyalakan Harapan di')} {pillarTitle}
-                        </h2>
-                        <p className="text-blue-100 text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-                            {t('Dukungan dan kepedulian Anda menghadirkan perubahan besar bagi mereka yang membutuhkan. Mari salurkan kebaikan terbaik Anda hari ini.')}
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-4">
-                            <Button size="lg" asChild className="bg-brand-600 hover:bg-brand-500 text-white rounded-full font-semibold px-8 h-12 shadow-xl shadow-brand-600/30">
-                                <a href="#campaigns">
-                                    <Heart className="w-4 h-4 mr-2 fill-current" />
-                                    {t('Pilih Kampanye Sekarang')}
-                                </a>
-                            </Button>
-                            <Button size="lg" variant="outline" asChild className="border-white/20 bg-white/5 hover:bg-white/10 text-white rounded-full px-6 h-12 backdrop-blur-md">
-                                <Link href="/program">
-                                    {t('Jelajahi Semua Program')}
-                                    <ArrowRight className="w-4 h-4 ml-2 rtl:rotate-180" />
-                                </Link>
-                            </Button>
-                        </div>
-                    </FadeIn>
-                </div>
-            </section>
-
         </PublicLayout>
     );
 }
