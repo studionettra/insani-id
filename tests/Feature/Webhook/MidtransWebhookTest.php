@@ -489,3 +489,84 @@ test('midtrans service sanitizes donor PII in charge payload logging', function 
         ->and($sanitized['customer_details']['email'])->toContain('@example.com')
         ->and($sanitized['customer_details']['phone'])->toContain('****');
 });
+
+test('midtrans webhook ignores subsequent callbacks when payment is in MISMATCH quarantine', function () {
+    $program = Program::factory()->create([
+        'target_amount' => 500000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 100000,
+        'donation_code' => 'DON-MISMATCH-001',
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-MISMATCH-001',
+        'gateway_status' => 'MISMATCH',
+        'raw_payload' => ['mismatch_details' => ['detected_at' => now()->toIso8601String()]],
+    ]);
+
+    $orderId = 'DON-MISMATCH-001';
+    $statusCode = '200';
+    $grossAmount = '100000.00';
+    $signature = generateMidtransSignature($orderId, $statusCode, $grossAmount, 'SB-Mid-server-testkey12345');
+
+    // Callback expire tiba setelah transaksi berstatus MISMATCH
+    $response = $this->postJson(route('webhooks.midtrans'), [
+        'order_id' => $orderId,
+        'status_code' => $statusCode,
+        'gross_amount' => $grossAmount,
+        'signature_key' => $signature,
+        'transaction_status' => 'expire',
+        'payment_type' => 'qris',
+    ]);
+
+    $response->assertStatus(200);
+    expect($response->json('message'))->toBe('Payment is under quarantine review; webhook ignored')
+        ->and($payment->fresh()->gateway_status)->toBe('MISMATCH');
+});
+
+test('midtrans syncPaymentStatus does not overwrite MISMATCH quarantine', function () {
+    Http::fake([
+        'https://api.sandbox.midtrans.com/v2/DON-SYNC-MISMATCH/status' => Http::response([
+            'status_code' => '200',
+            'transaction_status' => 'settlement',
+            'gross_amount' => '100000.00',
+            'payment_type' => 'qris',
+        ], 200),
+    ]);
+
+    $program = Program::factory()->create([
+        'target_amount' => 500000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 100000,
+        'donation_code' => 'DON-SYNC-MISMATCH',
+        'status' => 'pending',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-SYNC-MISMATCH',
+        'gateway_status' => 'MISMATCH',
+    ]);
+
+    $service = app(MidtransCorePaymentService::class);
+    $result = $service->syncPaymentStatus($payment);
+
+    expect($result)->toBeFalse()
+        ->and($payment->fresh()->gateway_status)->toBe('MISMATCH');
+});

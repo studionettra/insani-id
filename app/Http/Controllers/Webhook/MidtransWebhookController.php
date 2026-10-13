@@ -86,6 +86,17 @@ class MidtransWebhookController extends Controller
             $isExpire = ($transactionStatus === 'expire');
             $isFailed = in_array($transactionStatus, ['cancel', 'deny'], true);
 
+            // Quarantine protection: if payment is in MISMATCH quarantine, ignore automated callbacks
+            if ($currentStatus === 'MISMATCH') {
+                Log::warning("Ignored Midtrans webhook for quarantined order {$orderId}. Current status is MISMATCH, received: {$transactionStatus}");
+
+                $payment->update([
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['ignored_post_mismatch_webhook' => $payload]),
+                ]);
+
+                return response()->json(['message' => 'Payment is under quarantine review; webhook ignored'], 200);
+            }
+
             // Monotonic state protection: if payment is already PAID, ignore out-of-order downgrade callbacks
             if ($currentStatus === 'PAID' && ! $isSettlement) {
                 Log::info("Ignored out-of-order Midtrans webhook for order {$orderId}. Current status is already PAID, received: {$transactionStatus}");

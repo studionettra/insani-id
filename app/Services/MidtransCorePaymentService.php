@@ -6,6 +6,7 @@ use App\Models\AppSetting;
 use App\Models\BankAccount;
 use App\Models\Donation;
 use App\Models\Payment;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -776,6 +777,7 @@ class MidtransCorePaymentService
             return false;
         }
 
+        // Panggilan HTTP ke gateway dijalankan di luar transaksi DB agar tidak menahan lock selama latensi jaringan
         $res = $this->checkTransactionStatus($orderId);
 
         if ($res['status'] !== 'success' || empty($res['data'])) {
@@ -786,76 +788,120 @@ class MidtransCorePaymentService
         $transactionStatus = (string) ($data['transaction_status'] ?? '');
         $fraudStatus = (string) ($data['fraud_status'] ?? 'accept');
         $paymentType = (string) ($data['payment_type'] ?? '');
-        $grossAmount = (float) ($data['gross_amount'] ?? $payment->donation?->amount ?? 0);
+        $grossAmount = (float) ($data['gross_amount'] ?? 0);
 
-        // Map Midtrans transaction status to application gateway_status
-        $currentStatus = strtoupper((string) $payment->gateway_status);
-        $gatewayStatus = 'PENDING';
-        $isPaid = false;
+        // Bungkus pembacaan status dan penulisan ke database dalam transaksi dengan pessimistic row lock
+        return DB::transaction(function () use ($payment, $orderId, $data, $transactionStatus, $fraudStatus, $paymentType, $grossAmount) {
+            $lockedPayment = Payment::with('donation')
+                ->where('id', $payment->id)
+                ->lockForUpdate()
+                ->first();
 
-        if ($transactionStatus === 'settlement' || ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
-            $gatewayStatus = 'PAID';
-            $isPaid = true;
-        } elseif ($transactionStatus === 'expire') {
-            $gatewayStatus = 'EXPIRED';
-        } elseif (in_array($transactionStatus, ['cancel', 'deny'], true)) {
-            $gatewayStatus = 'FAILED';
-        }
+            if (! $lockedPayment) {
+                return false;
+            }
 
-        // Monotonic state protection: if payment is already PAID, ignore out-of-order downgrade syncs
-        if ($currentStatus === 'PAID' && ! $isPaid) {
-            $payment->update([
-                'raw_payload' => array_merge($payment->raw_payload ?? [], ['last_sync_ignored' => $data]),
-            ]);
+            $currentStatus = strtoupper((string) $lockedPayment->gateway_status);
 
-            return true;
-        }
+            // 1. Proteksi karantina MISMATCH: jangan pernah menimpa pembayaran yang dikarantina
+            if ($currentStatus === 'MISMATCH') {
+                Log::warning("Ignored Midtrans sync for order {$orderId}. Current status is quarantined as MISMATCH, received: {$transactionStatus}");
 
-        // Check nominal match for paid transactions
-        if ($isPaid) {
-            $expectedAmount = (float) ($payment->donation?->amount ?? 0);
-            if (round($grossAmount, 2) !== round($expectedAmount, 2)) {
-                $payment->update([
-                    'gateway_status' => 'MISMATCH',
-                    'raw_payload' => array_merge($payment->raw_payload ?? [], [
-                        'mismatch_sync' => $data,
-                        'mismatch_details' => [
-                            'received' => $grossAmount,
-                            'expected' => $expectedAmount,
-                            'detected_at' => now()->toIso8601String(),
-                        ],
-                    ]),
+                $lockedPayment->update([
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['ignored_sync_post_mismatch' => $data]),
                 ]);
 
                 return false;
             }
-        }
 
-        // Calculate Midtrans official gateway fee using centralized pricing logic
-        $fee = $isPaid ? self::calculateGatewayFee($paymentType, $grossAmount) : 0.0;
+            $isSettlement = ($transactionStatus === 'settlement' || ($transactionStatus === 'capture' && $fraudStatus === 'accept'));
+            $isExpire = ($transactionStatus === 'expire');
+            $isFailed = in_array($transactionStatus, ['cancel', 'deny'], true);
 
-        $updateData = [
-            'gateway_status' => $gatewayStatus,
-            'paid_amount' => $isPaid ? $grossAmount : null,
-            'gateway_fee' => $fee,
-            'paid_at' => $isPaid ? ($payment->paid_at ?? now()) : null,
-            'raw_payload' => array_merge($payment->raw_payload ?? [], ['last_sync' => $data]),
-        ];
+            // 2. Proteksi monotonic state: jika status sudah PAID, abaikan penurunan status (downgrade)
+            if ($currentStatus === 'PAID' && ! $isSettlement) {
+                $lockedPayment->update([
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync_ignored' => $data]),
+                ]);
 
-        // Capture VA number if present in sync response
-        if (! empty($data['va_numbers'][0]['va_number'])) {
-            $updateData['payment_destination'] = $data['va_numbers'][0]['va_number'];
-        } elseif (! empty($data['permata_va_number'])) {
-            $updateData['payment_destination'] = $data['permata_va_number'];
-        } elseif (! empty($data['bill_key'])) {
-            $updateData['payment_destination'] = $data['bill_key'];
-        }
+                return true;
+            }
 
-        // Update payment (PaymentObserver will automatically handle donation status,
-        // comments for Tab Donatur, program collected amount, fundraiser attribution, and receipt notification)
-        $payment->update($updateData);
+            $gatewayStatus = 'PENDING';
+            $isPaid = false;
 
-        return $isPaid;
+            if ($isSettlement) {
+                $expectedAmount = (float) ($lockedPayment->donation?->amount ?? 0);
+                $finalGrossAmount = $grossAmount > 0 ? $grossAmount : $expectedAmount;
+
+                // Strict nominal comparison to prevent financial mismatch
+                if (round($finalGrossAmount, 2) !== round($expectedAmount, 2)) {
+                    Log::error("Midtrans Sync Nominal Mismatch for order {$orderId}", [
+                        'received_gross_amount' => $finalGrossAmount,
+                        'expected_donation_amount' => $expectedAmount,
+                        'donation_code' => $lockedPayment->donation?->donation_code,
+                    ]);
+
+                    $lockedPayment->update([
+                        'gateway_status' => 'MISMATCH',
+                        'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], [
+                            'mismatch_sync' => $data,
+                            'mismatch_details' => [
+                                'received' => $finalGrossAmount,
+                                'expected' => $expectedAmount,
+                                'detected_at' => now()->toIso8601String(),
+                            ],
+                        ]),
+                    ]);
+
+                    return false;
+                }
+
+                $gatewayStatus = 'PAID';
+                $isPaid = true;
+                $fee = self::calculateGatewayFee($paymentType, $finalGrossAmount);
+
+                $updateData = [
+                    'gateway_status' => $gatewayStatus,
+                    'paid_amount' => $finalGrossAmount,
+                    'gateway_fee' => $fee,
+                    'paid_at' => $lockedPayment->paid_at ?? now(),
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync' => $data]),
+                ];
+            } elseif ($isExpire) {
+                $updateData = [
+                    'gateway_status' => 'EXPIRED',
+                    'paid_amount' => null,
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync' => $data]),
+                ];
+            } elseif ($isFailed) {
+                $updateData = [
+                    'gateway_status' => 'FAILED',
+                    'paid_amount' => null,
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync' => $data]),
+                ];
+            } else {
+                $updateData = [
+                    'gateway_status' => 'PENDING',
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync' => $data]),
+                ];
+            }
+
+            // Capture VA number if present in sync response
+            if (! empty($data['va_numbers'][0]['va_number'])) {
+                $updateData['payment_destination'] = $data['va_numbers'][0]['va_number'];
+            } elseif (! empty($data['permata_va_number'])) {
+                $updateData['payment_destination'] = $data['permata_va_number'];
+            } elseif (! empty($data['bill_key'])) {
+                $updateData['payment_destination'] = $data['bill_key'];
+            }
+
+            // Update payment (PaymentObserver will automatically handle donation status,
+            // comments for Tab Donatur, program collected amount, fundraiser attribution, and receipt notification)
+            $lockedPayment->update($updateData);
+
+            return $isPaid;
+        });
     }
 
     /**
