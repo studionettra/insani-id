@@ -570,3 +570,47 @@ test('midtrans syncPaymentStatus does not overwrite MISMATCH quarantine', functi
     expect($result)->toBeFalse()
         ->and($payment->fresh()->gateway_status)->toBe('MISMATCH');
 });
+
+test('program total_gateway_fees deduplicates when donation has multiple settled payments', function () {
+    $program = Program::factory()->create([
+        'target_amount' => 500000,
+        'collected_amount' => 50000,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 50000,
+        'donation_code' => 'DON-MULTI-001',
+        'status' => 'paid',
+        'paid_at' => now(),
+    ]);
+
+    // Payment 1 sukses
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'virtual_account',
+        'payment_channel' => 'BSI',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-MULTI-001-A',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 50000,
+        'gateway_fee' => 4440.0,
+        'paid_at' => now(),
+    ]);
+
+    // Payment 2 sukses (simulasi edge case duplicate settled payment)
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'virtual_account',
+        'payment_channel' => 'BSI',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-MULTI-001-B',
+        'gateway_status' => 'PAID',
+        'paid_amount' => 50000,
+        'gateway_fee' => 4440.0,
+        'paid_at' => now(),
+    ]);
+
+    // Total gateway fees harus tetap 4440 (bukan 8880) karena deduplikasi per donasi
+    expect($program->total_gateway_fees)->toBe(4440.0);
+});

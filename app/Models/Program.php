@@ -103,12 +103,17 @@ class Program extends Model
 
     public function getTotalGatewayFeesAttribute(): float
     {
-        return (float) DB::table('donations')
-            ->join('payments', 'donations.id', '=', 'payments.donation_id')
+        $latestPaymentSub = DB::table('payments')
+            ->select('payments.donation_id', DB::raw('MAX(payments.id) as latest_payment_id'))
+            ->join('donations', 'donations.id', '=', 'payments.donation_id')
             ->where('donations.program_id', $this->id)
             ->where('donations.status', 'paid')
             ->whereIn('payments.gateway_status', ['PAID', 'SETTLEMENT', 'SETTLED'])
             ->whereNotNull('payments.paid_at')
+            ->groupBy('payments.donation_id');
+
+        return (float) DB::table('payments')
+            ->joinSub($latestPaymentSub, 'latest_settled', 'payments.id', '=', 'latest_settled.latest_payment_id')
             ->sum('payments.gateway_fee');
     }
 
