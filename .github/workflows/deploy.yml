@@ -100,8 +100,14 @@ jobs:
             # Failsafe: Pastikan website selalu dibuka kembali jika script gagal di tengah jalan
             trap 'php artisan up || true' EXIT
 
+            # Proteksi bypass secret: gunakan secret repository jika ada, atau buat acak per-run
+            MAINTENANCE_SECRET="${{ secrets.APP_MAINTENANCE_SECRET }}"
+            if [ -z "$MAINTENANCE_SECRET" ]; then
+              MAINTENANCE_SECRET="deploy-$(openssl rand -hex 12)"
+            fi
+
             echo "Entering maintenance mode..."
-            php artisan down --render="errors::503" --secret="${{ secrets.APP_MAINTENANCE_SECRET || 'insani-deploy-bypass' }}" || true
+            php artisan down --render="errors::503" --secret="$MAINTENANCE_SECRET" || true
 
             echo "Running database migrations..."
             php artisan migrate --force
@@ -125,9 +131,11 @@ jobs:
       - name: 🩺 Automated Health Check Endpoint
         run: |
           echo "Checking application health at https://${APP_DOMAIN}/up..."
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://${APP_DOMAIN}/up" || echo "000")
-          if [ "$HTTP_STATUS" -eq 200 ] || [ "$HTTP_STATUS" -eq 301 ] || [ "$HTTP_STATUS" -eq 302 ]; then
+          HTTP_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 15 "https://${APP_DOMAIN}/up" || echo "000")
+          if [ "$HTTP_STATUS" -eq 200 ]; then
             echo "✅ Health check passed with status $HTTP_STATUS"
           else
-            echo "⚠️ Health check returned status $HTTP_STATUS (periksa konfigurasi domain atau SSL jika server baru diinisialisasi)"
+            echo "❌ Health check FAILED with status $HTTP_STATUS!"
+            echo "Aplikasi tidak merespons secara sehat (status HTTP bukan 200)."
+            exit 1
           fi
