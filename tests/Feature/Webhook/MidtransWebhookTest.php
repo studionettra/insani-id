@@ -457,3 +457,35 @@ test('midtrans verifySignature fails closed when server key is empty or whitespa
     $whitespaceService = new MidtransCorePaymentService(serverKey: '   ');
     expect($whitespaceService->verifySignature($orderId, $statusCode, $grossAmount, $forgedSignature))->toBeFalse();
 });
+
+test('midtrans service sanitizes donor PII in charge payload logging', function () {
+    $service = new MidtransCorePaymentService(serverKey: 'dummy-key');
+
+    $rawPayload = [
+        'payment_type' => 'qris',
+        'transaction_details' => [
+            'order_id' => 'DON-LOG-001',
+            'gross_amount' => 50000,
+        ],
+        'customer_details' => [
+            'first_name' => 'Ahmad Dahlan',
+            'last_name' => 'Kusuma',
+            'email' => 'ahmad.dahlan@example.com',
+            'phone' => '081234567890',
+        ],
+    ];
+
+    $sanitized = $service->sanitizePayloadForLogging($rawPayload);
+
+    // Pastikan struktur transaksi utama tetap utuh
+    expect($sanitized['transaction_details']['order_id'])->toBe('DON-LOG-001')
+        ->and($sanitized['transaction_details']['gross_amount'])->toBe(50000);
+
+    // Pastikan PII tersamarkan
+    expect($sanitized['customer_details']['first_name'])->not->toBe('Ahmad Dahlan')
+        ->and($sanitized['customer_details']['last_name'])->not->toBe('Kusuma')
+        ->and($sanitized['customer_details']['email'])->not->toBe('ahmad.dahlan@example.com')
+        ->and($sanitized['customer_details']['phone'])->not->toBe('081234567890')
+        ->and($sanitized['customer_details']['email'])->toContain('@example.com')
+        ->and($sanitized['customer_details']['phone'])->toContain('****');
+});

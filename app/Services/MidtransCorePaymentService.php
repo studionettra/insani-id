@@ -559,7 +559,7 @@ class MidtransCorePaymentService
                 Log::error('Midtrans charge failed', [
                     'status' => $response->status(),
                     'status_code' => $statusCode,
-                    'payload' => $payload,
+                    'payload' => $this->sanitizePayloadForLogging($payload),
                     'response' => $data,
                 ]);
 
@@ -621,7 +621,7 @@ class MidtransCorePaymentService
         } catch (\Throwable $e) {
             Log::error('Midtrans charge exception', [
                 'error' => $e->getMessage(),
-                'payload' => $payload,
+                'payload' => $this->sanitizePayloadForLogging($payload),
             ]);
 
             return [
@@ -629,6 +629,91 @@ class MidtransCorePaymentService
                 'message' => 'Terjadi kesalahan sistem saat menghubungi gateway pembayaran: '.$e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * Sanitize charge payload for logging to protect donor PII (Personal Identifiable Information).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    public function sanitizePayloadForLogging(array $payload): array
+    {
+        $sanitized = $payload;
+
+        if (isset($sanitized['customer_details']) && is_array($sanitized['customer_details'])) {
+            $customer = $sanitized['customer_details'];
+
+            if (! empty($customer['first_name'])) {
+                $customer['first_name'] = $this->maskName((string) $customer['first_name']);
+            }
+            if (! empty($customer['last_name'])) {
+                $customer['last_name'] = $this->maskName((string) $customer['last_name']);
+            }
+            if (! empty($customer['email'])) {
+                $customer['email'] = $this->maskEmail((string) $customer['email']);
+            }
+            if (! empty($customer['phone'])) {
+                $customer['phone'] = $this->maskPhone((string) $customer['phone']);
+            }
+
+            $sanitized['customer_details'] = $customer;
+        }
+
+        return $sanitized;
+    }
+
+    /**
+     * Mask name for safe logging.
+     */
+    protected function maskName(string $name): string
+    {
+        $trimmed = trim($name);
+        if ($trimmed === '' || in_array(strtolower($trimmed), ['inisiator', 'kebaikan'], true)) {
+            return $trimmed;
+        }
+
+        $length = mb_strlen($trimmed);
+        if ($length <= 2) {
+            return mb_substr($trimmed, 0, 1).'*';
+        }
+
+        return mb_substr($trimmed, 0, 1).str_repeat('*', min(6, $length - 1));
+    }
+
+    /**
+     * Mask email address for safe logging.
+     */
+    protected function maskEmail(string $email): string
+    {
+        $parts = explode('@', trim($email));
+        if (count($parts) !== 2) {
+            return '[REDACTED]';
+        }
+
+        $name = $parts[0];
+        $domain = $parts[1];
+
+        $maskedName = mb_strlen($name) > 2
+            ? mb_substr($name, 0, 2).str_repeat('*', 3)
+            : mb_substr($name, 0, 1).'*';
+
+        return $maskedName.'@'.$domain;
+    }
+
+    /**
+     * Mask phone number for safe logging.
+     */
+    protected function maskPhone(string $phone): string
+    {
+        $digits = preg_replace('/[^0-9+]/', '', trim($phone));
+        $len = strlen($digits);
+
+        if ($len <= 4) {
+            return '[REDACTED]';
+        }
+
+        return substr($digits, 0, 4).str_repeat('*', max(4, $len - 7)).substr($digits, -3);
     }
 
     /**
