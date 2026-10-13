@@ -655,3 +655,83 @@ test('midtrans syncPaymentStatus quarantines payment to MISMATCH if gross_amount
     expect($payment->gateway_status)->toBe('MISMATCH')
         ->and($payment->raw_payload['mismatch_details']['reason'])->toBe('missing_or_invalid_gross_amount');
 });
+
+test('midtrans webhook ignores non-settlement callback if payment is already in terminal state EXPIRED', function () {
+    $program = Program::factory()->create([
+        'target_amount' => 500000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 100000,
+        'donation_code' => 'DON-TERM-EXP-001',
+        'status' => 'expired',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-TERM-EXP-001',
+        'gateway_status' => 'EXPIRED',
+    ]);
+
+    $orderId = 'DON-TERM-EXP-001';
+    $statusCode = '201';
+    $grossAmount = '100000.00';
+    $signature = generateMidtransSignature($orderId, $statusCode, $grossAmount, 'SB-Mid-server-testkey12345');
+
+    // Callback pending terlambat tiba setelah pembayaran sudah EXPIRED
+    $response = $this->postJson(route('webhooks.midtrans'), [
+        'order_id' => $orderId,
+        'status_code' => $statusCode,
+        'gross_amount' => $grossAmount,
+        'signature_key' => $signature,
+        'transaction_status' => 'pending',
+        'payment_type' => 'qris',
+    ]);
+
+    $response->assertStatus(200);
+    expect($response->json('message'))->toBe('Payment already in terminal state; non-settlement callback ignored')
+        ->and($payment->fresh()->gateway_status)->toBe('EXPIRED');
+});
+
+test('midtrans syncPaymentStatus ignores non-settlement sync if payment is already in terminal state FAILED', function () {
+    Http::fake([
+        'https://api.sandbox.midtrans.com/v2/DON-TERM-FAIL-001/status' => Http::response([
+            'status_code' => '201',
+            'transaction_status' => 'pending',
+            'gross_amount' => '100000.00',
+            'payment_type' => 'qris',
+        ], 200),
+    ]);
+
+    $program = Program::factory()->create([
+        'target_amount' => 500000,
+        'collected_amount' => 0,
+    ]);
+
+    $donation = Donation::factory()->create([
+        'program_id' => $program->id,
+        'amount' => 100000,
+        'donation_code' => 'DON-TERM-FAIL-001',
+        'status' => 'failed',
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-TERM-FAIL-001',
+        'gateway_status' => 'FAILED',
+    ]);
+
+    $service = app(MidtransCorePaymentService::class);
+    $result = $service->syncPaymentStatus($payment);
+
+    expect($result)->toBeFalse()
+        ->and($payment->fresh()->gateway_status)->toBe('FAILED');
+});

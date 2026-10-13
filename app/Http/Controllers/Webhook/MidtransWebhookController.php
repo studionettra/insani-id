@@ -108,6 +108,18 @@ class MidtransWebhookController extends Controller
                 return response()->json(['message' => 'Ignored out-of-order webhook; payment already settled'], 200);
             }
 
+            // Terminal state protection: if payment is already EXPIRED or FAILED, ignore non-settlement callbacks
+            $isTerminal = in_array($currentStatus, ['EXPIRED', 'FAILED'], true);
+            if ($isTerminal && ! $isSettlement) {
+                Log::info("Ignored out-of-order non-settlement webhook for terminal order {$orderId}. Current status: {$currentStatus}, received: {$transactionStatus}");
+
+                $payment->update([
+                    'raw_payload' => array_merge($payment->raw_payload ?? [], ['ignored_post_terminal_webhook' => $payload]),
+                ]);
+
+                return response()->json(['message' => 'Payment already in terminal state; non-settlement callback ignored'], 200);
+            }
+
             // Handle settlement/capture
             if ($isSettlement) {
                 $amountFloat = (float) $grossAmount;

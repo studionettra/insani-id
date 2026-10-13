@@ -827,6 +827,18 @@ class MidtransCorePaymentService
                 return true;
             }
 
+            // 3. Proteksi terminal state: jika status sudah EXPIRED atau FAILED, abaikan sync non-settlement
+            $isTerminal = in_array($currentStatus, ['EXPIRED', 'FAILED'], true);
+            if ($isTerminal && ! $isSettlement) {
+                Log::info("Ignored Midtrans sync for terminal order {$orderId}. Current status: {$currentStatus}, received: {$transactionStatus}");
+
+                $lockedPayment->update([
+                    'raw_payload' => array_merge($lockedPayment->raw_payload ?? [], ['last_sync_ignored_terminal' => $data]),
+                ]);
+
+                return false;
+            }
+
             $gatewayStatus = 'PENDING';
             $isPaid = false;
 
