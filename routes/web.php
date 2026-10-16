@@ -83,6 +83,7 @@ Route::group([
     Route::post('/donasi/{donationCode}/batal', [DonationController::class, 'cancel'])
         ->middleware('throttle:15,1')
         ->name('donation.cancel');
+    Route::get('/donasi/{donation}/proof', [DonationController::class, 'viewProof'])->name('donation.proof');
     Route::get('/donasi/kuitansi/{donationCode}', [DonationReceiptController::class, 'show'])->name('donation.receipt');
     Route::redirect('/donasi/kwitansi/{donationCode}', '/donasi/kuitansi/{donationCode}', 301);
     Route::get('/cek-donasi', [DonationController::class, 'lookup'])
