@@ -2,21 +2,31 @@ import React, { useState, useRef, useEffect } from 'react';
 import { usePage, router } from '@inertiajs/react';
 import useTranslation from '@/hooks/use-translation';
 
-const flags = {
+const flags: Record<string, string> = {
     id: 'https://cdn.gtranslate.net/flags/svg/id.svg',
     en: 'https://cdn.gtranslate.net/flags/svg/en.svg',
     ar: 'https://cdn.gtranslate.net/flags/svg/ar.svg',
 };
 
+interface LocaleItem {
+    name: string;
+    url: string;
+}
+
+interface SharedPageProps {
+    supportedLocales?: Record<string, LocaleItem>;
+    [key: string]: unknown;
+}
+
 export default function LanguageSwitcher() {
-    const { supportedLocales } = usePage().props;
+    const { supportedLocales } = usePage<SharedPageProps>().props;
     const { t, locale: currentLang } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
@@ -24,7 +34,7 @@ export default function LanguageSwitcher() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const changeLanguage = (targetUrl) => {
+    const changeLanguage = (targetUrl: string) => {
         setIsOpen(false);
         if (targetUrl) {
             router.visit(targetUrl, {
@@ -35,7 +45,7 @@ export default function LanguageSwitcher() {
 
     const currentFlag = flags[currentLang] || flags.id;
 
-    const availableLocales = supportedLocales && Object.keys(supportedLocales).length > 0
+    const availableLocales: Record<string, LocaleItem> = supportedLocales && Object.keys(supportedLocales).length > 0
         ? supportedLocales
         : {
             id: { name: 'Bahasa Indonesia', url: '/id' },

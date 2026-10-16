@@ -1,19 +1,40 @@
-import React, { useEffect } from 'react';
+import React, { PropsWithChildren, useEffect } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Home, Heart, PlusCircle, User, Compass, HandHeart, MapPin, Phone, Mail, Clock, ShieldCheck, QrCode, Megaphone } from 'lucide-react';
+import { Home, Heart, Compass, HandHeart, MapPin, Phone, Mail, Clock, ShieldCheck, QrCode, Megaphone } from 'lucide-react';
 import PublicSearchDialog from '@/components/public/PublicSearchDialog';
 import PublicAccountDropdown from '@/components/public/PublicAccountDropdown';
 import EventPopupModal from '@/components/public/EventPopupModal';
 import { FlashMessages } from '@/components/flash-messages';
 import useTranslation from '@/hooks/use-translation';
 import { getLocalizedValue } from '@/lib/utils';
+import type { Auth } from '@/types/auth';
 
-export default function PublicLayout({ children, title = '', hideFooter = false, hideMobileNav = false, hideTopNav = false }) {
-    const { auth, siteSettings, activePopup } = usePage().props;
+interface PublicLayoutProps {
+    title?: string;
+    hideFooter?: boolean;
+    hideMobileNav?: boolean;
+    hideTopNav?: boolean;
+}
+
+interface SharedPageProps {
+    auth?: Auth;
+    siteSettings?: Record<string, string | null | undefined>;
+    activePopup?: unknown;
+    [key: string]: unknown;
+}
+
+export default function PublicLayout({
+    children,
+    title = '',
+    hideFooter = false,
+    hideMobileNav = false,
+    hideTopNav = false,
+}: PropsWithChildren<PublicLayoutProps>) {
+    const { siteSettings, activePopup } = usePage<SharedPageProps>().props;
     const { t, locale, isRtl } = useTranslation();
     const { url } = usePage();
     const currentPath = (url || '').split(/[?#]/)[0];
-    const isActive = (path) => {
+    const isActive = (path: string) => {
         if (!path) return false;
         if (path === '/') return currentPath === '/' || currentPath === '';
         return currentPath === path || currentPath.startsWith(path + '/');
@@ -23,8 +44,6 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
         document.documentElement.classList.remove('dark');
         document.documentElement.style.colorScheme = 'light';
     }, []);
-
-    const userAccountUrl = auth?.user ? '/dashboard' : '/login';
 
     const defaultHomeTitle = '';
     const pageTitle = (!title || title === 'Beranda') ? defaultHomeTitle : title;
@@ -112,7 +131,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                     className="h-[30px] sm:h-8 md:h-[34px] lg:h-9 w-auto object-contain shrink-0 transition-transform group-hover:scale-105"
                                     onError={(e) => {
                                         // Fallback if logo not found
-                                        e.target.src = "/images/logo/logo-landscape-color.png";
+                                        (e.currentTarget as HTMLImageElement).src = "/images/logo/logo-landscape-color.png";
                                     }}
                                 />
                                 <span className="hidden text-xl font-bold text-insani-darkblue">
@@ -173,7 +192,7 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                                     alt="Insani Indonesia" 
                                     className="h-8 sm:h-[34px] md:h-9 lg:h-10 w-auto object-contain hover:opacity-95 transition-opacity block"
                                     onError={(e) => {
-                                        e.target.src = "/images/logo/logo-landscape-white.png";
+                                        (e.currentTarget as HTMLImageElement).src = "/images/logo/logo-landscape-white.png";
                                     }}
                                 />
                             </Link>
@@ -349,46 +368,6 @@ export default function PublicLayout({ children, title = '', hideFooter = false,
                             </div>
                         </div>
                     </div>
-                    
-                    {/* Trust Strip: Lembaga Resmi Negara & Pengawasan Finansial */}
-                    {/* <div className="mt-12 pt-8 border-t border-white/10">
-                        <div className="flex flex-col lg:flex-row items-center justify-between gap-5 text-center lg:text-left">
-                            <div className="space-y-1">
-                                <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">
-                                    {t('Kepatuhan Hukum & Standar Keuangan Resmi')}
-                                </p>
-                                <p className="text-[11px] text-slate-400">
-                                    {t('Insani Indonesia beroperasi legal di bawah pengawasan regulasi kementerian dan sistem pembayaran nasional.')}
-                                </p>
-                            </div>
-                            
-                            {/* Badges Pill Bar */}
-                            {/* <div className="flex flex-wrap items-center justify-center lg:justify-end gap-2.5 sm:gap-3">
-                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Kementerian Hukum & HAM RI">
-                                    <img src="/images/legal/kemenkumham.svg" alt="Kemenkumham RI" className="h-6 w-auto object-contain" />
-                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">Kemenkumham RI</span>
-                                </div>
-                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Kementerian Sosial RI (Izin PUB)">
-                                    <img src="/images/legal/kemensos.svg" alt="Kemensos RI" className="h-5 w-auto object-contain" />
-                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">Kemensos RI</span>
-                                </div>
-                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Pemerintah Provinsi DKI Jakarta">
-                                    <img src="/images/legal/pemprov-dki.svg" alt="Pemprov DKI Jakarta" className="h-6 w-auto object-contain" />
-                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">Pemprov DKI</span>
-                                </div>
-                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Direktorat Jenderal Pajak (NPWP Terdaftar)">
-                                    <img src="/images/legal/djp-pajak.svg" alt="DJP Pajak" className="h-6 w-auto object-contain" />
-                                    <span className="text-[11px] font-bold text-slate-800 hidden sm:inline">DJP Pajak</span>
-                                </div>
-                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Quick Response Code Indonesian Standard">
-                                    <img src="/images/payments/qris.svg" alt="QRIS Nasional" className="h-5 w-auto object-contain" />
-                                </div>
-                                <div className="bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg shadow-2xs border border-white/20 flex items-center gap-2 hover:bg-white transition-all" title="Bank Indonesia">
-                                    <img src="/images/payments/bi.svg" alt="Bank Indonesia" className="h-5 w-auto object-contain" />
-                                </div>
-                            </div> */}
-                        {/* </div> */}
-                    {/* </div> */}
 
                     {/* Bottom Bar: Copyright & SK Kemenkumham */}
                     <div className="mt-8 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-400">

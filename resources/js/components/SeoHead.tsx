@@ -1,24 +1,46 @@
 import React from 'react';
 import { Head, usePage } from '@inertiajs/react';
 
-export default function SeoHead({ 
-    title, 
-    description = 'Insani Indonesia - Lembaga filantropi terpercaya untuk berbagi dan memberdayakan sesama.', 
+interface SupportedLocaleData {
+    name: string;
+    url: string;
+}
+
+interface SeoHeadProps {
+    title?: string;
+    description?: string;
+    image?: string;
+}
+
+interface SharedPageProps {
+    supportedLocales?: Record<string, SupportedLocaleData>;
+    locale?: string;
+    siteSettings?: {
+        site_name?: string;
+        site_logo?: string;
+        [key: string]: unknown;
+    };
+    [key: string]: unknown;
+}
+
+export default function SeoHead({
+    title,
+    description = 'Insani Indonesia - Lembaga filantropi terpercaya untuk berbagi dan memberdayakan sesama.',
     image,
-}) {
-    const { supportedLocales, locale, siteSettings } = usePage().props;
+}: SeoHeadProps) {
+    const { supportedLocales, locale = 'id', siteSettings } = usePage<SharedPageProps>().props;
     const resolvedImage = image || (siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png');
-    const siteName = siteSettings?.site_name || 'Insani Indonesia';
+    const siteName = (siteSettings?.site_name as string) || 'Insani Indonesia';
     const fullTitle = title ? `${title} - ${siteName}` : siteName;
-    
+
     // Get current URL from supportedLocales if available, else fallback
-    const currentUrl = supportedLocales && supportedLocales[locale] ? supportedLocales[locale].url : (typeof window !== 'undefined' ? window.location.href : '');
+    const currentUrl = supportedLocales && locale && supportedLocales[locale] ? supportedLocales[locale].url : (typeof window !== 'undefined' ? window.location.href : '');
 
     return (
         <Head>
             <title>{fullTitle}</title>
             <meta name="description" content={description} />
-            
+
             {/* Canonical and hreflang */}
             {currentUrl && <link rel="canonical" href={currentUrl} />}
             {supportedLocales && Object.entries(supportedLocales).map(([code, data]) => (
@@ -27,7 +49,7 @@ export default function SeoHead({
             {supportedLocales && supportedLocales['id'] && (
                 <link rel="alternate" hrefLang="x-default" href={supportedLocales['id'].url} />
             )}
-            
+
             {/* Open Graph / Facebook */}
             <meta property="og:type" content="website" />
             <meta property="og:url" content={currentUrl} />
