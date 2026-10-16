@@ -725,7 +725,12 @@ class MidtransCorePaymentService
     public function checkTransactionStatus(string $orderId): array
     {
         if (! $this->isConfigured()) {
-            return ['status' => 'error', 'message' => 'Midtrans not configured'];
+            return [
+                'status' => 'error',
+                'http_status' => null,
+                'connection_error' => false,
+                'message' => 'Midtrans not configured',
+            ];
         }
 
         try {
@@ -736,17 +741,23 @@ class MidtransCorePaymentService
             if ($response->successful()) {
                 return [
                     'status' => 'success',
+                    'http_status' => $response->status(),
+                    'connection_error' => false,
                     'data' => $response->json(),
                 ];
             }
 
             return [
                 'status' => 'error',
+                'http_status' => $response->status(),
+                'connection_error' => $response->serverError(),
                 'message' => $response->json('status_message') ?? 'Gagal memeriksa status.',
             ];
         } catch (\Throwable $e) {
             return [
                 'status' => 'error',
+                'http_status' => null,
+                'connection_error' => true,
                 'message' => $e->getMessage(),
             ];
         }
@@ -767,21 +778,57 @@ class MidtransCorePaymentService
     }
 
     /**
-     * Sync and update payment & donation status from Midtrans API.
+     * Sync and update payment & donation status from Midtrans API with detailed result.
+     *
+     * @return array{
+     *     success: bool,
+     *     reachable: bool,
+     *     is_paid: bool,
+     *     http_status: ?int,
+     *     transaction_status: ?string,
+     *     message: ?string
+     * }
      */
-    public function syncPaymentStatus(Payment $payment): bool
+    public function syncPaymentStatusDetailed(Payment $payment): array
     {
         $orderId = $payment->gateway_reference_id ?? $payment->donation?->donation_code;
 
         if (! $orderId) {
-            return false;
+            return [
+                'success' => false,
+                'reachable' => true,
+                'is_paid' => false,
+                'http_status' => null,
+                'transaction_status' => null,
+                'message' => 'Order ID tidak ditemukan.',
+            ];
         }
 
         // Panggilan HTTP ke gateway dijalankan di luar transaksi DB agar tidak menahan lock selama latensi jaringan
         $res = $this->checkTransactionStatus($orderId);
 
-        if ($res['status'] !== 'success' || empty($res['data'])) {
-            return false;
+        if ($res['status'] !== 'success') {
+            $isConnectionError = ! empty($res['connection_error']) || ($res['http_status'] ?? 0) >= 500 || $res['http_status'] === null;
+
+            return [
+                'success' => false,
+                'reachable' => ! $isConnectionError,
+                'is_paid' => false,
+                'http_status' => $res['http_status'] ?? null,
+                'transaction_status' => null,
+                'message' => $res['message'] ?? 'Gagal menghubungi Midtrans.',
+            ];
+        }
+
+        if (empty($res['data'])) {
+            return [
+                'success' => false,
+                'reachable' => true,
+                'is_paid' => false,
+                'http_status' => $res['http_status'] ?? 200,
+                'transaction_status' => null,
+                'message' => 'Data transaksi kosong dari Midtrans.',
+            ];
         }
 
         $data = $res['data'];
@@ -791,7 +838,7 @@ class MidtransCorePaymentService
         $grossAmount = (float) ($data['gross_amount'] ?? 0);
 
         // Bungkus pembacaan status dan penulisan ke database dalam transaksi dengan pessimistic row lock
-        return DB::transaction(function () use ($payment, $orderId, $data, $transactionStatus, $fraudStatus, $paymentType, $grossAmount) {
+        $isPaid = DB::transaction(function () use ($payment, $orderId, $data, $transactionStatus, $fraudStatus, $paymentType, $grossAmount) {
             $lockedPayment = Payment::with('donation')
                 ->where('id', $payment->id)
                 ->lockForUpdate()
@@ -914,6 +961,23 @@ class MidtransCorePaymentService
 
             return $isPaid;
         });
+
+        return [
+            'success' => true,
+            'reachable' => true,
+            'is_paid' => (bool) $isPaid,
+            'http_status' => $res['http_status'] ?? 200,
+            'transaction_status' => $transactionStatus,
+            'message' => 'Status berhasil disinkronkan.',
+        ];
+    }
+
+    /**
+     * Sync and update payment & donation status from Midtrans API.
+     */
+    public function syncPaymentStatus(Payment $payment): bool
+    {
+        return $this->syncPaymentStatusDetailed($payment)['is_paid'];
     }
 
     /**

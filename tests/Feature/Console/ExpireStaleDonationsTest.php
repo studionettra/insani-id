@@ -184,3 +184,92 @@ test('donations:expire-stale rescues paid online donation if Midtrans API report
     expect($savedDonation->fresh()->status)->toBe('paid');
     expect($savedDonation->payments()->first()->gateway_status)->toBe('PAID');
 });
+
+test('donations:expire-stale skips and preserves pending status when Midtrans connection fails', function () {
+    config([
+        'services.midtrans.server_key' => 'SB-Mid-server-testkey12345',
+        'services.midtrans.is_production' => false,
+    ]);
+
+    // Simulate 500 / gateway connection failure
+    Http::fake([
+        'https://api.sandbox.midtrans.com/v2/DON-TIMEOUT-ONLINE-01/status' => Http::response([
+            'status_message' => 'Internal Server Error at payment gateway',
+        ], 500),
+    ]);
+
+    $timeoutDonation = Donation::create([
+        'donation_code' => 'DON-TIMEOUT-ONLINE-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donatur Pending Timeout',
+        'donor_email' => 'timeout@example.com',
+        'donor_phone' => '08123456789',
+        'amount' => 100000,
+        'channel' => 'online',
+        'status' => 'pending',
+    ]);
+    $timeoutDonation->forceFill(['created_at' => now()->subHours(30)])->saveQuietly();
+
+    Payment::create([
+        'donation_id' => $timeoutDonation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-TIMEOUT-ONLINE-01',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    // Run command
+    $this->artisan('donations:expire-stale')
+        ->assertSuccessful();
+
+    // Assert donation was NOT expired and remained pending due to fail-safe skip
+    expect($timeoutDonation->fresh()->status)->toBe('pending');
+    expect($timeoutDonation->payments()->first()->gateway_status)->toBe('PENDING');
+});
+
+test('donations:expire-stale marks online donation as expired when Midtrans confirms expire status', function () {
+    config([
+        'services.midtrans.server_key' => 'SB-Mid-server-testkey12345',
+        'services.midtrans.is_production' => false,
+    ]);
+
+    Http::fake([
+        'https://api.sandbox.midtrans.com/v2/DON-EXPIRED-MIDTRANS-01/status' => Http::response([
+            'status_code' => '200',
+            'transaction_status' => 'expire',
+            'gross_amount' => '75000.00',
+            'payment_type' => 'qris',
+            'order_id' => 'DON-EXPIRED-MIDTRANS-01',
+        ], 200),
+    ]);
+
+    $expiredDonation = Donation::create([
+        'donation_code' => 'DON-EXPIRED-MIDTRANS-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donatur Expired Midtrans',
+        'donor_email' => 'expired@example.com',
+        'donor_phone' => '08123456789',
+        'amount' => 75000,
+        'channel' => 'online',
+        'status' => 'pending',
+    ]);
+    $expiredDonation->forceFill(['created_at' => now()->subHours(30)])->saveQuietly();
+
+    Payment::create([
+        'donation_id' => $expiredDonation->id,
+        'payment_method' => 'qris',
+        'payment_channel' => 'QRIS',
+        'gateway' => 'midtrans',
+        'gateway_reference_id' => 'DON-EXPIRED-MIDTRANS-01',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    // Run command
+    $this->artisan('donations:expire-stale')
+        ->assertSuccessful();
+
+    // Assert donation and payment status became expired
+    expect($expiredDonation->fresh()->status)->toBe('expired');
+    expect($expiredDonation->payments()->first()->gateway_status)->toBe('EXPIRED');
+});

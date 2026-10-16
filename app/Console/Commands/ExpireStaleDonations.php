@@ -61,11 +61,12 @@ class ExpireStaleDonations extends Command
 
         $expiredOnlineCount = 0;
         $syncedPaidCount = 0;
+        $skippedOnlineCount = 0;
 
         Donation::where('channel', 'online')
             ->where('status', 'pending')
             ->where('created_at', '<', $onlineThreshold)
-            ->chunkById(100, function ($donations) use ($midtrans, &$expiredOnlineCount, &$syncedPaidCount) {
+            ->chunkById(100, function ($donations) use ($midtrans, &$expiredOnlineCount, &$syncedPaidCount, &$skippedOnlineCount) {
                 foreach ($donations as $donation) {
                     $payment = $donation->payments()->where('gateway_status', 'PENDING')->latest()->first()
                         ?? $donation->payments()->latest()->first();
@@ -75,22 +76,39 @@ class ExpireStaleDonations extends Command
                     // Jika memiliki pembayaran Midtrans, coba verifikasi status terkini ke server Midtrans
                     if ($payment && $payment->gateway === 'midtrans' && $midtrans->isConfigured()) {
                         try {
-                            $isPaid = $midtrans->syncPaymentStatus($payment);
+                            $syncResult = $midtrans->syncPaymentStatusDetailed($payment);
                             $donation->refresh();
 
-                            if ($donation->status === 'paid' || $isPaid) {
+                            // Proteksi gangguan koneksi: Jika API Midtrans unreachable / timeout / 5xx,
+                            // JANGAN ubah status donasi! Lewati donasi ini agar diperiksa di jadwal berikutnya.
+                            if (! $syncResult['reachable']) {
+                                Log::warning("ExpireStaleDonations: Melewati donasi {$donation->donation_code} karena koneksi ke Midtrans gagal ({$syncResult['message']}). Status tetap pending.");
+                                $skippedOnlineCount++;
+
+                                continue;
+                            }
+
+                            if ($donation->status === 'paid' || $syncResult['is_paid']) {
                                 $syncedPaidCount++;
                                 $resolved = true;
                             } elseif (in_array($donation->status, ['expired', 'failed', 'cancelled'], true)) {
                                 $expiredOnlineCount++;
                                 $resolved = true;
+                            } elseif ($syncResult['transaction_status'] === 'pending') {
+                                // Transaksi di Midtrans masih berstatus pending padahal sudah melewati 24 jam batas donasi.
+                                // Lakukan pembatalan resmi ke Midtrans jika memungkinkan
+                                $midtrans->cancelTransaction($payment->gateway_reference_id ?? $donation->donation_code);
+                                $resolved = false;
                             }
                         } catch (\Throwable $e) {
-                            Log::warning("ExpireStaleDonations: Gagal sinkronisasi Midtrans untuk donasi {$donation->donation_code}: {$e->getMessage()}");
+                            Log::warning("ExpireStaleDonations: Terjadi kendala saat sinkronisasi Midtrans untuk donasi {$donation->donation_code}: {$e->getMessage()}. Melewati donasi ini.");
+                            $skippedOnlineCount++;
+
+                            continue;
                         }
                     }
 
-                    // Jika status belum terselesaikan (misal Midtrans mengembalikan error atau order not found), tandai expired
+                    // Jika status belum terselesaikan (misal order 404 di Midtrans atau offline), tandai expired
                     if (! $resolved && $donation->status === 'pending') {
                         DB::transaction(function () use ($donation, $payment) {
                             $donation->update(['status' => 'expired']);
@@ -109,8 +127,8 @@ class ExpireStaleDonations extends Command
                 }
             });
 
-        $this->info("Selesai. {$expiredOfflineCount} donasi manual kedaluwarsa, {$expiredOnlineCount} donasi online kedaluwarsa, {$syncedPaidCount} donasi online terverifikasi lunas.");
-        Log::info("ExpireStaleDonations: {$expiredOfflineCount} offline expired, {$expiredOnlineCount} online expired, {$syncedPaidCount} online synced paid.");
+        $this->info("Selesai. {$expiredOfflineCount} donasi manual kedaluwarsa, {$expiredOnlineCount} donasi online kedaluwarsa, {$syncedPaidCount} donasi online terverifikasi lunas, {$skippedOnlineCount} donasi dilewati karena gangguan koneksi gateway.");
+        Log::info("ExpireStaleDonations: {$expiredOfflineCount} offline expired, {$expiredOnlineCount} online expired, {$syncedPaidCount} online synced paid, {$skippedOnlineCount} online skipped due to gateway connectivity.");
 
         return Command::SUCCESS;
     }
