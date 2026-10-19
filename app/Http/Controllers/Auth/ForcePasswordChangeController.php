@@ -40,7 +40,7 @@ class ForcePasswordChangeController extends Controller
 
         $request->validate([
             'password' => ['required', 'confirmed', Password::defaults()],
-            'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
+            'cf-turnstile-response' => TurnstileRule::rule(),
         ], [
             'password.required' => 'Password baru wajib diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok dengan password yang dimasukkan.',

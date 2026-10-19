@@ -22,6 +22,7 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { trackInitiateDonation } from '@/lib/analytics';
 import { getLocalizedValue, formatCurrency } from '@/lib/utils';
 import BankLogo from '@/components/ui/bank-logo';
+import { useTurnstileSiteKey } from '@/hooks/use-turnstile';
 
 interface PaymentChannel {
     code: string;
@@ -176,6 +177,7 @@ const DEFAULT_CHANNELS: PaymentChannel[] = [
 ];
 
 export default function Donate({ program, onlinePaymentAvailable = true, paymentChannels, vaMaintenanceNotice, replaceDonation }: any) {
+    const turnstileSiteKey = useTurnstileSiteKey();
     const { auth, flash, siteSettings } = usePage().props as any;
     const foundationName = siteSettings?.legal_foundation_name || 'Yayasan Peduli Insani Indonesia';
 
@@ -262,7 +264,7 @@ return null;
             return;
         }
 
-        if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !data['cf-turnstile-response']) {
+        if (turnstileSiteKey && !data['cf-turnstile-response']) {
             toast.error('Mohon selesaikan verifikasi keamanan (Captcha).');
 
             return;
@@ -823,11 +825,13 @@ selectChannel(manualChannels[0]);
                                     </div>
 
                                     {/* Cloudflare Turnstile */}
-                                    {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+                                    {turnstileSiteKey ? (
                                         <div className="grid gap-2 my-4">
                                             <Turnstile
-                                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                                                siteKey={turnstileSiteKey}
                                                 onSuccess={(token) => setData('cf-turnstile-response', token)}
+                                                onExpire={() => setData('cf-turnstile-response', '')}
+                                                onError={() => setData('cf-turnstile-response', '')}
                                                 options={{
                                                     theme: 'light',
                                                 }}
@@ -836,7 +840,7 @@ selectChannel(manualChannels[0]);
                                                 <p className="text-red-500 text-sm mt-1">{errors['cf-turnstile-response']}</p>
                                             )}
                                         </div>
-                                    )}
+                                    ) : null}
 
                                     <Button 
                                         type="submit" 

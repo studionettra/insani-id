@@ -58,7 +58,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
         Fortify::confirmPasswordsUsing(function ($user, ?string $password = null) {
             request()->validate([
-                'cf-turnstile-response' => ['required', 'string', new TurnstileRule],
+                'cf-turnstile-response' => TurnstileRule::rule(),
             ], [
                 'cf-turnstile-response.required' => 'Mohon selesaikan verifikasi keamanan (Captcha).',
             ]);

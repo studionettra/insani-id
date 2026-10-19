@@ -16,7 +16,7 @@ class CustomLoginRequest extends LoginRequest
     public function rules(): array
     {
         $rules = parent::rules();
-        $rules['cf-turnstile-response'] = ['required', 'string', new TurnstileRule];
+        $rules['cf-turnstile-response'] = TurnstileRule::rule();
 
         return $rules;
     }

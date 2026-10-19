@@ -14,8 +14,10 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTurnstileSiteKey } from '@/hooks/use-turnstile';
 
 export default function Login({ status }: { status?: string }) {
+    const turnstileSiteKey = useTurnstileSiteKey();
     const { siteSettings } = usePage().props as any;
     const siteLogo = siteSettings?.site_logo
         ? `/storage/${siteSettings.site_logo}`
@@ -163,22 +165,28 @@ export default function Login({ status }: { status?: string }) {
                             </Label>
                         </div>
 
-                        <div className="grid gap-2">
-                            <Turnstile
-                                siteKey={
-                                    import.meta.env.VITE_TURNSTILE_SITE_KEY
-                                }
-                                onSuccess={(token) =>
-                                    setData('cf-turnstile-response', token)
-                                }
-                                options={{
-                                    theme: 'light',
-                                }}
-                            />
-                            <InputError
-                                message={errors['cf-turnstile-response']}
-                            />
-                        </div>
+                        {turnstileSiteKey ? (
+                            <div className="grid gap-2">
+                                <Turnstile
+                                    siteKey={turnstileSiteKey}
+                                    onSuccess={(token) =>
+                                        setData('cf-turnstile-response', token)
+                                    }
+                                    onExpire={() =>
+                                        setData('cf-turnstile-response', '')
+                                    }
+                                    onError={() =>
+                                        setData('cf-turnstile-response', '')
+                                    }
+                                    options={{
+                                        theme: 'light',
+                                    }}
+                                />
+                                <InputError
+                                    message={errors['cf-turnstile-response']}
+                                />
+                            </div>
+                        ) : null}
 
                         <Button
                             type="submit"

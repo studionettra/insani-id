@@ -81,9 +81,7 @@ class StoreDonationRequest extends FormRequest
             'referral_code' => ['nullable', 'string', 'max:100'],
             'ref' => ['nullable', 'string', 'max:100'],
             'replace_donation_code' => ['nullable', 'string', 'max:50'],
-            'cf-turnstile-response' => app()->environment('testing')
-                ? ['nullable', 'string', new TurnstileRule]
-                : ['required', 'string', new TurnstileRule],
+            'cf-turnstile-response' => TurnstileRule::rule(nullableInTesting: true),
         ];
     }
 

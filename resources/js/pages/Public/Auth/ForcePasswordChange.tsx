@@ -5,12 +5,14 @@ import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useTurnstileSiteKey } from '@/hooks/use-turnstile';
 
 type Props = {
     passwordRules?: string;
 };
 
 export default function ForcePasswordChange({ passwordRules }: Props) {
+    const turnstileSiteKey = useTurnstileSiteKey();
     const { auth, siteSettings } = usePage().props as any;
     const siteLogo = siteSettings?.site_logo ? `/storage/${siteSettings.site_logo}` : '/images/logo/logo-landscape-color.png';
     const userName = auth?.user?.name || 'Pengelola Sistem';
@@ -113,16 +115,20 @@ export default function ForcePasswordChange({ passwordRules }: Props) {
                         </div>
 
                         {/* Cloudflare Turnstile */}
-                        <div className="grid gap-1.5 pt-1">
-                            <Turnstile 
-                                siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY} 
-                                onSuccess={(token) => setData('cf-turnstile-response', token)}
-                                options={{
-                                    theme: 'light',
-                                }}
-                            />
-                            <InputError message={errors['cf-turnstile-response']} />
-                        </div>
+                        {turnstileSiteKey ? (
+                            <div className="grid gap-1.5 pt-1">
+                                <Turnstile 
+                                    siteKey={turnstileSiteKey} 
+                                    onSuccess={(token) => setData('cf-turnstile-response', token)}
+                                    onExpire={() => setData('cf-turnstile-response', '')}
+                                    onError={() => setData('cf-turnstile-response', '')}
+                                    options={{
+                                        theme: 'light',
+                                    }}
+                                />
+                                <InputError message={errors['cf-turnstile-response']} />
+                            </div>
+                        ) : null}
 
                         <div className="space-y-2 pt-2">
                             <Button
