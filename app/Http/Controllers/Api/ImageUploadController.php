@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Format;
 use Intervention\Image\ImageManager;
 
 class ImageUploadController extends Controller
@@ -21,9 +22,9 @@ class ImageUploadController extends Controller
         // Generate a unique filename
         $filename = uniqid('rich_text_').'_'.time().'.webp';
 
-        // Use Intervention Image to resize and convert to webp
+        // Use Intervention Image v4 to decode, resize, and convert to webp
         $manager = new ImageManager(new Driver);
-        $image = $manager->read($file);
+        $image = $manager->decode($file);
 
         // Resize image if width is greater than 800px, keeping aspect ratio
         if ($image->width() > 800) {
@@ -31,15 +32,15 @@ class ImageUploadController extends Controller
         }
 
         // Encode to webp format with 80% quality
-        $encodedImage = $image->toWebp(80);
+        $encodedImage = $image->encodeUsingFormat(Format::WEBP, quality: 80);
 
-        // Save to storage
-        $path = 'public/uploads/rich-text/'.$filename;
-        Storage::put($path, (string) $encodedImage);
+        // Save to public disk
+        $path = 'uploads/rich-text/'.$filename;
+        Storage::disk('public')->put($path, (string) $encodedImage);
 
-        // Return URL
+        // Return public URL
         return response()->json([
-            'url' => Storage::url('uploads/rich-text/'.$filename),
+            'url' => Storage::disk('public')->url($path),
         ]);
     }
 }
