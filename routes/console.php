@@ -35,6 +35,6 @@ Schedule::call(function () {
 Schedule::command('model:prune')->dailyAt('04:00');
 
 // Drain queue jobs every minute for Hostinger shared hosting without Supervisor daemon
-Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=2')
+Schedule::command('queue:work --stop-when-empty --max-time=50 --memory=128 --tries=2')
     ->everyMinute()
     ->withoutOverlapping();
