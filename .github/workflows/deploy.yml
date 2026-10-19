@@ -72,6 +72,8 @@ jobs:
 
       - name: 🏗️ Build Frontend Assets
         run: npm run build
+        env:
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY }}
 
       - name: 📂 Sync Files to Hostinger via rsync
         uses: easingthemes/ssh-deploy@v5.1.1
@@ -109,11 +111,13 @@ jobs:
             echo "Entering maintenance mode..."
             php artisan down --render="errors::503" --secret="$MAINTENANCE_SECRET" || true
 
+            echo "Clearing configuration and application caches..."
+            php artisan optimize:clear
+
             echo "Running database migrations..."
             php artisan migrate --force
 
-            echo "Clearing and optimizing caches..."
-            php artisan optimize:clear
+            echo "Optimizing application caches..."
             php artisan optimize
             php artisan view:cache
             php artisan event:cache

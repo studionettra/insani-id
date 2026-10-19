@@ -2,7 +2,7 @@
 
 Panduan ini berisi petunjuk komprehensif langkah demi langkah untuk mengunggah, mengonfigurasi, dan menjalankan aplikasi **Laravel 13 + Inertia v3 React (Insani Indonesia)** di paket **Business Shared Hosting Hostinger** dengan aman, cepat, dan stabil.
 
-> **Terakhir diperbarui:** 6 Oktober 2026
+> **Terakhir diperbarui:** 18 Oktober 2026 (Audit Kesiapan & Hardening Shared Hosting)
 
 ---
 
@@ -11,8 +11,9 @@ Panduan ini berisi petunjuk komprehensif langkah demi langkah untuk mengunggah, 
 * **Web Server:** LiteSpeed Web Server (LSWS)
 * **OS:** CloudLinux dengan LVE Manager (batasan RAM ~1.5 - 3 GB, CPU 1-2 core, I/O 10-20 MB/s).
 * **Document Root Default:** `/home/uXXXXXXX/domains/domainanda.com/public_html`
-* **Catatan Penting:** Shared hosting **TIDAK memiliki daemon process manager (Supervisor)**. Oleh karena itu, background queue worker dijalankan melalui **Laravel Scheduler (Cron Job)** yang telah dikonfigurasikan dengan `--stop-when-empty --max-time=50` dan `withoutOverlapping()`.
-* **SSR Inertia:** Shared hosting **TIDAK mendukung persistent Node.js process**. SSR sudah dikontrol via environment variable `INERTIA_SSR_ENABLED` (default `false` di production).
+* **Catatan Penting:** Shared hosting **TIDAK memiliki daemon process manager (Supervisor)**. Oleh karena itu, background queue worker dijalankan melalui **Laravel Scheduler (Cron Job)** yang telah dikonfigurasikan dengan `--stop-when-empty --max-time=50 --memory=128 --tries=2` dan `withoutOverlapping()`.
+* **SSR Inertia:** Shared hosting **TIDAK mendukung persistent Node.js process**. SSR sudah dikontrol via environment variable `INERTIA_SSR_ENABLED` (default `false` di production). Open Graph meta tags, Schema.org JSON-LD, dan SEO Google/social media tetap 100% aktif melalui rendering server-side native di `resources/views/partials/opengraph.blade.php`.
+* **Koneksi Database & Beban Shared Hosting:** CloudLinux membatasi `max_user_connections` (~30–50 koneksi serentak). Session, cache, queue, dan first-party analytics dirancang hemat query dengan pruning otomatis setiap malam. Jika kampanye donasi viral menghasilkan trafik sangat tinggi, fitur **Object Cache (Redis)** di hPanel dapat diaktifkan sebagai backend cache & session.
 
 ---
 
@@ -94,6 +95,11 @@ Buka tab **PHP Options** dan sesuaikan nilai berikut:
 * `max_execution_time` = `120`
 * `max_input_time` = `120`
 
+### D. Verifikasi PHP Functions (`disable_functions`)
+Buka tab **PHP Functions** di hPanel:
+* Pastikan fungsi `proc_open` dan `exec` **TIDAK** dicentang / tidak berada di dalam daftar fungsi yang dinonaktifkan (`disable_functions`).
+* Kedua fungsi ini wajib aktif agar paket `spatie/laravel-backup` dapat mengeksekusi binary `mysqldump` saat menjalankan pencadangan database harian.
+
 ---
 
 ## 4. Build Frontend Aset Sebelum Upload
@@ -145,7 +151,7 @@ BCRYPT_ROUNDS=12
 LOG_CHANNEL=daily
 LOG_STACK=single
 LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=error
+LOG_LEVEL=warning
 
 # --- Database (dari hPanel -> Databases -> Management) ---
 DB_CONNECTION=mysql
@@ -155,8 +161,8 @@ DB_DATABASE=uXXXXXXX_insani
 DB_USERNAME=uXXXXXXX_insani_user
 DB_PASSWORD=PasswordDatabaseAndaYangKuat
 
-# Path mysqldump jika backup spatie gagal mendeteksi binary (opsional)
-# DUMP_BINARY_PATH=/usr/bin/mysqldump
+# Path direktori mysqldump jika backup spatie gagal mendeteksi binary secara otomatis (opsional)
+# DUMP_BINARY_PATH=/usr/bin
 
 # --- Session & Keamanan Cookie ---
 SESSION_DRIVER=database
@@ -191,10 +197,11 @@ MAIL_REPLY_TO_ADDRESS="sapa@insani.id"
 MAIL_REPLY_TO_NAME="Layanan Sahabat Insani"
 
 # --- Cloudflare Turnstile Captcha (PRODUKSI) ---
+TURNSTILE_SITE_KEY=ProductionSiteKeyDariCloudflare
 VITE_TURNSTILE_SITE_KEY=ProductionSiteKeyDariCloudflare
 TURNSTILE_SECRET_KEY=ProductionSecretKeyDariCloudflare
 
-# --- Midtrans Payment Gateway PRODUKSI (Gateway Utama - Core API) ---
+# --- Midtrans Payment Gateway PRODUKSI (Gateway Resmi - Core API) ---
 MIDTRANS_MERCHANT_ID=ProductionMerchantID
 MIDTRANS_CLIENT_KEY=Mid-client-ProductionClientKey
 MIDTRANS_SERVER_KEY=Mid-server-ProductionServerKey
@@ -202,9 +209,13 @@ MIDTRANS_IS_PRODUCTION=true
 MIDTRANS_EXPIRY_QRIS_MINUTES=30
 MIDTRANS_EXPIRY_VA_HOURS=24
 
-# --- Xendit Payment Gateway (Cadangan / Legacy) ---
-XENDIT_API_KEY=xnd_production_...
-XENDIT_WEBHOOK_TOKEN=TokenWebhookXenditAsli
+# --- Spatie Backup (Database & File Storage) ---
+# Password enkripsi file zip arsip backup (opsional, disarankan string kuat acak)
+BACKUP_ARCHIVE_PASSWORD=PasswordEnkripsiZipKuat
+# Email penerima notifikasi laporan backup
+BACKUP_NOTIFICATION_EMAIL=sapa@insani.id
+# Target disk arsip backup (default: local)
+BACKUP_DISK=local
 
 # --- WhatsApp Gateway (Fonnte - Notifikasi WA Donatur Opsional) ---
 WHATSAPP_PROVIDER=fonnte
@@ -259,7 +270,7 @@ Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu cr
 
 | Tugas | Jadwal | Keterangan |
 |:---|:---|:---|
-| `queue:work --stop-when-empty --max-time=50 --tries=2` | Setiap menit | Memproses antrean email, notifikasi, dan dispatch job |
+| `queue:work --stop-when-empty --max-time=50 --memory=128 --tries=2` | Setiap menit | Memproses antrean email, notifikasi, dan dispatch job |
 | `programs:check-status` | 00:01 | Evaluasi status target donasi dan deadline program |
 | `disbursements:send-update-reminders` | 09:00 | Kirim pengingat pelaporan pencairan dana ke campaigner |
 | `donations:expire-stale --hours=48` | 02:00 | Menandai kedaluwarsa donasi manual/VA yang belum dibayar |
@@ -277,10 +288,17 @@ Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu cr
    /usr/bin/php /home/uXXXXXXX/domains/domainanda.com/laravel_app/artisan schedule:run >> /dev/null 2>&1
    ```
    *(Sesuaikan path `/home/uXXXXXXX/...` sesuai dengan path direktori akun hPanel Anda).*
+
+   > [!IMPORTANT]
+   > **Verifikasi Versi PHP CLI di Terminal SSH:**
+   > Jalankan `/usr/bin/php -v` di terminal SSH. Jika versi yang muncul **bukan PHP 8.3** (misalnya PHP 8.1 atau 8.2 bawaan default OS server), gunakan path binary CloudLinux PHP 8.3 secara eksplisit agar seluruh sintaks PHP 8.3 berjalan sempurna:
+   > ```bash
+   > /opt/alt/php83/usr/bin/php /home/uXXXXXXX/domains/domainanda.com/laravel_app/artisan schedule:run >> /dev/null 2>&1
+   > ```
 5. Klik **Save**.
 
 > [!NOTE]
-> Queue worker menggunakan `--max-time=50` (50 detik) dan `--stop-when-empty` agar selesai sebelum cron menit berikutnya dijalankan. Flag `withoutOverlapping()` memastikan tidak ada proses worker yang tumpang tindih.
+> Queue worker menggunakan `--max-time=50` (50 detik), `--memory=128` (128 MB RAM limit), dan `--stop-when-empty` agar selesai sebelum cron menit berikutnya dijalankan dan aman dari batasan RAM CloudLinux. Flag `withoutOverlapping()` memastikan tidak ada proses worker yang tumpang tindih.
 
 ---
 
@@ -334,11 +352,11 @@ php artisan storage:link
 
 ---
 
-## 10. Konfigurasi Payment Gateway & Webhook (Midtrans & Xendit)
+## 10. Konfigurasi Payment Gateway & Webhook (Midtrans Core API)
 
-Aplikasi Insani Indonesia menggunakan arsitektur pembayaran hybrid: **Midtrans Core API** sebagai gateway utama (100% native QRIS & Virtual Account tanpa Snap popup), serta **Xendit** sebagai gateway cadangan (legacy fallback).
+Aplikasi Insani Indonesia menggunakan **Midtrans Core API** sebagai payment gateway resmi (100% native QRIS & Virtual Account tanpa Snap popup) dengan verifikasi kriptografi SHA-512 signature.
 
-### A. Konfigurasi Midtrans (Gateway Utama)
+### Konfigurasi Midtrans
 1. Buka [Midtrans Dashboard (MAP)](https://dashboard.midtrans.com/) dan login.
 2. Pastikan mode diubah ke **Production Mode**.
 3. Buka menu **Settings** -> **Configuration**:
@@ -361,31 +379,26 @@ Aplikasi Insani Indonesia menggunakan arsitektur pembayaran hybrid: **Midtrans C
 > [!NOTE]
 > Webhook Midtrans di `MidtransWebhookController` diverifikasi otomatis menggunakan algoritma kriptografi SHA-512 Signature Key (`order_id + status_code + gross_amount + server_key`). Tidak memerlukan verifikasi token statis manual.
 
-### B. Konfigurasi Xendit (Gateway Cadangan / Legacy)
-1. Buka [Dashboard Xendit](https://dashboard.xendit.co/) -> **Settings** -> **Developers** -> **Webhooks**.
-2. Pada URL Callback Invoices, masukkan:
-   ```text
-   https://insani.id/webhooks/xendit
-   ```
-3. Salin **Verification Token (Callback Token)** dari dashboard Xendit.
-4. Tempelkan nilai tersebut ke dalam file `.env`:
-   ```dotenv
-   XENDIT_API_KEY=xnd_production_...
-   XENDIT_WEBHOOK_TOKEN=TokenYangDisalinTadi
-   ```
-5. Klik **Test and Save** di dashboard Xendit (harus mengembalikan status HTTP `200 OK`).
-
 ---
 
 ## 11. Konfigurasi Cloudflare Turnstile (Captcha)
 
 1. Buka [Cloudflare Dashboard](https://dash.cloudflare.com/) -> **Turnstile**.
-2. Tambahkan widget site baru dengan domain `insani.id`.
-3. Salin **Site Key** dan **Secret Key** ke `.env`:
+2. Tambahkan widget site baru dengan domain yang diizinkan (*Allowed Domains*):
+   - `insani.id`
+   - `www.insani.id`
+3. Salin **Site Key** dan **Secret Key** ke berkas `.env` server Hostinger:
    ```dotenv
+   TURNSTILE_SITE_KEY=SiteKeyDariCloudflare
    VITE_TURNSTILE_SITE_KEY=SiteKeyDariCloudflare
    TURNSTILE_SECRET_KEY=SecretKeyDariCloudflare
    ```
+4. Tambahkan juga secret di GitHub Repository Settings -> Secrets and variables -> Actions:
+   - Name: `VITE_TURNSTILE_SITE_KEY`
+   - Value: `SiteKeyDariCloudflare`
+
+> [!NOTE]
+> Aplikasi Insani.id menyalurkan `TURNSTILE_SITE_KEY` secara dinamis ke frontend melalui runtime Inertia.js. Jika di kemudian hari Anda merotasi key di Cloudflare, Anda cukup mengubah nilai `TURNSTILE_SITE_KEY` di berkas `.env` server tanpa perlu melakukan *re-build* aset frontend.
 
 > [!CAUTION]
 > Key testing bawaan Cloudflare (`1x00000000000000000000AA`) **tidak boleh** digunakan di server produksi! Selalu gunakan key produksi resmi dari dashboard Cloudflare.
@@ -422,9 +435,12 @@ Setelah seluruh tahapan selesai, jalankan checklist verifikasi berikut:
 | **Gambar/Avatar tidak tampil (404)** | Jalankan `php artisan storage:link` via SSH. Jika menggunakan Opsi B, pastikan symlink manual mengarah ke direktori `storage/app/public` yang benar. |
 | **"Vite manifest not found"** | Folder `public/build/` belum diupload. Jalankan `npm run build` di lokal dan unggah kembali folder `public/build/`. |
 | **Email SMTP gagal terkirim** | Pada Hostinger port 465 wajib menggunakan `MAIL_SCHEME=smtps`. Jika menggunakan port 587, gunakan `MAIL_SCHEME=tls`. Pastikan password email di hPanel sudah benar. |
+| **Limit SMTP Harian Hostinger tercapai** | Paket Business memiliki kuota ~500–1000 email/hari. Jika volume donatur melonjak tinggi, beralihlah ke relay transaksional (seperti Brevo, Mailgun, atau Postmark). |
 | **Midtrans Webhook 403 (Invalid Signature)** | Pastikan `MIDTRANS_SERVER_KEY` di file `.env` sudah sesuai dengan production Server Key di dashboard Midtrans, dan `MIDTRANS_IS_PRODUCTION=true`. |
 | **Queue job tidak kunjung diproses** | Pastikan Cron Job di hPanel berstatus aktif dengan interval `* * * * *` dan path biner `/usr/bin/php` serta `artisan` sudah valid. |
-| **Backup Spatie gagal saat dump DB** | Buka `.env` dan tambahkan `DUMP_BINARY_PATH=/usr/bin/mysqldump` (sesuaikan lokasi `mysqldump` pada server Hostinger jika berbeda). |
+| **Queue worker terhenti / SIGKILL** | Worker telah diproteksi dengan `--memory=128`. Jika memproses batch berat, worker keluar anggun sebelum batas RAM CloudLinux tercapai dan dilanjutkan menit berikutnya. |
+| **Backup Spatie gagal saat dump DB** | Pastikan `DUMP_BINARY_PATH=/usr/bin` terisi di `.env`, dan pastikan `proc_open` serta `exec` tidak dinonaktifkan di tab **PHP Functions** (`disable_functions`) hPanel. |
+| **Cron Job error syntax PHP CLI mismatch** | Biner `/usr/bin/php` bawaan OS mungkin masih PHP 8.1/8.2. Ubah path biner pada command cron hPanel menjadi `/opt/alt/php83/usr/bin/php`. |
 | **Admin tidak bisa masuk setelah seed** | Pastikan Anda menyelesaikan form `/force-password-change` setelah login dengan kata sandi bawaan `password`. |
 
 ---
