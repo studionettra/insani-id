@@ -44,8 +44,8 @@ return [
         ],
     ],
     'turnstile' => [
-        'secret_key' => env('TURNSTILE_SECRET_KEY', '1x0000000000000000000000000000000AA'),
-        'site_key' => env('TURNSTILE_SITE_KEY', '1x00000000000000000000AA'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY', env('APP_ENV', 'production') === 'production' ? null : '1x0000000000000000000000000000000AA'),
+        'site_key' => env('TURNSTILE_SITE_KEY', env('VITE_TURNSTILE_SITE_KEY', env('APP_ENV', 'production') === 'production' ? null : '1x00000000000000000000AA')),
     ],
 
     'whatsapp' => [

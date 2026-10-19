@@ -11,6 +11,28 @@ use Illuminate\Translation\PotentiallyTranslatedString;
 class TurnstileRule implements ValidationRule
 {
     /**
+     * Get the standardized validation rule array for Turnstile.
+     *
+     * In local/testing environments without a configured secret key,
+     * it evaluates to 'nullable' to avoid blocking development/testing.
+     * In production (or when explicitly configured), it strictly requires the captcha.
+     *
+     * @return array<int, mixed>
+     */
+    public static function rule(bool $nullableInTesting = false): array
+    {
+        if ($nullableInTesting && app()->environment('testing')) {
+            return ['nullable', 'string', new self];
+        }
+
+        if (app()->environment('local') && empty(config('services.turnstile.secret_key'))) {
+            return ['nullable', 'string', new self];
+        }
+
+        return ['required', 'string', new self];
+    }
+
+    /**
      * Run the validation rule.
      *
      * @param  Closure(string): PotentiallyTranslatedString  $fail
@@ -24,6 +46,11 @@ class TurnstileRule implements ValidationRule
                 if (app()->environment('local', 'testing')) {
                     return;
                 }
+
+                Log::critical('Cloudflare Turnstile verification failed: TURNSTILE_SECRET_KEY is empty in production environment.');
+                $fail('Layanan verifikasi keamanan belum dikonfigurasi di server. Silakan hubungi pengelola yayasan.');
+
+                return;
             }
 
             $response = Http::asForm()

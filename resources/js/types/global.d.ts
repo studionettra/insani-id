@@ -12,6 +12,7 @@ declare module '@inertiajs/core' {
     export interface InertiaConfig {
         sharedPageProps: {
             name: string;
+            turnstileSiteKey?: string | null;
             auth: Auth;
             notifications?: NotificationPayload | null;
             sidebarOpen: boolean;
