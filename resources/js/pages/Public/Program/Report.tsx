@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Turnstile } from '@marsidev/react-turnstile';
+import { useTurnstileSiteKey } from '@/hooks/use-turnstile';
 import PublicLayout from '@/layouts/PublicLayout';
 import { getLocalizedValue } from '@/lib/utils';
 import { useTranslation } from '@/hooks/use-translation';
@@ -41,10 +43,7 @@ export default function ProgramReport({ program, categories }: Props) {
     const { t, locale } = useTranslation();
     const { auth, flash } = usePage<any>().props;
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const turnstileRef = useRef<HTMLDivElement>(null);
-    const widgetIdRef = useRef<any>(null);
-
-    const turnstileSiteKey = (import.meta as any).env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+    const turnstileSiteKey = useTurnstileSiteKey();
 
     const [files, setFiles] = useState<File[]>([]);
     const [previews, setPreviews] = useState<string[]>([]);
@@ -61,53 +60,6 @@ export default function ProgramReport({ program, categories }: Props) {
         website: '', // Honeypot
         'cf-turnstile-response': '',
     });
-
-    useEffect(() => {
-        if (!document.getElementById('turnstile-script')) {
-            const script = document.createElement('script');
-            script.id = 'turnstile-script';
-            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-        }
-
-        const renderWidget = () => {
-            if ((window as any).turnstile && turnstileRef.current) {
-                try {
-                    widgetIdRef.current = (window as any).turnstile.render(turnstileRef.current, {
-                        sitekey: turnstileSiteKey,
-                        callback: (token: string) => {
-                            setData('cf-turnstile-response', token);
-                            clearErrors('cf-turnstile-response');
-                        },
-                        'expired-callback': () => {
-                            setData('cf-turnstile-response', '');
-                        },
-                        'error-callback': () => {
-                            setData('cf-turnstile-response', '');
-                        },
-                    });
-                } catch (e) {
-                    console.error('Turnstile rendering error', e);
-                }
-            } else {
-                setTimeout(renderWidget, 500);
-            }
-        };
-
-        renderWidget();
-
-        return () => {
-            if ((window as any).turnstile && widgetIdRef.current) {
-                try {
-                    (window as any).turnstile.remove(widgetIdRef.current);
-                } catch (e) {
-                    // Ignore
-                }
-            }
-        };
-    }, []);
 
     const ticketNumber = flash?.ticket_number;
 
@@ -459,12 +411,25 @@ export default function ProgramReport({ program, categories }: Props) {
                             </div>
 
                             {/* Cloudflare Turnstile */}
-                            <div className="flex flex-col items-center sm:items-start py-2">
-                                <div ref={turnstileRef} className="my-1"></div>
-                                {errors['cf-turnstile-response'] && (
-                                    <p className="text-xs text-rose-500 mt-1">{errors['cf-turnstile-response']}</p>
-                                )}
-                            </div>
+                            {turnstileSiteKey ? (
+                                <div className="flex flex-col items-center sm:items-start py-2">
+                                    <Turnstile
+                                        siteKey={turnstileSiteKey}
+                                        onSuccess={(token) => {
+                                            setData('cf-turnstile-response', token);
+                                            clearErrors('cf-turnstile-response');
+                                        }}
+                                        onExpire={() => setData('cf-turnstile-response', '')}
+                                        onError={() => setData('cf-turnstile-response', '')}
+                                        options={{
+                                            theme: 'light',
+                                        }}
+                                    />
+                                    {errors['cf-turnstile-response'] && (
+                                        <p className="text-xs text-rose-500 mt-1">{errors['cf-turnstile-response']}</p>
+                                    )}
+                                </div>
+                            ) : null}
 
                             {/* Submit Button */}
                             <div className="pt-4 border-t border-slate-100">

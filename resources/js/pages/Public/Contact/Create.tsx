@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
+import { useTurnstileSiteKey } from '@/hooks/use-turnstile';
 import PublicLayout from '@/layouts/PublicLayout';
 import useTranslation from '@/hooks/use-translation';
 
@@ -40,10 +42,9 @@ export default function ContactCreate({ faqs = [] }: any) {
         ? siteSettings.contact_maps_url 
         : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3965.6219083994824!2d106.8128105!3d-6.313297899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69ef82a08035fd%3A0x222843cf2a071b1b!2sInsani%20Indonesia!5e0!3m2!1sid!2sid!4v1784360269332!5m2!1sid!2sid";
     
-    // Cloudflare Turnstile Sitekey
-    const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
-    const turnstileRef = useRef<HTMLDivElement>(null);
-    const widgetIdRef = useRef<any>(null);
+    // Cloudflare Turnstile
+    const turnstileSiteKey = useTurnstileSiteKey();
+    const turnstileRef = useRef<TurnstileInstance>(null);
 
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -63,61 +64,14 @@ export default function ContactCreate({ faqs = [] }: any) {
     };
 
     useEffect(() => {
-        // Load Turnstile script dynamically
-        if (!document.getElementById('turnstile-script')) {
-            const script = document.createElement('script');
-            script.id = 'turnstile-script';
-            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-            script.async = true;
-            script.defer = true;
-            document.head.appendChild(script);
-        }
-
-        // Initialize widget when script loads or component mounts
-        const renderWidget = () => {
-            if (window.turnstile && turnstileRef.current) {
-                try {
-                    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-                        sitekey: turnstileSiteKey,
-                        callback: (token: string) => {
-                            setData('cf-turnstile-response', token);
-                            clearErrors('cf-turnstile-response');
-                        },
-                        'expired-callback': () => {
-                            setData('cf-turnstile-response', '');
-                        },
-                        'error-callback': () => {
-                            setData('cf-turnstile-response', '');
-                        }
-                    });
-                } catch (e) {
-                    console.error("Turnstile rendering error", e);
-                }
-            } else {
-                setTimeout(renderWidget, 500);
-            }
-        };
-
-        renderWidget();
-
-        return () => {
-            if (widgetIdRef.current !== null && window.turnstile) {
-                window.turnstile.remove(widgetIdRef.current);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
         if (flash?.success) {
             setSuccessMessage(flash.success);
             setErrorMessage(null);
             reset();
 
             // Reset Turnstile
-            if (widgetIdRef.current !== null && window.turnstile) {
-                window.turnstile.reset(widgetIdRef.current);
-                setData('cf-turnstile-response', '');
-            }
+            turnstileRef.current?.reset();
+            setData('cf-turnstile-response', '');
         }
         if (flash?.error) {
             setErrorMessage(flash.error);
@@ -128,7 +82,7 @@ export default function ContactCreate({ faqs = [] }: any) {
         e.preventDefault();
         setErrorMessage(null);
 
-        if (!data['cf-turnstile-response']) {
+        if (turnstileSiteKey && !data['cf-turnstile-response']) {
             const turnstileMsg = t('Harap selesaikan verifikasi keamanan (captcha) terlebih dahulu.');
             setErrorMessage(turnstileMsg);
             toast.error(turnstileMsg);
@@ -145,10 +99,8 @@ export default function ContactCreate({ faqs = [] }: any) {
                 reset();
 
                 // Reset Turnstile widget
-                if (widgetIdRef.current !== null && window.turnstile) {
-                    window.turnstile.reset(widgetIdRef.current);
-                    setData('cf-turnstile-response', '');
-                }
+                turnstileRef.current?.reset();
+                setData('cf-turnstile-response', '');
 
                 // Auto hide inline success banner after 8 seconds
                 setTimeout(() => {
@@ -161,10 +113,8 @@ export default function ContactCreate({ faqs = [] }: any) {
                 toast.error(firstError);
 
                 // If there's an error (e.g. invalid turnstile), reset the widget
-                if (widgetIdRef.current !== null && window.turnstile) {
-                    window.turnstile.reset(widgetIdRef.current);
-                    setData('cf-turnstile-response', '');
-                }
+                turnstileRef.current?.reset();
+                setData('cf-turnstile-response', '');
             }
         });
     };
@@ -388,10 +338,24 @@ export default function ContactCreate({ faqs = [] }: any) {
                                     </div>
 
                                     {/* Cloudflare Turnstile */}
-                                    <div className="py-2">
-                                        <div ref={turnstileRef}></div>
-                                        {errors['cf-turnstile-response'] && <p className="text-sm text-red-500 mt-2">{errors['cf-turnstile-response']}</p>}
-                                    </div>
+                                    {turnstileSiteKey ? (
+                                        <div className="py-2">
+                                            <Turnstile
+                                                ref={turnstileRef}
+                                                siteKey={turnstileSiteKey}
+                                                onSuccess={(token) => {
+                                                    setData('cf-turnstile-response', token);
+                                                    clearErrors('cf-turnstile-response');
+                                                }}
+                                                onExpire={() => setData('cf-turnstile-response', '')}
+                                                onError={() => setData('cf-turnstile-response', '')}
+                                                options={{
+                                                    theme: 'light',
+                                                }}
+                                            />
+                                            {errors['cf-turnstile-response'] && <p className="text-sm text-red-500 mt-2">{errors['cf-turnstile-response']}</p>}
+                                        </div>
+                                    ) : null}
 
                                     <Button 
                                         type="submit" 

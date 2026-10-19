@@ -8,11 +8,12 @@ use App\Models\ContactMessage;
 use App\Models\Faq;
 use App\Models\User;
 use App\Notifications\ContactMessageReceivedNotification;
+use App\Rules\TurnstileRule;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
 {
@@ -39,7 +40,7 @@ class ContactController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => [
                 'required',
                 'string',
@@ -113,26 +114,24 @@ class ContactController extends Controller
                     }
                 },
             ],
-            'cf-turnstile-response' => 'required|string',
+            'cf-turnstile-response' => TurnstileRule::rule(),
         ], [
             'phone.regex' => __('Nomor telepon hanya boleh memuat angka, spasi, dan simbol +, -, ().'),
             'message.min' => __('Pesan terlalu pendek, minimal 10 karakter.'),
             'message.max' => __('Pesan terlalu panjang, maksimal 2.000 karakter.'),
+            'cf-turnstile-response.required' => __('Mohon selesaikan verifikasi keamanan (Captcha).'),
         ]);
 
-        // Verify Turnstile
-        $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-            'secret' => config('services.turnstile.secret_key'),
-            'response' => $request->input('cf-turnstile-response'),
-            'remoteip' => $request->ip(),
-        ]);
+        if ($validator->fails()) {
+            $redirect = back()->withErrors($validator)->withInput();
+            if ($validator->errors()->has('cf-turnstile-response')) {
+                $redirect->with('error', $validator->errors()->first('cf-turnstile-response'));
+            }
 
-        if (! $response->json('success')) {
-            return back()
-                ->withErrors(['cf-turnstile-response' => __('Verifikasi keamanan gagal. Silakan coba kembali.')])
-                ->with('error', __('Verifikasi keamanan gagal. Silakan coba kembali.'));
+            return $redirect;
         }
 
+        $validated = $validator->validated();
         $cleanMessage = trim(strip_tags(str_replace("\0", '', $validated['message'])));
         $cleanName = trim(strip_tags(str_replace("\0", '', $validated['name'])));
         $cleanSubject = trim(strip_tags(str_replace("\0", '', $validated['subject'])));

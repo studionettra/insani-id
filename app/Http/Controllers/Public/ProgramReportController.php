@@ -8,11 +8,10 @@ use App\Models\ProgramReport;
 use App\Models\ProgramReportCategory;
 use App\Models\User;
 use App\Notifications\ProgramReportReceivedNotification;
+use App\Rules\TurnstileRule;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 
 class ProgramReportController extends Controller
 {
@@ -44,7 +43,7 @@ class ProgramReportController extends Controller
                 'id' => $program->id,
                 'title' => $program->title,
                 'slug' => $program->slug,
-                'cover_image' => $program->cover_image ? (str_starts_with($program->cover_image, 'http') ? $program->cover_image : Storage::url($program->cover_image)) : null,
+                'cover_image' => $program->cover_image ? (str_starts_with($program->cover_image, 'http') ? $program->cover_image : Storage::disk('public')->url($program->cover_image)) : null,
                 'campaigner_name' => $campaignerName,
             ],
             'categories' => $categories,
@@ -69,7 +68,7 @@ class ProgramReportController extends Controller
             'description' => 'required|string|min:10|max:1000',
             'evidence' => 'nullable|array|max:5',
             'evidence.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
-            'cf-turnstile-response' => 'required|string',
+            'cf-turnstile-response' => TurnstileRule::rule(),
         ], [
             'reporter_name.required' => 'Nama lengkap wajib diisi.',
             'reporter_phone.required' => 'Nomor handphone wajib diisi.',
@@ -83,19 +82,6 @@ class ProgramReportController extends Controller
             'evidence.*.max' => 'Ukuran maksimal file bukti adalah 5MB per file.',
             'cf-turnstile-response.required' => 'Verifikasi keamanan wajib diselesaikan.',
         ]);
-
-        // Verify Turnstile
-        $turnstileResponse = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-            'secret' => config('services.turnstile.secret_key'),
-            'response' => $request->input('cf-turnstile-response'),
-            'remoteip' => $request->ip(),
-        ]);
-
-        if (! $turnstileResponse->json('success')) {
-            throw ValidationException::withMessages([
-                'cf-turnstile-response' => 'Verifikasi keamanan gagal. Silakan coba lagi.',
-            ]);
-        }
 
         $uploadedFiles = [];
         if ($request->hasFile('evidence')) {
