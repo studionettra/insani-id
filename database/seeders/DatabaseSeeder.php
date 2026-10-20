@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@insani.id',
             'phone' => '081122334455',
             'password' => bcrypt('password'),
+            'must_change_password' => true,
         ]);
 
         $admin->assignRole('Administrator');
