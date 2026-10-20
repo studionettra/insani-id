@@ -84,21 +84,20 @@ Buka **hPanel** -> **Advanced** -> **PHP Configuration**:
 * `intl` (Wajib untuk format angka/mata uang Rupiah & tanggal multi-bahasa via `mcamara/laravel-localization`)
 * `bcmath` (Wajib untuk kalkulasi presisi nominal donasi, gateway fee, dan pencairan dana)
 * `pdo_mysql` (Koneksi database MariaDB/MySQL)
-* `zip` (Untuk backup zip via `spatie/laravel-backup` dan export dokumen)
+* `zip` (Untuk kompresi berkas arsip dan ekspor dokumen)
 * `curl`, `mbstring`, `openssl`, `tokenizer`, `xml`
 
 ### C. PHP Options / Resource Limits
 Buka tab **PHP Options** dan sesuaikan nilai berikut:
-* `memory_limit` = `256M` (mencegah out-of-memory saat resize gambar atau backup database)
+* `memory_limit` = `256M` (mencegah out-of-memory saat resize gambar atau pemrosesan antrean)
 * `upload_max_filesize` = `20M`
 * `post_max_size` = `25M`
 * `max_execution_time` = `120`
 * `max_input_time` = `120`
 
-### D. Verifikasi PHP Functions (`disable_functions`)
-Buka tab **PHP Functions** di hPanel:
-* Pastikan fungsi `proc_open` dan `exec` **TIDAK** dicentang / tidak berada di dalam daftar fungsi yang dinonaktifkan (`disable_functions`).
-* Kedua fungsi ini wajib aktif agar paket `spatie/laravel-backup` dapat mengeksekusi binary `mysqldump` saat menjalankan pencadangan database harian.
+### D. Konfigurasi PHP Functions & Akses CLI
+* Aplikasi Insani Indonesia telah dioptimalkan agar **tidak memerlukan fungsi berisiko seperti `proc_open()`** untuk tugas rutin. Pencadangan database dan berkas dikelola sepenuhnya oleh fitur **Automated Daily Backup** bawaan infrastruktur Hostinger Business.
+* Untuk kelancaran operasional deployment dan eksekusi Artisan CLI, pastikan akses SSH aktif melalui menu **Advanced** -> **SSH Access**.
 
 ---
 
@@ -161,9 +160,6 @@ DB_DATABASE=uXXXXXXX_insani
 DB_USERNAME=uXXXXXXX_insani_user
 DB_PASSWORD=PasswordDatabaseAndaYangKuat
 
-# Path direktori mysqldump jika backup spatie gagal mendeteksi binary secara otomatis (opsional)
-# DUMP_BINARY_PATH=/usr/bin
-
 # --- Session & Keamanan Cookie ---
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
@@ -209,18 +205,13 @@ MIDTRANS_IS_PRODUCTION=true
 MIDTRANS_EXPIRY_QRIS_MINUTES=30
 MIDTRANS_EXPIRY_VA_HOURS=24
 
-# --- Spatie Backup (Database & File Storage) ---
-# Password enkripsi file zip arsip backup (opsional, disarankan string kuat acak)
-BACKUP_ARCHIVE_PASSWORD=PasswordEnkripsiZipKuat
-# Email penerima notifikasi laporan backup
-BACKUP_NOTIFICATION_EMAIL=sapa@insani.id
-# Target disk arsip backup (default: local)
-BACKUP_DISK=local
-
 # --- WhatsApp Gateway (Fonnte - Notifikasi WA Donatur Opsional) ---
 WHATSAPP_PROVIDER=fonnte
 WHATSAPP_ENDPOINT=https://api.fonnte.com/send
 WHATSAPP_TOKEN=TokenAkunFonnteAnda
+
+# Catatan: Cadangan database & file storage ditangani otomatis setiap hari
+# oleh fitur Automated Daily Backup pada infrastruktur hPanel Hostinger.
 ```
 
 > [!CAUTION]
@@ -275,6 +266,7 @@ Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu cr
 | `disbursements:send-update-reminders` | 09:00 | Kirim pengingat pelaporan pencairan dana ke campaigner |
 | `donations:expire-stale --hours=24 --online-hours=24` | 02:00 | Menandai kedaluwarsa donasi manual/VA yang belum dibayar |
 | `notifications:prune-read` | 03:30 | Hapus notifikasi sistem yang telah dibaca >60 hari |
+| `activity-log:prune-auth` | 03:45 | Bersihkan log aktivitas autentikasi yang berusia >60 hari |
 | `model:prune` | 04:00 | Prune data first-party analytics (sessions, pageviews, events) |
 
 ### Langkah Pengaturan:
@@ -350,7 +342,39 @@ php artisan storage:link
 
 ---
 
-## 10. Konfigurasi Payment Gateway & Webhook (Midtrans Core API)
+## 10. Otomasi Deployment via GitHub Actions (CI/CD Pipeline)
+
+Proyek ini telah dilengkapi pipeline deployment otomatis berbasis rsync dan SSH di [`.github/workflows/deploy.yml`](file:///.github/workflows/deploy.yml). Dengan pipeline ini, Anda tidak perlu lagi mengunggah berkas secara manual atau login ke SSH setiap kali ada pembaruan kode.
+
+### Fitur Pipeline CI/CD:
+1. **Quality Gate:** Menjalankan tes otomatis Pest dan pengecekan kode Laravel Pint sebelum file disentuh di server.
+2. **Kompilasi Aset Otomatis:** Membangun bundle Vite di runner Ubuntu GitHub (Node.js 20) dengan inject token Turnstile.
+3. **Sinkronisasi Aman (rsync):** Mengunggah berkas dengan perlindungan terhadap berkas `.env`, direktori `storage/`, dan berkas upload pengguna agar tidak tertimpa atau terhapus.
+4. **Zero-Downtime Maintenance Mode:** Mengaktifkan maintenance page dengan bypass secret token dinamis, membersihkan cache, menjalankan `migrate --force`, mengoptimalkan konfigurasi (`optimize`, `view:cache`, `event:cache`), lalu membuka kembali situs secara otomatis.
+5. **Automated Health Check:** Memverifikasi ketersediaan situs via endpoint `https://domainanda.com/up`.
+
+### Konfigurasi GitHub Repository Secrets:
+Buka repositori GitHub Anda -> **Settings** -> **Secrets and variables** -> **Actions** -> klik **New repository secret**, lalu tambahkan:
+
+| Nama Secret | Contoh Nilai | Keterangan |
+|:---|:---|:---|
+| `HOSTINGER_HOST` | `156.67.xxx.xxx` atau `ssh.domainanda.com` | IP Server atau Hostname SSH dari menu **SSH Access** hPanel |
+| `HOSTINGER_PORT` | `65002` | Port SSH Hostinger (default Hostinger adalah 65002) |
+| `HOSTINGER_USERNAME` | `u123456789` | Username SSH dari hPanel |
+| `HOSTINGER_SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----...` | Private Key SSH (pasangan dari Public Key yang didaftarkan di hPanel) |
+| `HOSTINGER_TARGET_PATH` | `/home/u123456789/domains/insani.id/laravel_app` | Path absolut folder proyek di server |
+| `HOSTINGER_DOMAIN` | `insani.id` | Domain utama aplikasi |
+| `VITE_TURNSTILE_SITE_KEY` | `0x4AAAAAA...` | Site Key Turnstile Cloudflare untuk kompilasi frontend |
+| `APP_MAINTENANCE_SECRET` | *(string acak opsional)* | Token rahasia bypass maintenance mode selama deployment |
+
+### Cara Menjalankan Deployment:
+1. Buka tab **Actions** di repositori GitHub Anda.
+2. Pilih workflow **Deploy to Hostinger**.
+3. Klik tombol **Run workflow**, pilih branch `main`, lalu klik **Run workflow**.
+
+---
+
+## 11. Konfigurasi Payment Gateway & Webhook (Midtrans Core API)
 
 Aplikasi Insani Indonesia menggunakan **Midtrans Core API** sebagai payment gateway resmi (100% native QRIS & Virtual Account tanpa Snap popup) dengan verifikasi kriptografi SHA-512 signature.
 
@@ -379,7 +403,7 @@ Aplikasi Insani Indonesia menggunakan **Midtrans Core API** sebagai payment gate
 
 ---
 
-## 11. Konfigurasi Cloudflare Turnstile (Captcha)
+## 12. Konfigurasi Cloudflare Turnstile (Captcha)
 
 1. Buka [Cloudflare Dashboard](https://dash.cloudflare.com/) -> **Turnstile**.
 2. Tambahkan widget site baru dengan domain yang diizinkan (*Allowed Domains*):
@@ -403,7 +427,7 @@ Aplikasi Insani Indonesia menggunakan **Midtrans Core API** sebagai payment gate
 
 ---
 
-## 12. Verifikasi Post-Deploy & Troubleshooting
+## 13. Verifikasi Post-Deploy & Troubleshooting
 
 Setelah seluruh tahapan selesai, jalankan checklist verifikasi berikut:
 
@@ -437,7 +461,7 @@ Setelah seluruh tahapan selesai, jalankan checklist verifikasi berikut:
 | **Midtrans Webhook 403 (Invalid Signature)** | Pastikan `MIDTRANS_SERVER_KEY` di file `.env` sudah sesuai dengan production Server Key di dashboard Midtrans, dan `MIDTRANS_IS_PRODUCTION=true`. |
 | **Queue job tidak kunjung diproses** | Pastikan Cron Job di hPanel berstatus aktif dengan interval `* * * * *` dan path biner `/usr/bin/php` serta `artisan` sudah valid. |
 | **Queue worker terhenti / SIGKILL** | Worker telah diproteksi dengan `--memory=128`. Jika memproses batch berat, worker keluar anggun sebelum batas RAM CloudLinux tercapai dan dilanjutkan menit berikutnya. |
-| **Backup Spatie gagal saat dump DB** | Pastikan `DUMP_BINARY_PATH=/usr/bin` terisi di `.env`, dan pastikan `proc_open` serta `exec` tidak dinonaktifkan di tab **PHP Functions** (`disable_functions`) hPanel. |
+| **Pencadangan data server** | Cadangan database dan berkas dikelola langsung di level infrastruktur. Pastikan fitur Automated Daily Backup aktif di **hPanel** -> **Files** -> **Backups**. |
 | **Cron Job error syntax PHP CLI mismatch** | Biner `/usr/bin/php` bawaan OS mungkin masih PHP 8.1/8.2. Ubah path biner pada command cron hPanel menjadi `/opt/alt/php83/usr/bin/php`. |
 | **Admin tidak bisa masuk setelah seed** | Pastikan Anda menyelesaikan form `/force-password-change` setelah login dengan kata sandi bawaan `password`. |
 
