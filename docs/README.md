@@ -1,6 +1,6 @@
 # 📚 Direktori Dokumentasi Proyek — Insani Indonesia (`insani.id`)
 
-Selamat datang di repositori dokumentasi resmi platform **Insani Indonesia**. Seluruh dokumen teknis, spesifikasi arsitektur, laporan audit keamanan & performa, panduan operasional server, dan naskah konten dikelompokkan ke dalam kategori direktori berikut:
+Selamat datang di repositori dokumentasi resmi platform **Insani Indonesia**. Seluruh dokumen teknis, spesifikasi arsitektur, laporan audit keamanan & performa, panduan operasional server, dan naskah konten dikelompokkan secara terstruktur ke dalam kategori direktori berikut:
 
 ---
 
@@ -8,15 +8,15 @@ Selamat datang di repositori dokumentasi resmi platform **Insani Indonesia**. Se
 
 ```text
 docs/
-├── specifications/          # Spesifikasi Cetak Biru & Desain Sistem Inti (v1.0)
-├── audit/                   # Laporan Audit Keamanan, Performa, QA, dan Analisis Beban
-│   └── archive/             # Arsip catatan audit internal historis
+├── specifications/          # Cetak Biru Perancangan & Spesifikasi Sistem Inti (v1.0)
+├── audit/                   # Laporan Audit Kesiapan Deployment, Keamanan, QA, & Performa
+│   └── archive/             # Arsip laporan audit historis & catatan teknis masa lalu
 ├── deployment/              # Panduan Operasional Server, LiteSpeed, dan SOP Admin
 ├── implementation-plan/     # Rencana Kerja Teknis & Migrasi (Aktif)
-│   └── archive/             # Rencana fase implementasi MVP yang telah selesai (shipped)
-├── content/                 # Naskah Konten CMS, Narasi Program, dan Riset Bisnis
+│   └── archive/             # Arsip rencana fase implementasi MVP yang telah rampung (shipped)
+├── content/                 # Naskah Konten CMS, Narasi Program, dan Standar Desain
 │   └── archive/             # Arsip riset komparasi finansial masa lalu
-└── policy/                  # Dokumen Kebijakan & Regulasi Publik (Terikat PageSeeder)
+└── policy/                  # Dokumen Regulasi Publik (Terikat langsung ke PageSeeder)
 ```
 
 ---
@@ -33,11 +33,15 @@ Cetak biru perancangan awal sistem platform Galang Dana Insani Indonesia (GDII) 
 
 ---
 
-### 2. 🔍 [Laporan Audit & QA (`docs/audit/`)](file:///c:/laragon/www/insani-id/docs/audit)
-Laporan evaluasi teknis, audit keamanan, optimasi kueri, dan hasil pengujian otomatis pra-rilis:
-* [**`AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER.md`**](file:///c:/laragon/www/insani-id/docs/audit/AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER.md) — Audit mendalam & QA Hostinger Business Shared Hosting (LiteSpeed, 482 Pest Tests, 233 Routes, CAPI security hardening).
-* [**`DEPLOYMENT_READINESS_AUDIT.md`**](file:///c:/laragon/www/insani-id/docs/audit/DEPLOYMENT_READINESS_AUDIT.md) — Audit kesiapan infrastruktur dan simulasi beban donasi (5K, 10K, 50K concurrent).
-* [**`archive/BACKEND_AUDIT_AND_TASKS.md`**](file:///c:/laragon/www/insani-id/docs/audit/archive/BACKEND_AUDIT_AND_TASKS.md) — Catatan temuan audit backend internal versi awal (Agustus 2026).
+### 2. 🔍 [Laporan Audit & Kesiapan Sistem (`docs/audit/`)](file:///c:/laragon/www/insani-id/docs/audit)
+Laporan evaluasi komprehensif keamanan, optimasi kueri, integrasi payment gateway, dan kesiapan hosting:
+* [**`AUDIT_KESIAPAN_DEPLOYMENT_KOMPREHENSIF.md`**](file:///c:/laragon/www/insani-id/docs/audit/AUDIT_KESIAPAN_DEPLOYMENT_KOMPREHENSIF.md) — **★ DOKUMEN MASTER:** Audit lengkap pra-deployment Hostinger Business (Arsitektur, 551 Pest Tests, Hardening Keamanan, Optimasi Kueri, Midtrans Core API, dan Simulasi Beban).
+* [**`archive/`**](file:///c:/laragon/www/insani-id/docs/audit/archive) — Arsip checkpoint audit masa lalu:
+  * [`CODEBASE_REVIEW_2026_10_10.md`](file:///c:/laragon/www/insani-id/docs/audit/archive/CODEBASE_REVIEW_2026_10_10.md) — Audit statis kode sumber & mitigasi CR-001 s/d CR-006.
+  * [`DEPLOYMENT_READINESS_HOSTINGER_BUSINESS_OCT10.md`](file:///c:/laragon/www/insani-id/docs/audit/archive/DEPLOYMENT_READINESS_HOSTINGER_BUSINESS_OCT10.md) — Evaluasi runtime 10 Oktober.
+  * [`AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER_OCT4.md`](file:///c:/laragon/www/insani-id/docs/audit/archive/AUDIT_DAN_QA_PRE_DEPLOYMENT_HOSTINGER_OCT4.md) — Audit QA & verifikasi 233 rute (4 Oktober).
+  * [`DEPLOYMENT_READINESS_AUDIT_OCT3.md`](file:///c:/laragon/www/insani-id/docs/audit/archive/DEPLOYMENT_READINESS_AUDIT_OCT3.md) — Laporan awal kesiapan deployment (3 Oktober).
+  * [`BACKEND_AUDIT_AND_TASKS.md`](file:///c:/laragon/www/insani-id/docs/audit/archive/BACKEND_AUDIT_AND_TASKS.md) — Catatan temuan audit backend internal (Agustus 2026).
 
 ---
 
@@ -50,17 +54,18 @@ Instruksi langkah demi langkah konfigurasi lingkungan produksi dan operasional a
 
 ### 4. 🛠️ [Rencana Implementasi Teknis (`docs/implementation-plan/`)](file:///c:/laragon/www/insani-id/docs/implementation-plan)
 Dokumen rencana kerja teknis yang terstruktur untuk migrasi dan pembenahan sistem:
-* [**`PRE_DEPLOYMENT_FIXES_PLAN.md`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/PRE_DEPLOYMENT_FIXES_PLAN.md) — Rencana aksi perbaikan temuan kritis pra-deployment.
-* [**`MIDTRANS_CORE_API_IMPLEMENTATION_PLAN.md`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/MIDTRANS_CORE_API_IMPLEMENTATION_PLAN.md) — Blueprint migrasi Payment Gateway dari Xendit ke Midtrans Core API (Native UI).
-* [**`DOCS_RESTRUCTURE_PLAN.md`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/DOCS_RESTRUCTURE_PLAN.md) — Rencana penataan direktori dokumentasi project.
-* [**`archive/`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/archive) — Arsip rencana fase MVP yang telah rampung (`PHASE_1`, `PHASE_2`, `PHASE_8`, `COMPANY_PROFILE_PHASE_1`, `COMPANY_PROFILE_PHASE_2`).
+* [**`PRE_DEPLOYMENT_FIXES_PLAN.md`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/PRE_DEPLOYMENT_FIXES_PLAN.md) — **Rencana Aktif:** Aksi perbaikan pra-deployment Hostinger.
+* [**`archive/`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/archive) — Arsip rencana fase implementasi yang telah selesai (*shipped*):
+  * [**`MVP_PHASES_IMPLEMENTATION_ARCHIVE.md`**](file:///c:/laragon/www/insani-id/docs/implementation-plan/archive/MVP_PHASES_IMPLEMENTATION_ARCHIVE.md) — **★ KONSOLIDASI FASE MVP:** Rangkuman rencana kerja Phase 1 (Auth/RBAC), Phase 2 (i18n & Master Data), Phase 8 (Laporan & SEO), dan Company Profile Phase 1 & 2.
+  * [`MIDTRANS_CORE_API_IMPLEMENTATION_PLAN.md`](file:///c:/laragon/www/insani-id/docs/implementation-plan/archive/MIDTRANS_CORE_API_IMPLEMENTATION_PLAN.md) — Blueprint migrasi Payment Gateway dari Xendit ke Midtrans Core API.
+  * [`DOCS_RESTRUCTURE_PLAN.md`](file:///c:/laragon/www/insani-id/docs/implementation-plan/archive/DOCS_RESTRUCTURE_PLAN.md) — Rencana awal penataan folder dokumentasi.
 
 ---
 
-### 5. ✍️ [Naskah Konten & Seeder CMS (`docs/content/`)](file:///c:/laragon/www/insani-id/docs/content)
-Naskah acuan resmi konten publik dan narasi program yayasan:
+### 5. ✍️ [Naskah Konten & Standar Desain (`docs/content/`)](file:///c:/laragon/www/insani-id/docs/content)
+Naskah acuan resmi konten publik dan standar visual yayasan:
+* [**`fokus-program-insani.md`**](file:///c:/laragon/www/insani-id/docs/content/fokus-program-insani.md) — Naskah definitif 6 Fokus Program Yayasan (Blok A Realitas Lapangan + Blok B Capaian Program). Menjadi *source of truth* untuk `CategorySeeder.php`.
 * [**`PANDUAN_DESAIN_BANNER_BERANDA.md`**](file:///c:/laragon/www/insani-id/docs/content/PANDUAN_DESAIN_BANNER_BERANDA.md) — Panduan standar desain banner beranda, spesifikasi aspek rasio (Desktop 1920x820 vs Mobile 1080x1920), pemetaan safe zone, etika visual filantropi, dan optimasi LCP.
-* [**`fokus-program-insani.md`**](file:///c:/laragon/www/insani-id/docs/content/fokus-program-insani.md) — Naskah definitif 6 Fokus Program Yayasan (BLOK A Narasi Realitas Lapangan + BLOK B Narasi Capaian Program). Menjadi *source of truth* untuk `CategorySeeder.php`.
 * [**`archive/analisis-biaya-xendit-vs-midtrans.html`**](file:///c:/laragon/www/insani-id/docs/content/archive/analisis-biaya-xendit-vs-midtrans.html) — Laporan komparasi kalkulasi biaya transaksi gateway Xendit vs Midtrans.
 
 ---
