@@ -273,9 +273,7 @@ Cron job ini adalah **jantung otomatisasi** di Hostinger Shared Hosting. Satu cr
 | `queue:work --stop-when-empty --max-time=50 --memory=128 --tries=2` | Setiap menit | Memproses antrean email, notifikasi, dan dispatch job |
 | `programs:check-status` | 00:01 | Evaluasi status target donasi dan deadline program |
 | `disbursements:send-update-reminders` | 09:00 | Kirim pengingat pelaporan pencairan dana ke campaigner |
-| `donations:expire-stale --hours=48` | 02:00 | Menandai kedaluwarsa donasi manual/VA yang belum dibayar |
-| `backup:run --only-db` | 01:00 | Backup otomatis database MySQL via Spatie Backup |
-| `backup:clean` | 01:30 | Membersihkan file backup lama sesuai aturan retensi |
+| `donations:expire-stale --hours=24 --online-hours=24` | 02:00 | Menandai kedaluwarsa donasi manual/VA yang belum dibayar |
 | `notifications:prune-read` | 03:30 | Hapus notifikasi sistem yang telah dibaca >60 hari |
 | `model:prune` | 04:00 | Prune data first-party analytics (sessions, pageviews, events) |
 
@@ -423,7 +421,7 @@ Setelah seluruh tahapan selesai, jalankan checklist verifikasi berikut:
 - [ ] Dashboard manajemen admin dapat diakses lancar
 - [ ] First-party Analytics aktif mencatat kunjungan (endpoint `/analytics/collect` dan `/analytics/heartbeat` merespon 200 OK)
 - [ ] Cron job berjalan di server — cek log: `tail -f storage/logs/laravel.log`
-- [ ] Database backup berfungsi: jalankan manual `php artisan backup:run --only-db` lalu cek dengan `php artisan backup:list`
+- [ ] Automated Daily Backup aktif di hPanel (Hostinger mengamankan snapshot database MySQL & file storage secara otomatis)
 - [ ] Izin berkas folder `storage/` dan `bootstrap/cache` telah dipastikan `755` (atau `775`) dan bukan `777`
 - [ ] Submit sitemap XML ke [Google Search Console](https://search.google.com/search-console): `https://insani.id/sitemap.xml`
 
