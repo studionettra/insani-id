@@ -3,8 +3,8 @@
 
 > **Kategori:** Naskah Acuan Konten & Desain Visual (`docs/content/`)  
 > **Target Pengguna:** Tim Desain Grafis, Content Editor, Administrator Kampanye, dan Tim Komunikasi Publik  
-> **Versi Dokumen:** 1.0 — Oktober 2026  
-> **Kompatibilitas Sistem:** Laravel 11 + Inertia React (Hero Slider `Home/Index.tsx`)
+> **Versi Dokumen:** 1.1 — Oktober 2026  
+> **Kompatibilitas Sistem:** Laravel 13 + Inertia v3 React (Hero Slider `Public/Home/Index.tsx`)
 
 ---
 
@@ -28,7 +28,7 @@ Panduan ini menetapkan standar matematis, tata letak, safe zone, dan etika visua
 
 ## 🏗️ 1. Bedah Arsitektur Tampilan Banner Beranda (Frontend Analysis)
 
-Berdasarkan implementasi kode pada [`resources/js/pages/Public/Home/Index.tsx`](file:///c:/laragon/www/insani-id/resources/js/pages/Public/Home/Index.tsx) dan [`resources/js/layouts/PublicLayout.jsx`](file:///c:/laragon/www/insani-id/resources/js/layouts/PublicLayout.jsx), banner beranda terdiri atas **4 lapisan (layers)** yang bertumpuk:
+Berdasarkan implementasi kode pada [`resources/js/pages/Public/Home/Index.tsx`](file:///c:/laragon/www/insani-id/resources/js/pages/Public/Home/Index.tsx) dan [`resources/js/layouts/PublicLayout.tsx`](file:///c:/laragon/www/insani-id/resources/js/layouts/PublicLayout.tsx), banner beranda terdiri atas **4 lapisan (layers)** yang bertumpuk:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -52,7 +52,7 @@ Berdasarkan implementasi kode pada [`resources/js/pages/Public/Home/Index.tsx`](
    * **Karakteristik:** Area 35%–40% terbawah gambar akan digelapkan oleh gradien transparan menuju hitam pekat 80%. Tujuannya agar teks putih di atasnya selalu terbaca dengan kontras tinggi (sesuai standar aksesibilitas WCAG AA).
 3. **Lapisan 3 — Tipografi Dinamis & Tombol CTA:**
    * Diletakkan di bagian bawah: `absolute inset-0 flex flex-col justify-end pb-16 md:pb-24`.
-   * **Desktop:** Judul teks berukuran `text-3xl` s.d. `text-5xl` (font bold), paragraf deskripsi hingga 200 karakter, dan tombol bulat putih *"Lihat Selengkapnya / Donasi Sekarang"*.
+   * **Desktop:** Judul teks berukuran `text-3xl` s.d. `text-5xl` (font bold), paragraf deskripsi hingga 200 karakter, dan tombol bulat putih berlabel *"Lihat Selengkapnya"* (dihasilkan otomatis oleh sistem via `t('Lihat Selengkapnya', 'Selengkapnya')` berdasarkan `cta_link`).
    * **Mobile:** Menempati hingga **45% tinggi layar bawah**.
 4. **Lapisan 4 — Elemen UI Mengambang (Floating Controls & Navigation):**
    * **Tombol Panah Slider (Next/Prev):** Berada di pojok kanan bawah (`bottom-12 right-6 md:right-12`).
@@ -91,7 +91,7 @@ Untuk menghasilkan ketajaman optimal di layar biasa maupun layar retina (High-DP
 │                                  │                                                             │
 │         AREA LAPANG /            │   • Letakkan mata/wajah relawan, penerima manfaat,          │
 │       BACKGROUND NETRAL          │     atau aksi lapangan di sini.                             │
-│                                  │   • Koordinat: X: 900px s.d. 1820px, Y: 80px s.d. 650px    │ 500px
+│                                  │   • Koordinat: X: 900px s.d. 1820px, Y: 80px s.d. 650px     │ 500px
 │                                  │                                                             │
 ├──────────────────────────────────┤                               ┌─────────────────────────────┤
 │ SYSTEM OVERLAY ZONE              │                               │   SLIDER CHEVRON BUTTONS    │
@@ -135,8 +135,8 @@ Tampilan mobile adalah titik paling krusial karena layar smartphone memiliki ras
 │                                                            │
 │  • Area paling aman 100% terlihat di SEMUA jenis HP        │
 │    (iPhone SE, iPhone 15 Pro, Samsung S24 Ultra).          │
-│  • Koordinat Vertikal: Y: 180px s.d. 950px                │
-│  • Margin Horizontal: X: 80px s.d. 1000px                 │
+│  • Koordinat Vertikal: Y: 180px s.d. 950px                 │
+│  • Margin Horizontal: X: 80px s.d. 1000px                  │
 │                                                            │
 │                                                            │
 ├────────────────────────────────────────────────────────────┤ 950px
@@ -176,22 +176,25 @@ Tergantung pada kebutuhan divisi komunikasi yayasan, ada dua metode pembuatan ba
 
 ### Mode A: Banner Fotografi Dinamis (Metode Standar & Sangat Direkomendasikan)
 Pada mode ini, banner hanya berisi **foto dokumentasi asli (high-res photography)** tanpa teks judul yang ditempel manual pada gambar.
-* **Mekanisme:** Judul, deskripsi, dan tombol diisi langsung melalui formulir CMS Admin.
+* **Mekanisme:** Judul, deskripsi, dan tautan tombol diisi langsung melalui formulir CMS Admin.
 * **Keunggulan:**
-  * **Otomatis Multibahasa:** Judul dan deskripsi otomatis diterjemahkan ke Bahasa Indonesia, Inggris, dan Arab sesuai bahasa yang dipilih pengunjung.
+  * **Alur Multibahasa Terintegrasi:** Judul dan deskripsi yang diinput dalam Bahasa Indonesia dapat diterjemahkan ke Bahasa Inggris dan Arab secara otomatis menggunakan tombol *"Terjemahkan Otomatis"* di formulir CMS Admin, kemudian tersimpan ke basis data sehingga langsung tampil sesuai bahasa yang dipilih pengunjung.
   * **SEO Friendly:** Teks judul terbaca oleh mesin pencari Google sebagai elemen `<h2>` yang sah.
-  * **Responsif Sempurna:** Teks HTML otomatis mengatur ukuran font (*fluid typography*) di smartphone maupun desktop.
+  * **Responsif Sempurna:** Teks HTML otomatis mengatur ukuran font (*fluid typography*) di smartphone maupun desktop tanpa risiko teks gambar pecah atau buram.
 * **Panduan untuk Desainer:**
   * Cukup sediakan foto berkualitas tinggi dengan komposisi yang tepat:
-    * File Desktop: Foto dengan ruang kosong (*negative space*) di kiri, subjek di kanan.
-    * File Mobile: Foto dengan ruang kosong di bawah, subjek di tengah-atas.
+    * File Desktop: Foto dengan ruang lapang (*negative space*) di kiri, subjek di kanan.
+    * File Mobile: Foto dengan ruang lapang di bawah, subjek di tengah-atas.
 
 ### Mode B: Banner Grafis Komprehensif (Poster Campaign / Acara Tertentu)
 Digunakan saat yayasan merilis kampanye khusus bertema tematik (misal: *Ramadan 1448 H*, *Kurban Berkah Nusantara*, *Darurat Bencana Gempa*), di mana tim kreatif mendesain poster khusus dengan tipografi dan ilustrasi terintegrasi.
-* **Mekanisme CMS:** Field Judul & Deskripsi di Admin dikosongkan (atau hanya diisi judul ringkas untuk alt-text), tombol CTA diisi link program.
+* **Mekanisme CMS & Catatan Validasi Sistem:**
+  * **Judul Banner (ID) Wajib Diisi:** Validasi sistem backend ([`HomepageBannerController.php`](file:///c:/laragon/www/insani-id/app/Http/Controllers/Admin/HomepageBannerController.php)) dan formulir CMS mewajibkan input `title.id` (maks. 255 karakter), sehingga **TIDAK BISA DIKOSONGKAN**.
+  * **Deskripsi Singkat:** Bersifat opsional (dapat dikosongkan jika seluruh informasi penting sudah tertera di poster grafis).
+  * **Peringatan Tumpang Tindih Teks:** Karena judul sistem selalu dirender di atas banner pada area kiri bawah, desainer wajib memastikan **TIDAK MENARUH TEKS GRAFIS** di *System Overlay Zone* (X: 60px – 1100px, Y: 500px – 760px). Isi field judul di CMS dengan judul ringkas yang serasi dengan poster.
 * **Aturan Wajib:**
   1. Teks poster tidak boleh diletakkan di tepi kanvas (terapkan margin minimal 100px di semua sisi).
-  2. Pada versi mobile, seluruh tipografi grafis (misal *"SEDEKAH AIR BERSIH"*) **wajib berada di dalam Golden Safe Zone (Y: 200px – 900px)**.
+  2. Pada versi mobile, seluruh tipografi grafis (misal *"SEDEKAH AIR BERSIH"*) **wajib berada di dalam Golden Safe Zone (Y: 200px – 900px)** agar tidak tertutup gradien dan tombol CTA sistem di bawah.
   3. Gunakan kontras warna yang tegas terhadap gradien gelap bawaan sistem.
 
 ---
@@ -204,11 +207,17 @@ Dalam mendesain aset visual yayasan filantropi resmi Insani Indonesia, seluruh t
 > Sesuai ketentuan resmi dalam [AGENTS.md](file:///c:/laragon/www/insani-id/AGENTS.md):
 > **DILARANG KERAS** menggunakan icon `Sparkles`, bintang kilau, atau grafis kilauan artificial di seluruh banner dan materi promosi Insani. Simbol ini berkonotasi gimmick kecerdasan buatan (*AI slop*) dan bertentangan dengan marwah lembaga kemanusiaan resmi. Gunakan elemen visual humanis, geometris minimalis, atau ikon resmi dari katalog Lucide seperti `Heart`, `ShieldCheck`, `CheckCircle2`, `Landmark`, atau `Compass`.
 
-### 2. Prinsip Memuliakan Penerima Manfaat (*Dignity First*)
+### 2. Larangan Ikon Berlogo Dollar ($) & Standar Ikon Finansial (Strict Rule)
+> Sesuai ketentuan resmi dalam [AGENTS.md](file:///c:/laragon/www/insani-id/AGENTS.md):
+> **DILARANG KERAS** menggunakan ikon yang menampilkan simbol mata uang Dollar (`$`) seperti `DollarSign`, `CircleDollarSign`, `BadgeDollarSign`, serta ikon `Receipt` (karena katalog default Lucide memuat grafis `$` di dalamnya).
+> Seluruh transaksi, donasi, dan penyaluran di Insani menggunakan mata uang **Rupiah (IDR)**.
+> Gunakan ikon representatif seperti `Wallet`, `CreditCard`, `Coins`, `Banknote`, `Landmark`, `HandCoins`, `ReceiptText` (nota teks bergaris tanpa lambang `$`), atau `Printer`.
+
+### 3. Prinsip Memuliakan Penerima Manfaat (*Dignity First*)
 * **Hindari Pornografi Kemiskinan (*Poverty Porn*):** Jangan menampilkan subjek penerima manfaat dalam kondisi yang merendahkan martabat (misal: menangis histeris dengan zoom ekstrem, pakaian kotor yang dieksploitasi, atau ekspresi tanpa harapan).
 * **Fokus pada Harapan & Solusi (*Hope & Impact*):** Tampilkan senyuman ketabahan, interaksi hangat relawan dengan warga, transparansi penyaluran bantuan pangan, atau optimisme anak-anak di ruang belajar.
 
-### 3. Aset Logo Resmi
+### 4. Aset Logo Resmi
 * Jika banner mencantumkan logo mitra perbankan (BSI, Mandiri, BCA), e-wallet (QRIS, GoPay), atau kementerian (Kemensos, Kemenkumham), wajib menggunakan aset **vektor resmi (SVG) atau PNG transparan beresolusi tinggi** tanpa distorsi (*stretching* aspek rasio).
 
 ---
@@ -256,13 +265,14 @@ Sebelum menekan tombol simpan di menu **Dashboard Admin > Banner Beranda**, laku
 
 ```text
 [ ] Apakah Anda sudah menyiapkan 2 file terpisah (Desktop & Mobile)?
-    -> JANGAN hanya upload 1 file desktop jika tidak ingin tampilan mobile hancur!
+    -> JANGAN hanya upload 1 file desktop jika tidak ingin tampilan mobile terpotong ekstrem!
 [ ] Apakah wajah subjek di versi Desktop berada di sisi kanan (X: 900px - 1800px)?
 [ ] Apakah subjek di versi Mobile berada di area 15% - 50% dari atas (Y: 180px - 950px)?
 [ ] Apakah tidak ada teks/logo di area 40% terbawah gambar mobile?
 [ ] Apakah format gambar sudah .webp atau .jpg dengan sRGB?
 [ ] Apakah ukuran file di bawah 350 KB (Desktop) dan 180 KB (Mobile)?
-[ ] Apakah teks judul dan deskripsi di form admin sudah diisi dengan baik?
+[ ] Apakah Judul Banner (ID) sudah diisi (wajib) dan tombol "Terjemahkan Otomatis" sudah ditekan untuk melengkapi EN & AR?
+[ ] Apakah tautan CTA tujuan (cta_link) sudah valid (diawali https:// atau URL internal)?
 ```
 
 ---
@@ -271,4 +281,6 @@ Sebelum menekan tombol simpan di menu **Dashboard Admin > Banner Beranda**, laku
 * [SOP Pengisian Data Live Yayasan (`docs/deployment/MANUAL_DATA_ENTRY_GUIDE.md`)](file:///c:/laragon/www/insani-id/docs/deployment/MANUAL_DATA_ENTRY_GUIDE.md)
 * [Naskah Acuan Narasi Fokus Program (`docs/content/fokus-program-insani.md`)](file:///c:/laragon/www/insani-id/docs/content/fokus-program-insani.md)
 * [Kode Komponen Hero Slider Beranda (`resources/js/pages/Public/Home/Index.tsx`)](file:///c:/laragon/www/insani-id/resources/js/pages/Public/Home/Index.tsx)
+* [Layout Publik Responsif (`resources/js/layouts/PublicLayout.tsx`)](file:///c:/laragon/www/insani-id/resources/js/layouts/PublicLayout.tsx)
 * [Form Manajemen Banner Admin (`resources/js/pages/Admin/HomepageBanners/Index.tsx`)](file:///c:/laragon/www/insani-id/resources/js/pages/Admin/HomepageBanners/Index.tsx)
+* [Controller Manajemen Banner Admin (`app/Http/Controllers/Admin/HomepageBannerController.php`)](file:///c:/laragon/www/insani-id/app/Http/Controllers/Admin/HomepageBannerController.php)
