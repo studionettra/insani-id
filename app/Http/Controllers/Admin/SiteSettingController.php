@@ -32,6 +32,10 @@ class SiteSettingController extends Controller
      */
     public function update(Request $request)
     {
+        if (! $request->user()->can('settings.update')) {
+            abort(403, 'Anda tidak memiliki hak akses untuk mengubah pengaturan situs.');
+        }
+
         $rules = [
             'contact_whatsapp' => 'nullable|string|max:50',
             'contact_phone' => 'nullable|string|max:50',
@@ -79,7 +83,7 @@ class SiteSettingController extends Controller
             'receipt_signature_image' => 'nullable|image|max:2048',
             'receipt_stamp_image' => 'nullable|image|max:2048',
             'announcement_enabled' => 'nullable|string|in:0,1',
-            'announcement_link' => 'nullable|string|max:500',
+            'announcement_link' => ['nullable', 'string', 'max:500', 'regex:/^(\/|https?:\/\/)/i'],
             'announcement_bg_color' => 'nullable|string|max:50',
             'site_logo' => 'nullable|image|max:2048',
             'site_logo_white' => 'nullable|image|max:2048',
@@ -267,6 +271,10 @@ class SiteSettingController extends Controller
      */
     public function testMidtrans(MidtransCorePaymentService $midtrans): JsonResponse
     {
+        if (! request()->user()->can('settings.update')) {
+            abort(403, 'Anda tidak memiliki hak akses untuk menguji koneksi payment gateway.');
+        }
+
         return response()->json($midtrans->testConnection());
     }
 }

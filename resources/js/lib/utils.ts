@@ -148,6 +148,15 @@ export function sanitizeHtml(html: string | null | undefined): string {
     return html;
 }
 
+export function sanitizeUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('/') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+    }
+    return '#';
+}
+
 export function terbilang(n: number | string): string {
     const rawNum = typeof n === 'string' ? parseFloat(n.replace(/[^\d.-]/g, '')) : n;
     const angka = Math.floor(Math.abs(rawNum || 0));

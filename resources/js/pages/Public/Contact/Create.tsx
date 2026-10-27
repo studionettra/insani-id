@@ -11,6 +11,7 @@ import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { useTurnstileSiteKey } from '@/hooks/use-turnstile';
 import PublicLayout from '@/layouts/PublicLayout';
 import useTranslation from '@/hooks/use-translation';
+import { sanitizeHtml } from '@/lib/utils';
 
 export default function ContactCreate({ faqs = [] }: any) {
     const { t, locale, isRtl } = useTranslation();
@@ -471,7 +472,7 @@ export default function ContactCreate({ faqs = [] }: any) {
                                         >
                                             <div 
                                                 className="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4 prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5"
-                                                dangerouslySetInnerHTML={{ __html: answer }}
+                                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(answer) }}
                                             />
                                         </motion.div>
                                     </motion.div>

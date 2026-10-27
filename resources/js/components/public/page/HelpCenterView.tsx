@@ -20,6 +20,7 @@ import {
     Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { sanitizeHtml } from '@/lib/utils';
 
 interface FaqItem {
     id: string;
@@ -661,7 +662,7 @@ export default function HelpCenterView({ faqs }: { faqs?: any[] }) {
                 answer: typeof f.answer === 'string' ? (
                     <div 
                         className="space-y-2 text-slate-600 prose prose-sm max-w-none leading-relaxed" 
-                        dangerouslySetInnerHTML={{ __html: f.answer }} 
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(f.answer) }} 
                     />
                 ) : f.answer,
             }));

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { X, ExternalLink, ArrowRight } from 'lucide-react';
 import useTranslation from '@/hooks/use-translation';
-import { getLocalizedValue } from '@/lib/utils';
+import { getLocalizedValue, sanitizeUrl } from '@/lib/utils';
 
 export interface PopupData {
     id: number;
@@ -206,7 +206,7 @@ export default function EventPopupModal({ popup }: Props) {
                         {popup.cta_url ? (
                             isExternalUrl(popup.cta_url) || popup.open_in_new_tab ? (
                                 <a
-                                    href={popup.cta_url}
+                                    href={sanitizeUrl(popup.cta_url)}
                                     target={popup.open_in_new_tab ? '_blank' : '_self'}
                                     rel="noopener noreferrer"
                                     onClick={handleClose}
@@ -236,7 +236,7 @@ export default function EventPopupModal({ popup }: Props) {
                                 </a>
                             ) : (
                                 <Link
-                                    href={popup.cta_url}
+                                    href={sanitizeUrl(popup.cta_url)}
                                     onClick={handleClose}
                                     className="block group cursor-pointer"
                                 >
@@ -307,7 +307,7 @@ export default function EventPopupModal({ popup }: Props) {
                                 <div className="pt-2">
                                     {isExternalUrl(popup.cta_url) || popup.open_in_new_tab ? (
                                         <a
-                                            href={popup.cta_url}
+                                            href={sanitizeUrl(popup.cta_url)}
                                             target={popup.open_in_new_tab ? '_blank' : '_self'}
                                             rel="noopener noreferrer"
                                             onClick={handleClose}
@@ -318,7 +318,7 @@ export default function EventPopupModal({ popup }: Props) {
                                         </a>
                                     ) : (
                                         <Link
-                                            href={popup.cta_url}
+                                            href={sanitizeUrl(popup.cta_url)}
                                             onClick={handleClose}
                                             className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-700 hover:to-emerald-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]"
                                         >

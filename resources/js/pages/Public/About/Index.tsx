@@ -25,7 +25,7 @@ import { motion } from 'motion/react';
 import React, { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import { Button } from '@/components/ui/button';
-import { getLocalizedValue } from '@/lib/utils';
+import { getLocalizedValue, sanitizeHtml } from '@/lib/utils';
 import useTranslation from '@/hooks/use-translation';
 
 export default function AboutIndex({ management = [], faqs = [], aboutPage, legalDocuments = [], financialReports = [] }: any) {
@@ -906,7 +906,7 @@ export default function AboutIndex({ management = [], faqs = [], aboutPage, lega
                                             <div className="overflow-hidden">
                                                 <div 
                                                     className="px-6 pb-6 pt-2 text-slate-600 leading-relaxed text-base prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2"
-                                                    dangerouslySetInnerHTML={{ __html: answer }}
+                                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(answer) }}
                                                 />
                                             </div>
                                         </div>

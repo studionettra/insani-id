@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { FadeIn } from '@/components/ui/fade-in';
 import PublicLayout from '@/layouts/PublicLayout';
-import { formatCurrency, getLocalizedValue } from '@/lib/utils';
+import { formatCurrency, getLocalizedValue, sanitizeUrl } from '@/lib/utils';
 import DonationProgressBar from '@/components/donation/DonationProgressBar';
 import { renderStatIcon } from '@/components/ui/icon-picker';
 import useTranslation from '@/hooks/use-translation';
@@ -87,7 +87,7 @@ return;
                                                 {banner.cta_link && (
                                                     <FadeIn delay={0.1}>
                                                         <Button asChild size="lg" className="bg-white text-zinc-950 hover:bg-zinc-100 rounded-full font-semibold px-8 h-12 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
-                                                            <a href={banner.cta_link}>
+                                                            <a href={sanitizeUrl(banner.cta_link)}>
                                                                 {t('Lihat Selengkapnya', 'Selengkapnya')} <ArrowRight className="ml-2 h-4 w-4 rtl:rotate-180" />
                                                             </a>
                                                         </Button>

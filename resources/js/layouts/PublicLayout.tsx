@@ -6,7 +6,7 @@ import PublicAccountDropdown from '@/components/public/PublicAccountDropdown';
 import EventPopupModal from '@/components/public/EventPopupModal';
 import { FlashMessages } from '@/components/flash-messages';
 import useTranslation from '@/hooks/use-translation';
-import { getLocalizedValue } from '@/lib/utils';
+import { getLocalizedValue, sanitizeUrl } from '@/lib/utils';
 import type { Auth } from '@/types/auth';
 
 interface PublicLayoutProps {
@@ -108,7 +108,7 @@ export default function PublicLayout({
                         <span className="truncate sm:overflow-visible">{announcementText}</span>
                         {siteSettings?.announcement_link && (
                             <Link 
-                                href={siteSettings.announcement_link}
+                                href={sanitizeUrl(siteSettings.announcement_link)}
                                 className="underline font-bold hover:opacity-85 inline-flex items-center gap-1 shrink-0 ml-1 text-white"
                             >
                                 {t('Lihat Detail')} &rarr;

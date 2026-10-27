@@ -47,7 +47,7 @@ class PopupMessageController extends Controller
         $rules = [
             'display_type' => 'required|in:image_only,hybrid',
             'image_path' => 'nullable|image|max:5120',
-            'cta_url' => 'nullable|string|max:500',
+            'cta_url' => ['nullable', 'string', 'max:500', 'regex:/^(\/|https?:\/\/)/i'],
             'open_in_new_tab' => 'boolean',
             'delay_seconds' => 'integer|min:0|max:60',
             'auto_close_seconds' => 'integer|min:0|max:120',
@@ -122,7 +122,7 @@ class PopupMessageController extends Controller
         $rules = [
             'display_type' => 'required|in:image_only,hybrid',
             'image_path' => 'nullable|image|max:5120',
-            'cta_url' => 'nullable|string|max:500',
+            'cta_url' => ['nullable', 'string', 'max:500', 'regex:/^(\/|https?:\/\/)/i'],
             'open_in_new_tab' => 'boolean',
             'delay_seconds' => 'integer|min:0|max:60',
             'auto_close_seconds' => 'integer|min:0|max:120',

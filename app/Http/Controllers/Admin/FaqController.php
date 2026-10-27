@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
 use Illuminate\Http\Request;
+use Mews\Purifier\Facades\Purifier;
 
 class FaqController extends Controller
 {
@@ -49,6 +50,14 @@ class FaqController extends Controller
             'sort_order' => 'integer',
         ]);
 
+        if (isset($validated['answer_html']) && is_array($validated['answer_html'])) {
+            foreach ($validated['answer_html'] as $lang => $html) {
+                if (! empty($html)) {
+                    $validated['answer_html'][$lang] = Purifier::clean($html);
+                }
+            }
+        }
+
         $validated['is_active'] = $validated['is_active'] ?? true;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
         $validated['category'] = $validated['category'] ?? 'umum';
@@ -74,6 +83,14 @@ class FaqController extends Controller
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ]);
+
+        if (isset($validated['answer_html']) && is_array($validated['answer_html'])) {
+            foreach ($validated['answer_html'] as $lang => $html) {
+                if (! empty($html)) {
+                    $validated['answer_html'][$lang] = Purifier::clean($html);
+                }
+            }
+        }
 
         $faq->update($validated);
 

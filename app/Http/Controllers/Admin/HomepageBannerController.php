@@ -41,7 +41,7 @@ class HomepageBannerController extends Controller
         $rules = [
             'desktop_image_url' => 'required|image|max:3072',
             'mobile_image_url' => 'nullable|image|max:2048',
-            'cta_link' => 'nullable|string|max:255',
+            'cta_link' => ['nullable', 'string', 'max:255', 'regex:/^(\/|https?:\/\/)/i'],
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
@@ -100,7 +100,7 @@ class HomepageBannerController extends Controller
         $rules = [
             'desktop_image_url' => 'nullable|image|max:3072',
             'mobile_image_url' => 'nullable|image|max:2048',
-            'cta_link' => 'nullable|string|max:255',
+            'cta_link' => ['nullable', 'string', 'max:255', 'regex:/^(\/|https?:\/\/)/i'],
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];
