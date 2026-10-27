@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\Donation;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 
 class DonationReceiptController extends Controller
 {
@@ -28,10 +32,19 @@ class DonationReceiptController extends Controller
 
         $settings = AppSetting::pluck('value', 'key')->toArray();
 
+        $verifyUrl = route('donation.status', ['donationCode' => $donation->donation_code]);
+        $renderer = new ImageRenderer(
+            new RendererStyle(150, 1),
+            new SvgImageBackEnd
+        );
+        $writer = new Writer($renderer);
+        $qrCodeDataUri = 'data:image/svg+xml;base64,'.base64_encode($writer->writeString($verifyUrl));
+
         return view('receipt', [
             'donation' => $donation,
             'payment' => $payment,
             'settings' => $settings,
+            'qrCodeDataUri' => $qrCodeDataUri,
         ]);
     }
 }

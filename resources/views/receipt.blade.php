@@ -676,10 +676,17 @@
                 <div class="receipt-footer">
                     <div class="qr-section">
                         @php
-                            $verifyUrl = route('donation.status', ['donationCode' => $donation->donation_code]);
-                            $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($verifyUrl);
+                            if (!isset($qrCodeDataUri)) {
+                                $verifyUrl = route('donation.status', ['donationCode' => $donation->donation_code]);
+                                $renderer = new \BaconQrCode\Renderer\ImageRenderer(
+                                    new \BaconQrCode\Renderer\RendererStyle\RendererStyle(150, 1),
+                                    new \BaconQrCode\Renderer\Image\SvgImageBackEnd()
+                                );
+                                $writer = new \BaconQrCode\Writer($renderer);
+                                $qrCodeDataUri = 'data:image/svg+xml;base64,' . base64_encode($writer->writeString($verifyUrl));
+                            }
                         @endphp
-                        <img src="{{ $qrCodeUrl }}" alt="QR Verifikasi" class="qr-image">
+                        <img src="{{ $qrCodeDataUri }}" alt="QR Verifikasi" class="qr-image">
                         <div class="qr-text">
                             <p><strong>Verifikasi Kuitansi Resmi</strong></p>
                             <p>Pindai kode QR untuk memverifikasi keaslian donasi secara online.</p>

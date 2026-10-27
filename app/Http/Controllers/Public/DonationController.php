@@ -127,6 +127,8 @@ class DonationController extends Controller
             'landing_page' => $landingPage,
         ]);
 
+        session()->put("donation_owner_{$donationCode}", true);
+
         // If replacing a previous pending donation, safely mark the old one as cancelled
         $replaceCode = $validated['replace_donation_code'] ?? $request->input('replace_donation_code');
         if (! empty($replaceCode)) {
@@ -309,7 +311,7 @@ class DonationController extends Controller
         $donations = null;
 
         if (! empty($search)) {
-            // If query matches a donation code, check direct redirection
+            // 1. If query matches a donation code, direct redirection to status
             if (str_starts_with(strtoupper($search), 'DON-')) {
                 $exactDonation = Donation::where('donation_code', strtoupper($search))->first();
                 if ($exactDonation) {
@@ -317,12 +319,54 @@ class DonationController extends Controller
                 }
             }
 
-            $donations = Donation::with(['program.category', 'payments'])
+            $rawDonations = Donation::with(['program.category', 'payments'])
                 ->where('donor_email', $search)
-                ->orWhere('donation_code', $search)
+                ->orWhere('donation_code', strtoupper($search))
                 ->latest()
                 ->paginate(10)
                 ->withQueryString();
+
+            $maskEmail = function (?string $email): ?string {
+                if (! $email || ! str_contains($email, '@')) {
+                    return null;
+                }
+                [$local, $domain] = explode('@', $email, 2);
+                $maskedLocal = strlen($local) <= 2
+                    ? substr($local, 0, 1).'***'
+                    : substr($local, 0, 2).str_repeat('*', max(strlen($local) - 2, 3));
+
+                return $maskedLocal.'@'.$domain;
+            };
+
+            $donations = $rawDonations->through(function ($donation) use ($maskEmail) {
+                return [
+                    'id' => $donation->id,
+                    'donation_code' => $donation->donation_code,
+                    'amount' => $donation->amount,
+                    'unique_code' => $donation->unique_code,
+                    'channel' => $donation->channel,
+                    'status' => $donation->status,
+                    'created_at' => $donation->created_at,
+                    'paid_at' => $donation->paid_at,
+                    'message' => $donation->message,
+                    'is_anonymous' => (bool) $donation->is_anonymous,
+                    'donor_email' => $maskEmail($donation->donor_email),
+                    'donor_name' => $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name,
+                    'program' => $donation->program ? [
+                        'id' => $donation->program->id,
+                        'title' => $donation->program->title,
+                        'slug' => $donation->program->slug,
+                        'cover_image' => $donation->program->cover_image,
+                        'category' => $donation->program->category ? [
+                            'name' => $donation->program->category->name,
+                        ] : null,
+                    ] : null,
+                    'payments' => $donation->payments->map(fn ($p) => [
+                        'payment_method' => $p->payment_method,
+                        'gateway_status' => $p->gateway_status,
+                    ]),
+                ];
+            });
         }
 
         return inertia('Public/Donation/Lookup', [
@@ -367,6 +411,13 @@ class DonationController extends Controller
 
             if (! $isOwner && ! $canManage) {
                 abort(403, 'Anda tidak memiliki hak untuk membatalkan donasi ini.');
+            }
+        } else {
+            $isSessionOwner = session("donation_owner_{$donation->donation_code}", false);
+            $matchesEmail = $request->filled('email') && strtolower(trim((string) $request->input('email'))) === strtolower($donation->donor_email);
+
+            if (! $isSessionOwner && ! $matchesEmail && ! $request->hasValidSignature()) {
+                abort(403, 'Aksi ini memerlukan autentikasi atau sesi donatur yang valid.');
             }
         }
 

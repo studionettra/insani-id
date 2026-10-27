@@ -11,7 +11,8 @@ import {
     HeartHandshake, 
     FileText,
     HelpCircle,
-    UserCheck
+    UserCheck,
+    Lock
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -59,9 +60,10 @@ interface Props {
         }>;
         total: number;
     } | null;
+    notice?: string | null;
 }
 
-export default function DonationLookup({ search = '', donations }: Props) {
+export default function DonationLookup({ search = '', donations, notice }: Props) {
     const { auth } = usePage().props as any;
     const [query, setQuery] = useState(search || '');
     const [isSearching, setIsSearching] = useState(false);
@@ -177,6 +179,27 @@ export default function DonationLookup({ search = '', donations }: Props) {
                             </p>
                         </form>
                     </div>
+
+                    {/* Privacy Notice Banner */}
+                    {notice && (
+                        <div className="mb-8 p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-start gap-3 text-xs sm:text-sm leading-relaxed">
+                                <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                <div>
+                                    <strong className="block text-amber-950 font-semibold mb-0.5">Perlindungan Privasi Donatur</strong>
+                                    <span>{notice}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold">
+                                    <Link href="/login">
+                                        Masuk Akun
+                                        <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Results Section */}
                     {donations ? (
