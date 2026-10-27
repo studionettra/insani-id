@@ -7,6 +7,7 @@ use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Mews\Purifier\Facades\Purifier;
 
 class PageController extends Controller
 {
@@ -53,6 +54,12 @@ class PageController extends Controller
         $validated['slug'] = Str::slug($validated['slug']);
         $validated['is_active'] = $validated['is_active'] ?? true;
 
+        if (isset($validated['content_html']) && is_array($validated['content_html'])) {
+            foreach ($validated['content_html'] as $lang => $content) {
+                $validated['content_html'][$lang] = is_string($content) ? Purifier::clean($content) : $content;
+            }
+        }
+
         if ($request->hasFile('attachment')) {
             $validated['attachment_url'] = $request->file('attachment')->store('pages/attachments', 'public');
         }
@@ -88,6 +95,12 @@ class PageController extends Controller
         ]);
 
         $validated['slug'] = Str::slug($validated['slug']);
+
+        if (isset($validated['content_html']) && is_array($validated['content_html'])) {
+            foreach ($validated['content_html'] as $lang => $content) {
+                $validated['content_html'][$lang] = is_string($content) ? Purifier::clean($content) : $content;
+            }
+        }
 
         if ($request->hasFile('attachment')) {
             if ($page->attachment_url) {

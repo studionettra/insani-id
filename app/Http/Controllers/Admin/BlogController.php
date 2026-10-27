@@ -81,7 +81,15 @@ class BlogController extends Controller
         $translationService = app(TranslationService::class);
         $titleInput = $request->title;
         $excerptInput = $request->excerpt;
-        $contentInput = is_array($request->content_html) ? $request->content_html : Purifier::clean($request->content_html);
+        $contentInput = $request->content_html;
+
+        if (is_array($contentInput)) {
+            foreach ($contentInput as $loc => $val) {
+                $contentInput[$loc] = is_string($val) ? Purifier::clean($val) : $val;
+            }
+        } else {
+            $contentInput = is_string($contentInput) ? Purifier::clean($contentInput) : $contentInput;
+        }
 
         $titleTranslations = is_array($titleInput)
             ? $titleInput
@@ -123,6 +131,12 @@ class BlogController extends Controller
         $contentTranslations = is_array($contentInput)
             ? $contentInput
             : ($translationService->translateFields(['content' => (string) $contentInput], ['en', 'ar'], 'id', ['content'])['content'] ?? ['id' => (string) $contentInput]);
+
+        if (is_array($contentTranslations)) {
+            foreach ($contentTranslations as $lang => $content) {
+                $contentTranslations[$lang] = is_string($content) ? Purifier::clean($content) : $content;
+            }
+        }
 
         $validated['title'] = $titleTranslations;
         $validated['excerpt'] = $excerptTranslations;
@@ -180,7 +194,15 @@ class BlogController extends Controller
         $translationService = app(TranslationService::class);
         $titleInput = $request->title;
         $excerptInput = $request->excerpt;
-        $contentInput = is_array($request->content_html) ? $request->content_html : Purifier::clean($request->content_html);
+        $contentInput = $request->content_html;
+
+        if (is_array($contentInput)) {
+            foreach ($contentInput as $loc => $val) {
+                $contentInput[$loc] = is_string($val) ? Purifier::clean($val) : $val;
+            }
+        } else {
+            $contentInput = is_string($contentInput) ? Purifier::clean($contentInput) : $contentInput;
+        }
 
         $titleTranslations = is_array($titleInput)
             ? $titleInput
@@ -204,6 +226,12 @@ class BlogController extends Controller
         $contentTranslations = is_array($contentInput)
             ? $contentInput
             : ($translationService->translateFields(['content' => (string) $contentInput], ['en', 'ar'], 'id', ['content'])['content'] ?? ['id' => (string) $contentInput]);
+
+        if (is_array($contentTranslations)) {
+            foreach ($contentTranslations as $lang => $content) {
+                $contentTranslations[$lang] = is_string($content) ? Purifier::clean($content) : $content;
+            }
+        }
 
         $validated['title'] = $titleTranslations;
         $validated['excerpt'] = $excerptTranslations;

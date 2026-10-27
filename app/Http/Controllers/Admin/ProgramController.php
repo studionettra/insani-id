@@ -99,6 +99,12 @@ class ProgramController extends Controller
      */
     public function create()
     {
+        abort_unless(
+            auth()->user()->can('program.create') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk membuat program baru.'
+        );
+
         $categories = Category::where('is_active', true)->get();
 
         return Inertia::render('Admin/Programs/Create', [
@@ -111,6 +117,12 @@ class ProgramController extends Controller
      */
     public function store(Request $request)
     {
+        abort_unless(
+            auth()->user()->can('program.create') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk membuat program baru.'
+        );
+
         $request->validate([
             'title' => 'required',
             'category_id' => 'required|exists:categories,id',
@@ -221,6 +233,12 @@ class ProgramController extends Controller
      */
     public function edit(string $id)
     {
+        abort_unless(
+            auth()->user()->can('program.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengubah data program.'
+        );
+
         $program = Program::findOrFail($id);
         $categories = Category::where('is_active', true)->get();
 
@@ -238,6 +256,12 @@ class ProgramController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        abort_unless(
+            auth()->user()->can('program.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengubah data program.'
+        );
+
         $program = Program::findOrFail($id);
 
         $request->validate([
@@ -303,6 +327,12 @@ class ProgramController extends Controller
      */
     public function destroy(string $id)
     {
+        abort_unless(
+            auth()->user()->hasRole('Administrator'),
+            403,
+            'Hanya Administrator yang memiliki wewenang untuk menghapus program.'
+        );
+
         $program = Program::findOrFail($id);
         $program->delete();
 
@@ -322,6 +352,12 @@ class ProgramController extends Controller
         ]);
 
         if ($request->status === 'published') {
+            abort_unless(
+                auth()->user()->can('program.publish') || auth()->user()->hasRole('Administrator'),
+                403,
+                'Anda tidak memiliki wewenang untuk mempublikasikan program.'
+            );
+
             // Regex to detect common bank account numbers in Indonesia
             // Look for sequences of 10 to 16 digits, ignoring spaces or dashes
             $rawStory = is_array($program->story) ? implode(' ', $program->story) : (string) $program->story;
@@ -336,10 +372,22 @@ class ProgramController extends Controller
             $program->published_at = now();
             $program->verified_by = auth()->id();
         } elseif ($request->status === 'rejected') {
+            abort_unless(
+                auth()->user()->can('program.reject') || auth()->user()->hasRole('Administrator'),
+                403,
+                'Anda tidak memiliki wewenang untuk menolak program.'
+            );
+
             $program->status = 'rejected';
             $program->rejection_notes = $request->rejection_notes;
             $program->verified_by = auth()->id();
         } elseif ($request->status === 'closed_manual') {
+            abort_unless(
+                auth()->user()->can('program.close') || auth()->user()->hasRole('Administrator'),
+                403,
+                'Anda tidak memiliki wewenang untuk menutup program.'
+            );
+
             $program->status = 'closed_manual';
             $program->closed_at = now();
         }
@@ -364,6 +412,12 @@ class ProgramController extends Controller
      */
     public function translate(string $id)
     {
+        abort_unless(
+            auth()->user()->can('program.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk menerjemahkan program.'
+        );
+
         $program = Program::findOrFail($id);
 
         TranslateProgramJob::dispatch($program, true);
@@ -376,6 +430,12 @@ class ProgramController extends Controller
      */
     public function toggleFeatured(Request $request, Program $program)
     {
+        abort_unless(
+            auth()->user()->can('program.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola program unggulan.'
+        );
+
         $newStatus = ! $program->is_featured;
         $program->is_featured = $newStatus;
 

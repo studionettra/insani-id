@@ -268,8 +268,18 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         Route::post('/auto-translate', [TranslationController::class, 'translate'])->name('auto-translate');
 
         Route::middleware('permission:user.view')->group(function () {
+            Route::get('users', [UserController::class, 'index'])->name('users.index');
+        });
+        Route::middleware('permission:user.create')->group(function () {
+            Route::post('users', [UserController::class, 'store'])->name('users.store');
+        });
+        Route::middleware('permission:user.update')->group(function () {
+            Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+            Route::patch('users/{user}', [UserController::class, 'update']);
             Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
-            Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
+        });
+        Route::middleware('permission:user.delete')->group(function () {
+            Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
         });
 
         Route::middleware('permission:category.view')->group(function () {
@@ -296,8 +306,14 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         });
 
         Route::middleware('permission:manage_financial_reports|report.view')->group(function () {
+            Route::get('financial-reports', [AdminFinancialReportController::class, 'index'])->name('financial-reports.index');
+        });
+        Route::middleware('permission:manage_financial_reports')->group(function () {
             Route::post('financial-reports/settings', [AdminFinancialReportController::class, 'updateSettings'])->name('financial-reports.settings.update');
-            Route::resource('financial-reports', AdminFinancialReportController::class)->except(['show', 'create', 'edit']);
+            Route::post('financial-reports', [AdminFinancialReportController::class, 'store'])->name('financial-reports.store');
+            Route::put('financial-reports/{financial_report}', [AdminFinancialReportController::class, 'update'])->name('financial-reports.update');
+            Route::patch('financial-reports/{financial_report}', [AdminFinancialReportController::class, 'update']);
+            Route::delete('financial-reports/{financial_report}', [AdminFinancialReportController::class, 'destroy'])->name('financial-reports.destroy');
         });
 
         Route::middleware('permission:manage_partners')->group(function () {
@@ -326,12 +342,25 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::resource('blogs', AdminBlogController::class)->except(['show']);
         });
 
-        Route::middleware('permission:donation.view|settings.view')->group(function () {
+        Route::middleware('permission:donation.view')->group(function () {
             Route::get('/donations', [App\Http\Controllers\Admin\DonationController::class, 'index'])->name('donations.index');
             Route::get('/donations/{donation}/proof', [App\Http\Controllers\Admin\DonationController::class, 'viewProof'])->name('donations.proof');
+        });
+
+        Route::middleware('permission:donation.confirm-manual')->group(function () {
             Route::post('/donations/{donation}/confirm', [App\Http\Controllers\Admin\DonationController::class, 'confirm'])->name('donations.confirm');
+        });
+
+        Route::middleware('permission:settings.view|settings.update')->group(function () {
+            Route::get('bank-accounts', [BankAccountController::class, 'index'])->name('bank-accounts.index');
+        });
+
+        Route::middleware('permission:settings.update')->group(function () {
+            Route::post('bank-accounts', [BankAccountController::class, 'store'])->name('bank-accounts.store');
+            Route::put('bank-accounts/{bank_account}', [BankAccountController::class, 'update'])->name('bank-accounts.update');
+            Route::patch('bank-accounts/{bank_account}', [BankAccountController::class, 'update']);
             Route::patch('bank-accounts/{bank_account}/toggle', [BankAccountController::class, 'toggleActive'])->name('bank-accounts.toggle');
-            Route::resource('bank-accounts', BankAccountController::class)->except(['show', 'create', 'edit']);
+            Route::delete('bank-accounts/{bank_account}', [BankAccountController::class, 'destroy'])->name('bank-accounts.destroy');
         });
 
         Route::middleware('permission:campaigner.verify')->group(function () {
@@ -349,13 +378,32 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::get('/fundraisers', [AdminFundraiserController::class, 'index'])->name('fundraisers.index');
         });
 
+        Route::middleware('permission:program.create')->group(function () {
+            Route::get('programs/create', [ProgramController::class, 'create'])->name('programs.create');
+            Route::post('programs', [ProgramController::class, 'store'])->name('programs.store');
+        });
+
         Route::middleware('permission:program.view')->group(function () {
-            Route::resource('programs', ProgramController::class);
-            Route::put('/programs/{id}/status', [ProgramController::class, 'updateStatus'])->name('programs.update-status');
-            Route::patch('/programs/{program}/toggle-featured', [ProgramController::class, 'toggleFeatured'])->name('programs.toggle-featured');
-            Route::post('/programs/{id}/translate', [ProgramController::class, 'translate'])->name('programs.translate');
-            Route::resource('programs.updates', AdminProgramUpdateController::class)->only(['index', 'store', 'update', 'destroy']);
+            Route::get('programs', [ProgramController::class, 'index'])->name('programs.index');
+            Route::get('programs/{program}', [ProgramController::class, 'show'])->name('programs.show');
+            Route::get('programs/{program}/updates', [AdminProgramUpdateController::class, 'index'])->name('programs.updates.index');
+        });
+
+        Route::middleware('permission:program.update')->group(function () {
+            Route::get('programs/{program}/edit', [ProgramController::class, 'edit'])->name('programs.edit');
+            Route::match(['put', 'patch'], 'programs/{program}', [ProgramController::class, 'update'])->name('programs.update');
+            Route::patch('programs/{program}/toggle-featured', [ProgramController::class, 'toggleFeatured'])->name('programs.toggle-featured');
+            Route::post('programs/{id}/translate', [ProgramController::class, 'translate'])->name('programs.translate');
+            Route::resource('programs.updates', AdminProgramUpdateController::class)->except(['index', 'create', 'show', 'edit']);
             Route::put('programs/{program}/updates/{update}/moderation', [AdminProgramUpdateController::class, 'updateModeration'])->name('programs.updates.moderation');
+        });
+
+        Route::middleware('role:Administrator')->group(function () {
+            Route::delete('programs/{program}', [ProgramController::class, 'destroy'])->name('programs.destroy');
+        });
+
+        Route::middleware('permission:program.publish|program.reject|program.close')->group(function () {
+            Route::put('/programs/{id}/status', [ProgramController::class, 'updateStatus'])->name('programs.update-status');
         });
 
         Route::middleware('permission:disbursement.create')->group(function () {
@@ -368,6 +416,9 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::get('disbursements/{disbursement}/receipt', [DisbursementController::class, 'receipt'])->name('disbursements.receipt');
             Route::get('disbursements/{disbursement}/supporting-document', [DisbursementController::class, 'supportingDocument'])->name('disbursements.supporting-document');
             Route::get('disbursements/{disbursement}/proof', [DisbursementController::class, 'proof'])->name('disbursements.proof');
+        });
+
+        Route::middleware('permission:disbursement.approve')->group(function () {
             Route::put('disbursements/{disbursement}/status', [DisbursementController::class, 'updateStatus'])->name('disbursements.update-status');
         });
 
@@ -397,8 +448,11 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
             Route::get('analytics/events', [AnalyticsController::class, 'events'])->name('analytics.events');
         });
 
-        Route::middleware('permission:settings.view')->group(function () {
+        Route::middleware('permission:settings.view|settings.update')->group(function () {
             Route::get('site-settings', [SiteSettingController::class, 'index'])->name('site-settings.index');
+        });
+
+        Route::middleware('permission:settings.update')->group(function () {
             Route::post('site-settings', [SiteSettingController::class, 'update'])->name('site-settings.update');
             Route::post('site-settings/test-midtrans', [SiteSettingController::class, 'testMidtrans'])->name('site-settings.test-midtrans');
         });
