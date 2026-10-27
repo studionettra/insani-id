@@ -15,6 +15,12 @@ class FinancialReportController extends Controller
 {
     public function index(Request $request): Response
     {
+        abort_unless(
+            auth()->user()->can('manage_financial_reports') || auth()->user()->can('report.view') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk melihat laporan keuangan.'
+        );
+
         $reports = FinancialReport::query()
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -98,6 +104,12 @@ class FinancialReportController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('manage_financial_reports') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola laporan keuangan.'
+        );
+
         if (is_string($request->input('title'))) {
             $request->merge(['title' => ['id' => $request->input('title')]]);
         }
@@ -157,6 +169,12 @@ class FinancialReportController extends Controller
 
     public function update(Request $request, FinancialReport $financial_report): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('manage_financial_reports') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola laporan keuangan.'
+        );
+
         if (is_string($request->input('title'))) {
             $request->merge(['title' => ['id' => $request->input('title')]]);
         }
@@ -219,6 +237,12 @@ class FinancialReportController extends Controller
 
     public function destroy(FinancialReport $financial_report): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('manage_financial_reports') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola laporan keuangan.'
+        );
+
         if ($financial_report->file_path && Storage::disk('public')->exists($financial_report->file_path)) {
             Storage::disk('public')->delete($financial_report->file_path);
         }
@@ -234,6 +258,12 @@ class FinancialReportController extends Controller
 
     public function updateSettings(Request $request): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('manage_financial_reports') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola laporan keuangan.'
+        );
+
         $validated = $request->validate([
             'financial_report_notice_enabled' => 'nullable|string|in:0,1',
             'financial_report_notice_year' => 'nullable|string|max:10',

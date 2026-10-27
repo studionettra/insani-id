@@ -29,7 +29,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        $trustedProxies = env('TRUSTED_PROXIES');
+        if ($trustedProxies !== null && $trustedProxies !== '') {
+            $proxies = str_contains($trustedProxies, ',')
+                ? array_map('trim', explode(',', $trustedProxies))
+                : trim($trustedProxies);
+            $middleware->trustProxies(at: $proxies);
+        } else {
+            $middleware->trustProxies(at: '*');
+        }
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']);
 

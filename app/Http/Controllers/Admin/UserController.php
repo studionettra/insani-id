@@ -128,6 +128,10 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->input('role') === 'Administrator' && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Hanya Administrator yang memiliki wewenang untuk menetapkan peran Administrator.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -168,6 +172,14 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        if ($user->hasRole('Administrator') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Hanya Administrator yang memiliki wewenang untuk mengubah data akun Administrator.');
+        }
+
+        if ($request->input('role') === 'Administrator' && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Hanya Administrator yang memiliki wewenang untuk menetapkan peran Administrator.');
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
@@ -175,6 +187,10 @@ class UserController extends Controller
             'role' => ['required', 'string', 'exists:roles,name'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+
+        if ($user->id === auth()->id() && $user->hasRole('Administrator') && $validated['role'] !== 'Administrator') {
+            return redirect()->back()->with('error', 'Anda tidak dapat mencabut peran Administrator dari akun Anda sendiri.');
+        }
 
         $updateData = [
             'name' => $validated['name'],
@@ -223,6 +239,10 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
         }
 
+        if ($user->hasRole('Administrator') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Hanya Administrator yang memiliki wewenang untuk mengelola status akun Administrator.');
+        }
+
         $user->update([
             'is_active' => ! $user->is_active,
         ]);
@@ -239,6 +259,10 @@ class UserController extends Controller
     {
         if ($user->id === auth()->id()) {
             return redirect()->back()->with('error', 'You cannot delete yourself.');
+        }
+
+        if ($user->hasRole('Administrator') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Hanya Administrator yang memiliki wewenang untuk menghapus akun Administrator.');
         }
 
         $deleteUserAction->execute($user, isSelfService: false);

@@ -14,6 +14,12 @@ class BankAccountController extends Controller
 {
     public function index(Request $request): Response
     {
+        abort_unless(
+            auth()->user()->can('settings.view') || auth()->user()->can('settings.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk melihat data rekening bank yayasan.'
+        );
+
         $accounts = BankAccount::query()
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -39,6 +45,12 @@ class BankAccountController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('settings.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola rekening bank yayasan.'
+        );
+
         $validated = $request->validate([
             'bank_name' => 'required|string|max:255',
             'bank_code' => 'nullable|string|max:50',
@@ -69,6 +81,12 @@ class BankAccountController extends Controller
 
     public function update(Request $request, BankAccount $bank_account): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('settings.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola rekening bank yayasan.'
+        );
+
         $validated = $request->validate([
             'bank_name' => 'required|string|max:255',
             'bank_code' => 'nullable|string|max:50',
@@ -108,6 +126,12 @@ class BankAccountController extends Controller
 
     public function destroy(BankAccount $bank_account): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('settings.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola rekening bank yayasan.'
+        );
+
         if ($bank_account->logo_path && str_starts_with($bank_account->logo_path, 'banks/')) {
             Storage::disk('public')->delete($bank_account->logo_path);
         }
@@ -119,6 +143,12 @@ class BankAccountController extends Controller
 
     public function toggleActive(BankAccount $bank_account): RedirectResponse
     {
+        abort_unless(
+            auth()->user()->can('settings.update') || auth()->user()->hasRole('Administrator'),
+            403,
+            'Anda tidak memiliki wewenang untuk mengelola rekening bank yayasan.'
+        );
+
         $bank_account->update([
             'is_active' => ! $bank_account->is_active,
         ]);
