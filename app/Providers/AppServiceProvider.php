@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\LinkGuestDonationsOnVerified;
 use App\Models\Payment;
 use App\Models\Program;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -86,6 +88,9 @@ class AppServiceProvider extends ServiceProvider
                 request()->attributes->set('logged_out_user', $event->user);
             }
         });
+
+        // Link previous guest donations safely only after email address is verified
+        Event::listen(Verified::class, LinkGuestDonationsOnVerified::class);
 
         Program::observe(ProgramObserver::class);
         Payment::observe(PaymentObserver::class);
