@@ -13,6 +13,7 @@ use App\Models\Payment;
 use App\Models\Program;
 use App\Services\MidtransCorePaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -129,7 +130,7 @@ class DonationController extends Controller
 
         session()->put("donation_owner_{$donationCode}", true);
 
-        // If replacing a previous pending donation, safely mark the old one as cancelled
+        // If replacing a previous pending donation, safely mark the old one as cancelled after strictly verifying ownership
         $replaceCode = $validated['replace_donation_code'] ?? $request->input('replace_donation_code');
         if (! empty($replaceCode)) {
             $oldDonation = Donation::where('donation_code', $replaceCode)
@@ -138,14 +139,27 @@ class DonationController extends Controller
                 ->first();
 
             if ($oldDonation) {
-                if ($oldDonation->channel === 'online') {
-                    $this->midtrans->cancelTransaction($oldDonation->donation_code);
-                }
+                $isSessionOwner = session("donation_owner_{$replaceCode}", false) === true;
+                $user = $request->user();
+                $isAuthOwner = $user && (($oldDonation->donor_user_id === $user->id) || (strtolower((string) $oldDonation->donor_email) === strtolower((string) $user->email)));
+                $isEmailMatch = ! empty($validated['donor_email']) && strtolower(trim((string) $validated['donor_email'])) === strtolower(trim((string) $oldDonation->donor_email));
 
-                $oldDonation->update(['status' => 'cancelled']);
-                $oldDonation->payments()->where('gateway_status', 'PENDING')->update([
-                    'gateway_status' => 'CANCELLED',
-                ]);
+                if ($isSessionOwner || $isAuthOwner || $isEmailMatch) {
+                    if ($oldDonation->channel === 'online') {
+                        $this->midtrans->cancelTransaction($oldDonation->donation_code);
+                    }
+
+                    $oldDonation->update(['status' => 'cancelled']);
+                    $oldDonation->payments()->where('gateway_status', 'PENDING')->update([
+                        'gateway_status' => 'CANCELLED',
+                    ]);
+                } else {
+                    Log::warning('Rejected unauthorized attempt to replace pending donation', [
+                        'replace_code' => $replaceCode,
+                        'current_donor_email' => $validated['donor_email'] ?? null,
+                        'ip' => $request->ip(),
+                    ]);
+                }
             }
         }
 
@@ -285,14 +299,45 @@ class DonationController extends Controller
             }
         }
 
+        $user = auth()->user();
+        $isSessionOwner = session("donation_owner_{$donation->donation_code}", false) === true;
+        $isAuthOwner = $user && (($donation->donor_user_id === $user->id) || (strtolower((string) $donation->donor_email) === strtolower((string) $user->email)));
+        $isStaffViewer = $user && ($user->hasRole('Administrator') || $user->can('donation.view'));
+        $isAuthorizedViewer = $isSessionOwner || $isAuthOwner || $isStaffViewer;
+
         $proofUrl = null;
-        $paymentWithProof = $donation->payments->first(fn ($p) => ! empty($p->transfer_proof));
-        if ($paymentWithProof && Storage::disk('local')->exists($paymentWithProof->transfer_proof)) {
-            $proofUrl = URL::temporarySignedRoute(
-                'donation.proof',
-                now()->addMinutes(60),
-                ['donation' => $donation->id]
-            );
+        if ($isAuthorizedViewer) {
+            $paymentWithProof = $donation->payments->first(fn ($p) => ! empty($p->transfer_proof));
+            if ($paymentWithProof && Storage::disk('local')->exists($paymentWithProof->transfer_proof)) {
+                $proofUrl = URL::temporarySignedRoute(
+                    'donation.proof',
+                    now()->addMinutes(60),
+                    ['donation' => $donation->id]
+                );
+            }
+        } else {
+            // Mask sensitive donor PII and conceal internal proof paths for unauthorized third-party viewers
+            if ($donation->is_anonymous) {
+                $donation->donor_name = 'Inisiator Kebaikan';
+            }
+
+            if (! empty($donation->donor_phone)) {
+                $phone = (string) $donation->donor_phone;
+                $len = strlen($phone);
+                $donation->donor_phone = $len > 6
+                    ? substr($phone, 0, 4).str_repeat('*', max($len - 7, 3)).substr($phone, -3)
+                    : substr($phone, 0, 2).'****';
+            }
+
+            if (! empty($donation->donor_email) && str_contains($donation->donor_email, '@')) {
+                [$local, $domain] = explode('@', $donation->donor_email, 2);
+                $maskedLocal = strlen($local) <= 2
+                    ? substr($local, 0, 1).'***'
+                    : substr($local, 0, 2).str_repeat('*', max(strlen($local) - 2, 3));
+                $donation->donor_email = $maskedLocal.'@'.$domain;
+            }
+
+            $donation->payments->makeHidden(['transfer_proof', 'raw_payload']);
         }
 
         return inertia('Public/Donation/Status', [

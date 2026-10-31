@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Donation;
+use App\Models\Payment;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -157,4 +159,77 @@ test('it passes turnstile captcha when token is verified successfully', function
     ]);
 
     $response->assertSessionHasNoErrors();
+});
+
+test('it prevents unauthorized users from cancelling other donors pending transactions via replace_donation_code', function () {
+    $victimDonation = Donation::create([
+        'donation_code' => 'DON-VICTIM-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Korban Donasi',
+        'donor_email' => 'korban@example.com',
+        'donor_phone' => '081234567888',
+        'amount' => 100000,
+        'channel' => 'offline',
+        'status' => 'pending',
+    ]);
+
+    Payment::create([
+        'donation_id' => $victimDonation->id,
+        'payment_method' => 'bank_transfer_manual',
+        'payment_channel' => 'MANUAL_BSI',
+        'gateway' => 'manual',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    // Attacker submits a new donation with victim's donation code as replace_donation_code but attacker's email and no session
+    $this->post(route('donation.store', ['program' => $this->program->slug]), [
+        'amount' => 50000,
+        'donor_name' => 'Penyerang',
+        'donor_email' => 'attacker@example.com',
+        'donor_phone' => '081299998888',
+        'channel' => 'offline',
+        'payment_method' => 'bank_transfer_manual',
+        'replace_donation_code' => $victimDonation->donation_code,
+    ]);
+
+    // Victim donation MUST remain pending and NOT cancelled
+    $victimDonation->refresh();
+    expect($victimDonation->status)->toBe('pending');
+});
+
+test('it allows legitimate donor with session ownership to replace their own pending donation', function () {
+    $legitDonation = Donation::create([
+        'donation_code' => 'DON-LEGIT-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donatur Sah',
+        'donor_email' => 'sah@example.com',
+        'donor_phone' => '081234567777',
+        'amount' => 100000,
+        'channel' => 'offline',
+        'status' => 'pending',
+    ]);
+
+    Payment::create([
+        'donation_id' => $legitDonation->id,
+        'payment_method' => 'bank_transfer_manual',
+        'payment_channel' => 'MANUAL_BSI',
+        'gateway' => 'manual',
+        'gateway_status' => 'PENDING',
+    ]);
+
+    // Session owner replaces their own pending donation
+    session(["donation_owner_{$legitDonation->donation_code}" => true]);
+
+    $this->post(route('donation.store', ['program' => $this->program->slug]), [
+        'amount' => 200000,
+        'donor_name' => 'Donatur Sah',
+        'donor_email' => 'sah@example.com',
+        'donor_phone' => '081234567777',
+        'channel' => 'offline',
+        'payment_method' => 'bank_transfer_manual',
+        'replace_donation_code' => $legitDonation->donation_code,
+    ]);
+
+    $legitDonation->refresh();
+    expect($legitDonation->status)->toBe('cancelled');
 });

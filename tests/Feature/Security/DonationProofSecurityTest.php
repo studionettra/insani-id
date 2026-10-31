@@ -221,3 +221,50 @@ test('viewing missing donation proof file returns 404', function () {
     $response = $this->actingAs($admin)->get("/admin/donations/{$donation->id}/proof");
     $response->assertNotFound();
 });
+
+test('unauthorized third-party visitor cannot see transfer proof signed url on donation status page', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-SEC-UNAUTH-01',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donatur Rahasia',
+        'donor_email' => 'rahasia@example.com',
+        'donor_phone' => '081234567899',
+        'amount' => 150000,
+        'channel' => 'offline',
+        'is_anonymous' => true,
+        'status' => 'pending',
+    ]);
+
+    $path = UploadedFile::fake()->image('proof.jpg')->store('donation-proofs', 'local');
+
+    Payment::create([
+        'donation_id' => $donation->id,
+        'payment_method' => 'bank_transfer_manual',
+        'payment_channel' => 'MANUAL_BSI',
+        'gateway' => 'manual',
+        'gateway_status' => 'PENDING',
+        'transfer_proof' => $path,
+    ]);
+
+    // 1. Guest visitor without session ownership
+    $response = $this->get(route('donation.status', ['donationCode' => $donation->donation_code]));
+    $response->assertOk();
+
+    // Must NOT provide proofUrl to third parties and must mask anonymous donor name and phone
+    $response->assertInertia(fn ($page) => $page
+        ->component('Public/Donation/Status')
+        ->where('proofUrl', null)
+        ->where('donation.donor_name', 'Inisiator Kebaikan')
+        ->whereNot('donation.donor_phone', '081234567899')
+    );
+
+    // 2. Guest with valid session ownership CAN access proofUrl and review their own name
+    session(["donation_owner_{$donation->donation_code}" => true]);
+    $ownerResponse = $this->get(route('donation.status', ['donationCode' => $donation->donation_code]));
+    $ownerResponse->assertOk();
+    $ownerResponse->assertInertia(fn ($page) => $page
+        ->component('Public/Donation/Status')
+        ->whereNot('proofUrl', null)
+        ->where('donation.donor_name', 'Donatur Rahasia')
+    );
+});
