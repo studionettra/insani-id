@@ -79,3 +79,17 @@ it('does not render public OpenGraph tags on dashboard/admin pages', function ()
     $response->assertSee('<meta name="robots" content="noindex, nofollow"', false);
     $response->assertDontSee('<meta property="og:site_name"', false);
 });
+
+it('safely escapes script closing tags in JSON-LD schema to prevent stored XSS', function () {
+    $xssTitle = 'Campaign Title </script><script>alert("XSS")</script>';
+    $program = Program::factory()->published()->create([
+        'title' => ['id' => $xssTitle],
+        'story' => ['id' => '<p>Deskripsi aman.</p>'],
+    ]);
+
+    $response = $this->get("/program/{$program->slug}");
+
+    $response->assertOk();
+    $response->assertDontSee('</script><script>alert("XSS")</script>', false);
+    $response->assertSee('\u003C/script\u003E\u003Cscript\u003E', false);
+});
