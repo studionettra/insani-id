@@ -19,7 +19,7 @@ class ProgramObserver
 
     public function updating(Program $program): void
     {
-        if ($program->status === 'published' && $program->isDirty('collected_amount') && $program->target_amount > 0) {
+        if (! $program->is_continuous && $program->status === 'published' && $program->isDirty('collected_amount') && $program->target_amount > 0) {
             if ($program->collected_amount >= $program->target_amount) {
                 $program->status = 'completed';
 
