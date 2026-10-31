@@ -484,6 +484,74 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
 
 require __DIR__.'/settings.php';
 
+// Legacy WordPress Campaign & Meta Ads 301 Redirects (Forwarding Query String for Meta CAPI / Attribution)
+Route::get('/sulteng-pl', function (Request $request) {
+    $qs = $request->getQueryString();
+
+    return redirect()->to('/program/sulteng-untuk-palestina'.($qs ? '?'.$qs : ''), 301);
+});
+
+Route::get('/gorontalo-pl', function (Request $request) {
+    $qs = $request->getQueryString();
+
+    return redirect()->to('/program/gorontalo-untuk-palestina'.($qs ? '?'.$qs : ''), 301);
+});
+
+Route::get('/indonesia-pl', function (Request $request) {
+    $qs = $request->getQueryString();
+
+    return redirect()->to('/program/sulteng-untuk-palestina'.($qs ? '?'.$qs : ''), 301);
+});
+
+Route::get('/galang-dana-id', function (Request $request) {
+    $qs = $request->getQueryString();
+
+    return redirect()->to('/program'.($qs ? '?'.$qs : ''), 301);
+});
+
+Route::get('/galang-dana/{legacyCampaignSlug}', function (Request $request, string $legacyCampaignSlug) {
+    $slugMap = [
+        'sulteng-untuk-palestina' => 'sulteng-untuk-palestina',
+        'gorontalo-untuk-palestina' => 'gorontalo-untuk-palestina',
+        'wintergaza' => 'bantu-mereka-bertahan-ditengah-musim-dingin-ekstrem',
+        'sembako-untuk-palestina' => 'paket-sembako-untuk-keluarga-palestina',
+        'bantu-krisis-yaman' => 'bersama-bantu-krisis-kemanusiaan-di-yaman',
+        'tolong-anak-gaza' => 'tolong-anak-anak-di-gaza',
+        'qurangaza' => 'bantu-anak-anak-penghafal-quran-di-gaza',
+        'muliakan-anak-anak-yatim' => 'muliakan-anak-yatim',
+        'airgaza' => 'gaza-krisis-air-bersih-saatnya-kita-bantu',
+        'sedekah-air-bersih-di-tengah-kemarau-panjang' => 'sedekah-air-bersih',
+    ];
+
+    $targetSlug = $slugMap[$legacyCampaignSlug] ?? null;
+    $targetUrl = $targetSlug ? "/program/{$targetSlug}" : '/program';
+    $qs = $request->getQueryString();
+
+    return redirect()->to($targetUrl.($qs ? '?'.$qs : ''), 301);
+});
+
+Route::get('/wc-donation/{legacyCampaignSlug}', function (Request $request, string $legacyCampaignSlug) {
+    $slugMap = [
+        'erupsi-semeru-bantu-warga-terdampak-segera' => 'erupsi-semeru-bantu-warga-terdampak-segera',
+        'sulteng-untuk-palestina' => 'sulteng-untuk-palestina',
+        'gorontalo-untuk-palestina' => 'gorontalo-untuk-palestina',
+        'wintergaza' => 'bantu-mereka-bertahan-ditengah-musim-dingin-ekstrem',
+        'sembako-untuk-palestina' => 'paket-sembako-untuk-keluarga-palestina',
+        'bantu-krisis-yaman' => 'bersama-bantu-krisis-kemanusiaan-di-yaman',
+        'tolong-anak-gaza' => 'tolong-anak-anak-di-gaza',
+        'qurangaza' => 'bantu-anak-anak-penghafal-quran-di-gaza',
+        'muliakan-anak-anak-yatim' => 'muliakan-anak-yatim',
+        'airgaza' => 'gaza-krisis-air-bersih-saatnya-kita-bantu',
+        'sedekah-air-bersih-di-tengah-kemarau-panjang' => 'sedekah-air-bersih',
+    ];
+
+    $targetSlug = $slugMap[$legacyCampaignSlug] ?? $legacyCampaignSlug;
+    $targetUrl = "/program/{$targetSlug}";
+    $qs = $request->getQueryString();
+
+    return redirect()->to($targetUrl.($qs ? '?'.$qs : ''), 301);
+});
+
 // Smart Fallback for Legacy WordPress root permalinks (e.g. insani.id/{slug} -> insani.id/kabar/{slug})
 Route::get('/{legacyBlogSlug}', function (string $legacyBlogSlug) {
     $blog = BlogPostCache::published()->where('slug', $legacyBlogSlug)->first();
