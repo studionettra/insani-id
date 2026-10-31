@@ -252,3 +252,19 @@ test('receipt renders local QR code data URI and does not leak to api.qrserver.c
     $response->assertDontSee('api.qrserver.com');
     $response->assertSee('data:image/svg+xml;base64,');
 });
+
+test('security headers middleware applies modern CSP with Cloudflare Turnstile whitelist and sets x-xss-protection to 0', function () {
+    $response = $this->get('/');
+
+    $response->assertOk();
+    $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+    $response->assertHeader('X-Content-Type-Options', 'nosniff');
+    $response->assertHeader('X-XSS-Protection', '0');
+    $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+
+    $csp = $response->headers->get('Content-Security-Policy');
+    expect($csp)->not->toBeNull()
+        ->and($csp)->toContain("default-src 'self'")
+        ->and($csp)->toContain('https://challenges.cloudflare.com')
+        ->and($csp)->toContain('https://api.midtrans.com');
+});
