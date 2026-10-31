@@ -739,7 +739,7 @@ export default function ProgramShow({ program, isProgramOwner = false, auth, cur
                                                         {program.comments.slice(0, visibleDonorsCount).map((comment: any) => (
                                                             <div key={comment.id} className="flex gap-3.5 sm:gap-4 border-b border-slate-100 pb-5 last:border-0 items-start">
                                                                 <div className="w-10 h-10 rounded-full bg-insani-blue/10 flex items-center justify-center text-insani-blue font-bold flex-shrink-0 text-sm">
-                                                                    {comment.name.charAt(0).toUpperCase()}
+                                                                    {(comment.name || 'I').trim().charAt(0).toUpperCase()}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-start justify-between gap-3 mb-1">
