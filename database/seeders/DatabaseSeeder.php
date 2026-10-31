@@ -35,14 +35,22 @@ class DatabaseSeeder extends Seeder
             KabarArchiveSeeder::class,
         ]);
 
-        $admin = User::factory()->create([
-            'name' => 'Super Administrator',
-            'email' => 'admin@insani.id',
-            'phone' => '081122334455',
-            'password' => bcrypt('password'),
-            'must_change_password' => true,
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@insani.id'],
+            [
+                'name' => 'Super Administrator',
+                'phone' => '081122334455',
+                'password' => bcrypt('password'),
+                'must_change_password' => true,
+            ]
+        );
 
-        $admin->assignRole('Administrator');
+        if (! $admin->hasRole('Administrator')) {
+            $admin->assignRole('Administrator');
+        }
+
+        $this->call([
+            LegacyCampaignAndDonationSeeder::class,
+        ]);
     }
 }
