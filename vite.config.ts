@@ -30,4 +30,7 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    build: {
+        chunkSizeWarningLimit: 1000,
+    },
 });
