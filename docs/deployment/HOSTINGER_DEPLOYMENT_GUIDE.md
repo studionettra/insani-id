@@ -328,6 +328,20 @@ php artisan storage:link
 >    * Ekstrak file zip tersebut di server sehingga file gambar berada di direktori `laravel_app/storage/app/public/blogs/`.
 > 3. **Idempotensi Seeder:** `KabarArchiveSeeder` bersifat 100% idempoten (`updateOrCreate` berbasis `slug`). Menjalankannya berkali-kali tidak akan membuat duplikasi data artikel.
 
+> [!TIP]
+> **Migrasi & Seeding Kampanye & Transaksi Donasi Legacy (11 Kampanye + 76 Transaksi Riil):**
+> 1. **Data JSON Kampanye & Donasi:** Data 11 kampanye terkelola di `database/data/campaigns_archive.json` dan 76 transaksi donasi di `database/data/donations_archive.json`.
+> 2. **Aset Gambar Kampanye (`storage/app/public/programs`):** Berkas gambar sampul (*cover*) dan ilustrasi narasi dikompresi menjadi file zip (`programs.zip`):
+>    * Unggah file `programs.zip` melalui **File Manager Hostinger** ke folder:
+>      `laravel_app/storage/app/public/`
+>    * Ekstrak file zip tersebut di server sehingga struktur direktori `laravel_app/storage/app/public/programs/covers/` dan `stories/` tersedia.
+> 3. **Eksekusi Seeder Mandiri:**
+>    Untuk melakukan seeding data kampanye dan donasi legacy secara terisolasi tanpa memicu notifikasi email atau webhook:
+>    ```bash
+>    php artisan db:seed --class=LegacyCampaignAndDonationSeeder --force
+>    ```
+>    Seeder ini bersifat 100% idempoten dan aman dijalankan berulang kali. Saldo terkumpul, bukti bayar kuitansi, dan Tab Donatur publik akan tersinkronisasi otomatis.
+
 
 > [!IMPORTANT]
 > **Keamanan Akun Superadmin Awal:**
