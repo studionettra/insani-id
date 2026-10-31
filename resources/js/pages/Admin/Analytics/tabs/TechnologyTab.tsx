@@ -1,6 +1,13 @@
 import React from 'react';
-import Chart from 'react-apexcharts';
-import { Smartphone, Monitor, Tablet, Globe2, Cpu, Compass } from 'lucide-react';
+import LazyChart from '@/components/ui/lazy-chart';
+import {
+    Smartphone,
+    Monitor,
+    Tablet,
+    Globe2,
+    Cpu,
+    Compass,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ItemCount {
@@ -30,7 +37,8 @@ interface Props {
 }
 
 export default function TechnologyTab({ data }: Props) {
-    const totalDevices = data.devices.mobile + data.devices.desktop + data.devices.tablet;
+    const totalDevices =
+        data.devices.mobile + data.devices.desktop + data.devices.tablet;
 
     const deviceChartOptions: ApexCharts.ApexOptions = {
         chart: {
@@ -67,24 +75,26 @@ export default function TechnologyTab({ data }: Props) {
     return (
         <div className="space-y-6">
             {/* Device breakdown & Geo Location */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Device Distribution Donut */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
-                    <div className="flex items-center gap-2 mb-1">
-                        <Smartphone className="w-4 h-4 text-emerald-600" />
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-1 flex items-center gap-2">
+                        <Smartphone className="h-4 w-4 text-emerald-600" />
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                             Kategori Perangkat
                         </h3>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
                         Perbandingan pengunjung dari HP, Komputer, dan Tablet
                     </p>
 
-                    <div className="flex-1 flex items-center justify-center min-h-[220px]">
+                    <div className="flex min-h-[220px] flex-1 items-center justify-center">
                         {totalDevices === 0 ? (
-                            <div className="text-sm text-gray-400">Belum ada data perangkat.</div>
+                            <div className="text-sm text-gray-400">
+                                Belum ada data perangkat.
+                            </div>
                         ) : (
-                            <Chart
+                            <LazyChart
                                 options={deviceChartOptions}
                                 series={deviceChartSeries}
                                 type="donut"
@@ -94,28 +104,28 @@ export default function TechnologyTab({ data }: Props) {
                         )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-center">
+                    <div className="mt-4 grid grid-cols-3 gap-2 border-t border-gray-100 pt-4 text-center dark:border-gray-700">
                         <div>
-                            <div className="text-xs text-gray-400 flex items-center justify-center gap-1">
-                                <Smartphone className="w-3 h-3" /> HP
+                            <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                                <Smartphone className="h-3 w-3" /> HP
                             </div>
-                            <div className="font-bold text-sm text-emerald-600 mt-0.5">
+                            <div className="mt-0.5 text-sm font-bold text-emerald-600">
                                 {data.devices.mobile}
                             </div>
                         </div>
                         <div>
-                            <div className="text-xs text-gray-400 flex items-center justify-center gap-1">
-                                <Monitor className="w-3 h-3" /> Desktop
+                            <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                                <Monitor className="h-3 w-3" /> Desktop
                             </div>
-                            <div className="font-bold text-sm text-blue-600 mt-0.5">
+                            <div className="mt-0.5 text-sm font-bold text-blue-600">
                                 {data.devices.desktop}
                             </div>
                         </div>
                         <div>
-                            <div className="text-xs text-gray-400 flex items-center justify-center gap-1">
-                                <Tablet className="w-3 h-3" /> Tablet
+                            <div className="flex items-center justify-center gap-1 text-xs text-gray-400">
+                                <Tablet className="h-3 w-3" /> Tablet
                             </div>
-                            <div className="font-bold text-sm text-amber-600 mt-0.5">
+                            <div className="mt-0.5 text-sm font-bold text-amber-600">
                                 {data.devices.tablet}
                             </div>
                         </div>
@@ -123,34 +133,46 @@ export default function TechnologyTab({ data }: Props) {
                 </div>
 
                 {/* City & Geography Table */}
-                <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm lg:col-span-2 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Globe2 className="w-4 h-4 text-blue-600" />
-                            <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                            <Globe2 className="h-4 w-4 text-blue-600" />
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                                 Sebaran Wilayah / Kota Pengunjung
                             </h3>
                         </div>
-                        <span className="text-xs text-gray-400">Deteksi IP & Jaringan</span>
+                        <span className="text-xs text-gray-400">
+                            Deteksi IP & Jaringan
+                        </span>
                     </div>
 
                     {data.locations.length === 0 ? (
-                        <div className="text-center py-10 text-gray-400 text-sm">
-                            Data kota pengunjung belum tersedia atau sebagian besar dari jaringan lokal.
+                        <div className="py-10 text-center text-sm text-gray-400">
+                            Data kota pengunjung belum tersedia atau sebagian
+                            besar dari jaringan lokal.
                         </div>
                     ) : (
-                        <div className="overflow-x-auto custom-scrollbar">
+                        <div className="custom-scrollbar overflow-x-auto">
                             <table className="w-full text-left text-xs">
                                 <thead>
-                                    <tr className="border-b border-gray-100 dark:border-gray-700 text-gray-400">
-                                        <th className="pb-2.5 font-medium">Kota / Daerah</th>
-                                        <th className="pb-2.5 font-medium">Negara</th>
-                                        <th className="pb-2.5 font-medium text-right">Pengunjung</th>
+                                    <tr className="border-b border-gray-100 text-gray-400 dark:border-gray-700">
+                                        <th className="pb-2.5 font-medium">
+                                            Kota / Daerah
+                                        </th>
+                                        <th className="pb-2.5 font-medium">
+                                            Negara
+                                        </th>
+                                        <th className="pb-2.5 text-right font-medium">
+                                            Pengunjung
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                                     {data.locations.map((loc, idx) => (
-                                        <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
+                                        <tr
+                                            key={idx}
+                                            className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
+                                        >
                                             <td className="py-2.5 font-medium text-gray-800 dark:text-gray-200">
                                                 {loc.city}
                                             </td>
@@ -158,8 +180,13 @@ export default function TechnologyTab({ data }: Props) {
                                                 {loc.country || 'Indonesia'}
                                             </td>
                                             <td className="py-2.5 text-right font-bold text-gray-700 dark:text-gray-300">
-                                                <Badge variant="outline" className="text-[11px]">
-                                                    {loc.count.toLocaleString('id-ID')}
+                                                <Badge
+                                                    variant="outline"
+                                                    className="text-[11px]"
+                                                >
+                                                    {loc.count.toLocaleString(
+                                                        'id-ID',
+                                                    )}
                                                 </Badge>
                                             </td>
                                         </tr>
@@ -172,31 +199,42 @@ export default function TechnologyTab({ data }: Props) {
             </div>
 
             {/* OS and Browser breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Operating Systems */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Cpu className="w-4 h-4 text-purple-600" />
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-4 flex items-center gap-2">
+                        <Cpu className="h-4 w-4 text-purple-600" />
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                             Sistem Operasi (OS)
                         </h3>
                     </div>
 
                     {data.operating_systems.length === 0 ? (
-                        <div className="text-center py-6 text-gray-400 text-sm">Belum ada data OS.</div>
+                        <div className="py-6 text-center text-sm text-gray-400">
+                            Belum ada data OS.
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             {data.operating_systems.map((os, idx) => {
-                                const pct = Math.round((os.count / maxOs) * 100);
+                                const pct = Math.round(
+                                    (os.count / maxOs) * 100,
+                                );
                                 return (
-                                    <div key={idx} className="space-y-1 text-xs">
+                                    <div
+                                        key={idx}
+                                        className="space-y-1 text-xs"
+                                    >
                                         <div className="flex justify-between font-medium">
-                                            <span className="text-gray-700 dark:text-gray-200">{os.name}</span>
-                                            <span className="text-gray-500">{os.count} kunjungan</span>
+                                            <span className="text-gray-700 dark:text-gray-200">
+                                                {os.name}
+                                            </span>
+                                            <span className="text-gray-500">
+                                                {os.count} kunjungan
+                                            </span>
                                         </div>
-                                        <div className="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                                        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
                                             <div
-                                                className="bg-purple-500 h-full rounded-full transition-all duration-500"
+                                                className="h-full rounded-full bg-purple-500 transition-all duration-500"
                                                 style={{ width: `${pct}%` }}
                                             />
                                         </div>
@@ -208,29 +246,40 @@ export default function TechnologyTab({ data }: Props) {
                 </div>
 
                 {/* Browsers */}
-                <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Compass className="w-4 h-4 text-blue-600" />
-                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
+                <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="mb-4 flex items-center gap-2">
+                        <Compass className="h-4 w-4 text-blue-600" />
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                             Peramban Web (Browser)
                         </h3>
                     </div>
 
                     {data.browsers.length === 0 ? (
-                        <div className="text-center py-6 text-gray-400 text-sm">Belum ada data browser.</div>
+                        <div className="py-6 text-center text-sm text-gray-400">
+                            Belum ada data browser.
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             {data.browsers.map((b, idx) => {
-                                const pct = Math.round((b.count / maxBrowser) * 100);
+                                const pct = Math.round(
+                                    (b.count / maxBrowser) * 100,
+                                );
                                 return (
-                                    <div key={idx} className="space-y-1 text-xs">
+                                    <div
+                                        key={idx}
+                                        className="space-y-1 text-xs"
+                                    >
                                         <div className="flex justify-between font-medium">
-                                            <span className="text-gray-700 dark:text-gray-200">{b.name}</span>
-                                            <span className="text-gray-500">{b.count} kunjungan</span>
+                                            <span className="text-gray-700 dark:text-gray-200">
+                                                {b.name}
+                                            </span>
+                                            <span className="text-gray-500">
+                                                {b.count} kunjungan
+                                            </span>
                                         </div>
-                                        <div className="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+                                        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
                                             <div
-                                                className="bg-blue-500 h-full rounded-full transition-all duration-500"
+                                                className="h-full rounded-full bg-blue-500 transition-all duration-500"
                                                 style={{ width: `${pct}%` }}
                                             />
                                         </div>
