@@ -354,6 +354,7 @@ class DonationController extends Controller
     {
         $search = trim((string) $request->input('q', ''));
         $donations = null;
+        $notice = null;
 
         if (! empty($search)) {
             // 1. If query matches a donation code, direct redirection to status
@@ -362,61 +363,80 @@ class DonationController extends Controller
                 if ($exactDonation) {
                     return redirect()->route('donation.status', ['donationCode' => $exactDonation->donation_code]);
                 }
-            }
 
-            $rawDonations = Donation::with(['program.category', 'payments'])
-                ->where('donor_email', $search)
-                ->orWhere('donation_code', strtoupper($search))
-                ->latest()
-                ->paginate(10)
-                ->withQueryString();
+                $notice = 'Kode donasi "'.strtoupper($search).'" tidak ditemukan. Pastikan format kode donasi sesuai dengan yang tertera pada email atau bukti donasi Anda.';
+            } elseif (str_contains($search, '@')) {
+                // 2. Email query: require authentication to prevent unauthorized enumeration of donor history
+                $user = $request->user();
+                $isOwnEmail = $user && strtolower(trim((string) $user->email)) === strtolower($search);
+                $isStaff = $user && ($user->hasRole('Administrator') || $user->can('donation.view'));
 
-            $maskEmail = function (?string $email): ?string {
-                if (! $email || ! str_contains($email, '@')) {
-                    return null;
+                if ($isOwnEmail || $isStaff) {
+                    $rawDonations = Donation::with(['program.category', 'payments'])
+                        ->where('donor_email', $search)
+                        ->latest()
+                        ->paginate(10)
+                        ->withQueryString();
+
+                    $maskEmail = function (?string $email): ?string {
+                        if (! $email || ! str_contains($email, '@')) {
+                            return null;
+                        }
+                        [$local, $domain] = explode('@', $email, 2);
+                        $maskedLocal = strlen($local) <= 2
+                            ? substr($local, 0, 1).'***'
+                            : substr($local, 0, 2).str_repeat('*', max(strlen($local) - 2, 3));
+
+                        return $maskedLocal.'@'.$domain;
+                    };
+
+                    $donations = $rawDonations->through(function ($donation) use ($maskEmail) {
+                        return [
+                            'id' => $donation->id,
+                            'donation_code' => $donation->donation_code,
+                            'amount' => $donation->amount,
+                            'unique_code' => $donation->unique_code,
+                            'channel' => $donation->channel,
+                            'status' => $donation->status,
+                            'created_at' => $donation->created_at,
+                            'paid_at' => $donation->paid_at,
+                            'message' => $donation->message,
+                            'is_anonymous' => (bool) $donation->is_anonymous,
+                            'donor_email' => $maskEmail($donation->donor_email),
+                            'donor_name' => $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name,
+                            'program' => $donation->program ? [
+                                'id' => $donation->program->id,
+                                'title' => $donation->program->title,
+                                'slug' => $donation->program->slug,
+                                'cover_image' => $donation->program->cover_image,
+                                'category' => $donation->program->category ? [
+                                    'name' => $donation->program->category->name,
+                                ] : null,
+                            ] : null,
+                            'payments' => $donation->payments->map(fn ($p) => [
+                                'payment_method' => $p->payment_method,
+                                'gateway_status' => $p->gateway_status,
+                            ]),
+                        ];
+                    });
+                } else {
+                    $notice = 'Demi menjaga kerahasiaan dan privasi donatur, pencarian riwayat donasi berdasarkan alamat email hanya dapat diakses melalui akun terverifikasi. Silakan masuk ke akun Anda atau periksa status menggunakan Kode Transaksi spesifik (contoh: DON-XXXXXXXXXX).';
                 }
-                [$local, $domain] = explode('@', $email, 2);
-                $maskedLocal = strlen($local) <= 2
-                    ? substr($local, 0, 1).'***'
-                    : substr($local, 0, 2).str_repeat('*', max(strlen($local) - 2, 3));
+            } else {
+                // If input doesn't start with DON- but could be an exact code without prefix or invalid search
+                $exactDonation = Donation::where('donation_code', strtoupper($search))->first();
+                if ($exactDonation) {
+                    return redirect()->route('donation.status', ['donationCode' => $exactDonation->donation_code]);
+                }
 
-                return $maskedLocal.'@'.$domain;
-            };
-
-            $donations = $rawDonations->through(function ($donation) use ($maskEmail) {
-                return [
-                    'id' => $donation->id,
-                    'donation_code' => $donation->donation_code,
-                    'amount' => $donation->amount,
-                    'unique_code' => $donation->unique_code,
-                    'channel' => $donation->channel,
-                    'status' => $donation->status,
-                    'created_at' => $donation->created_at,
-                    'paid_at' => $donation->paid_at,
-                    'message' => $donation->message,
-                    'is_anonymous' => (bool) $donation->is_anonymous,
-                    'donor_email' => $maskEmail($donation->donor_email),
-                    'donor_name' => $donation->is_anonymous ? 'Inisiator Kebaikan' : $donation->donor_name,
-                    'program' => $donation->program ? [
-                        'id' => $donation->program->id,
-                        'title' => $donation->program->title,
-                        'slug' => $donation->program->slug,
-                        'cover_image' => $donation->program->cover_image,
-                        'category' => $donation->program->category ? [
-                            'name' => $donation->program->category->name,
-                        ] : null,
-                    ] : null,
-                    'payments' => $donation->payments->map(fn ($p) => [
-                        'payment_method' => $p->payment_method,
-                        'gateway_status' => $p->gateway_status,
-                    ]),
-                ];
-            });
+                $notice = 'Masukkan Kode Donasi yang valid (contoh: DON-8X91LK20PW) untuk memeriksa status donasi Anda.';
+            }
         }
 
         return inertia('Public/Donation/Lookup', [
             'search' => $search,
             'donations' => $donations,
+            'notice' => $notice,
         ]);
     }
 

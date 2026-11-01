@@ -161,7 +161,7 @@ export default function DonationLookup({ search = '', donations, notice }: Props
                                         type="text"
                                         value={query}
                                         onChange={(e) => setQuery(e.target.value)}
-                                        placeholder="Masukkan alamat email donatur atau ID transaksi (DON-...)"
+                                        placeholder="Masukkan ID transaksi / Kode Donasi (contoh: DON-8X91LK20PW)"
                                         className="w-full bg-transparent border-0 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 py-2.5"
                                         required
                                     />
@@ -175,7 +175,7 @@ export default function DonationLookup({ search = '', donations, notice }: Props
                                 </Button>
                             </div>
                             <p className="text-[11px] text-slate-500 mt-2.5 text-center">
-                                Contoh: <code>ahmad@example.com</code> atau kode <code>DON-8X91LK20PW</code>
+                                Masukkan kode donasi unik yang tercantum pada kuitansi atau email konfirmasi (contoh: <code>DON-8X91LK20PW</code>)
                             </p>
                         </form>
                     </div>

@@ -199,9 +199,12 @@ test('unauthenticated guest without session or signature cannot cancel pending d
 });
 
 test('public donation lookup masks anonymous donor name and strips donor phone number', function () {
+    $user = User::factory()->create(['email' => 'budirahardjo@example.com']);
+
     $donation = Donation::create([
         'donation_code' => 'DON-SECRETANON',
         'program_id' => $this->program->id,
+        'donor_user_id' => $user->id,
         'donor_name' => 'Budi Rahasia',
         'donor_email' => 'budirahardjo@example.com',
         'donor_phone' => '081299998888',
@@ -211,8 +214,8 @@ test('public donation lookup masks anonymous donor name and strips donor phone n
         'status' => 'paid',
     ]);
 
-    // 1. Search with plain email returns donations with masked data and NO donor_phone
-    $response = $this->get('/cek-donasi?q=budirahardjo@example.com');
+    // 1. Search with plain email by authenticated donor returns donations with masked data and NO donor_phone
+    $response = $this->actingAs($user)->get('/cek-donasi?q=budirahardjo@example.com');
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Public/Donation/Lookup')
