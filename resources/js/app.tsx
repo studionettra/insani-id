@@ -23,7 +23,7 @@ createInertiaApp({
         switch (true) {
             case name.startsWith('Public/Akun/') || name.startsWith('Public/CampaignerRegistration/'):
                 return TailAdminLayout;
-            case name === 'welcome' || name.startsWith('Public/'):
+            case name === 'welcome' || name.startsWith('Public/') || name === 'Error':
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
