@@ -66,7 +66,12 @@ class HomeController extends Controller
         $latestBlogs = BlogPostCache::published()
             ->latest('published_at')
             ->take(3)
-            ->get();
+            ->get()
+            ->map(function ($blog) {
+                $blog->featured_image_url = $blog->thumbnail_url ?: $blog->featured_image_url;
+
+                return $blog;
+            });
 
         $testimonials = Testimonial::where('is_active', true)
             ->orderBy('sort_order')

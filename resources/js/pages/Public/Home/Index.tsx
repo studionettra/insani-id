@@ -372,8 +372,8 @@ return;
                                 <FadeIn className="lg:col-span-7">
                                     <Link href={`/kabar/${blogs[0].slug}`} className="group block relative rounded-3xl overflow-hidden bg-white border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
                                         <div className="aspect-[16/10] overflow-hidden bg-zinc-100 relative">
-                                            {blogs[0].featured_image_url ? (
-                                                <img src={blogs[0].featured_image_url} alt={blogs[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                            {(blogs[0].thumbnail_url || blogs[0].featured_image_url) ? (
+                                                <img src={blogs[0].thumbnail_url || blogs[0].featured_image_url} alt={blogs[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                                             ) : (
                                                 <div className="absolute inset-0 bg-gradient-to-br from-brand-100 to-brand-50"></div>
                                             )}
@@ -398,8 +398,8 @@ return;
                                         <FadeIn key={blog.id} delay={0.2 + (idx * 0.1)} className="h-full">
                                             <Link href={`/kabar/${blog.slug}`} className="group flex flex-col sm:flex-row lg:flex-col xl:flex-row h-full bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300">
                                                 <div className="sm:w-2/5 lg:w-full xl:w-2/5 aspect-[4/3] sm:aspect-auto lg:aspect-[16/9] xl:aspect-auto overflow-hidden bg-zinc-100 flex-shrink-0 relative">
-                                                    {blog.featured_image_url ? (
-                                                        <img src={blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                                    {(blog.thumbnail_url || blog.featured_image_url) ? (
+                                                        <img src={blog.thumbnail_url || blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                                                     ) : (
                                                         <div className="absolute inset-0 bg-gradient-to-br from-brand-100 to-brand-50"></div>
                                                     )}
@@ -424,8 +424,8 @@ return;
                                     <FadeIn key={blog.id}>
                                         <Link href={`/kabar/${blog.slug}`} className="group flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
                                             <div className="md:w-1/2 aspect-[16/9] md:aspect-auto overflow-hidden bg-zinc-100 relative">
-                                                {blog.featured_image_url ? (
-                                                    <img src={blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                                {(blog.thumbnail_url || blog.featured_image_url) ? (
+                                                    <img src={blog.thumbnail_url || blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                                                 ) : (
                                                     <div className="absolute inset-0 bg-gradient-to-br from-brand-100 to-brand-50"></div>
                                                 )}
