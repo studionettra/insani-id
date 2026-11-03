@@ -41,8 +41,8 @@ class SecurityHeaders
         $csp = [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.googletagmanager.com https://connect.facebook.net{$localScript}",
-            "frame-src 'self' https://challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.youtube.com https://www.youtube-nocookie.com",
-            "connect-src 'self' https://challenges.cloudflare.com https://api.midtrans.com https://app.midtrans.com https://translate.googleapis.com https://api.fonnte.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://connect.facebook.net{$localConnect}",
+            "frame-src 'self' https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
+            "connect-src 'self' data: https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://*.cloudflarecaptcha.com https://api.midtrans.com https://app.midtrans.com https://translate.googleapis.com https://api.fonnte.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://connect.facebook.net{$localConnect}",
             "img-src 'self' data: https: blob:",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             "font-src 'self' data: https://fonts.gstatic.com",

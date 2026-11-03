@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             AppSettingSeeder::class,
             CategorySeeder::class,
             BankAccountSeeder::class,
+            PartnerSeeder::class,
+            HomepageBannerSeeder::class,
             LegalDocumentSeeder::class,
             PageSeeder::class,
             FaqSeeder::class,
