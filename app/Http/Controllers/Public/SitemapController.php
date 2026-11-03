@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Page;
 use App\Models\Program;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 
 class SitemapController extends Controller
 {
@@ -76,9 +77,10 @@ class SitemapController extends Controller
             ->get();
 
         foreach ($blogs as $blog) {
+            $lastmod = $blog->synced_at ?? $blog->updated_at ?? $blog->published_at ?? now();
             $urls[] = [
                 'loc' => route('blog.show', $blog->slug),
-                'lastmod' => ($blog->synced_at ?? $blog->updated_at ?? $blog->published_at ?? now())->toAtomString(),
+                'lastmod' => Carbon::parse($lastmod)->toAtomString(),
                 'changefreq' => 'weekly',
                 'priority' => '0.8',
             ];

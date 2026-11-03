@@ -9,7 +9,13 @@
     $metaPixelId = (!$isAdminOrDashboard && !$suppressDirect) ? \App\Models\AppSetting::get('meta_pixel_id') : null;
     $tiktokPixelId = (!$isAdminOrDashboard && !$suppressDirect) ? \App\Models\AppSetting::get('tiktok_pixel_id') : null;
     $googleSiteVerification = !$isAdminOrDashboard ? \App\Models\AppSetting::get('google_site_verification') : null;
+    if ($googleSiteVerification) {
+        $googleSiteVerification = preg_replace('/^google-site-verification\s*=\s*/i', '', trim($googleSiteVerification));
+    }
     $metaDomainVerification = !$isAdminOrDashboard ? \App\Models\AppSetting::get('meta_domain_verification') : null;
+    if ($metaDomainVerification) {
+        $metaDomainVerification = preg_replace('/^facebook-domain-verification\s*=\s*/i', '', trim($metaDomainVerification));
+    }
     $siteFavicon = \App\Models\AppSetting::get('site_favicon');
     $faviconUrl = $siteFavicon ? asset('storage/' . $siteFavicon) : asset('favicon-insani.svg');
 @endphp

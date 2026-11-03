@@ -35,6 +35,7 @@ class BlogPostCache extends Model
     protected $casts = [
         'views_count' => 'integer',
         'published_at' => 'datetime',
+        'synced_at' => 'datetime',
     ];
 
     protected $appends = [

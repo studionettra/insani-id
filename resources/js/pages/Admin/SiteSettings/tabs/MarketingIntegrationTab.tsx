@@ -326,12 +326,12 @@ export default function MarketingIntegrationTab({
                         <Input
                             id="google_site_verification"
                             value={data.google_site_verification || ''}
-                            onChange={(e) => setData('google_site_verification', e.target.value)}
-                            placeholder="google-site-verification=XXXXXXXXXXXXXXXXXXXXXX"
+                            onChange={(e) => setData('google_site_verification', e.target.value.replace(/^google-site-verification\s*=\s*/i, ''))}
+                            placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                             className="font-mono text-xs"
                         />
                         <p className="text-[11px] text-gray-400">
-                            Isi nilai parameter <code>content="..."</code> dari tag meta Google Search Console.
+                            Isi kode verifikasi dari parameter <code>content="..."</code> (tanpa awalan <code>google-site-verification=</code>).
                         </p>
                         {errors.google_site_verification && (
                             <p className="text-xs text-red-500 mt-1">{errors.google_site_verification}</p>
@@ -346,12 +346,12 @@ export default function MarketingIntegrationTab({
                         <Input
                             id="meta_domain_verification"
                             value={data.meta_domain_verification || ''}
-                            onChange={(e) => setData('meta_domain_verification', e.target.value)}
-                            placeholder="facebook-domain-verification=XXXXXXXXXXXXX"
+                            onChange={(e) => setData('meta_domain_verification', e.target.value.replace(/^facebook-domain-verification\s*=\s*/i, ''))}
+                            placeholder="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
                             className="font-mono text-xs"
                         />
                         <p className="text-[11px] text-gray-400">
-                            Isi nilai parameter <code>content="..."</code> dari meta tag verifikasi domain Facebook.
+                            Isi kode verifikasi dari parameter <code>content="..."</code> (tanpa awalan <code>facebook-domain-verification=</code>).
                         </p>
                         {errors.meta_domain_verification && (
                             <p className="text-xs text-red-500 mt-1">{errors.meta_domain_verification}</p>
