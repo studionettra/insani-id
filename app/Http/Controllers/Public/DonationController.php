@@ -32,8 +32,9 @@ class DonationController extends Controller
             abort(404);
         }
 
-        $isOnlineAvailable = $this->midtrans->isConfigured();
         $channels = MidtransCorePaymentService::getAvailableChannels();
+        $isOnlineAvailable = $this->midtrans->isConfigured()
+            && collect($channels)->contains(fn ($channel) => ($channel['channel'] ?? '') === 'online');
         $vaNotice = AppSetting::get('midtrans_va_maintenance_notice', 'Layanan Virtual Account otomatis sedang dalam integrasi perbankan berkala. Anda dapat berdonasi secara instan menggunakan QRIS (mendukung semua M-Banking: BCA, Mandiri, BRI, BNI, BSI) atau melalui Transfer Manual BSI & BRI.');
 
         $replaceCode = $request->query('replace') ?? $request->query('replace_donation');

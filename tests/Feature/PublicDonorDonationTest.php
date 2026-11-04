@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Jobs\SendDonationPaidNotification;
+use App\Models\AppSetting;
 use App\Models\Category;
 use App\Models\Donation;
 use App\Models\Payment;
@@ -208,4 +209,19 @@ test('replacing a previous pending donation automatically cancels the old donati
     $response->assertRedirect();
     expect($oldDonation->fresh()->status)->toBe('cancelled')
         ->and($oldDonation->payments()->first()->gateway_status)->toBe('CANCELLED');
+});
+
+test('donation create page returns onlinePaymentAvailable false when all midtrans channels are disabled in settings', function () {
+    AppSetting::set('midtrans_channel_qris', '0');
+    AppSetting::set('midtrans_channel_shopeepay', '0');
+    AppSetting::set('midtrans_channel_gopay', '0');
+    AppSetting::set('midtrans_channel_bsi_va', '0');
+
+    $response = $this->get(route('donation.create', $this->program->slug));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Public/Program/Donate')
+        ->where('onlinePaymentAvailable', false)
+    );
 });

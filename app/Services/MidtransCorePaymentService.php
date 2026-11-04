@@ -285,6 +285,15 @@ class MidtransCorePaymentService
     }
 
     /**
+     * Check if at least one online payment channel is actively enabled.
+     */
+    public static function hasActiveOnlineChannels(): bool
+    {
+        return collect(self::getAvailableChannels())
+            ->contains(fn ($channel) => ($channel['channel'] ?? '') === 'online');
+    }
+
+    /**
      * Find a channel by its code.
      *
      * @return array<string, mixed>|null

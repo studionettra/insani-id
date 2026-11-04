@@ -35,6 +35,13 @@ class StoreDonationRequest extends FormRequest
             $merges['payment_method'] = $this->input('payment_method') ?: 'qris';
         }
 
+        if ($this->input('channel') === 'offline' && ! $this->filled('payment_channel')) {
+            $firstManual = collect(MidtransCorePaymentService::getAvailableChannels())
+                ->firstWhere('channel', 'offline');
+            $merges['payment_channel'] = $firstManual['code'] ?? 'MANUAL_BSI';
+            $merges['payment_method'] = 'bank_transfer_manual';
+        }
+
         $this->merge($merges);
     }
 
@@ -99,7 +106,7 @@ class StoreDonationRequest extends FormRequest
                 $channelDef = MidtransCorePaymentService::findChannel($channelCode, 'online');
 
                 if (! $channelDef) {
-                    $validator->errors()->add('payment_channel', 'Kanal pembayaran online yang dipilih tidak valid.');
+                    $validator->errors()->add('payment_channel', 'Kanal pembayaran online yang dipilih sedang tidak tersedia. Silakan gunakan Transfer Bank Manual.');
 
                     return;
                 }

@@ -8,7 +8,8 @@ import {
     Info,
     Check,
     AlertCircle,
-    QrCode
+    QrCode,
+    Copy
 } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
@@ -187,9 +188,35 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
 
     const presets = [10000, 20000, 50000, 100000, 500000, 1000000];
 
-    const initialChannel = onlinePaymentAvailable ? 'QRIS' : 'MANUAL_BSI';
-    const initialMethod = onlinePaymentAvailable ? 'qris' : 'bank_transfer_manual';
-    const initialCategory = onlinePaymentAvailable ? 'online' : 'offline';
+    const qrisChannels = useMemo(() => channels.filter(c => c.category === 'qris'), [channels]);
+    const vaChannels = useMemo(() => channels.filter(c => c.category === 'virtual_account'), [channels]);
+    const ewalletChannels = useMemo(() => channels.filter(c => c.category === 'ewallet'), [channels]);
+    const manualChannels = useMemo(() => channels.filter(c => c.category === 'manual'), [channels]);
+
+    const hasOnlineChannels = Boolean(
+        onlinePaymentAvailable && (qrisChannels.length > 0 || vaChannels.length > 0 || ewalletChannels.length > 0)
+    );
+
+    // Tentukan kanal default awal secara adaptif
+    const defaultChannelDef = useMemo(() => {
+        if (hasOnlineChannels) {
+            return qrisChannels[0] || vaChannels[0] || ewalletChannels[0] || manualChannels[0] || channels[0];
+        }
+        return manualChannels[0] || channels[0];
+    }, [hasOnlineChannels, qrisChannels, vaChannels, ewalletChannels, manualChannels, channels]);
+
+    const initialChannel = defaultChannelDef?.code || (hasOnlineChannels ? 'QRIS' : 'MANUAL_BSI');
+    const initialMethod = defaultChannelDef?.method || (hasOnlineChannels ? 'qris' : 'bank_transfer_manual');
+    const initialCategory = defaultChannelDef?.channel || (hasOnlineChannels ? 'online' : 'offline');
+
+    const initialTab: 'qris' | 'virtual_account' | 'ewallet' | 'manual' = useMemo(() => {
+        if (hasOnlineChannels) {
+            if (qrisChannels.length > 0) return 'qris';
+            if (vaChannels.length > 0) return 'virtual_account';
+            if (ewalletChannels.length > 0) return 'ewallet';
+        }
+        return 'manual';
+    }, [hasOnlineChannels, qrisChannels.length, vaChannels.length, ewalletChannels.length]);
 
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 
@@ -213,19 +240,50 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
         'cf-turnstile-response': '',
     });
 
-    const [activeTab, setActiveTab] = useState<'qris' | 'virtual_account' | 'ewallet' | 'manual'>(
-        onlinePaymentAvailable ? 'qris' : 'manual'
-    );
+    const [activeTab, setActiveTab] = useState<'qris' | 'virtual_account' | 'ewallet' | 'manual'>(initialTab);
+    const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+
+    const handleCopyAccount = (e: React.MouseEvent, accountNumber?: string) => {
+        e.stopPropagation();
+        if (!accountNumber) return;
+        const cleanNumber = accountNumber.replace(/\s+/g, '');
+        navigator.clipboard.writeText(cleanNumber);
+        setCopiedAccount(cleanNumber);
+        toast.success('Nomor rekening berhasil disalin!');
+        setTimeout(() => {
+            setCopiedAccount(null);
+        }, 2500);
+    };
+
+    const selectChannel = (channel: PaymentChannel) => {
+        setData(prev => ({
+            ...prev,
+            channel: channel.channel,
+            payment_method: channel.method,
+            payment_channel: channel.code,
+        }));
+    };
+
+    React.useEffect(() => {
+        if (!hasOnlineChannels && activeTab !== 'manual') {
+            setActiveTab('manual');
+            if (manualChannels[0]) {
+                selectChannel(manualChannels[0]);
+            }
+        }
+    }, [hasOnlineChannels, activeTab, manualChannels]);
 
     const selectedChannelDef = useMemo(() => {
-        return channels.find(c => c.code.toUpperCase() === data.payment_channel.toUpperCase()) || channels[0];
-    }, [channels, data.payment_channel]);
+        return channels.find(c => c.code.toUpperCase() === data.payment_channel.toUpperCase()) 
+            || defaultChannelDef 
+            || channels[0];
+    }, [channels, data.payment_channel, defaultChannelDef]);
 
     // Check if the current amount is valid for the selected channel
     const amountValidationNotice = useMemo(() => {
         if (!selectedChannelDef) {
-return null;
-}
+            return null;
+        }
 
         if (data.amount < selectedChannelDef.min_amount) {
             return `Minimal donasi untuk ${selectedChannelDef.name} adalah ${formatCurrency(selectedChannelDef.min_amount)}`;
@@ -238,14 +296,22 @@ return null;
         return null;
     }, [data.amount, selectedChannelDef]);
 
-    const selectChannel = (channel: PaymentChannel) => {
-        setData(prev => ({
-            ...prev,
-            channel: channel.channel,
-            payment_method: channel.method,
-            payment_channel: channel.code,
-        }));
-    };
+    const availableTabs = useMemo(() => {
+        const list: Array<{ id: 'qris' | 'virtual_account' | 'ewallet' | 'manual'; label: string; icon: any }> = [];
+        if (qrisChannels.length > 0) {
+            list.push({ id: 'qris', label: 'QRIS', icon: QrCode });
+        }
+        if (vaChannels.length > 0 || (onlinePaymentAvailable && vaMaintenanceNotice)) {
+            list.push({ id: 'virtual_account', label: 'Virtual Account', icon: CreditCard });
+        }
+        if (ewalletChannels.length > 0) {
+            list.push({ id: 'ewallet', label: 'E-Wallet', icon: Smartphone });
+        }
+        if (manualChannels.length > 0) {
+            list.push({ id: 'manual', label: 'Transfer Manual', icon: Landmark });
+        }
+        return list;
+    }, [qrisChannels.length, vaChannels.length, ewalletChannels.length, manualChannels.length, onlinePaymentAvailable, vaMaintenanceNotice]);
 
     const title = getLocalizedValue(program.title);
 
@@ -280,11 +346,6 @@ return null;
 
         post(`/program/${program.slug}/donasi`);
     };
-
-    const qrisChannels = channels.filter(c => c.category === 'qris');
-    const vaChannels = channels.filter(c => c.category === 'virtual_account');
-    const ewalletChannels = channels.filter(c => c.category === 'ewallet');
-    const manualChannels = channels.filter(c => c.category === 'manual');
 
     return (
         <PublicLayout title={`Donasi untuk ${title}`} hideFooter>
@@ -380,7 +441,9 @@ return null;
                                             <div className="min-w-0 flex-1">
                                                 <h2 className="text-xl font-bold text-slate-800">Pilih Metode Pembayaran</h2>
                                                 <p className="text-xs text-slate-500 mt-0.5">
-                                                    Pilih metode yang paling nyaman <span className="sm:inline block">untuk Anda.</span>
+                                                    {!hasOnlineChannels 
+                                                        ? 'Donasi dilayani melalui Transfer Bank Resmi Yayasan' 
+                                                        : 'Pilih metode yang paling nyaman untuk Anda.'}
                                                 </p>
                                             </div>
                                             {selectedChannelDef && (
@@ -390,87 +453,60 @@ return null;
                                             )}
                                         </div>
 
-                                        {/* Category Navigation Pills */}
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
-                                            <button
-                                                type="button"
-                                                disabled={!onlinePaymentAvailable}
-                                                onClick={() => {
-                                                    setActiveTab('qris');
+                                        {/* Category Navigation Pills / Reassurance Banner */}
+                                        {!hasOnlineChannels ? (
+                                            <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/80 border border-blue-200/90 text-blue-950 flex items-start gap-3.5 shadow-2xs">
+                                                <div className="w-9 h-9 rounded-xl bg-insani-blue/10 text-insani-blue flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Landmark className="w-5 h-5 text-insani-blue" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <h4 className="font-bold text-xs sm:text-sm text-blue-950">
+                                                        Metode Resmi: Transfer Bank Langsung ke Rekening Yayasan
+                                                    </h4>
+                                                    <p className="text-xs text-blue-900/90 leading-relaxed">
+                                                        Layanan pembayaran instan perbankan sedang dalam proses sinkronisasi berkala. Seluruh donasi saat ini dialihkan langsung ke rekening resmi {foundationName} dengan verifikasi aman dan penerbitan kuitansi donasi resmi.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : availableTabs.length > 1 ? (
+                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+                                                {availableTabs.map((tab) => {
+                                                    const Icon = tab.icon;
+                                                    const isActive = activeTab === tab.id;
 
-                                                    if (qrisChannels[0]) {
-selectChannel(qrisChannels[0]);
-}
-                                                }}
-                                                className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
-                                                    activeTab === 'qris'
-                                                        ? 'border-insani-blue bg-blue-50/80 text-insani-blue shadow-xs font-semibold'
-                                                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                                                } ${!onlinePaymentAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <QrCode className="w-5 h-5" />
-                                                <span className="text-xs">QRIS</span>
-                                            </button>
+                                                    return (
+                                                        <button
+                                                            key={tab.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setActiveTab(tab.id);
 
-                                            <button
-                                                type="button"
-                                                disabled={!onlinePaymentAvailable}
-                                                onClick={() => {
-                                                    setActiveTab('virtual_account');
-
-                                                    if (vaChannels[0]) {
-selectChannel(vaChannels[0]);
-}
-                                                }}
-                                                className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
-                                                    activeTab === 'virtual_account'
-                                                        ? 'border-insani-blue bg-blue-50/80 text-insani-blue shadow-xs font-semibold'
-                                                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                                                } ${!onlinePaymentAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <CreditCard className="w-5 h-5" />
-                                                <span className="text-xs">Virtual Account</span>
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                disabled={!onlinePaymentAvailable}
-                                                onClick={() => {
-                                                    setActiveTab('ewallet');
-
-                                                    if (ewalletChannels[0]) {
-selectChannel(ewalletChannels[0]);
-}
-                                                }}
-                                                className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
-                                                    activeTab === 'ewallet'
-                                                        ? 'border-insani-blue bg-blue-50/80 text-insani-blue shadow-xs font-semibold'
-                                                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                                                } ${!onlinePaymentAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                            >
-                                                <Smartphone className="w-5 h-5" />
-                                                <span className="text-xs">E-Wallet</span>
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setActiveTab('manual');
-
-                                                    if (manualChannels[0]) {
-selectChannel(manualChannels[0]);
-}
-                                                }}
-                                                className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
-                                                    activeTab === 'manual'
-                                                        ? 'border-insani-blue bg-blue-50/80 text-insani-blue shadow-xs font-semibold'
-                                                        : 'border-slate-200 hover:bg-slate-50 text-slate-700'
-                                                }`}
-                                            >
-                                                <Landmark className="w-5 h-5" />
-                                                <span className="text-xs">Transfer Manual</span>
-                                            </button>
-                                        </div>
+                                                                if (tab.id === 'qris' && qrisChannels[0]) {
+                                                                    selectChannel(qrisChannels[0]);
+                                                                }
+                                                                if (tab.id === 'virtual_account' && vaChannels[0]) {
+                                                                    selectChannel(vaChannels[0]);
+                                                                }
+                                                                if (tab.id === 'ewallet' && ewalletChannels[0]) {
+                                                                    selectChannel(ewalletChannels[0]);
+                                                                }
+                                                                if (tab.id === 'manual' && manualChannels[0]) {
+                                                                    selectChannel(manualChannels[0]);
+                                                                }
+                                                            }}
+                                                            className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5 ${
+                                                                isActive
+                                                                    ? 'border-insani-blue bg-blue-50/80 text-insani-blue shadow-xs font-semibold'
+                                                                    : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                                                            }`}
+                                                        >
+                                                            <Icon className="w-5 h-5" />
+                                                            <span className="text-xs">{tab.label}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : null}
 
                                         {/* Channel Options Box */}
                                         <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3 mt-3">
@@ -545,17 +581,19 @@ selectChannel(manualChannels[0]);
                                                             </div>
 
                                                             <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-amber-200/60">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        setActiveTab('qris');
-                                                                        if (qrisChannels[0]) selectChannel(qrisChannels[0]);
-                                                                    }}
-                                                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-insani-blue text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-all shadow-xs active:scale-[0.98]"
-                                                                >
-                                                                    <QrCode className="w-4 h-4" />
-                                                                    <span>Gunakan QRIS (Semua Bank)</span>
-                                                                </button>
+                                                                {qrisChannels.length > 0 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setActiveTab('qris');
+                                                                            if (qrisChannels[0]) selectChannel(qrisChannels[0]);
+                                                                        }}
+                                                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-insani-blue text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-all shadow-xs active:scale-[0.98]"
+                                                                    >
+                                                                        <QrCode className="w-4 h-4" />
+                                                                        <span>Gunakan QRIS (Semua Bank)</span>
+                                                                    </button>
+                                                                )}
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => {
@@ -565,7 +603,7 @@ selectChannel(manualChannels[0]);
                                                                     className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-amber-300 text-amber-900 rounded-xl text-xs font-semibold hover:bg-amber-100 transition-all"
                                                                 >
                                                                     <Landmark className="w-4 h-4" />
-                                                                    <span>Transfer Manual BSI / BRI</span>
+                                                                    <span>Transfer Bank Manual</span>
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -661,64 +699,116 @@ selectChannel(manualChannels[0]);
                                                     </div>
 
                                                     {/* Micro-Card Edukasi OVO & DANA */}
-                                                    <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-700">
-                                                        <div className="flex items-start sm:items-center gap-2.5">
-                                                            <div className="flex items-center gap-1.5 shrink-0 mt-0.5 sm:mt-0">
-                                                                <BankLogo code="ovo" size="xs" />
-                                                                <BankLogo code="dana" size="xs" />
+                                                    {qrisChannels.length > 0 && (
+                                                        <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-700">
+                                                            <div className="flex items-start sm:items-center gap-2.5">
+                                                                <div className="flex items-center gap-1.5 shrink-0 mt-0.5 sm:mt-0">
+                                                                    <BankLogo code="ovo" size="xs" />
+                                                                    <BankLogo code="dana" size="xs" />
+                                                                </div>
+                                                                <span>Untuk donasi via <strong>OVO & DANA</strong>, gunakan <strong>Tab QRIS</strong> untuk proses instan tanpa biaya.</span>
                                                             </div>
-                                                            <span>Untuk donasi via <strong>OVO & DANA</strong>, gunakan <strong>Tab QRIS</strong> untuk proses instan tanpa biaya.</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setActiveTab('qris');
+                                                                    if (qrisChannels[0]) selectChannel(qrisChannels[0]);
+                                                                }}
+                                                                className="shrink-0 self-start sm:self-auto px-3 py-1 bg-white border border-blue-300 text-insani-blue font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-2xs"
+                                                            >
+                                                                Pilih QRIS
+                                                            </button>
                                                         </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setActiveTab('qris');
-                                                                if (qrisChannels[0]) selectChannel(qrisChannels[0]);
-                                                            }}
-                                                            className="shrink-0 self-start sm:self-auto px-3 py-1 bg-white border border-blue-300 text-insani-blue font-semibold rounded-lg hover:bg-blue-50 transition-colors shadow-2xs"
-                                                        >
-                                                            Pilih QRIS
-                                                        </button>
-                                                    </div>
+                                                    )}
                                                 </div>
                                             )}
 
                                             {/* Tab 4: Manual Transfer */}
                                             {activeTab === 'manual' && (
-                                                <div className="space-y-2.5">
-                                                    <p className="text-xs text-slate-500 font-medium mb-2">Transfer ke rekening resmi {foundationName} dengan kode unik 3 angka.</p>
-                                                    {manualChannels.map((channel) => {
-                                                        const isSelected = data.payment_channel.toUpperCase() === channel.code.toUpperCase();
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-0.5">
+                                                        <span>Pilih rekening resmi {foundationName}:</span>
+                                                        <span className="text-slate-400">Verifikasi via mutasi bank</span>
+                                                    </div>
+                                                    <div className="space-y-2.5">
+                                                        {manualChannels.map((channel) => {
+                                                            const isSelected = data.payment_channel.toUpperCase() === channel.code.toUpperCase();
+                                                            const isCopied = copiedAccount === channel.account_number?.replace(/\s+/g, '');
 
-                                                        return (
-                                                            <div
-                                                                key={channel.code}
-                                                                onClick={() => selectChannel(channel)}
-                                                                className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between cursor-pointer ${
-                                                                    isSelected
-                                                                        ? 'border-insani-blue bg-white shadow-xs'
-                                                                        : 'border-slate-200 bg-white hover:border-slate-300'
-                                                                }`}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <BankLogo code={channel.code} size="md" />
-                                                                    <div>
-                                                                        <span className="font-bold text-slate-800 text-sm sm:text-base block">{channel.name}</span>
-                                                                        <span className="text-xs text-slate-500 font-mono mt-0.5 block">{channel.account_number} ({channel.account_name})</span>
+                                                            return (
+                                                                <div
+                                                                    key={channel.code}
+                                                                    onClick={() => selectChannel(channel)}
+                                                                    className={`p-3.5 sm:p-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer ${
+                                                                        isSelected
+                                                                            ? 'border-insani-blue bg-white shadow-xs'
+                                                                            : 'border-slate-200 bg-white hover:border-slate-300'
+                                                                    }`}
+                                                                >
+                                                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                                        <BankLogo code={channel.code} size="md" />
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                                <span className="font-bold text-slate-900 text-sm sm:text-base block truncate">
+                                                                                    {channel.name}
+                                                                                </span>
+                                                                                {channel.bank_type && (
+                                                                                    <span className="text-[10px] font-semibold px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full">
+                                                                                        {channel.bank_type === 'syariah' ? 'Bank Syariah' : 'Bank Umum'}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2 mt-1">
+                                                                                <span className="text-sm sm:text-base text-slate-900 font-mono font-bold tracking-wider">
+                                                                                    {channel.account_number}
+                                                                                </span>
+                                                                                {channel.account_number && (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => handleCopyAccount(e, channel.account_number)}
+                                                                                        className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md transition-colors"
+                                                                                        title="Salin nomor rekening"
+                                                                                    >
+                                                                                        {isCopied ? (
+                                                                                            <>
+                                                                                                <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />
+                                                                                                <span className="text-emerald-700 font-semibold">Tersalin</span>
+                                                                                            </>
+                                                                                        ) : (
+                                                                                            <>
+                                                                                                <Copy className="w-3 h-3 text-slate-500" />
+                                                                                                <span>Salin</span>
+                                                                                            </>
+                                                                                        )}
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
+                                                                            <span className="text-xs text-slate-500 block mt-0.5">
+                                                                                Atas Nama: <strong className="text-slate-700 font-medium">{channel.account_name || foundationName}</strong>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="shrink-0 flex items-center justify-end sm:pl-2">
+                                                                        {isSelected ? (
+                                                                            <div className="w-6 h-6 rounded-full bg-insani-blue text-white flex items-center justify-center">
+                                                                                <Check className="w-4 h-4 stroke-[3]" />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="w-6 h-6 rounded-full border-2 border-slate-300" />
+                                                                        )}
                                                                     </div>
                                                                 </div>
-                                                                <div className="shrink-0 pl-2">
-                                                                    {isSelected ? (
-                                                                        <div className="w-6 h-6 rounded-full bg-insani-blue text-white flex items-center justify-center">
-                                                                            <Check className="w-4 h-4 stroke-[3]" />
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div className="w-6 h-6 rounded-full border-2 border-slate-300" />
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Panduan Kode Unik Reassurance Box */}
+                                                    <div className="p-3.5 bg-slate-100/90 border border-slate-200/90 rounded-xl text-xs text-slate-600 flex items-start gap-2.5 mt-2">
+                                                        <Info className="w-4 h-4 text-insani-blue shrink-0 mt-0.5" />
+                                                        <p className="leading-relaxed">
+                                                            Setelah menekan tombol <strong>Lanjut Pembayaran</strong>, sistem akan menambahkan <strong>3 digit kode unik</strong> pada nominal donasi untuk mempermudah verifikasi mutasi transfer secara otomatis dan kuitansi donasi resmi langsung diterbitkan.
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             )}
 
