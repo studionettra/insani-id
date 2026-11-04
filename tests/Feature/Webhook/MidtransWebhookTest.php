@@ -17,9 +17,11 @@ beforeEach(function () {
     config(['services.midtrans.server_key' => 'SB-Mid-server-testkey12345']);
 });
 
-function generateMidtransSignature(string $orderId, string $statusCode, string $grossAmount, string $serverKey): string
-{
-    return hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
+if (! function_exists('generateMidtransSignature')) {
+    function generateMidtransSignature(string $orderId, string $statusCode, string $grossAmount, string $serverKey): string
+    {
+        return hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
+    }
 }
 
 test('midtrans webhook returns 400 when order_id or status_code is missing', function () {

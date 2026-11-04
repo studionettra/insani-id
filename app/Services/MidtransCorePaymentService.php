@@ -422,7 +422,20 @@ class MidtransCorePaymentService
             ],
         ];
 
-        return $this->executeCharge($payload, 'qris', 'QRIS');
+        $result = $this->executeCharge($payload, 'qris', 'QRIS');
+
+        // Jika acquirer gopay ditolak karena belum aktif (402), coba fallback otomatis ke airpay shopee
+        if ($result['status'] === 'error' && (($result['raw_response']['status_code'] ?? '') === '402')) {
+            $fallbackPayload = $payload;
+            $fallbackPayload['qris'] = ['acquirer' => 'airpay shopee'];
+            $fallbackResult = $this->executeCharge($fallbackPayload, 'qris', 'QRIS (ShopeePay)');
+
+            if ($fallbackResult['status'] === 'success') {
+                return $fallbackResult;
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -566,7 +579,7 @@ class MidtransCorePaymentService
 
                 $errorMessage = $data['status_message'] ?? 'Gagal membuat tagihan di Midtrans.';
                 if ($statusCode === '402') {
-                    $errorMessage = "Saluran pembayaran {$paymentChannel} belum aktif di sistem perbankan Midtrans. Silakan gunakan Virtual Account BCA, BNI, Mandiri, atau Transfer Manual.";
+                    $errorMessage = "Saluran pembayaran {$paymentChannel} sedang dalam proses aktivasi di sistem perbankan Midtrans (estimasi 1–3 hari kerja). Silakan gunakan Transfer Bank Manual atau metode pembayaran lainnya.";
                 }
 
                 return [
