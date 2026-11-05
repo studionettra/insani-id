@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -126,5 +127,45 @@ class AppServiceProvider extends ServiceProvider
             ->symbols()
             ->uncompromised()
         );
+    }
+
+    /**
+     * Load the cached routes for the application with graceful dynamic fallback.
+     */
+    protected function loadCachedRoutes(): void
+    {
+        $localization = $this->getLaravelLocalization();
+
+        // compute $locale from url.
+        // It is null if url does not contain locale.
+        $locale = $localization->getInversedLocaleFromMapping(
+            $localization->setLocale()
+        );
+
+        $localeKeys = $localization->getSupportedLanguagesKeys();
+
+        $path = $this->makeLocaleRoutesPath($locale, $localeKeys);
+
+        if (! file_exists($path)) {
+            // Failsafe: Jika cache rute per-locale tidak ditemukan untuk locale aktif non-default
+            // (misal akibat eksekusi php artisan optimize biasa), load rute dinamis agar tidak 404.
+            if ($locale && in_array($locale, $localeKeys, true)) {
+                $this->app->booted(function () {
+                    require base_path('routes/web.php');
+                    $this->app['router']->getRoutes()->refreshNameLookups();
+                    $this->app['router']->getRoutes()->refreshActionLookups();
+                });
+
+                return;
+            }
+
+            Log::warning("Routes cached, but no cached routes found for locale '{$locale}'!");
+
+            $path = $this->getDefaultCachedRoutePath();
+        }
+
+        $this->app->booted(function () use ($path) {
+            require $path;
+        });
     }
 }

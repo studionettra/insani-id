@@ -119,6 +119,7 @@ jobs:
 
             echo "Optimizing application caches..."
             php artisan optimize
+            php artisan route:trans:cache
             php artisan view:cache
             php artisan event:cache
 

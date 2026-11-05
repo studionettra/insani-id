@@ -71,3 +71,14 @@ it('shares correct arabic translations via HandleInertiaRequests when locale is 
     expect($shared['translations']['Kontak'])->toBe('تواصل معنا');
     expect($shared['translations']['Hubungi Layanan CS'])->toBe('التواصل مع خدمة العملاء');
 });
+
+it('resolves localized contact route for english and arabic', function (string $locale) {
+    $response = $this->get("/{$locale}/kontak");
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Public/Contact/Create')
+        ->where('locale', $locale)
+    );
+})->with(['en', 'ar']);
+
