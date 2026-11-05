@@ -453,22 +453,8 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                             )}
                                         </div>
 
-                                        {/* Category Navigation Pills / Reassurance Banner */}
-                                        {!hasOnlineChannels ? (
-                                            <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/80 border border-blue-200/90 text-blue-950 flex items-start gap-3.5 shadow-2xs">
-                                                <div className="w-9 h-9 rounded-xl bg-insani-blue/10 text-insani-blue flex items-center justify-center shrink-0 mt-0.5">
-                                                    <Landmark className="w-5 h-5 text-insani-blue" />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <h4 className="font-bold text-xs sm:text-sm text-blue-950">
-                                                        Metode Resmi: Transfer Bank Langsung ke Rekening Yayasan
-                                                    </h4>
-                                                    <p className="text-xs text-blue-900/90 leading-relaxed">
-                                                        Layanan pembayaran instan perbankan sedang dalam proses sinkronisasi berkala. Seluruh donasi saat ini dialihkan langsung ke rekening resmi {foundationName} dengan verifikasi aman dan penerbitan kuitansi donasi resmi.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ) : availableTabs.length > 1 ? (
+                                        {/* Category Navigation Pills */}
+                                        {availableTabs.length > 1 && (
                                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
                                                 {availableTabs.map((tab) => {
                                                     const Icon = tab.icon;
@@ -506,7 +492,7 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                                     );
                                                 })}
                                             </div>
-                                        ) : null}
+                                        )}
 
                                         {/* Channel Options Box */}
                                         <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 space-y-3 mt-3">
@@ -727,7 +713,7 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                             {activeTab === 'manual' && (
                                                 <div className="space-y-3">
                                                     <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-0.5">
-                                                        <span>Pilih rekening resmi {foundationName}:</span>
+                                                        <span>Pilih rekening :</span>
                                                         <span className="text-slate-400">Verifikasi via mutasi bank</span>
                                                     </div>
                                                     <div className="space-y-2.5">
@@ -806,7 +792,7 @@ export default function Donate({ program, onlinePaymentAvailable = true, payment
                                                     <div className="p-3.5 bg-slate-100/90 border border-slate-200/90 rounded-xl text-xs text-slate-600 flex items-start gap-2.5 mt-2">
                                                         <Info className="w-4 h-4 text-insani-blue shrink-0 mt-0.5" />
                                                         <p className="leading-relaxed">
-                                                            Setelah menekan tombol <strong>Lanjut Pembayaran</strong>, sistem akan menambahkan <strong>3 digit kode unik</strong> pada nominal donasi untuk mempermudah verifikasi mutasi transfer secara otomatis dan kuitansi donasi resmi langsung diterbitkan.
+                                                            Setelah menekan tombol <strong>Lanjut Pembayaran</strong>, sistem akan menambahkan <strong>3 digit kode unik</strong> pada nominal donasi untuk mempermudah verifikasi mutasi transfer.
                                                         </p>
                                                     </div>
                                                 </div>
