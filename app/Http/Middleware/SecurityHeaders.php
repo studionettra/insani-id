@@ -33,24 +33,24 @@ class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
-        // Build Content-Security-Policy compatible with Cloudflare Turnstile, Midtrans, and local Vite dev
-        $isLocal = app()->environment('local');
-        $localConnect = $isLocal ? ' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*' : '';
-        $localScript = $isLocal ? ' http://localhost:* http://127.0.0.1:*' : '';
+        // Enforce Content-Security-Policy in production, staging, and testing environments.
+        // In local development, strict CSP is disabled by default to avoid blocking Vite dev server,
+        // HMR WebSockets, and dynamic fonts (Chromium CSP specification does not support IPv6 [::1] loopbacks).
+        if (! app()->environment('local') || config('app.force_csp_in_local', false)) {
+            $csp = [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com",
+                "frame-src 'self' https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
+                "connect-src 'self' data: https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://*.cloudflarecaptcha.com https://api.midtrans.com https://app.midtrans.com https://translate.googleapis.com https://api.fonnte.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com",
+                "img-src 'self' data: https: blob:",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
+                "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net",
+                "object-src 'none'",
+                "base-uri 'self'",
+            ];
 
-        $csp = [
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.googletagmanager.com https://connect.facebook.net{$localScript}",
-            "frame-src 'self' https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
-            "connect-src 'self' data: https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://*.cloudflarecaptcha.com https://api.midtrans.com https://app.midtrans.com https://translate.googleapis.com https://api.fonnte.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://connect.facebook.net{$localConnect}",
-            "img-src 'self' data: https: blob:",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "font-src 'self' data: https://fonts.gstatic.com",
-            "object-src 'none'",
-            "base-uri 'self'",
-        ];
-
-        $response->headers->set('Content-Security-Policy', implode('; ', $csp));
+            $response->headers->set('Content-Security-Policy', implode('; ', $csp));
+        }
 
         return $response;
     }

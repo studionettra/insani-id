@@ -30,6 +30,10 @@ export default defineConfig({
             formVariants: true,
         }),
     ],
+    server: {
+        host: 'localhost',
+        port: 5173,
+    },
     build: {
         chunkSizeWarningLimit: 1000,
     },
