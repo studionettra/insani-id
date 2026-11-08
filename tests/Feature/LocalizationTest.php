@@ -81,4 +81,3 @@ it('resolves localized contact route for english and arabic', function (string $
         ->where('locale', $locale)
     );
 })->with(['en', 'ar']);
-

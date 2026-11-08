@@ -15,11 +15,10 @@ class LinkGuestDonationsOnVerified
     {
         $user = $event->user;
 
-        if ($user instanceof User && ! empty($user->email)) {
+        if ($user instanceof User && filled($user->email)) {
             Donation::where('donor_email', $user->email)
                 ->whereNull('donor_user_id')
                 ->update(['donor_user_id' => $user->id]);
         }
     }
 }
-
