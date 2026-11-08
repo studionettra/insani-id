@@ -37,6 +37,7 @@ jobs:
         run: php artisan test --compact
         env:
           APP_ENV: testing
+          APP_KEY: base64:xhK5RnvxVgHCN47F33EIOisGYAzw5xllBG5d+czSv64=
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
 
