@@ -16,6 +16,14 @@
     if ($metaDomainVerification) {
         $metaDomainVerification = preg_replace('/^facebook-domain-verification\s*=\s*/i', '', trim($metaDomainVerification));
     }
+    $adsenseClientId = !$isAdminOrDashboard ? (\App\Models\AppSetting::get('google_adsense_client_id') ?: 'ca-pub-5774566279704717') : null;
+    if ($adsenseClientId) {
+        $adsenseClientId = trim($adsenseClientId);
+        if (!str_starts_with($adsenseClientId, 'ca-pub-')) {
+            $digits = preg_replace('/[^0-9]/', '', $adsenseClientId);
+            $adsenseClientId = !empty($digits) ? 'ca-pub-' . $digits : $adsenseClientId;
+        }
+    }
     $siteFavicon = \App\Models\AppSetting::get('site_favicon');
     $faviconUrl = $siteFavicon ? asset('storage/' . $siteFavicon) : asset('favicon-insani.svg');
 @endphp
@@ -31,6 +39,9 @@
     @endif
     @if ($metaDomainVerification)
         <meta name="facebook-domain-verification" content="{{ $metaDomainVerification }}">
+    @endif
+    @if ($adsenseClientId)
+        <meta name="google-adsense-account" content="{{ $adsenseClientId }}">
     @endif
 
     @if ($gtmId)
