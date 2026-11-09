@@ -33,6 +33,17 @@ jobs:
       - name: 🎨 Run Laravel Pint (Code Style Check)
         run: vendor/bin/pint --test
 
+      - name: 🛠️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install NPM Dependencies
+        run: npm ci || npm install
+
+      - name: 🏗️ Build Frontend Assets
+        run: npm run build
+
       - name: 🧪 Run Pest Test Suite
         run: php artisan test --compact
         env:
