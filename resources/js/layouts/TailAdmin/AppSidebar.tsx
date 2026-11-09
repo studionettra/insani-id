@@ -24,6 +24,7 @@ import {
   Compass,
   ShieldAlert,
   HandHelping,
+  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -403,6 +404,11 @@ const AppSidebar: React.FC = () => {
               nav.path && (
                 <Link
                   href={nav.path}
+                  onClick={() => {
+                    if (isMobileOpen) {
+                      toggleMobileSidebar();
+                    }
+                  }}
                   title={!isExpanded ? nav.name : undefined}
                   className={`menu-item group ${
                     isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
@@ -441,6 +447,11 @@ const AppSidebar: React.FC = () => {
                     <li key={subItem.name}>
                       <Link
                         href={subItem.path}
+                        onClick={() => {
+                          if (isMobileOpen) {
+                            toggleMobileSidebar();
+                          }
+                        }}
                         className={`menu-dropdown-item ${
                           isActive(subItem.path)
                             ? "menu-dropdown-item-active"
@@ -486,17 +497,25 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed top-0 left-0 flex flex-col bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 transition-transform duration-300 ease-in-out z-50 border-r border-gray-200 h-dvh max-h-dvh px-5
         ${isExpanded || isMobileOpen ? "w-[290px]" : "w-[90px]"}
-        ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+        ${isMobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"}
         lg:translate-x-0`}
     >
       <div
-        className={`py-3 flex items-center ${
-          !isExpanded ? "lg:justify-center" : "justify-start"
+        className={`py-3.5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/80 lg:border-none ${
+          !isExpanded ? "lg:justify-center" : "justify-between"
         }`}
       >
-        <Link href="/dashboard" className="flex items-center">
+        <Link
+          href="/dashboard"
+          className="flex items-center"
+          onClick={() => {
+            if (isMobileOpen) {
+              toggleMobileSidebar();
+            }
+          }}
+        >
           {isExpanded || isMobileOpen ? (
             <>
               <img
@@ -525,8 +544,19 @@ const AppSidebar: React.FC = () => {
             </>
           )}
         </Link>
+
+        {/* Tombol Tutup Mobile (X) */}
+        <button
+          type="button"
+          onClick={toggleMobileSidebar}
+          aria-label="Tutup menu sidebar"
+          className="flex lg:hidden items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
-      <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
+
+      <div className="flex-1 overflow-y-auto duration-300 ease-linear no-scrollbar pt-3 pb-24">
         <nav className="mb-6">
           <div className="flex flex-col gap-6">
             {visibleGroups.map((group) => (
