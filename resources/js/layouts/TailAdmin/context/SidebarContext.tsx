@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
 
 interface SidebarContextProps {
   isExpanded: boolean;
@@ -28,6 +29,42 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  // Kunci scroll halaman belakang saat sidebar mobile terbuka
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    if (isMobileOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isMobileOpen]);
+
+  // Tutup sidebar mobile otomatis saat berpindah halaman via Inertia
+  useEffect(() => {
+    const unregister = router.on('navigate', () => {
+      setIsMobileOpen(false);
+    });
+
+    return () => {
+      unregister();
+    };
+  }, []);
+
+  // Tutup sidebar mobile saat ukuran layar berubah ke desktop (>= 1024px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const toggleSidebar = () => {
     setIsExpanded((prev) => {
       const next = !prev;
@@ -39,7 +76,7 @@ export const SidebarProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleMobileSidebar = () => {
-    setIsMobileOpen(!isMobileOpen);
+    setIsMobileOpen((prev) => !prev);
   };
 
   return (
