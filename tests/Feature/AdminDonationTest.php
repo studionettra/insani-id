@@ -8,6 +8,7 @@ use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
@@ -142,4 +143,63 @@ test('admin cannot confirm offline donation without uploading transfer proof', f
 
     $response->assertSessionHasErrors(['transfer_proof']);
     expect($donation->fresh()->status)->toBe('pending');
+});
+
+test('admin can sync online pending donation with midtrans', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-ONLINE-SYNC',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donor Online',
+        'donor_email' => 'online@test.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'online',
+        'status' => 'pending',
+        'amount' => 50000,
+    ]);
+
+    $payment = Payment::create([
+        'donation_id' => $donation->id,
+        'gateway' => 'midtrans',
+        'payment_method' => 'qris',
+        'gateway_status' => 'PENDING',
+        'paid_amount' => null,
+    ]);
+
+    // Mock Http call to Midtrans status API returning expire
+    Http::fake([
+        'https://api.sandbox.midtrans.com/v2/DON-ONLINE-SYNC/status' => Http::response([
+            'status_code' => '200',
+            'transaction_status' => 'expire',
+            'order_id' => 'DON-ONLINE-SYNC',
+            'gross_amount' => '50000.00',
+        ], 200),
+    ]);
+
+    config(['services.midtrans.server_key' => 'SB-Mid-server-TESTKEY']);
+
+    $response = $this->actingAs($this->admin)->post("/admin/donations/{$donation->id}/sync-gateway");
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success');
+
+    expect($donation->fresh()->status)->toBe('expired');
+    expect($payment->fresh()->gateway_status)->toBe('EXPIRED');
+});
+
+test('admin cannot sync offline donation with gateway', function () {
+    $donation = Donation::create([
+        'donation_code' => 'DON-OFFLINE-SYNC',
+        'program_id' => $this->program->id,
+        'donor_name' => 'Donor Offline',
+        'donor_email' => 'offline@test.com',
+        'donor_phone' => '08123456789',
+        'channel' => 'offline',
+        'status' => 'pending',
+        'amount' => 50000,
+    ]);
+
+    $response = $this->actingAs($this->admin)->post("/admin/donations/{$donation->id}/sync-gateway");
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error', 'Pemeriksaan status gateway hanya berlaku untuk transaksi online.');
 });

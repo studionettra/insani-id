@@ -345,6 +345,7 @@ Route::middleware(['auth', 'verified', 'no-cache', 'force.password.change'])->gr
         Route::middleware('permission:donation.view')->group(function () {
             Route::get('/donations', [App\Http\Controllers\Admin\DonationController::class, 'index'])->name('donations.index');
             Route::get('/donations/{donation}/proof', [App\Http\Controllers\Admin\DonationController::class, 'viewProof'])->name('donations.proof');
+            Route::post('/donations/{donation}/sync-gateway', [App\Http\Controllers\Admin\DonationController::class, 'syncGateway'])->name('donations.sync-gateway');
         });
 
         Route::middleware('permission:donation.confirm-manual')->group(function () {

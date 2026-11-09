@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Donation;
+use App\Models\Payment;
+use App\Services\MidtransCorePaymentService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -127,5 +130,53 @@ class DonationController extends Controller
         }
 
         return Storage::disk('local')->response($payment->transfer_proof);
+    }
+
+    public function syncGateway(Donation $donation, MidtransCorePaymentService $midtrans): RedirectResponse
+    {
+        if (! auth()->user()->can('donation.view') && ! auth()->user()->hasRole('Administrator')) {
+            abort(403, 'Anda tidak memiliki wewenang untuk memeriksa status gateway.');
+        }
+
+        if ($donation->channel !== 'online') {
+            return back()->with('error', 'Pemeriksaan status gateway hanya berlaku untuk transaksi online.');
+        }
+
+        $payment = $donation->payments()->where('gateway', 'midtrans')->latest()->first()
+            ?? $donation->payments()->latest()->first();
+
+        if (! $payment) {
+            return back()->with('error', 'Data pembayaran gateway tidak ditemukan untuk donasi ini.');
+        }
+
+        if (! $midtrans->isConfigured()) {
+            return back()->with('error', 'Kunci Server Midtrans belum dikonfigurasi di sistem.');
+        }
+
+        try {
+            $result = $midtrans->syncPaymentStatusDetailed($payment);
+            $donation->refresh();
+
+            if (! $result['reachable']) {
+                return back()->with('error', "Gagal menghubungi server gateway: {$result['message']}");
+            }
+
+            if ($donation->status === 'paid' || $result['is_paid']) {
+                return back()->with('success', "Status donasi {$donation->donation_code} berhasil disinkronkan: LUNAS / TERVERIFIKASI.");
+            }
+
+            if (in_array($donation->status, ['expired', 'failed', 'cancelled'], true) || in_array($result['transaction_status'], ['expire', 'cancel', 'deny'], true)) {
+                if ($donation->status === 'pending') {
+                    $donation->update(['status' => 'expired']);
+                    $payment->update(['gateway_status' => 'EXPIRED']);
+                }
+
+                return back()->with('success', "Status donasi {$donation->donation_code} berhasil disinkronkan: KEDALUWARSA / GAGAL.");
+            }
+
+            return back()->with('info', "Status transaksi terkini di gateway: {$result['transaction_status']} (Belum ada pembayaran).");
+        } catch (\Throwable $e) {
+            return back()->with('error', "Terjadi kesalahan saat memeriksa gateway: {$e->getMessage()}");
+        }
     }
 }

@@ -22,6 +22,7 @@ import {
     ZoomIn,
     Copy,
     Check,
+    RefreshCw,
 } from 'lucide-react';
 import React, { useState, useRef } from 'react';
 import { toast } from 'sonner';
@@ -54,6 +55,7 @@ import {
 import {
     index as donationsIndex,
     confirm as donationsConfirm,
+    syncGateway as donationsSyncGateway,
 } from '@/routes/admin/donations';
 
 interface PaymentInfo {
@@ -239,11 +241,37 @@ export default function Index({ donations, filters = {}, counts }: Props) {
         filters.channel || 'all',
     );
 
+    const [syncingId, setSyncingId] = useState<number | null>(null);
+
     const handleCopyCode = (code: string) => {
         navigator.clipboard.writeText(code);
         setCopiedCode(true);
         toast.success(`Kode donasi ${code} berhasil disalin!`);
         setTimeout(() => setCopiedCode(false), 2000);
+    };
+
+    const handleSyncGateway = (donation: Donation) => {
+        setSyncingId(donation.id);
+        router.post(
+            donationsSyncGateway.url({ donation: donation.id }),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSyncingId(null);
+                    if (selectedDonation && selectedDonation.id === donation.id) {
+                        setSelectedDonation(null);
+                    }
+                },
+                onError: () => {
+                    setSyncingId(null);
+                    toast.error('Gagal menyinkronkan status dengan payment gateway.');
+                },
+                onFinish: () => {
+                    setSyncingId(null);
+                },
+            },
+        );
     };
 
     const currentStatus = filters.status || 'all';
@@ -688,6 +716,9 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                     const isManualPending =
                                         donation.channel === 'offline' &&
                                         donation.status === 'pending';
+                                    const isOnlinePending =
+                                        donation.channel === 'online' &&
+                                        donation.status === 'pending';
 
                                     return (
                                         <TableRow
@@ -884,6 +915,38 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                         >
                                                             <CheckCircle className="mr-1 h-3.5 w-3.5" />
                                                             Konfirmasi
+                                                        </Button>
+                                                    )}
+
+                                                    {/* Tombol Sinkronisasi Gateway untuk Donasi Online Pending */}
+                                                    {isOnlinePending && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() =>
+                                                                handleSyncGateway(
+                                                                    donation,
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                syncingId ===
+                                                                donation.id
+                                                            }
+                                                            className="h-7.5 shrink-0 rounded-lg border-blue-200 bg-blue-50/50 px-2.5 text-xs font-semibold text-blue-700 shadow-xs hover:bg-blue-100 hover:text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-900/60"
+                                                            title="Periksa dan sinkronkan status terkini ke server Midtrans"
+                                                        >
+                                                            <RefreshCw
+                                                                className={`mr-1 h-3.5 w-3.5 ${
+                                                                    syncingId ===
+                                                                    donation.id
+                                                                        ? 'animate-spin'
+                                                                        : ''
+                                                                }`}
+                                                            />
+                                                            {syncingId ===
+                                                            donation.id
+                                                                ? 'Mengecek...'
+                                                                : 'Cek Status'}
                                                         </Button>
                                                     )}
 
@@ -1450,6 +1513,35 @@ export default function Index({ donations, filters = {}, counts }: Props) {
                                                 >
                                                     <CheckCircle className="mr-1.5 h-4 w-4" />
                                                     Konfirmasi Donasi Ini
+                                                </Button>
+                                            )}
+
+                                        {selectedDonation.channel === 'online' &&
+                                            selectedDonation.status === 'pending' && (
+                                                <Button
+                                                    onClick={() =>
+                                                        handleSyncGateway(
+                                                            selectedDonation,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        syncingId ===
+                                                        selectedDonation.id
+                                                    }
+                                                    className="bg-blue-600 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 sm:text-sm"
+                                                >
+                                                    <RefreshCw
+                                                        className={`mr-1.5 h-4 w-4 ${
+                                                            syncingId ===
+                                                            selectedDonation.id
+                                                                ? 'animate-spin'
+                                                                : ''
+                                                        }`}
+                                                    />
+                                                    {syncingId ===
+                                                    selectedDonation.id
+                                                        ? 'Memeriksa Gateway...'
+                                                        : 'Cek Status ke Gateway'}
                                                 </Button>
                                             )}
                                     </div>

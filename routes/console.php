@@ -11,7 +11,7 @@ Artisan::command('inspire', function () {
 
 Schedule::command('programs:check-status')->dailyAt('00:01');
 Schedule::command('disbursements:send-update-reminders')->dailyAt('09:00');
-Schedule::command('donations:expire-stale --hours=24 --online-hours=24')->dailyAt('02:00');
+Schedule::command('donations:expire-stale --hours=24 --online-hours=1')->hourly();
 
 // Prune read notifications older than 60 days to keep shared hosting database lean
 Schedule::call(function () {
