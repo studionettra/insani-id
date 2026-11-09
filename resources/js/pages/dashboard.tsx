@@ -746,7 +746,7 @@ export default function Dashboard({
                 {/* Main Content Split */}
                 <div className="grid gap-6 lg:grid-cols-3 flex-1 mt-2">
                     {/* Left Column (2/3) */}
-                    <div className="lg:col-span-2 flex flex-col gap-6">
+                    <div className="lg:col-span-2 flex flex-col gap-6 min-w-0">
                         {isDonor ? (
                             <>
                                 {/* Donor: Recent Personal Donations Table */}
@@ -1242,7 +1242,7 @@ export default function Dashboard({
                 </div>
                     
                     {/* Right Column (1/3) */}
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-6 min-w-0">
                         {isDonor ? (
                             <>
                                 {/* Donor Quick Access */}
