@@ -355,14 +355,14 @@ export default function PublicLayout({
                             </div>
 
                             {/* Legal compliance & support links */}
-                            <div className="pt-1 flex flex-col space-y-1.5 text-xs text-slate-400">
-                                <Link href="/syarat-ketentuan" className="hover:text-blue-300 transition-colors">
+                            <div className="pt-1 flex flex-col space-y-1 text-xs text-slate-400">
+                                <Link href="/syarat-ketentuan" className="py-1.5 hover:text-blue-300 transition-colors inline-block">
                                     &bull; {t('Syarat & Ketentuan')}
                                 </Link>
-                                <Link href="/kebijakan-privasi" className="hover:text-blue-300 transition-colors">
+                                <Link href="/kebijakan-privasi" className="py-1.5 hover:text-blue-300 transition-colors inline-block">
                                     &bull; {t('Kebijakan Privasi')}
                                 </Link>
-                                <Link href="/kontak" className="hover:text-blue-300 transition-colors">
+                                <Link href="/kontak" className="py-1.5 hover:text-blue-300 transition-colors inline-block">
                                     &bull; {t('Hubungi Layanan CS')}
                                 </Link>
                             </div>

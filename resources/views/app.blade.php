@@ -121,6 +121,19 @@
 
     <link rel="icon" href="{{ $faviconUrl }}">
 
+    @php
+        $firstBannerDesktop = data_get($page['props'] ?? [], 'banners.0.desktop_image_url');
+        $firstBannerMobile = data_get($page['props'] ?? [], 'banners.0.mobile_image_url') ?: $firstBannerDesktop;
+    @endphp
+    @if (($page['component'] ?? null) === 'Public/Home/Index')
+        @if ($firstBannerMobile)
+            <link rel="preload" as="image" href="{{ asset('storage/' . $firstBannerMobile) }}" media="(max-width: 767px)" fetchpriority="high">
+        @endif
+        @if ($firstBannerDesktop)
+            <link rel="preload" as="image" href="{{ asset('storage/' . $firstBannerDesktop) }}" media="(min-width: 768px)" fetchpriority="high">
+        @endif
+    @endif
+
     @fonts
 
     @viteReactRefresh

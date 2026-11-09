@@ -189,6 +189,7 @@ export default function DonationProgressBar({
             >
                 <div
                     role="progressbar"
+                    aria-label={label || `Progres donasi: ${percentageDisplay}`}
                     aria-valuenow={percentage || 0}
                     aria-valuemin={0}
                     aria-valuemax={100}

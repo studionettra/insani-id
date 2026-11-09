@@ -53,16 +53,22 @@ return;
                                     key={banner.id} 
                                     className={`absolute inset-0 transition-opacity duration-[1200ms] ease-in-out ${index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                                 >
-                                    <img 
-                                        src={`/storage/${banner.desktop_image_url}`} 
-                                        alt={bannerTitle} 
-                                        className="hidden md:block w-full h-full object-cover" 
-                                    />
-                                    <img 
-                                        src={`/storage/${banner.mobile_image_url || banner.desktop_image_url}`} 
-                                        alt={bannerTitle} 
-                                        className="block md:hidden w-full h-full object-cover" 
-                                    />
+                                    <picture className="w-full h-full">
+                                        {banner.desktop_image_url && (
+                                            <source
+                                                media="(min-width: 768px)"
+                                                srcSet={`/storage/${banner.desktop_image_url}`}
+                                            />
+                                        )}
+                                        <img 
+                                            src={`/storage/${banner.mobile_image_url || banner.desktop_image_url}`} 
+                                            alt={bannerTitle} 
+                                            className="w-full h-full object-cover" 
+                                            loading={index === 0 ? 'eager' : 'lazy'}
+                                            fetchPriority={index === 0 ? 'high' : 'auto'}
+                                            decoding="async"
+                                        />
+                                    </picture>
                                     
                                     {/* Gradient for CTA contrast */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-zinc-950/20 to-transparent" />
@@ -225,6 +231,8 @@ return;
                                                 <img 
                                                     src={`/storage/${cat.pillar_image}`} 
                                                     alt={catTitle} 
+                                                    loading="lazy"
+                                                    decoding="async"
                                                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                                                 />
                                             ) : (
@@ -294,6 +302,8 @@ return;
                                             <img 
                                                 src={`/storage/${program.cover_image}`} 
                                                 alt={getLocalizedValue(program.title, locale)}
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                                             />
                                             <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-1.5 rounded-full text-xs font-bold text-zinc-900 shadow-sm">
@@ -373,7 +383,7 @@ return;
                                     <Link href={`/kabar/${blogs[0].slug}`} className="group block relative rounded-3xl overflow-hidden bg-white border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
                                         <div className="aspect-[16/10] overflow-hidden bg-zinc-100 relative">
                                             {(blogs[0].thumbnail_url || blogs[0].featured_image_url) ? (
-                                                <img src={blogs[0].thumbnail_url || blogs[0].featured_image_url} alt={blogs[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                                <img src={blogs[0].thumbnail_url || blogs[0].featured_image_url} alt={blogs[0].title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                                             ) : (
                                                 <div className="absolute inset-0 bg-gradient-to-br from-brand-100 to-brand-50"></div>
                                             )}
@@ -399,7 +409,7 @@ return;
                                             <Link href={`/kabar/${blog.slug}`} className="group flex flex-col sm:flex-row lg:flex-col xl:flex-row h-full bg-white rounded-2xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md hover:border-brand-100 transition-all duration-300">
                                                 <div className="sm:w-2/5 lg:w-full xl:w-2/5 aspect-[4/3] sm:aspect-auto lg:aspect-[16/9] xl:aspect-auto overflow-hidden bg-zinc-100 flex-shrink-0 relative">
                                                     {(blog.thumbnail_url || blog.featured_image_url) ? (
-                                                        <img src={blog.thumbnail_url || blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                                        <img src={blog.thumbnail_url || blog.featured_image_url} alt={blog.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                                                     ) : (
                                                         <div className="absolute inset-0 bg-gradient-to-br from-brand-100 to-brand-50"></div>
                                                     )}
@@ -425,7 +435,7 @@ return;
                                         <Link href={`/kabar/${blog.slug}`} className="group flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-zinc-100 shadow-sm hover:shadow-md transition-all duration-300">
                                             <div className="md:w-1/2 aspect-[16/9] md:aspect-auto overflow-hidden bg-zinc-100 relative">
                                                 {(blog.thumbnail_url || blog.featured_image_url) ? (
-                                                    <img src={blog.thumbnail_url || blog.featured_image_url} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                                    <img src={blog.thumbnail_url || blog.featured_image_url} alt={blog.title} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                                                 ) : (
                                                     <div className="absolute inset-0 bg-gradient-to-br from-brand-100 to-brand-50"></div>
                                                 )}
@@ -493,6 +503,10 @@ return;
                                             <img 
                                                 src={item.avatar_url} 
                                                 alt={item.name} 
+                                                width="48"
+                                                height="48"
+                                                loading="lazy"
+                                                decoding="async"
                                                 className="w-12 h-12 rounded-full object-cover border border-zinc-200" 
                                             />
                                         ) : (
@@ -528,7 +542,15 @@ return;
                         <FadeIn delay={0.2} className="flex flex-wrap justify-center items-center gap-12 md:gap-20 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700">
                             {partners.map((partner: any) => (
                                 <a key={partner.id} href={partner.website_url || '#'} target={partner.website_url ? "_blank" : "_self"} rel="noreferrer" className="block transform transition-transform hover:-translate-y-1">
-                                    <img src={`/storage/${partner.logo_url}`} alt={partner.name} className="h-10 md:h-12 object-contain max-w-[140px]" />
+                                    <img 
+                                        src={`/storage/${partner.logo_url}`} 
+                                        alt={partner.name} 
+                                        width="140"
+                                        height="48"
+                                        loading="lazy"
+                                        decoding="async"
+                                        className="h-10 md:h-12 object-contain max-w-[140px]" 
+                                    />
                                 </a>
                             ))}
                         </FadeIn>

@@ -41,7 +41,7 @@ class SecurityHeaders
                 "default-src 'self'",
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com",
                 "frame-src 'self' https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://app.midtrans.com https://api.midtrans.com https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
-                "connect-src 'self' data: https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://*.cloudflarecaptcha.com https://api.midtrans.com https://app.midtrans.com https://translate.googleapis.com https://api.fonnte.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://connect.facebook.net https://analytics.tiktok.com",
+                "connect-src 'self' data: https://challenges.cloudflare.com https://*.challenges.cloudflare.com https://*.cloudflarecaptcha.com https://api.midtrans.com https://app.midtrans.com https://translate.googleapis.com https://api.fonnte.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.doubleclick.net https://ad.doubleclick.net https://stats.g.doubleclick.net https://connect.facebook.net https://analytics.tiktok.com",
                 "img-src 'self' data: https: blob:",
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
                 "font-src 'self' data: https://fonts.gstatic.com https://fonts.bunny.net",
