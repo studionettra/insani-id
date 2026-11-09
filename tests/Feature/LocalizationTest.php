@@ -3,6 +3,7 @@
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Http\Request;
 use Inertia\Testing\AssertableInertia as Assert;
+use Mcamara\LaravelLocalization\LaravelLocalization;
 
 it('shares default indonesian translations and locale on root visit', function () {
     $response = $this->get('/');
@@ -73,12 +74,20 @@ it('shares correct arabic translations via HandleInertiaRequests when locale is 
 });
 
 it('resolves localized contact route for english and arabic', function (string $locale) {
-    app('laravellocalization')->setLocale($locale);
+    putenv("ROUTING_LOCALE={$locale}");
+    $_ENV['ROUTING_LOCALE'] = $locale;
+
+    app()->forgetInstance(LaravelLocalization::class);
+
     require base_path('routes/web.php');
     app('router')->getRoutes()->refreshNameLookups();
     app('router')->getRoutes()->refreshActionLookups();
 
     $response = $this->get("/{$locale}/kontak");
+
+    putenv('ROUTING_LOCALE');
+    unset($_ENV['ROUTING_LOCALE']);
+    app()->forgetInstance(LaravelLocalization::class);
 
     $response->assertOk();
     $response->assertInertia(fn (Assert $page) => $page
