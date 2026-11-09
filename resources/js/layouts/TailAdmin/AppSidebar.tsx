@@ -53,7 +53,7 @@ type NavGroup = {
 };
 
 const AppSidebar: React.FC = () => {
-  const { isExpanded, isMobileOpen, toggleSidebar } = useSidebar();
+  const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const { url, props } = usePage();
   const { auth } = props as any;
   const permissions: string[] = auth?.user?.permissions || [];
