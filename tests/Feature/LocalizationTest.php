@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use Mcamara\LaravelLocalization\LaravelLocalization;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
@@ -82,7 +83,9 @@ it('resolves localized contact route for english and arabic', function (string $
 
     app()->forgetInstance(LaravelLocalization::class);
 
-    require base_path('routes/web.php');
+    Route::middleware('web')->group(function () {
+        require base_path('routes/web.php');
+    });
     app('router')->getRoutes()->refreshNameLookups();
     app('router')->getRoutes()->refreshActionLookups();
 
