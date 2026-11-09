@@ -162,7 +162,15 @@ class AnalyticsService
             ->groupBy('url', 'path', 'title')
             ->orderByDesc('active_readers')
             ->limit(8)
-            ->get();
+            ->get()
+            ->map(fn ($p) => [
+                'url' => $p->url,
+                'path' => $p->path,
+                'title' => $p->title,
+                'active_readers' => (int) $p->active_readers,
+            ])
+            ->values()
+            ->all();
 
         $recentMinutes = collect(range(0, 29))->reverse()->map(function ($minuteAgo) {
             $time = Carbon::now()->subMinutes($minuteAgo);
@@ -207,7 +215,9 @@ class AnalyticsService
                 'time_ago' => $event->created_at ? $event->created_at->diffForHumans() : '-',
                 'device' => $event->session?->device_type ?? 'desktop',
                 'created_at' => $event->created_at ? $event->created_at->toIso8601String() : '',
-            ]);
+            ])
+            ->values()
+            ->all();
 
         return [
             'active_visitors_count' => $activeVisitorsCount,
@@ -313,7 +323,9 @@ class AnalyticsService
                         'total_amount' => (float) ($donations->total_amount ?? 0),
                         'conversion_rate' => $convRate,
                     ];
-                });
+                })
+                ->values()
+                ->all();
 
             $topReferrers = AnalyticsSession::select('referrer_domain', DB::raw('count(*) as visits'))
                 ->where('created_at', '>=', $startDate)
@@ -322,7 +334,13 @@ class AnalyticsService
                 ->groupBy('referrer_domain')
                 ->orderByDesc('visits')
                 ->limit(8)
-                ->get();
+                ->get()
+                ->map(fn ($r) => [
+                    'referrer_domain' => (string) $r->referrer_domain,
+                    'visits' => (int) $r->visits,
+                ])
+                ->values()
+                ->all();
 
             return [
                 'channels' => $channels,
@@ -355,7 +373,9 @@ class AnalyticsService
                 'url' => $p->url,
                 'views' => (int) $p->views,
                 'avg_duration_seconds' => round($p->avg_duration),
-            ]);
+            ])
+            ->values()
+            ->all();
 
         // Conversion Funnel
         $programViews = AnalyticsPageView::where('created_at', '>=', $startDate)
@@ -407,7 +427,9 @@ class AnalyticsService
             ->orderByDesc('count')
             ->limit(6)
             ->get()
-            ->map(fn ($b) => ['name' => $b->browser, 'count' => (int) $b->count]);
+            ->map(fn ($b) => ['name' => $b->browser, 'count' => (int) $b->count])
+            ->values()
+            ->all();
 
         $os = AnalyticsSession::select('os', DB::raw('count(*) as count'))
             ->where('created_at', '>=', $startDate)
@@ -416,7 +438,9 @@ class AnalyticsService
             ->orderByDesc('count')
             ->limit(6)
             ->get()
-            ->map(fn ($o) => ['name' => $o->os, 'count' => (int) $o->count]);
+            ->map(fn ($o) => ['name' => $o->os, 'count' => (int) $o->count])
+            ->values()
+            ->all();
 
         $locations = AnalyticsSession::select('city', 'country', DB::raw('count(*) as count'))
             ->where('created_at', '>=', $startDate)
@@ -426,7 +450,9 @@ class AnalyticsService
             ->orderByDesc('count')
             ->limit(8)
             ->get()
-            ->map(fn ($l) => ['city' => $l->city, 'country' => $l->country, 'count' => (int) $l->count]);
+            ->map(fn ($l) => ['city' => $l->city, 'country' => $l->country, 'count' => (int) $l->count])
+            ->values()
+            ->all();
 
         return [
             'devices' => [

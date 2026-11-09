@@ -41,37 +41,56 @@ interface Props {
 }
 
 export default function AcquisitionTab({ data }: Props) {
+    const channels = data?.channels || {
+        'Organic Search': 0,
+        'Social Media': 0,
+        Direct: 0,
+        Referral: 0,
+    };
+
+    const referrersList: ReferrerRow[] = Array.isArray(data?.referrers)
+        ? data.referrers
+        : (data?.referrers && typeof data.referrers === 'object')
+            ? Object.values(data.referrers)
+            : [];
+
+    const campaignsList: CampaignRow[] = Array.isArray(data?.campaigns)
+        ? data.campaigns
+        : (data?.campaigns && typeof data.campaigns === 'object')
+            ? Object.values(data.campaigns)
+            : [];
+
     const totalVisits =
-        (data.channels['Organic Search'] || 0) +
-        (data.channels['Social Media'] || 0) +
-        (data.channels['Direct'] || 0) +
-        (data.channels['Referral'] || 0);
+        (channels['Organic Search'] || 0) +
+        (channels['Social Media'] || 0) +
+        (channels['Direct'] || 0) +
+        (channels['Referral'] || 0);
 
     const channelCards = [
         {
             title: 'Social Media',
-            count: data.channels['Social Media'] || 0,
+            count: channels['Social Media'] || 0,
             icon: <Share2 className="h-5 w-5 text-indigo-500" />,
             color: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',
             desc: 'WhatsApp, FB, Instagram, TikTok, Telegram',
         },
         {
             title: 'Organic Search',
-            count: data.channels['Organic Search'] || 0,
+            count: channels['Organic Search'] || 0,
             icon: <Search className="h-5 w-5 text-emerald-500" />,
             color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
             desc: 'Google, Bing, DuckDuckGo, Yahoo',
         },
         {
             title: 'Direct Traffic',
-            count: data.channels['Direct'] || 0,
+            count: channels['Direct'] || 0,
             icon: <Compass className="h-5 w-5 text-blue-500" />,
             color: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
             desc: 'Ketik URL langsung, Bookmark, Tanpa perujuk',
         },
         {
             title: 'Referral Luar',
-            count: data.channels['Referral'] || 0,
+            count: channels['Referral'] || 0,
             icon: <LinkIcon className="h-5 w-5 text-amber-500" />,
             color: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
             desc: 'Tautan dari portal berita / website mitra',
@@ -191,7 +210,7 @@ export default function AcquisitionTab({ data }: Props) {
                         </span>
                     </div>
 
-                    {data.referrers.length === 0 ? (
+                    {referrersList.length === 0 ? (
                         <div className="py-10 text-center text-sm text-gray-400">
                             Sebagian besar pengunjung datang langsung (Direct)
                             atau belum ada perujuk eksternal.
@@ -213,7 +232,7 @@ export default function AcquisitionTab({ data }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                    {data.referrers.map((ref, idx) => {
+                                    {referrersList.map((ref, idx) => {
                                         const refPct =
                                             totalVisits > 0
                                                 ? (
@@ -270,7 +289,7 @@ export default function AcquisitionTab({ data }: Props) {
                     </span>
                 </div>
 
-                {data.campaigns.length === 0 ? (
+                {campaignsList.length === 0 ? (
                     <div className="py-8 text-center text-sm text-gray-400">
                         Belum ada tautan dengan parameter UTM yang diklik
                         pengunjung dalam periode ini.
@@ -304,7 +323,7 @@ export default function AcquisitionTab({ data }: Props) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                {data.campaigns.map((camp, idx) => (
+                                {campaignsList.map((camp, idx) => (
                                     <tr
                                         key={idx}
                                         className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30"

@@ -46,6 +46,24 @@ interface Props {
 }
 
 export default function RealtimeTab({ data, onRefresh, isRefreshing }: Props) {
+    const viewsPerMinute: MinuteView[] = Array.isArray(data?.views_per_minute)
+        ? data.views_per_minute
+        : (data?.views_per_minute && typeof data.views_per_minute === 'object')
+            ? Object.values(data.views_per_minute)
+            : [];
+
+    const activePages: ActivePage[] = Array.isArray(data?.active_pages)
+        ? data.active_pages
+        : (data?.active_pages && typeof data.active_pages === 'object')
+            ? Object.values(data.active_pages)
+            : [];
+
+    const recentEvents: RecentEvent[] = Array.isArray(data?.recent_events)
+        ? data.recent_events
+        : (data?.recent_events && typeof data.recent_events === 'object')
+            ? Object.values(data.recent_events)
+            : [];
+
     const chartOptions: ApexCharts.ApexOptions = {
         chart: {
             type: 'bar',
@@ -62,7 +80,7 @@ export default function RealtimeTab({ data, onRefresh, isRefreshing }: Props) {
         dataLabels: { enabled: false },
         colors: ['#10B981'],
         xaxis: {
-            categories: data.views_per_minute.map((item) => item.time),
+            categories: viewsPerMinute.map((item) => item.time),
             labels: {
                 show: true,
                 rotate: -45,
@@ -92,7 +110,7 @@ export default function RealtimeTab({ data, onRefresh, isRefreshing }: Props) {
     const series = [
         {
             name: 'Tayangan Halaman',
-            data: data.views_per_minute.map((item) => item.views),
+            data: viewsPerMinute.map((item) => item.views),
         },
     ];
 
@@ -204,7 +222,7 @@ export default function RealtimeTab({ data, onRefresh, isRefreshing }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                    {data.active_pages.map((page, idx) => (
+                                    {activePages.map((page, idx) => (
                                         <tr
                                             key={idx}
                                             className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
@@ -255,13 +273,13 @@ export default function RealtimeTab({ data, onRefresh, isRefreshing }: Props) {
                         </span>
                     </div>
 
-                    {data.recent_events.length === 0 ? (
+                    {recentEvents.length === 0 ? (
                         <div className="py-10 text-center text-sm text-gray-400">
                             Belum ada event tercatat.
                         </div>
                     ) : (
                         <div className="custom-scrollbar max-h-[340px] space-y-2.5 overflow-y-auto pr-1">
-                            {data.recent_events.map((event) => {
+                            {recentEvents.map((event) => {
                                 const isPurchase =
                                     event.event_name === 'Purchase';
                                 const isCheckout =

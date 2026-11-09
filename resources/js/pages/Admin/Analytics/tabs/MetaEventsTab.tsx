@@ -50,6 +50,12 @@ interface Props {
 export default function MetaEventsTab({ data }: Props) {
     const [selectedEvent, setSelectedEvent] = useState<MetaEventItem | null>(null);
 
+    const recentEventsList: MetaEventItem[] = Array.isArray(data?.recent_events)
+        ? data.recent_events
+        : (data?.recent_events && typeof data.recent_events === 'object')
+            ? Object.values(data.recent_events)
+            : [];
+
     const eventStats = [
         {
             name: 'Purchase',
@@ -179,7 +185,7 @@ export default function MetaEventsTab({ data }: Props) {
                     <span className="text-xs text-gray-400">50 Peristiwa Terbaru</span>
                 </div>
 
-                {data.recent_events.length === 0 ? (
+                {recentEventsList.length === 0 ? (
                     <div className="text-center py-12 text-gray-400 text-sm">
                         Belum ada event tercatat dalam log diagnostik.
                     </div>
@@ -197,7 +203,7 @@ export default function MetaEventsTab({ data }: Props) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                {data.recent_events.map((evt) => {
+                                {recentEventsList.map((evt) => {
                                     const isPurchase = evt.event_name === 'Purchase';
                                     const isCheckout = evt.event_name === 'InitiateCheckout';
                                     const isView = evt.event_name === 'ViewContent';

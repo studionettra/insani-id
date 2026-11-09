@@ -36,31 +36,43 @@ function formatDuration(seconds: number): string {
 }
 
 export default function EngagementTab({ data }: Props) {
+    const funnelList: FunnelStep[] = Array.isArray(data?.funnel)
+        ? data.funnel
+        : (data?.funnel && typeof data.funnel === 'object')
+            ? Object.values(data.funnel)
+            : [];
+
+    const topPagesList: TopPage[] = Array.isArray(data?.top_pages)
+        ? data.top_pages
+        : (data?.top_pages && typeof data.top_pages === 'object')
+            ? Object.values(data.top_pages)
+            : [];
+
     const kpis = [
         {
             label: 'Total Tayangan Halaman',
-            value: data.total_page_views.toLocaleString('id-ID'),
+            value: (data?.total_page_views || 0).toLocaleString('id-ID'),
             icon: <Eye className="w-5 h-5 text-blue-500" />,
             color: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
             subtitle: 'Pageviews di seluruh web',
         },
         {
             label: 'Pengunjung Unik',
-            value: data.unique_visitors.toLocaleString('id-ID'),
+            value: (data?.unique_visitors || 0).toLocaleString('id-ID'),
             icon: <Users className="w-5 h-5 text-emerald-500" />,
             color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
             subtitle: 'Sesi unik pengunjung',
         },
         {
             label: 'Rata-Rata Waktu di Halaman',
-            value: formatDuration(data.avg_duration_seconds),
+            value: formatDuration(data?.avg_duration_seconds || 0),
             icon: <Clock className="w-5 h-5 text-purple-500" />,
             color: 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300',
             subtitle: 'Estimasi durasi baca per halaman',
         },
     ];
 
-    const baseCount = data.funnel[0]?.count || 1;
+    const baseCount = funnelList[0]?.count || 1;
 
     return (
         <div className="space-y-6">
@@ -100,9 +112,9 @@ export default function EngagementTab({ data }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
-                    {data.funnel.map((step, idx) => {
+                    {funnelList.map((step, idx) => {
                         const pctOfBase = baseCount > 0 ? Math.min(100, (step.count / baseCount) * 100) : 0;
-                        const prevCount = idx > 0 ? data.funnel[idx - 1]?.count || 1 : baseCount;
+                        const prevCount = idx > 0 ? funnelList[idx - 1]?.count || 1 : baseCount;
                         const stepConv = prevCount > 0 ? ((step.count / prevCount) * 100).toFixed(1) : '0';
 
                         return (
@@ -160,7 +172,7 @@ export default function EngagementTab({ data }: Props) {
                     <span className="text-xs text-gray-400">10 Halaman Teratas</span>
                 </div>
 
-                {data.top_pages.length === 0 ? (
+                {topPagesList.length === 0 ? (
                     <div className="text-center py-8 text-gray-400 text-sm">
                         Belum ada riwayat halaman tercatat pada periode ini.
                     </div>
@@ -175,7 +187,7 @@ export default function EngagementTab({ data }: Props) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                {data.top_pages.map((page, idx) => (
+                                {topPagesList.map((page, idx) => (
                                     <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30">
                                         <td className="py-3 pr-4 max-w-[340px]">
                                             <a

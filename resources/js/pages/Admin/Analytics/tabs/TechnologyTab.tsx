@@ -64,13 +64,31 @@ export default function TechnologyTab({ data }: Props) {
     };
 
     const deviceChartSeries = [
-        data.devices.mobile,
-        data.devices.desktop,
-        data.devices.tablet,
+        data?.devices?.mobile || 0,
+        data?.devices?.desktop || 0,
+        data?.devices?.tablet || 0,
     ];
 
-    const maxOs = Math.max(...data.operating_systems.map((o) => o.count), 1);
-    const maxBrowser = Math.max(...data.browsers.map((b) => b.count), 1);
+    const operatingSystemsList: OperatingSystemRow[] = Array.isArray(data?.operating_systems)
+        ? data.operating_systems
+        : (data?.operating_systems && typeof data.operating_systems === 'object')
+            ? Object.values(data.operating_systems)
+            : [];
+
+    const browsersList: BrowserRow[] = Array.isArray(data?.browsers)
+        ? data.browsers
+        : (data?.browsers && typeof data.browsers === 'object')
+            ? Object.values(data.browsers)
+            : [];
+
+    const locationsList: LocationRow[] = Array.isArray(data?.locations)
+        ? data.locations
+        : (data?.locations && typeof data.locations === 'object')
+            ? Object.values(data.locations)
+            : [];
+
+    const maxOs = Math.max(...operatingSystemsList.map((o) => o.count), 1);
+    const maxBrowser = Math.max(...browsersList.map((b) => b.count), 1);
 
     return (
         <div className="space-y-6">
@@ -146,7 +164,7 @@ export default function TechnologyTab({ data }: Props) {
                         </span>
                     </div>
 
-                    {data.locations.length === 0 ? (
+                    {locationsList.length === 0 ? (
                         <div className="py-10 text-center text-sm text-gray-400">
                             Data kota pengunjung belum tersedia atau sebagian
                             besar dari jaringan lokal.
@@ -168,7 +186,7 @@ export default function TechnologyTab({ data }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                    {data.locations.map((loc, idx) => (
+                                    {locationsList.map((loc, idx) => (
                                         <tr
                                             key={idx}
                                             className="hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
@@ -209,13 +227,13 @@ export default function TechnologyTab({ data }: Props) {
                         </h3>
                     </div>
 
-                    {data.operating_systems.length === 0 ? (
+                    {operatingSystemsList.length === 0 ? (
                         <div className="py-6 text-center text-sm text-gray-400">
                             Belum ada data OS.
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {data.operating_systems.map((os, idx) => {
+                            {operatingSystemsList.map((os, idx) => {
                                 const pct = Math.round(
                                     (os.count / maxOs) * 100,
                                 );
@@ -254,13 +272,13 @@ export default function TechnologyTab({ data }: Props) {
                         </h3>
                     </div>
 
-                    {data.browsers.length === 0 ? (
+                    {browsersList.length === 0 ? (
                         <div className="py-6 text-center text-sm text-gray-400">
                             Belum ada data browser.
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {data.browsers.map((b, idx) => {
+                            {browsersList.map((b, idx) => {
                                 const pct = Math.round(
                                     (b.count / maxBrowser) * 100,
                                 );
