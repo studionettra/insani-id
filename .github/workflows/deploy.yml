@@ -44,11 +44,13 @@ jobs:
       - name: 🏗️ Build Frontend Assets
         run: npm run build
 
+      - name: 🔑 Siapkan Kunci Enkripsi Testing
+        run: echo "APP_KEY=$(php artisan key:generate --show)" >> $GITHUB_ENV
+
       - name: 🧪 Run Pest Test Suite
         run: php artisan test --compact
         env:
           APP_ENV: testing
-          APP_KEY: base64:xhK5RnvxVgHCN47F33EIOisGYAzw5xllBG5d+czSv64=
           DB_CONNECTION: sqlite
           DB_DATABASE: ':memory:'
 
