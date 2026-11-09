@@ -20,7 +20,7 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     return (
-        <div className="min-h-screen overflow-x-hidden bg-gray-50 text-gray-900 transition-colors xl:flex dark:bg-gray-950 dark:text-gray-100 print:block print:min-h-0 print:bg-white">
+        <div className="min-h-screen overflow-x-clip bg-gray-50 text-gray-900 transition-colors xl:flex dark:bg-gray-950 dark:text-gray-100 print:block print:min-h-0 print:bg-white">
             <div className="print:hidden">
                 <FlashMessages />
             </div>
