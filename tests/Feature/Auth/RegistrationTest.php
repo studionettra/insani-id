@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Donation;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Http;
 use Laravel\Fortify\Features;
 
@@ -56,7 +57,7 @@ test('it automatically links previous guest donations to newly registered user w
     // Guest donation remains unlinked until email address is verified
     expect($guestDonation->donor_user_id)->toBeNull();
 
-    event(new \Illuminate\Auth\Events\Verified($user));
+    event(new Verified($user));
     $guestDonation->refresh();
 
     expect($guestDonation->donor_user_id)->toBe($user->id);
