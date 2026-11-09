@@ -53,6 +53,12 @@ test('it automatically links previous guest donations to newly registered user w
     $user = auth()->user();
     $guestDonation->refresh();
 
+    // Guest donation remains unlinked until email address is verified
+    expect($guestDonation->donor_user_id)->toBeNull();
+
+    event(new \Illuminate\Auth\Events\Verified($user));
+    $guestDonation->refresh();
+
     expect($guestDonation->donor_user_id)->toBe($user->id);
 });
 

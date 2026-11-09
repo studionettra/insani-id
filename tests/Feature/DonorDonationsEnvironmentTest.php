@@ -72,15 +72,20 @@ test('guest can search donations by email on /cek-donasi', function () {
         'status' => 'published',
     ]);
 
+    $donorUser = User::factory()->create([
+        'email' => 'guest_donor@example.com',
+    ]);
+
     Donation::factory()->create([
         'donor_email' => 'guest_donor@example.com',
+        'donor_user_id' => $donorUser->id,
         'donor_name' => 'Budi Guest',
         'program_id' => $program->id,
         'amount' => 75000,
         'status' => 'paid',
     ]);
 
-    $response = $this->get(route('donation.lookup', ['q' => 'guest_donor@example.com']));
+    $response = $this->actingAs($donorUser)->get(route('donation.lookup', ['q' => 'guest_donor@example.com']));
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page

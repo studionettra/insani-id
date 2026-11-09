@@ -73,6 +73,11 @@ it('shares correct arabic translations via HandleInertiaRequests when locale is 
 });
 
 it('resolves localized contact route for english and arabic', function (string $locale) {
+    app('laravellocalization')->setLocale($locale);
+    require base_path('routes/web.php');
+    app('router')->getRoutes()->refreshNameLookups();
+    app('router')->getRoutes()->refreshActionLookups();
+
     $response = $this->get("/{$locale}/kontak");
 
     $response->assertOk();
