@@ -14,7 +14,7 @@ on:
 jobs:
   test:
     name: 🧪 Quality Gate (Pest & Pint)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: "${{ !inputs.skip_tests }}"
     steps:
       - name: 🚚 Checkout Code
@@ -36,7 +36,7 @@ jobs:
       - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 📦 Install NPM Dependencies
         run: npm ci || npm install
@@ -54,7 +54,7 @@ jobs:
 
   deploy:
     name: 🚀 Deploy to Hostinger
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test]
     if: |
       always() &&
@@ -79,7 +79,7 @@ jobs:
       - name: 🛠️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: 📦 Install NPM Dependencies
         run: npm ci || npm install
