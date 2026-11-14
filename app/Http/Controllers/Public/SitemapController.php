@@ -32,6 +32,7 @@ class SitemapController extends Controller
             ['url' => route('page.syarat-ketentuan'), 'priority' => '0.5', 'changefreq' => 'monthly'],
             ['url' => route('page.kebijakan-privasi'), 'priority' => '0.5', 'changefreq' => 'monthly'],
             ['url' => route('page.cara-donasi'), 'priority' => '0.5', 'changefreq' => 'monthly'],
+            ['url' => route('page.logo'), 'priority' => '0.4', 'changefreq' => 'monthly'],
         ];
 
         foreach ($staticRoutes as $item) {
@@ -87,7 +88,7 @@ class SitemapController extends Controller
         }
 
         // 5. Additional CMS Pages
-        $specialSlugs = ['pusat-bantuan', 'syarat-ketentuan', 'kebijakan-privasi', 'cara-donasi'];
+        $specialSlugs = ['logo', 'pusat-bantuan', 'syarat-ketentuan', 'kebijakan-privasi', 'cara-donasi'];
         $extraPages = Page::where('is_active', true)
             ->whereNotIn('slug', $specialSlugs)
             ->get();
