@@ -504,6 +504,9 @@ Route::get('/indonesia-pl', function (Request $request) {
     return redirect()->to('/program/sulteng-untuk-palestina'.($qs ? '?'.$qs : ''), 301);
 });
 
+Route::get('/fokus-program-insani', fn () => redirect()->to('/fokus-program', 301));
+Route::get('/manajemen', fn () => redirect()->to('/tentang-kami', 301));
+
 Route::get('/galang-dana-id', function (Request $request) {
     $qs = $request->getQueryString();
 
