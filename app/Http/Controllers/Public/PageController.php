@@ -9,7 +9,28 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    public function show(string $slug): Response
+    public function show(string $slug)
+    {
+        // Prevent duplicate content & canonical mismatch for core pages with dedicated clean routes
+        $cleanAliases = [
+            'logo' => 'page.logo',
+            'pusat-bantuan' => 'page.pusat-bantuan',
+            'syarat-ketentuan' => 'page.syarat-ketentuan',
+            'kebijakan-privasi' => 'page.kebijakan-privasi',
+            'cara-donasi' => 'page.cara-donasi',
+        ];
+
+        if (isset($cleanAliases[$slug])) {
+            return redirect()->route($cleanAliases[$slug], [], 301);
+        }
+
+        return $this->renderPage($slug);
+    }
+
+    /**
+     * Render the CMS page view.
+     */
+    protected function renderPage(string $slug): Response
     {
         $page = Page::where('slug', $slug)
             ->where('is_active', true)
@@ -29,22 +50,22 @@ class PageController extends Controller
 
     public function syaratKetentuan(): Response
     {
-        return $this->show('syarat-ketentuan');
+        return $this->renderPage('syarat-ketentuan');
     }
 
     public function kebijakanPrivasi(): Response
     {
-        return $this->show('kebijakan-privasi');
+        return $this->renderPage('kebijakan-privasi');
     }
 
     public function caraDonasi(): Response
     {
-        return $this->show('cara-donasi');
+        return $this->renderPage('cara-donasi');
     }
 
     public function logoGuideline(): Response
     {
-        return $this->show('logo');
+        return $this->renderPage('logo');
     }
 
     public function pusatBantuan(): Response
