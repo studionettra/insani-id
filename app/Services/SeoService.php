@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\AppSetting;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 class SeoService
@@ -331,6 +332,20 @@ class SeoService
         // 4. Static CMS Pages (Public/Page/Show)
         if ($component === 'Public/Page/Show' && ! empty($props['page'])) {
             $cmsPage = $props['page'];
+            $slug = (string) data_get($cmsPage, 'slug');
+
+            $cleanRouteMap = [
+                'logo' => 'page.logo',
+                'pusat-bantuan' => 'page.pusat-bantuan',
+                'syarat-ketentuan' => 'page.syarat-ketentuan',
+                'kebijakan-privasi' => 'page.kebijakan-privasi',
+                'cara-donasi' => 'page.cara-donasi',
+            ];
+
+            $canonicalUrl = isset($cleanRouteMap[$slug])
+                ? route($cleanRouteMap[$slug])
+                : (Route::has('page.show') ? route('page.show', $slug) : $currentUrl);
+
             $title = (string) (data_get($cmsPage, 'meta_title') ?: data_get($cmsPage, 'title') ?: 'Halaman Informasi');
             $description = (string) (data_get($cmsPage, 'meta_description') ?: $defaultDescription);
 
@@ -341,7 +356,7 @@ class SeoService
                 'title' => str_contains($title, $siteName) ? $title : "{$title} - {$siteName}",
                 'description' => Str::limit($description, 160),
                 'image' => $image,
-                'url' => $currentUrl,
+                'url' => $canonicalUrl,
                 'type' => 'website',
                 'site_name' => $siteName,
                 'card' => 'summary_large_image',
