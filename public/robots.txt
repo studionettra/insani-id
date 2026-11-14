@@ -1,11 +1,34 @@
 User-agent: *
 Allow: /
+
+# Admin & Area Terproteksi Internal
 Disallow: /admin/
 Disallow: /dashboard/
 Disallow: /akun/
 Disallow: /settings/
 Disallow: /login
 Disallow: /register
+Disallow: /daftar
 Disallow: /api/
 
+# Blokir Jejak Sistem WordPress Lama (Menghemat Crawl Budget)
+Disallow: /wp-admin/
+Disallow: /wp-includes/
+Disallow: /wp-content/
+Disallow: /wp-json/
+Disallow: /xmlrpc.php
+Disallow: /feed/
+Disallow: /*/feed/
+Disallow: /*/feed$
+Disallow: /tag/
+Disallow: /category/
+Disallow: /author/
+Disallow: /my-account/
+Disallow: /account/
+Disallow: /pembayaran/
+Disallow: /pemeriksaan/
+Disallow: /cart/
+Disallow: /checkout/
+
 Sitemap: https://insani.id/sitemap.xml
+
