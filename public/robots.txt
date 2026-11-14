@@ -23,6 +23,8 @@ Disallow: /*/feed$
 Disallow: /tag/
 Disallow: /category/
 Disallow: /author/
+Disallow: /galang-dana-category/
+Disallow: /galang-dana-tag/
 Disallow: /my-account/
 Disallow: /account/
 Disallow: /pembayaran/
