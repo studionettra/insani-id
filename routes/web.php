@@ -102,6 +102,9 @@ Route::group([
     Route::get('/fokus-program', [FocusProgramController::class, 'index'])->name('focus.index');
     Route::get('/fokus-program/{category:slug}', [FocusProgramController::class, 'show'])->name('focus.show');
     Route::get('/kabar', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/kabar/{page}', function (int $page) {
+        return redirect()->to('/kabar?page='.$page, 301);
+    })->whereNumber('page');
     Route::get('/kabar/{slug}', [BlogController::class, 'show'])->name('blog.show');
     Route::get('/berita', function (Request $request) {
         $qs = $request->getQueryString();
@@ -506,6 +509,12 @@ Route::get('/indonesia-pl', function (Request $request) {
 
 Route::get('/fokus-program-insani', fn () => redirect()->to('/fokus-program', 301));
 Route::get('/manajemen', fn () => redirect()->to('/tentang-kami', 301));
+
+Route::get('/galang-dana', function (Request $request) {
+    $qs = $request->getQueryString();
+
+    return redirect()->to('/program'.($qs ? '?'.$qs : ''), 301);
+});
 
 Route::get('/galang-dana-id', function (Request $request) {
     $qs = $request->getQueryString();
