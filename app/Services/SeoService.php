@@ -372,21 +372,78 @@ class SeoService
 
         // 5. Known Public Pages mapping
         $customTitles = [
-            'Public/Home/Index' => $siteName,
-            'Public/About/Index' => "Tentang Kami - {$siteName}",
-            'Public/FocusProgram/Index' => "Fokus Program Kebaikan - {$siteName}",
-            'Public/Contact/Create' => "Hubungi Kami - {$siteName}",
-            'Public/Program/Listing' => "Daftar Program Donasi - {$siteName}",
-            'Public/Program/Index' => "Daftar Program Donasi - {$siteName}",
-            'Public/Blog/Index' => "Kabar Terbaru - {$siteName}",
+            'Public/Home/Index' => AppSetting::get('seo_home_title') ?: $siteName,
+            'Public/About/Index' => AppSetting::get('seo_about_title') ?: "Tentang Kami - Profil Yayasan {$siteName}",
+            'Public/FocusProgram/Index' => AppSetting::get('seo_focus_title') ?: "Fokus Program Kebaikan - {$siteName}",
+            'Public/Contact/Create' => AppSetting::get('seo_contact_title') ?: "Hubungi Kami - Layanan Donatur {$siteName}",
+            'Public/Program/Listing' => AppSetting::get('seo_program_title') ?: "Daftar Program Donasi - {$siteName}",
+            'Public/Program/Index' => AppSetting::get('seo_program_title') ?: "Daftar Program Donasi - {$siteName}",
+            'Public/Blog/Index' => AppSetting::get('seo_blog_title') ?: "Kabar Penyaluran & Berita Kebaikan - {$siteName}",
             'Public/CampaignerRegistration/Create' => "Daftar Penggalang Dana - {$siteName}",
             'Public/Donation/Lookup' => "Cek Status & Riwayat Donasi - {$siteName}",
         ];
 
+        $customDescriptions = [
+            'Public/Home/Index' => AppSetting::get('seo_home_description') ?: 'Platform gotong royong digital yang didedikasikan untuk menjembatani kebaikan dan memberikan dampak nyata bagi masyarakat dalam naungan nilai-nilai kemanusiaan.',
+            'Public/About/Index' => AppSetting::get('seo_about_description') ?: 'Mengenal Yayasan Peduli Insani Indonesia, visi misi, legalitas resmi Kemenkumham, serta transparansi kelembagaan.',
+            'Public/FocusProgram/Index' => AppSetting::get('seo_focus_description') ?: 'Pilar program kebaikan Insani Indonesia: Bantuan Kemanusiaan, Ketahanan Pangan, Ketersediaan Air, Pendidikan, Pemberdayaan, dan Kesehatan.',
+            'Public/Contact/Create' => AppSetting::get('seo_contact_description') ?: 'Kantor layanan donatur Yayasan Peduli Insani Indonesia. Layanan informasi donasi, konfirmasi transfer, kemitraan, dan konsultasi program.',
+            'Public/Program/Listing' => AppSetting::get('seo_program_description') ?: 'Pilihan program donasi dan galang dana kemanusiaan, pendidikan, air bersih, serta santunan yatim terpercaya bersama Insani Indonesia.',
+            'Public/Program/Index' => AppSetting::get('seo_program_description') ?: 'Pilihan program donasi dan galang dana kemanusiaan, pendidikan, air bersih, serta santunan yatim terpercaya bersama Insani Indonesia.',
+            'Public/Blog/Index' => AppSetting::get('seo_blog_description') ?: 'Dokumentasi realisasi program, laporan penyaluran bantuan kemanusiaan, dan kabar kebaikan terkini dari relawan di lapangan.',
+            'Public/CampaignerRegistration/Create' => 'Daftar sebagai inisiator atau mitra penggalang dana kebaikan di Insani Indonesia.',
+            'Public/Donation/Lookup' => 'Cek status dan riwayat donasi online Anda secara transparan di Insani Indonesia.',
+        ];
+
         $pageTitle = $customTitles[$component] ?? "{$siteName} - Platform Galang Dana dan Donasi";
+        $pageDescription = $customDescriptions[$component] ?? $defaultDescription;
 
         $schema = null;
         if ($component === 'Public/Home/Index') {
+            $siteNavSchema = [
+                '@type' => 'ItemList',
+                '@id' => url('/').'#site-navigation',
+                'name' => "Navigasi Utama {$siteName}",
+                'description' => "Pilar menu navigasi utama situs resmi {$siteName}.",
+                'itemListElement' => [
+                    [
+                        '@type' => 'SiteNavigationElement',
+                        'position' => 1,
+                        'name' => 'Program Donasi',
+                        'description' => 'Katalog program donasi dan galang dana kemanusiaan.',
+                        'url' => route('program.index'),
+                    ],
+                    [
+                        '@type' => 'SiteNavigationElement',
+                        'position' => 2,
+                        'name' => 'Tentang Kami',
+                        'description' => 'Profil yayasan, legalitas resmi, dan laporan transparansi.',
+                        'url' => route('about.index'),
+                    ],
+                    [
+                        '@type' => 'SiteNavigationElement',
+                        'position' => 3,
+                        'name' => 'Kabar Penyaluran',
+                        'description' => 'Dokumentasi realisasi program dan kabar berita penyaluran bantuan.',
+                        'url' => route('blog.index'),
+                    ],
+                    [
+                        '@type' => 'SiteNavigationElement',
+                        'position' => 4,
+                        'name' => 'Fokus Program',
+                        'description' => 'Pilar utama fokus program bantuan dan pemberdayaan masyarakat.',
+                        'url' => route('focus.index'),
+                    ],
+                    [
+                        '@type' => 'SiteNavigationElement',
+                        'position' => 5,
+                        'name' => 'Kontak',
+                        'description' => 'Layanan informasi donasi dan kantor layanan donatur.',
+                        'url' => route('contact.create'),
+                    ],
+                ],
+            ];
+
             $schema = [
                 '@context' => 'https://schema.org',
                 '@graph' => [
@@ -396,9 +453,46 @@ class SeoService
                         '@id' => url('/').'#website',
                         'url' => url('/'),
                         'name' => $siteName,
-                        'description' => $defaultDescription,
+                        'description' => $pageDescription,
                         'publisher' => [
                             '@id' => url('/').'#organization',
+                        ],
+                    ],
+                    $siteNavSchema,
+                ],
+            ];
+        } elseif (in_array($component, ['Public/Program/Listing', 'Public/Program/Index', 'Public/About/Index', 'Public/Blog/Index', 'Public/FocusProgram/Index', 'Public/Contact/Create'], true)) {
+            $breadcrumbNameMap = [
+                'Public/Program/Listing' => 'Program Donasi',
+                'Public/Program/Index' => 'Program Donasi',
+                'Public/About/Index' => 'Tentang Kami',
+                'Public/Blog/Index' => 'Kabar Penyaluran',
+                'Public/FocusProgram/Index' => 'Fokus Program',
+                'Public/Contact/Create' => 'Kontak',
+            ];
+
+            $breadcrumbName = $breadcrumbNameMap[$component] ?? $pageTitle;
+
+            $schema = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    $organizationSchema,
+                    [
+                        '@type' => 'BreadcrumbList',
+                        '@id' => $currentUrl.'#breadcrumb',
+                        'itemListElement' => [
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 1,
+                                'name' => 'Beranda',
+                                'item' => url('/'),
+                            ],
+                            [
+                                '@type' => 'ListItem',
+                                'position' => 2,
+                                'name' => $breadcrumbName,
+                                'item' => $currentUrl,
+                            ],
                         ],
                     ],
                 ],
@@ -407,7 +501,7 @@ class SeoService
 
         return [
             'title' => $pageTitle,
-            'description' => $defaultDescription,
+            'description' => Str::limit($pageDescription, 160),
             'image' => $defaultImage,
             'url' => $currentUrl,
             'type' => 'website',
