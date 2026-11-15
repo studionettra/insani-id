@@ -156,6 +156,9 @@ jobs:
               mkdir -p "$PUBLIC_HTML_DIR/build"
               rsync -av --delete public/build/ "$PUBLIC_HTML_DIR/build/" || cp -r public/build/* "$PUBLIC_HTML_DIR/build/"
 
+              # Sinkronkan file publik statis penting (robots.txt)
+              cp -f public/robots.txt "$PUBLIC_HTML_DIR/robots.txt" || true
+
               # Memastikan symlink storage di public_html mengarah ke laravel_app/storage/app/public
               if [ ! -L "$PUBLIC_HTML_DIR/storage" ] && [ ! -d "$PUBLIC_HTML_DIR/storage" ]; then
                 echo "Membuat symlink storage di public_html..."

@@ -28,7 +28,7 @@ export const parseMultilingual = (val: any, defaultText = ''): MultilingualField
     return { id: val || defaultText, en: '', ar: '' };
 };
 
-export type TabKey = 'general' | 'branding' | 'profile' | 'legal' | 'announcement' | 'marketing' | 'payment';
+export type TabKey = 'general' | 'branding' | 'profile' | 'legal' | 'announcement' | 'marketing' | 'payment' | 'seo';
 
 export type TabCategoryKey = 'identity' | 'finance' | 'communications';
 

@@ -6,7 +6,8 @@ import {
     ShieldCheck, 
     Megaphone, 
     BarChart3,
-    CreditCard
+    CreditCard,
+    Search
 } from 'lucide-react';
 import { 
     TabKey, 
@@ -100,6 +101,22 @@ export const SITE_SETTINGS_TABS: TabDefinition[] = [
             'adsense_enabled', 'google_adsense_client_id', 'adsense_slot_blog_index',
             'adsense_slot_article_top', 'adsense_slot_article_middle', 'adsense_slot_article_bottom',
             'ads_txt_content'
+        ]
+    },
+    {
+        key: 'seo',
+        category: 'communications',
+        label: 'SEO & Metadata',
+        shortLabel: 'SEO',
+        description: 'Meta title, deskripsi, & cuplikan Sitelink Google untuk halaman utama',
+        icon: Search,
+        fields: [
+            'seo_home_title', 'seo_home_description',
+            'seo_program_title', 'seo_program_description',
+            'seo_about_title', 'seo_about_description',
+            'seo_blog_title', 'seo_blog_description',
+            'seo_focus_title', 'seo_focus_description',
+            'seo_contact_title', 'seo_contact_description',
         ]
     }
 ];

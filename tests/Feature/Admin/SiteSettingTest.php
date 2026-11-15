@@ -101,6 +101,8 @@ it('allows administrator to update tracking and analytics pixel settings', funct
 });
 
 it('allows administrator to update google adsense and ads.txt settings with auto normalization', function () {
+    $originalAdsTxt = file_exists(public_path('ads.txt')) ? file_get_contents(public_path('ads.txt')) : null;
+
     actingAs($this->admin)
         ->post(route('admin.site-settings.update'), [
             'adsense_enabled' => '1',
@@ -121,6 +123,10 @@ it('allows administrator to update google adsense and ads.txt settings with auto
     expect(AppSetting::get('adsense_slot_article_middle'))->toBe('333444555');
     expect(AppSetting::get('adsense_slot_article_bottom'))->toBe('444555666');
     expect(AppSetting::get('ads_txt_content'))->toBe('google.com, pub-9998887776665554, DIRECT, f08c47fec0942fa0');
+
+    if ($originalAdsTxt !== null) {
+        file_put_contents(public_path('ads.txt'), $originalAdsTxt);
+    }
 });
 
 it('allows administrator to update foundation legal and sk kemenkumham settings', function () {
@@ -185,4 +191,31 @@ it('allows administrator to update multilingual organization profile and footer 
     $footer = json_decode(AppSetting::get('footer_description'), true);
     expect($footer['en'])->toBe('Trusted Islamic philanthropy foundation.');
     expect($footer['ar'])->toBe('مؤسسة خيرية إسلامية موثوقة.');
+});
+
+it('allows administrator to update SEO and sitelink metadata settings', function () {
+    actingAs($this->admin)
+        ->post(route('admin.site-settings.update'), [
+            'seo_home_title' => 'Insani Indonesia - Gotong Royong Kemanusiaan',
+            'seo_home_description' => 'Platform resmi donasi dan kebaikan masyarakat Indonesia.',
+            'seo_program_title' => 'Program Donasi Kebaikan - Insani Indonesia',
+            'seo_program_description' => 'Pilihan program bantuan donasi dan sedekah terverifikasi.',
+            'seo_about_title' => 'Tentang Kami - Profil Yayasan Insani',
+            'seo_about_description' => 'Mengenal Yayasan Peduli Insani Indonesia dan visi misinya.',
+            'seo_blog_title' => 'Kabar Penyaluran Resmi - Insani Indonesia',
+            'seo_blog_description' => 'Dokumentasi penyaluran bantuan langsung dari lapangan.',
+            'seo_focus_title' => 'Pilar Fokus Program - Insani Indonesia',
+            'seo_focus_description' => 'Fokus pilar pendidikan, kemanusiaan, dan air bersih.',
+            'seo_contact_title' => 'Hubungi Layanan Donatur - Insani Indonesia',
+            'seo_contact_description' => 'Layanan bantuan informasi dan konfirmasi donasi resmi.',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect(AppSetting::get('seo_home_title'))->toBe('Insani Indonesia - Gotong Royong Kemanusiaan');
+    expect(AppSetting::get('seo_program_title'))->toBe('Program Donasi Kebaikan - Insani Indonesia');
+    expect(AppSetting::get('seo_about_title'))->toBe('Tentang Kami - Profil Yayasan Insani');
+    expect(AppSetting::get('seo_blog_title'))->toBe('Kabar Penyaluran Resmi - Insani Indonesia');
+    expect(AppSetting::get('seo_focus_title'))->toBe('Pilar Fokus Program - Insani Indonesia');
+    expect(AppSetting::get('seo_contact_title'))->toBe('Hubungi Layanan Donatur - Insani Indonesia');
 });

@@ -13,6 +13,7 @@ import LegalReceiptTab from './tabs/LegalReceiptTab';
 import AnnouncementTab from './tabs/AnnouncementTab';
 import MarketingIntegrationTab from './tabs/MarketingIntegrationTab';
 import PaymentGatewayTab, { BankAccount } from './tabs/PaymentGatewayTab';
+import SeoMetadataTab from './tabs/SeoMetadataTab';
 
 interface Props {
     settings: Record<string, string>;
@@ -79,6 +80,18 @@ export default function SiteSettingsIndex({ settings, bankAccounts = [] }: Props
         adsense_slot_article_middle: settings.adsense_slot_article_middle || '',
         adsense_slot_article_bottom: settings.adsense_slot_article_bottom || '',
         ads_txt_content: settings.ads_txt_content || '',
+        seo_home_title: settings.seo_home_title || '',
+        seo_home_description: settings.seo_home_description || '',
+        seo_program_title: settings.seo_program_title || '',
+        seo_program_description: settings.seo_program_description || '',
+        seo_about_title: settings.seo_about_title || '',
+        seo_about_description: settings.seo_about_description || '',
+        seo_blog_title: settings.seo_blog_title || '',
+        seo_blog_description: settings.seo_blog_description || '',
+        seo_focus_title: settings.seo_focus_title || '',
+        seo_focus_description: settings.seo_focus_description || '',
+        seo_contact_title: settings.seo_contact_title || '',
+        seo_contact_description: settings.seo_contact_description || '',
         payment_gateway_provider: settings.payment_gateway_provider || 'midtrans',
         midtrans_channel_qris: settings.midtrans_channel_qris ?? '1',
         midtrans_channel_shopeepay: settings.midtrans_channel_shopeepay ?? '1',
@@ -369,7 +382,16 @@ export default function SiteSettingsIndex({ settings, bankAccounts = [] }: Props
                         />
                     )}
 
-                    {/* Tab 7: Payment Gateway (Midtrans Core API) */}
+                    {/* Tab 7: SEO & Metadata Sitelink */}
+                    {activeTab === 'seo' && (
+                        <SeoMetadataTab
+                            data={data}
+                            setData={(key, val) => setData(key as any, val)}
+                            errors={errors}
+                        />
+                    )}
+
+                    {/* Tab 8: Payment Gateway (Midtrans Core API) */}
                     {activeTab === 'payment' && (
                         <PaymentGatewayTab
                             data={data}
